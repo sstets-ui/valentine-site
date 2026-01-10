@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Will you be my Valentine?</title>
+    <title>Will you be my Valentine Andrew Getzow?</title>
     <meta name="description" content="A tiny interactive Valentine page.">
 
     <!-- Tailwind (so scale-125 works) -->
@@ -22,11 +22,12 @@
     <div class="bg-white rounded-2xl shadow-lg p-6 max-w-md w-full text-center">
       <h1 class="text-2xl font-bold mb-4">Will you be my Valentine? 💘</h1>
 
+      <!-- initial image: anime girl with a heart (Tenor) -->
       <img
         id="valImage"
         class="w-full h-64 object-cover rounded-xl mb-5"
-        src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
-        alt="Valentine gif"
+        src="https://media.tenor.com/images/f3cee32151cca69845a1d78050c21e72/tenor.gif"
+        alt="Anime girl with a heart"
       />
 
       <div class="flex gap-3 justify-center">
@@ -60,65 +61,55 @@
       const hint = document.getElementById("hint");
 
       // WebAudio-based "Glue Song" placeholder (no external file needed)
-      // Plays a short, sweet arpeggio when called. Uses a user gesture so browsers allow playback.
       function playGlueSong() {
         try {
           const ctx = new (window.AudioContext || window.webkitAudioContext)();
           const now = ctx.currentTime;
-
-          const notes = [440, 550, 660, 880]; // A4, C#5-ish, E5-ish, A5
+          const notes = [440, 550, 660, 880];
           const duration = 0.35;
-
           notes.forEach((freq, i) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sine';
             osc.frequency.value = freq;
-
             gain.gain.setValueAtTime(0, now + i * duration);
             gain.gain.linearRampToValueAtTime(0.18, now + i * duration + 0.02);
             gain.gain.linearRampToValueAtTime(0, now + (i + 1) * duration - 0.05);
-
             osc.connect(gain).connect(ctx.destination);
             osc.start(now + i * duration);
             osc.stop(now + (i + 1) * duration);
           });
-
-          // keep context around briefly to ensure sound finishes
           setTimeout(() => {
             if (ctx.state !== 'closed') ctx.close().catch(() => {});
           }, (notes.length * duration + 0.5) * 1000);
         } catch (err) {
-          // If WebAudio isn't available, do nothing.
           console.warn('WebAudio play failed', err);
         }
       }
 
-      // YES clicked 💙
+      // YES clicked -> show two Pokémon in love (Giphy)
       yesBtn.addEventListener("click", () => {
-        valImage.src = "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif";
+        valImage.src = "https://media.giphy.com/media/sQfnbNwfNcQly/giphy.gif";
 
         yesBtn.textContent = "Forever 💙";
         noBtn.style.display = "none";
 
-        // Play glue song using WebAudio (user gesture ensured by click listener)
         playGlueSong();
 
-        // Confetti
         confetti({
           particleCount: 250,
           spread: 80,
           origin: { y: 0.6 }
         });
 
-        hint.textContent = "Thanks for clicking — enjoy!";
+        hint.textContent = "Thanks for clicking — enjoy! And yes, this was absolutely rigged";
       });
 
-      // NO clicked 😳
+      // NO clicked -> playful reaction (keeps behavior)
       noBtn.addEventListener("click", () => {
         valImage.src = "https://media.giphy.com/media/3og0IPxMM0erATueVW/giphy.gif";
 
-        noBtn.textContent = "Are you sure? 🥺";
+        noBtn.textContent = "Are you sure about that?";
 
         yesBtn.classList.add("scale-125");
         setTimeout(() => yesBtn.classList.remove("scale-125"), 300);
