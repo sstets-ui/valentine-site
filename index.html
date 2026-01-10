@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Will you be my Valentine?</title>
+    <meta name="description" content="A tiny interactive Valentine page.">
+
+    <!-- Tailwind (so scale-125 works) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Confetti library (so confetti(...) works) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+      /* Optional: smoother scaling */
+      #yesBtn { transition: transform 0.2s ease; }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-pink-50 flex items-center justify-center p-6">
+    <div class="bg-white rounded-2xl shadow-lg p-6 max-w-md w-full text-center">
+      <h1 class="text-2xl font-bold mb-4">Will you be my Valentine? 💘</h1>
+
+      <img
+        id="valImage"
+        class="w-full h-64 object-cover rounded-xl mb-5"
+        src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
+        alt="Valentine gif"
+      />
+
+      <div class="flex gap-3 justify-center">
+        <button
+          id="yesBtn"
+          class="px-5 py-3 rounded-xl font-semibold bg-blue-500 text-white hover:bg-blue-600"
+          type="button"
+          aria-label="Yes"
+        >
+          Yes 💙
+        </button>
+
+        <button
+          id="noBtn"
+          class="px-5 py-3 rounded-xl font-semibold bg-gray-200 hover:bg-gray-300"
+          type="button"
+          aria-label="No"
+        >
+          No 😳
+        </button>
+      </div>
+
+      <p id="hint" class="text-sm text-gray-500 mt-4">Tip: click any button to interact. Sound may require a gesture.</p>
+    </div>
+
+    <script>
+      // Elements
+      const yesBtn = document.getElementById("yesBtn");
+      const noBtn = document.getElementById("noBtn");
+      const valImage = document.getElementById("valImage");
+      const hint = document.getElementById("hint");
+
+      // WebAudio-based "Glue Song" placeholder (no external file needed)
+      // Plays a short, sweet arpeggio when called. Uses a user gesture so browsers allow playback.
+      function playGlueSong() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const now = ctx.currentTime;
+
+          const notes = [440, 550, 660, 880]; // A4, C#5-ish, E5-ish, A5
+          const duration = 0.35;
+
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+
+            gain.gain.setValueAtTime(0, now + i * duration);
+            gain.gain.linearRampToValueAtTime(0.18, now + i * duration + 0.02);
+            gain.gain.linearRampToValueAtTime(0, now + (i + 1) * duration - 0.05);
+
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now + i * duration);
+            osc.stop(now + (i + 1) * duration);
+          });
+
+          // keep context around briefly to ensure sound finishes
+          setTimeout(() => {
+            if (ctx.state !== 'closed') ctx.close().catch(() => {});
+          }, (notes.length * duration + 0.5) * 1000);
+        } catch (err) {
+          // If WebAudio isn't available, do nothing.
+          console.warn('WebAudio play failed', err);
+        }
+      }
+
+      // YES clicked 💙
+      yesBtn.addEventListener("click", () => {
+        valImage.src = "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif";
+
+        yesBtn.textContent = "Forever 💙";
+        noBtn.style.display = "none";
+
+        // Play glue song using WebAudio (user gesture ensured by click listener)
+        playGlueSong();
+
+        // Confetti
+        confetti({
+          particleCount: 250,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+
+        hint.textContent = "Thanks for clicking — enjoy!";
+      });
+
+      // NO clicked 😳
+      noBtn.addEventListener("click", () => {
+        valImage.src = "https://media.giphy.com/media/3og0IPxMM0erATueVW/giphy.gif";
+
+        noBtn.textContent = "Are you sure? 🥺";
+
+        yesBtn.classList.add("scale-125");
+        setTimeout(() => yesBtn.classList.remove("scale-125"), 300);
+
+        hint.textContent = "Maybe try asking again?";
+      });
+    </script>
+  </body>
+</html>
