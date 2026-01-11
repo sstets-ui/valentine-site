@@ -18,6 +18,20 @@
           linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
       }
 
+      /* Boss mode tint (kicks in when NO gets spicy) */
+      body.boss-mode::before{
+        content:"";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(900px 520px at 55% 55%, rgba(15, 23, 42, 0.55), transparent 65%),
+          linear-gradient(180deg, rgba(15,23,42,0.25), rgba(0,0,0,0.10));
+        opacity: 0.85;
+        mix-blend-mode: multiply;
+      }
+
       #bg {
         position: fixed;
         inset: 0;
@@ -72,6 +86,11 @@
         50%      { transform: translate(120px, -60px) scale(1.1); }
       }
 
+      /* Boss mode = faster blobs */
+      body.boss-mode .blob.a{ animation-duration: 9s; }
+      body.boss-mode .blob.b{ animation-duration: 10s; }
+      body.boss-mode .blob.c{ animation-duration: 11s; }
+
       /* subtle noise overlay */
       .noise {
         position: absolute;
@@ -81,16 +100,44 @@
         background-size: 180px 180px;
       }
 
+      /* pixel grid overlay */
+      .pixel-grid{
+        position:absolute;
+        inset:0;
+        opacity:.08;
+        background-image:
+          linear-gradient(to right, rgba(15,23,42,.25) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(15,23,42,.25) 1px, transparent 1px);
+        background-size: 26px 26px;
+        mix-blend-mode: overlay;
+      }
+
       /* Nintendo-ish polish */
-      .pixel-vibe {
-        text-shadow: 0 2px 0 rgba(0,0,0,0.08);
+      .pixel-vibe { text-shadow: 0 2px 0 rgba(0,0,0,0.08); }
+      .mascot-bounce { animation: mascotBounce 1.8s ease-in-out infinite; }
+      @keyframes mascotBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
+
+      /* Power-ups layer (stars/coins/etc) */
+      #powerups{
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1; /* above bg, below hearts */
+        overflow: hidden;
       }
-      .mascot-bounce {
-        animation: mascotBounce 1.8s ease-in-out infinite;
+      .powerup{
+        position: absolute;
+        bottom: -40px;
+        opacity: 0;
+        animation: puFloat linear forwards;
+        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.12));
+        will-change: transform, opacity;
+        user-select: none;
       }
-      @keyframes mascotBounce {
-        0%,100% { transform: translateY(0); }
-        50% { transform: translateY(-6px); }
+      @keyframes puFloat{
+        0%   { transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity: 0; }
+        12%  { opacity: .9; }
+        100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity: 0; }
       }
 
       /* Moving hearts background */
@@ -99,7 +146,7 @@
         inset: 0;
         overflow: hidden;
         pointer-events: none;
-        z-index: 1;
+        z-index: 2; /* above bg + powerups */
       }
       .heart {
         position: absolute;
@@ -118,7 +165,7 @@
       /* Card above everything */
       .card {
         position: relative;
-        z-index: 2;
+        z-index: 3;
         background: rgba(255, 255, 255, 0.78);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
@@ -145,12 +192,7 @@
         will-change: transform;
       }
 
-      .svg-heart svg{
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
-
+      .svg-heart svg{ width: 100%; height: 100%; display: block; }
       .svg-heart.yes path{ fill: #ef4444; }
       .svg-heart.no  path{ fill: #f43f5e; }
 
@@ -184,14 +226,19 @@
   </head>
 
   <body class="min-h-screen flex items-center justify-center p-6">
-    <!-- Background blobs + noise -->
+    <!-- Background blobs + noise + pixel grid -->
     <div id="bg" aria-hidden="true">
       <div class="blob a"></div>
       <div class="blob b"></div>
       <div class="blob c"></div>
       <div class="noise"></div>
+      <div class="pixel-grid"></div>
     </div>
 
+    <!-- Power-up particles -->
+    <div id="powerups" aria-hidden="true"></div>
+
+    <!-- Hearts -->
     <div id="hearts" aria-hidden="true"></div>
 
     <div class="card rounded-3xl p-7 max-w-md w-full text-center">
@@ -200,40 +247,28 @@
       <!-- Dedede-inspired mascot (original, not Nintendo art) -->
       <div class="mx-auto mb-3 w-24 h-24 mascot-bounce">
         <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
-          <!-- crown -->
           <path d="M40 24 L64 10 L88 24 L82 44 H46 Z" fill="#fbbf24"/>
           <circle cx="64" cy="22" r="6" fill="#f59e0b"/>
-          <!-- face -->
           <ellipse cx="64" cy="62" rx="34" ry="28" fill="#60a5fa"/>
           <ellipse cx="64" cy="70" rx="26" ry="18" fill="#93c5fd" opacity="0.9"/>
-          <!-- eyes -->
           <ellipse cx="52" cy="58" rx="7" ry="10" fill="#0f172a"/>
           <ellipse cx="76" cy="58" rx="7" ry="10" fill="#0f172a"/>
           <circle cx="50" cy="55" r="2" fill="#fff"/>
           <circle cx="74" cy="55" r="2" fill="#fff"/>
-          <!-- beak -->
           <path d="M64 64 C56 62 56 74 64 76 C72 74 72 62 64 64 Z" fill="#f59e0b"/>
-          <!-- robe -->
           <path d="M30 92 C34 78 48 72 64 72 C80 72 94 78 98 92
                    C90 108 78 118 64 118 C50 118 38 108 30 92 Z"
                 fill="#ef4444"/>
-          <!-- robe trim -->
           <path d="M38 94 C44 104 54 110 64 110 C74 110 84 104 90 94"
                 stroke="#fff" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
-          <!-- tiny hammer silhouette -->
           <rect x="92" y="70" width="8" height="30" rx="3" fill="#334155"/>
           <rect x="84" y="60" width="26" height="14" rx="6" fill="#475569"/>
           <circle cx="84" cy="67" r="6" fill="#475569"/>
         </svg>
       </div>
 
-      <img
-        id="valImage"
-        class="w-full h-64 object-cover rounded-xl mb-5"
-        alt="Valentine gif"
-      />
+      <img id="valImage" class="w-full h-64 object-cover rounded-xl mb-5" alt="Valentine gif" />
 
-      <!-- NEAT HEART BUTTONS -->
       <div class="flex gap-6 justify-center mt-2">
         <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
           <svg viewBox="0 0 32 29" aria-hidden="true">
@@ -266,9 +301,9 @@
         el.className = "heart";
         el.textContent = Math.random() > 0.25 ? "💗" : "💖";
 
-        const left = Math.random() * 100;          // vw
-        const size = 14 + Math.random() * 28;      // px
-        const dur  = 5 + Math.random() * 7;        // sec
+        const left = Math.random() * 100;
+        const size = 14 + Math.random() * 28;
+        const dur  = 5 + Math.random() * 7;
         const drift = (Math.random() * 60 - 30) + "px";
 
         el.style.left = left + "vw";
@@ -284,50 +319,63 @@
       for (let i = 0; i < 14; i++) spawnHeart();
       setInterval(spawnHeart, 220);
 
-      // ------------------ GIF loader (tries multiple URLs) ------------------
+      // ------------------ Power-ups particles ------------------
+      const powerupsLayer = document.getElementById("powerups");
+
+      function spawnPowerup(){
+        const el = document.createElement("span");
+        el.className = "powerup";
+        const items = ["⭐","🪙","✨","💖","🎮"];
+        el.textContent = items[Math.floor(Math.random() * items.length)];
+
+        const left = Math.random() * 100;
+        const size = 14 + Math.random() * 22;
+        const dur  = 6 + Math.random() * 8;
+        const drift = (Math.random() * 80 - 40) + "px";
+        const rot = (Math.random() * 160 - 80) + "deg";
+
+        el.style.left = left + "vw";
+        el.style.fontSize = size + "px";
+        el.style.animationDuration = dur + "s";
+        el.style.setProperty("--drift", drift);
+        el.style.setProperty("--rot", rot);
+
+        powerupsLayer.appendChild(el);
+        setTimeout(() => el.remove(), dur * 1000 + 200);
+      }
+
+      for (let i = 0; i < 10; i++) spawnPowerup();
+      setInterval(spawnPowerup, 600);
+
+      // ------------------ GIF loader ------------------
       const valImage = document.getElementById("valImage");
       const hint = document.getElementById("hint");
 
       function setImageTry(urls, failMessage) {
         let i = 0;
-
         const tryNext = () => {
-          if (i >= urls.length) {
-            hint.textContent = failMessage;
-            return;
-          }
+          if (i >= urls.length) { hint.textContent = failMessage; return; }
           const url = urls[i++];
 
           const probe = new Image();
-          probe.onload = () => {
-            valImage.src = url;
-            hint.textContent = "";
-          };
+          probe.onload = () => { valImage.src = url; hint.textContent = ""; };
           probe.onerror = () => tryNext();
           probe.src = url;
         };
-
         tryNext();
       }
 
-      // ------------------ Buttons ------------------
       const yesBtn = document.getElementById("yesBtn");
       const noBtn = document.getElementById("noBtn");
 
       const GIFS = {
-        start: [
-          "https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif",
-        ],
-        yesMain: [
-          "https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"
-        ],
+        start: ["https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif"],
+        yesMain: ["https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"],
         yesFinal: [
           "https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif",
           "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnd5OW94bW81Zzg5MXpyMHB6eTE0azRiMGU5OHhlYTl4MmNiMHh6biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TqK5V0YnrWaR2/200.gif"
         ],
-        no: [
-          "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"
-        ]
+        no: ["https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"]
       };
 
       setImageTry(GIFS.start, "Start GIF failed to load.");
@@ -357,7 +405,6 @@
 
           delay.connect(feedback);
           feedback.connect(delay);
-
           delay.connect(wet);
           wet.connect(ctx.destination);
           dry.connect(ctx.destination);
@@ -387,15 +434,12 @@
             toDelay = true
           } = {}) {
             let t = now + offset;
-
             for (const step of sequence) {
               const dur = step.beats * beat;
               const freq = noteToFreq(step.note);
-
               if (freq) {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-
                 osc.type = type;
                 osc.frequency.setValueAtTime(freq, t);
                 osc.detune.setValueAtTime(detune, t);
@@ -415,10 +459,8 @@
                 osc.start(t);
                 osc.stop(t + dur);
               }
-
               t += dur;
             }
-
             return t;
           }
 
@@ -427,19 +469,16 @@
             { note: "B5", beats: 0.5 }, { note: "C6", beats: 2 },
             { note: "G5", beats: 0.5 }, { note: "C6", beats: 2.5 }
           ];
-
           const harmony = [
             { note: "E4", beats: 0.5 }, { note: "G4", beats: 0.5 }, { note: "C5", beats: 0.5 }, { note: "E5", beats: 1.5 },
             { note: "D5", beats: 0.5 }, { note: "E5", beats: 2 },
             { note: "C5", beats: 0.5 }, { note: "E5", beats: 2.5 }
           ];
-
           const bass = [
             { note: "C3", beats: 1 }, { note: "REST", beats: 1 },
             { note: "G3", beats: 1 }, { note: "REST", beats: 1 },
             { note: "C3", beats: 2 },
           ];
-
           const sparkle = [
             { note: "C6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 },
             { note: "B6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "C6", beats: 0.25 },
@@ -519,7 +558,7 @@
         src.stop(time + duration);
       }
 
-      function noteToFreq(note) {
+      function noteToFreqBattle(note) {
         const m = /^([A-G])(#|b)?(\d)$/.exec(note);
         if (!m) return null;
         const [, letter, accidental, octaveStr] = m;
@@ -561,7 +600,7 @@
           const bassNote = riff[battleStep % riff.length];
           const bassOsc = battleCtx.createOscillator();
           bassOsc.type = "sawtooth";
-          bassOsc.frequency.setValueAtTime(noteToFreq(bassNote), t);
+          bassOsc.frequency.setValueAtTime(noteToFreqBattle(bassNote), t);
 
           const bassGain = battleCtx.createGain();
           bassGain.gain.setValueAtTime(0, t);
@@ -580,7 +619,7 @@
             const leadNote = lead[(battleStep / 2) % lead.length];
             const leadOsc = battleCtx.createOscillator();
             leadOsc.type = "square";
-            leadOsc.frequency.setValueAtTime(noteToFreq(leadNote), t);
+            leadOsc.frequency.setValueAtTime(noteToFreqBattle(leadNote), t);
 
             const leadGain = battleCtx.createGain();
             leadGain.gain.setValueAtTime(0, t);
@@ -624,9 +663,14 @@
         }
       }
 
+      function maybeBossMode() {
+        if (noDodges >= 3) document.body.classList.add("boss-mode");
+      }
+
       // ------------------ YES / NO click handlers ------------------
       yesBtn.addEventListener("click", () => {
         stopBattleMusic();
+        document.body.classList.remove("boss-mode");
 
         setImageTry(GIFS.yesMain, "YES GIF failed to load.");
         hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
@@ -650,6 +694,7 @@
 
         startBattleMusic(noDodges);
         updateBattleIntensity(noDodges);
+        maybeBossMode();
 
         const capped = Math.min(noScale, 4.5);
 
@@ -669,6 +714,3 @@
   </body>
 </html>
 
-    </script>
-  </body>
-</html>
