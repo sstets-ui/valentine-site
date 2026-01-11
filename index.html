@@ -363,6 +363,74 @@
       filter: drop-shadow(0 12px 24px rgba(0,0,0,0.22));
       mix-blend-mode: screen;
     }
+
+    /* =========================
+       SUPER VALENTINE PLATFORMER
+       ========================= */
+    .platFrame{
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.70);
+      background:
+        radial-gradient(700px 260px at 20% 15%, rgba(251,113,133,0.25), transparent 60%),
+        radial-gradient(700px 260px at 85% 25%, rgba(236,72,153,0.20), transparent 60%),
+        radial-gradient(700px 260px at 50% 90%, rgba(96,165,250,0.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.70), rgba(255,255,255,0.55));
+      box-shadow: 0 22px 70px rgba(0,0,0,0.14);
+    }
+
+    .platFrame::before{
+      content:"";
+      position:absolute;
+      inset: 0;
+      pointer-events:none;
+      border-radius: 24px;
+      box-shadow:
+        inset 0 0 0 3px rgba(255,255,255,0.70),
+        inset 0 0 0 10px rgba(251,113,133,0.14);
+    }
+
+    .platFrame::after{
+      content:"";
+      position:absolute;
+      inset: 0;
+      pointer-events:none;
+      opacity: 0.18;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='none' stroke='%23fb7185' stroke-width='2' opacity='.65'%3E%3Cpath d='M60 82c-16-10-28-20-28-34 0-9 7-16 16-16 6 0 10 3 12 7 2-4 6-7 12-7 9 0 16 7 16 16 0 14-12 24-28 34z'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 140px 140px;
+      filter: saturate(1.1);
+    }
+
+    .platVignette{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: radial-gradient(closest-side at 50% 35%, transparent 60%, rgba(15,23,42,0.10) 100%);
+      z-index: 3;
+    }
+
+    .platSticker{
+      position:absolute;
+      z-index: 4;
+      font-size: 30px;
+      filter: drop-shadow(0 14px 18px rgba(0,0,0,0.16));
+      opacity: 0.95;
+      animation: platFloat 2.6s ease-in-out infinite;
+      user-select:none;
+      pointer-events:none;
+      transform: rotate(var(--r, 0deg));
+    }
+    .platSticker.s1{ left: 14px; top: 10px; --r: -12deg; }
+    .platSticker.s2{ right: 14px; top: 10px; --r: 10deg; animation-delay: .25s; }
+    .platSticker.s3{ left: 16px; bottom: 12px; --r: 8deg; animation-delay: .45s; }
+    .platSticker.s4{ right: 16px; bottom: 12px; --r: -10deg; animation-delay: .15s; }
+
+    @keyframes platFloat{
+      0%,100%{ transform: translateY(0) rotate(var(--r, 0deg)); }
+      50%{ transform: translateY(-6px) rotate(var(--r, 0deg)); }
+    }
   </style>
 </head>
 
@@ -575,13 +643,20 @@
               </div>
             </div>
 
-            <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
+            <!-- ✅ REPLACED WRAPPER: SUPER VALENTINE GRAPHICS -->
+            <div class="platFrame">
+              <div class="platSticker s1" aria-hidden="true">💘</div>
+              <div class="platSticker s2" aria-hidden="true">🌹</div>
+              <div class="platSticker s3" aria-hidden="true">🍬</div>
+              <div class="platSticker s4" aria-hidden="true">🏹</div>
+
               <canvas id="platCanvas" class="w-full block h-[360px]"></canvas>
+              <div class="platVignette" aria-hidden="true"></div>
 
               <div id="platOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
                 <div class="text-slate-800/80">
                   <div class="text-3xl font-extrabold">Tiny Love Quest 💌</div>
-                  <div class="text-sm font-semibold mt-2">Jump on platforms, grab hearts, reach the letter.</div>
+                  <div class="text-sm font-semibold mt-2">Jump on frosted platforms, grab hearts, deliver the letter.</div>
                 </div>
               </div>
 
@@ -2141,11 +2216,9 @@
 
     bossCtx2.clearRect(0,0,w,h);
 
-    // ✅ CASTLE BACKGROUND (your screenshot) — save it as boss-bg.png next to this HTML
     if (bossBgReady) {
       drawCoverImage(bossCtx2, bossBgImg, w, h);
     } else {
-      // fallback while loading
       const g = bossCtx2.createLinearGradient(0, 0, 0, h);
       g.addColorStop(0, "rgba(2, 6, 23, 0.75)");
       g.addColorStop(1, "rgba(88, 28, 135, 0.45)");
@@ -2153,11 +2226,9 @@
       bossCtx2.fillRect(0, 0, w, h);
     }
 
-    // overlay for readability
     bossCtx2.fillStyle = "rgba(0,0,0,0.18)";
     bossCtx2.fillRect(0,0,w,h);
 
-    // twinkle pixels
     bossCtx2.globalAlpha = 0.35;
     bossCtx2.fillStyle = "#ffffff";
     for (let i = 0; i < 26; i++) {
@@ -2167,10 +2238,8 @@
     }
     bossCtx2.globalAlpha = 1;
 
-    // boss
     drawMagolorLikeBoss(bossCtx2, bossGame.boss.x, bossGame.boss.y, 0.75);
 
-    // player
     bossCtx2.save();
     bossCtx2.translate(bossGame.player.x, bossGame.player.y);
     const blink = bossGame.player.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
@@ -2183,7 +2252,6 @@
     bossCtx2.fill();
     bossCtx2.restore();
 
-    // bullets
     for (const b of bossGame.bullets){
       bossCtx2.save();
       bossCtx2.translate(b.x, b.y);
@@ -2207,7 +2275,6 @@
     }
     bossCtx2.globalAlpha = 1;
 
-    // beams
     for (const p of bossGame.beams){
       bossCtx2.save();
       bossCtx2.translate(p.x, p.y);
@@ -2218,7 +2285,6 @@
       bossCtx2.restore();
     }
 
-    // particles
     for (const pt of bossGame.particles){
       bossCtx2.globalAlpha = Math.max(0, Math.min(1, pt.life/40));
       bossCtx2.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
@@ -2243,7 +2309,6 @@
     resetBossFight();
     bossGame.running = true;
 
-    // start boss music on user click (allowed)
     startBattleMusic(1);
     updateBattleIntensity(1);
 
@@ -2334,6 +2399,55 @@
     goal: { x: 1420, y: 140, w: 24, h: 24 }
   };
 
+  // ===== Platformer Valentine FX (petals + sparkles) =====
+  platGame.fx = { t: 0, petals: [], sparkles: [] };
+
+  function spawnPlatPetal(){
+    const w = platCanvas.getBoundingClientRect().width;
+    platGame.fx.petals.push({
+      x: Math.random() * w,
+      y: -20,
+      vy: 26 + Math.random() * 44,
+      vx: -14 + Math.random() * 28,
+      rot: Math.random() * Math.PI * 2,
+      vr: (-1 + Math.random() * 2) * 1.4,
+      life: 7 + Math.random() * 4,
+      emo: Math.random() > 0.6 ? "🌸" : (Math.random() > 0.5 ? "🌹" : "💗")
+    });
+    if (platGame.fx.petals.length > 44) platGame.fx.petals.shift();
+  }
+
+  function spawnPlatSparkle(){
+    const w = platCanvas.getBoundingClientRect().width;
+    const h = platCanvas.getBoundingClientRect().height;
+    platGame.fx.sparkles.push({
+      x: Math.random() * w,
+      y: 30 + Math.random() * (h - 90),
+      r: 1 + Math.random() * 2,
+      life: 0.6 + Math.random() * 0.7
+    });
+    if (platGame.fx.sparkles.length > 34) platGame.fx.sparkles.shift();
+  }
+
+  function updatePlatFX(dt){
+    platGame.fx.t += dt;
+
+    if (Math.random() < dt * 2.2) spawnPlatPetal();
+    if (Math.random() < dt * 3.0) spawnPlatSparkle();
+
+    const h = platCanvas.getBoundingClientRect().height;
+    for (const p of platGame.fx.petals){
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.rot += p.vr * dt;
+      p.life -= dt;
+    }
+    platGame.fx.petals = platGame.fx.petals.filter(p => p.life > 0 && p.y < h + 30);
+
+    for (const s of platGame.fx.sparkles) s.life -= dt;
+    platGame.fx.sparkles = platGame.fx.sparkles.filter(s => s.life > 0);
+  }
+
   function rectsOverlap(a, b){
     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   }
@@ -2362,6 +2476,21 @@
       { x: 0,   y: 300, w: 1500, h: 70 },
     ];
 
+    // pre-bake sprinkles so they don't flicker each frame
+    platGame.platforms.forEach((p) => {
+      const spr = [];
+      const n = Math.max(6, Math.floor(p.w / 42));
+      for (let i = 0; i < n; i++){
+        spr.push({
+          x: p.x + 14 + Math.random() * (p.w - 28),
+          y: p.y + 5 + Math.random() * Math.min(8, Math.max(4, p.h - 8)),
+          a: Math.random() * Math.PI * 2,
+          len: 5 + Math.random() * 6
+        });
+      }
+      p.sprinkles = spr;
+    });
+
     platGame.hearts = [
       { x: 140, y: 205, taken: false },
       { x: 320, y: 195, taken: false },
@@ -2371,6 +2500,11 @@
       { x: 1180,y: 145, taken: false },
       { x: 1370,y: 190, taken: false },
     ];
+
+    // reset FX too
+    platGame.fx.t = 0;
+    platGame.fx.petals.length = 0;
+    platGame.fx.sparkles.length = 0;
   }
 
   function updatePlatformer(){
@@ -2442,49 +2576,211 @@
     }
   }
 
+  // ✅ REPLACED DRAW: full Valentine render
   function drawPlatformer(){
     const w = platCanvas.getBoundingClientRect().width;
     const h = platCanvas.getBoundingClientRect().height;
     platCtx.clearRect(0,0,w,h);
 
-    const g = platCtx.createLinearGradient(0,0,0,h);
-    g.addColorStop(0, "rgba(255, 192, 203, 0.20)");
-    g.addColorStop(1, "rgba(173, 216, 230, 0.22)");
-    platCtx.fillStyle = g;
+    const t = platGame.fx.t;
+
+    const sky = platCtx.createLinearGradient(0,0,0,h);
+    sky.addColorStop(0, "rgba(255, 205, 225, 0.38)");
+    sky.addColorStop(0.55, "rgba(255, 235, 245, 0.30)");
+    sky.addColorStop(1, "rgba(206, 232, 255, 0.26)");
+    platCtx.fillStyle = sky;
     platCtx.fillRect(0,0,w,h);
 
+    platCtx.save();
+    platCtx.globalAlpha = 0.22;
+    for (let i=0;i<12;i++){
+      const bx = (i * 97 + (t*24)) % (w + 160) - 80;
+      const by = 40 + (i * 41) % 220;
+      const s = 18 + (i % 4) * 10;
+      platCtx.fillStyle = "rgba(251,113,133,0.55)";
+      drawHeartShape(platCtx, bx, by, s);
+      platCtx.fill();
+    }
+    platCtx.restore();
+
     const cam = platGame.camX;
+
+    platCtx.save();
+    platCtx.translate(-cam * 0.35, 0);
+    platCtx.globalAlpha = 0.22;
+    platCtx.fillStyle = "#ffffff";
+    for (let i=0;i<6;i++){
+      const cx = (i * 260 + (t*18)) % (platGame.levelW + 300) - 150;
+      const cy = 35 + (i*22)%90;
+      platCtx.beginPath();
+      platCtx.arc(cx, cy, 24, 0, Math.PI*2);
+      platCtx.arc(cx+26, cy+6, 18, 0, Math.PI*2);
+      platCtx.arc(cx-24, cy+8, 16, 0, Math.PI*2);
+      platCtx.fill();
+    }
+    platCtx.restore();
+
     platCtx.save();
     platCtx.translate(-cam, 0);
 
     for (const plat of platGame.platforms){
-      platCtx.globalAlpha = 0.95;
-      platCtx.fillStyle = "#ffffff";
-      platCtx.strokeStyle = "rgba(15, 23, 42, 0.15)";
+      const base = platCtx.createLinearGradient(plat.x, plat.y, plat.x, plat.y + plat.h);
+      base.addColorStop(0, "rgba(255,255,255,0.95)");
+      base.addColorStop(1, "rgba(255,255,255,0.78)");
+      platCtx.fillStyle = base;
+      platCtx.strokeStyle = "rgba(251,113,133,0.35)";
       platCtx.lineWidth = 2;
-      roundRectPath(platCtx, plat.x, plat.y, plat.w, plat.h, 12);
+
+      roundRectPath(platCtx, plat.x, plat.y, plat.w, plat.h, 14);
       platCtx.fill();
       platCtx.stroke();
+
+      platCtx.globalAlpha = 0.55;
+      platCtx.fillStyle = "rgba(251,113,133,0.25)";
+      roundRectPath(platCtx, plat.x+2, plat.y+2, plat.w-4, Math.min(10, plat.h-2), 12);
+      platCtx.fill();
       platCtx.globalAlpha = 1;
+
+      if (plat.sprinkles){
+        platCtx.strokeStyle = "rgba(236,72,153,0.55)";
+        platCtx.lineWidth = 2.2;
+        for (const s of plat.sprinkles){
+          platCtx.beginPath();
+          platCtx.moveTo(s.x, s.y);
+          platCtx.lineTo(s.x + Math.cos(s.a)*s.len, s.y + Math.sin(s.a)*s.len);
+          platCtx.stroke();
+        }
+
+        platCtx.strokeStyle = "rgba(96,165,250,0.50)";
+        platCtx.lineWidth = 2.0;
+        for (let i=0;i<plat.sprinkles.length;i+=2){
+          const s = plat.sprinkles[i];
+          platCtx.beginPath();
+          platCtx.moveTo(s.x+3, s.y+2);
+          platCtx.lineTo(
+            s.x+3 + Math.cos(s.a+1.3)*(s.len*0.8),
+            s.y+2 + Math.sin(s.a+1.3)*(s.len*0.8)
+          );
+          platCtx.stroke();
+        }
+      }
     }
 
     for (const heart of platGame.hearts){
       if (heart.taken) continue;
-      platCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-      platCtx.fillText("💖", heart.x - 8, heart.y + 6);
+      const bob = Math.sin(t*5 + heart.x*0.02) * 5;
+      const hx = heart.x;
+      const hy = heart.y + bob;
+
+      platCtx.save();
+      platCtx.globalAlpha = 0.22;
+      platCtx.fillStyle = "rgba(251,113,133,0.60)";
+      drawHeartShape(platCtx, hx, hy, 18);
+      platCtx.fill();
+      platCtx.restore();
+
+      platCtx.font = "20px system-ui, Apple Color Emoji, Segoe UI Emoji";
+      platCtx.fillText("💖", hx - 10, hy + 8);
     }
 
-    platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-    platCtx.fillText("💌", platGame.goal.x - 4, platGame.goal.y + 20);
+    (function drawEnvelope(){
+      const g = platGame.goal;
+      const x = g.x, y = g.y;
+
+      platCtx.save();
+      platCtx.translate(x, y);
+
+      platCtx.globalAlpha = 0.25;
+      platCtx.fillStyle = "rgba(15,23,42,0.35)";
+      roundRectPath(platCtx, -2, 18, 36, 10, 8);
+      platCtx.fill();
+      platCtx.globalAlpha = 1;
+
+      const env = platCtx.createLinearGradient(0,0,0,28);
+      env.addColorStop(0, "rgba(255,255,255,0.95)");
+      env.addColorStop(1, "rgba(255,255,255,0.80)");
+      platCtx.fillStyle = env;
+      platCtx.strokeStyle = "rgba(236,72,153,0.40)";
+      platCtx.lineWidth = 2;
+
+      roundRectPath(platCtx, 0, 0, 32, 22, 8);
+      platCtx.fill();
+      platCtx.stroke();
+
+      platCtx.beginPath();
+      platCtx.moveTo(0, 2);
+      platCtx.lineTo(16, 12);
+      platCtx.lineTo(32, 2);
+      platCtx.closePath();
+      platCtx.fillStyle = "rgba(251,113,133,0.18)";
+      platCtx.fill();
+
+      platCtx.save();
+      platCtx.translate(16, 13 + Math.sin(t*6)*1.5);
+      platCtx.fillStyle = "#fb7185";
+      drawHeartShape(platCtx, 0, 2, 6);
+      platCtx.fill();
+      platCtx.restore();
+
+      platCtx.restore();
+    })();
 
     const p = platGame.player;
     platCtx.save();
     platCtx.translate(p.x + p.w/2, p.y + p.h/2);
-    platCtx.fillStyle = "#ef4444";
-    drawHeartShape(platCtx, 0, 2, 14);
+
+    platCtx.globalAlpha = 0.65;
+    platCtx.fillStyle = "rgba(255,255,255,0.9)";
+    platCtx.beginPath();
+    platCtx.ellipse(-16, -2, 10, 6, -0.2, 0, Math.PI*2);
+    platCtx.ellipse( 16, -2, 10, 6,  0.2, 0, Math.PI*2);
     platCtx.fill();
+    platCtx.globalAlpha = 1;
+
+    platCtx.fillStyle = "#ef4444";
+    drawHeartShape(platCtx, 0, 2, 15);
+    platCtx.fill();
+
+    platCtx.strokeStyle = "rgba(255,255,255,0.95)";
+    platCtx.lineWidth = 2.4;
+    platCtx.beginPath();
+    platCtx.moveTo(-18, -2);
+    platCtx.lineTo(18, 6);
+    platCtx.stroke();
+
+    platCtx.beginPath();
+    platCtx.moveTo(18, 6);
+    platCtx.lineTo(12, 2);
+    platCtx.lineTo(12, 10);
+    platCtx.closePath();
+    platCtx.fillStyle = "rgba(255,255,255,0.95)";
+    platCtx.fill();
+
+    platCtx.restore();
     platCtx.restore();
 
+    platCtx.save();
+    for (const s of platGame.fx.sparkles){
+      const a = Math.max(0, Math.min(1, s.life));
+      platCtx.globalAlpha = 0.55 * a;
+      platCtx.fillStyle = "rgba(255,255,255,0.9)";
+      platCtx.beginPath();
+      platCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      platCtx.fill();
+    }
+    platCtx.restore();
+
+    platCtx.save();
+    platCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+    for (const pt of platGame.fx.petals){
+      const a = Math.max(0, Math.min(1, pt.life / 2));
+      platCtx.globalAlpha = 0.85 * a;
+      platCtx.save();
+      platCtx.translate(pt.x, pt.y);
+      platCtx.rotate(pt.rot);
+      platCtx.fillText(pt.emo, -8, 8);
+      platCtx.restore();
+    }
     platCtx.restore();
   }
 
@@ -2497,6 +2793,8 @@
     for (let i=0;i<Math.max(1, Math.floor(dt/0.016)); i++){
       updatePlatformer();
     }
+
+    updatePlatFX(dt);
     drawPlatformer();
     platRaf = requestAnimationFrame(platformerLoop);
   }
