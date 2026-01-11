@@ -41,179 +41,27 @@
       #valImage {
         background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));
       }
-    </style>
-  </head>
 
-  <body class="min-h-screen bg-pink-50 flex items-center justify-center p-6">
-    <div id="hearts" aria-hidden="true"></div>
-
-    <div class="card bg-white rounded-2xl shadow-lg p-6 max-w-md w-full text-center">
-      <h1 class="text-2xl font-bold mb-4">Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘</h1>
-
-      <img
-        id="valImage"
-        class="w-full h-64 object-cover rounded-xl mb-5"
-        alt="Valentine gif"
-      />
-
-      <!-- HEART BUTTONS -->
-      <div class="flex gap-6 justify-center">
-        <button
-          id="yesBtn"
-          class="w-20 h-20 rounded-full bg-red-500 text-white text-4xl flex items-center justify-center shadow-lg hover:bg-red-600 active:scale-95 transition"
-          type="button"
-          aria-label="Yes"
-        >
-          ❤️
-        </button>
-
-        <button
-          id="noBtn"
-          class="w-20 h-20 rounded-full bg-red-500 text-white text-4xl flex items-center justify-center shadow-lg hover:bg-red-600 active:scale-95 transition"
-          type="button"
-          aria-label="No"
-        >
-          ❤️
-        </button>
-      </div>
-
-      <p id="hint" class="text-sm text-gray-500 mt-4">Tip: click a button. If a GIF host blocks embeds, it’ll auto-try another link.</p>
-    </div>
-
-    <script>
-      // ------------------ Moving hearts ------------------
-      const heartsLayer = document.getElementById("hearts");
-
-      function spawnHeart() {
-        const el = document.createElement("span");
-        el.className = "heart";
-        el.textContent = Math.random() > 0.25 ? "💗" : "💖";
-
-        const left = Math.random() * 100;          // vw
-        const size = 14 + Math.random() * 28;      // px
-        const dur  = 5 + Math.random() * 7;        // sec
-        const drift = (Math.random() * 60 - 30) + "px";
-
-        el.style.left = left + "vw";
-        el.style.fontSize = size + "px";
-        el.style.opacity = (0.30 + Math.random() * 0.50).toFixed(2);
-        el.style.animationDuration = dur + "s";
-        el.style.setProperty("--drift", drift);
-
-        heartsLayer.appendChild(el);
-        setTimeout(() => el.remove(), dur * 1000 + 100);
+      /* ---------------- Heart-shaped buttons ---------------- */
+      .heart-btn{
+        --size: 84px;
+        width: var(--size);
+        height: var(--size);
+        position: relative;
+        border: 0;
+        cursor: pointer;
+        background: #ef4444;              /* Tailwind red-500 */
+        transform: rotate(-45deg);
+        border-radius: 14px;
+        box-shadow: 0 12px 20px rgba(0,0,0,.18);
+        transition: transform .15s ease, filter .15s ease;
       }
 
-      for (let i = 0; i < 14; i++) spawnHeart();
-      setInterval(spawnHeart, 220);
-
-      // ------------------ GIF loader (tries multiple URLs) ------------------
-      const valImage = document.getElementById("valImage");
-      const hint = document.getElementById("hint");
-
-      function setImageTry(urls, failMessage) {
-        let i = 0;
-
-        const tryNext = () => {
-          if (i >= urls.length) {
-            hint.textContent = failMessage;
-            return;
-          }
-          const url = urls[i++];
-
-          const probe = new Image();
-          probe.onload = () => {
-            valImage.src = url;
-            hint.textContent = "";
-          };
-          probe.onerror = () => tryNext();
-          probe.src = url;
-        };
-
-        tryNext();
-      }
-
-      // ------------------ Buttons ------------------
-      const yesBtn = document.getElementById("yesBtn");
-      const noBtn = document.getElementById("noBtn");
-
-      // GIFS (start + final Eevee updated)
-      const GIFS = {
-        start: [
-          "https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif",
-        ],
-        yesMain: [
-          "https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"
-        ],
-        // After YES, swap to Eevee (YOUR requested Tenor gif first)
-        yesFinal: [
-          "https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif",
-          "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnd5OW94bW81Zzg5MXpyMHB6eTE0azRiMGU5OHhlYTl4MmNiMHh6biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TqK5V0YnrWaR2/200.gif" // fallback
-        ],
-        no: [
-          "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"
-        ]
-      };
-
-      // initial
-      setImageTry(
-        GIFS.start,
-        "Start GIF failed to load."
-      );
-
-      // tiny sound
-      function playGlueSong() {
-        try {
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const now = ctx.currentTime;
-          const notes = [440, 550, 660, 880];
-          const duration = 0.35;
-          notes.forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = "sine";
-            osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0, now + idx * duration);
-            gain.gain.linearRampToValueAtTime(0.18, now + idx * duration + 0.02);
-            gain.gain.linearRampToValueAtTime(0, now + (idx + 1) * duration - 0.05);
-            osc.connect(gain).connect(ctx.destination);
-            osc.start(now + idx * duration);
-            osc.stop(now + (idx + 1) * duration);
-          });
-          setTimeout(() => ctx.close().catch(() => {}), (notes.length * duration + 0.5) * 1000);
-        } catch {}
-      }
-
-      let yesFinalTimer = null;
-
-      yesBtn.addEventListener("click", () => {
-        setImageTry(GIFS.yesMain, "YES GIF failed to load.");
-
-        // Text below since the buttons are hearts
-        hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
-
-        noBtn.style.display = "none";
-
-        playGlueSong();
-        confetti({ particleCount: 250, spread: 80, origin: { y: 0.6 } });
-
-        // then swap to Eevee after ~2 seconds
-        if (yesFinalTimer) clearTimeout(yesFinalTimer);
-        yesFinalTimer = setTimeout(() => {
-          setImageTry(
-            GIFS.yesFinal,
-            "Final Eevee GIF failed to load."
-          );
-        }, 2000);
-      });
-
-      noBtn.addEventListener("click", () => {
-        setImageTry(GIFS.no, "NO GIF failed to load.");
-        hint.textContent = "No (Are you sure about that?) 😳";
-
-        yesBtn.classList.add("scale-125");
-        setTimeout(() => yesBtn.classList.remove("scale-125"), 300);
-      });
-    </script>
-  </body>
-</html>
+      /* the two top lobes */
+      .heart-btn::before,
+      .heart-btn::after{
+        content:"";
+        position:absolute;
+        width: var(--size);
+        height: var(--size);
+        background: inherit;
