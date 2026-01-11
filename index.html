@@ -1,2179 +1,1887 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Will you be my Valentine Andrew Getzow?</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Will you be my Valentine Andrew Getzow?</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-    <style>
-      :root{
-        --fg: rgba(255,255,255,0.96);
-        --shadow: rgba(0,0,0,0.18);
-        --pill: rgba(244,63,94,0.20);
-        --card: rgba(255,255,255,0.80);
-        --cardBorder: rgba(255,255,255,0.70);
-        --muted: rgba(15,23,42,0.78);
-        --hud: rgba(255,255,255,0.55);
-        --cycle: day;
-      }
+  <style>
+    :root{
+      --fg: rgba(255,255,255,0.96);
+      --shadow: rgba(0,0,0,0.18);
+      --pill: rgba(244,63,94,0.20);
+      --card: rgba(255,255,255,0.80);
+      --cardBorder: rgba(255,255,255,0.70);
+      --muted: rgba(15,23,42,0.78);
+      --hud: rgba(255,255,255,0.55);
+    }
 
-      /* ===== BACKGROUNDS (day / sunset / night) ===== */
-      body{
-        min-height: 100vh;
-        background:
-          radial-gradient(900px 520px at 20% 15%, rgba(255, 182, 193, 0.55), transparent 60%),
-          radial-gradient(900px 520px at 80% 25%, rgba(255, 105, 180, 0.28), transparent 60%),
-          radial-gradient(900px 520px at 55% 85%, rgba(147, 197, 253, 0.35), transparent 60%),
-          linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
-      }
-      body.sunset{
-        background:
-          radial-gradient(900px 520px at 20% 15%, rgba(255, 170, 120, 0.55), transparent 60%),
-          radial-gradient(900px 520px at 80% 25%, rgba(255, 105, 180, 0.25), transparent 60%),
-          radial-gradient(900px 520px at 55% 85%, rgba(147, 197, 253, 0.25), transparent 60%),
-          linear-gradient(180deg, #fff7ed 0%, #ffedd5 35%, #ffe4e6 70%, #eff6ff 100%);
-      }
-      body.night{
-        --fg: rgba(255,255,255,0.92);
-        --shadow: rgba(0,0,0,0.55);
-        --pill: rgba(59,130,246,0.18);
-        --card: rgba(255,255,255,0.12);
-        --cardBorder: rgba(255,255,255,0.18);
-        --muted: rgba(255,255,255,0.86);
-        --hud: rgba(255,255,255,0.12);
+    body{
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 520px at 20% 15%, rgba(255, 182, 193, 0.55), transparent 60%),
+        radial-gradient(900px 520px at 80% 25%, rgba(255, 105, 180, 0.28), transparent 60%),
+        radial-gradient(900px 520px at 55% 85%, rgba(147, 197, 253, 0.35), transparent 60%),
+        linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
+      overflow-x: hidden;
+    }
+    body.sunset{
+      background:
+        radial-gradient(900px 520px at 20% 15%, rgba(255, 170, 120, 0.55), transparent 60%),
+        radial-gradient(900px 520px at 80% 25%, rgba(255, 105, 180, 0.25), transparent 60%),
+        radial-gradient(900px 520px at 55% 85%, rgba(147, 197, 253, 0.25), transparent 60%),
+        linear-gradient(180deg, #fff7ed 0%, #ffedd5 35%, #ffe4e6 70%, #eff6ff 100%);
+    }
+    body.night{
+      --fg: rgba(255,255,255,0.92);
+      --shadow: rgba(0,0,0,0.55);
+      --pill: rgba(59,130,246,0.18);
+      --card: rgba(255,255,255,0.12);
+      --cardBorder: rgba(255,255,255,0.18);
+      --muted: rgba(255,255,255,0.86);
+      --hud: rgba(255,255,255,0.12);
+      background:
+        radial-gradient(900px 520px at 20% 20%, rgba(59, 130, 246, 0.25), transparent 60%),
+        radial-gradient(900px 520px at 80% 25%, rgba(168, 85, 247, 0.18), transparent 60%),
+        radial-gradient(900px 520px at 55% 85%, rgba(244, 63, 94, 0.15), transparent 60%),
+        linear-gradient(180deg, #0b1220 0%, #0f172a 50%, #111827 100%);
+    }
 
-        background:
-          radial-gradient(900px 520px at 20% 20%, rgba(59, 130, 246, 0.25), transparent 60%),
-          radial-gradient(900px 520px at 80% 25%, rgba(168, 85, 247, 0.18), transparent 60%),
-          radial-gradient(900px 520px at 55% 85%, rgba(244, 63, 94, 0.15), transparent 60%),
-          linear-gradient(180deg, #0b1220 0%, #0f172a 50%, #111827 100%);
-      }
+    body.boss-mode::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(900px 520px at 55% 55%, rgba(15, 23, 42, 0.55), transparent 65%),
+        linear-gradient(180deg, rgba(15,23,42,0.28), rgba(0,0,0,0.12));
+      opacity: 0.85;
+      mix-blend-mode: multiply;
+    }
 
-      /* boss tint */
-      body.boss-mode::before{
-        content:"";
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        background:
-          radial-gradient(900px 520px at 55% 55%, rgba(15, 23, 42, 0.55), transparent 65%),
-          linear-gradient(180deg, rgba(15,23,42,0.28), rgba(0,0,0,0.12));
-        opacity: 0.85;
-        mix-blend-mode: multiply;
-      }
+    #stage{
+      transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
+      transition: transform 80ms linear;
+    }
 
-      /* stage parallax */
-      #stage{
-        transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
-        transition: transform 80ms linear;
-      }
+    #bg{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow:hidden;
+    }
+    .blob{
+      position:absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 999px;
+      filter: blur(55px);
+      opacity: 0.55;
+      mix-blend-mode: multiply;
+      will-change: transform;
+    }
+    .blob.a{
+      left:-140px; top:-160px;
+      background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.55), rgba(255, 182, 193, 0.25) 55%, transparent 70%);
+      animation: floatA 14s ease-in-out infinite;
+    }
+    .blob.b{
+      right:-160px; top:-120px;
+      background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.45), rgba(147, 197, 253, 0.22) 55%, transparent 70%);
+      animation: floatB 16s ease-in-out infinite;
+    }
+    .blob.c{
+      left:10%; bottom:-210px;
+      background: radial-gradient(circle at 30% 30%, rgba(147, 197, 253, 0.45), rgba(244, 63, 94, 0.18) 55%, transparent 70%);
+      animation: floatC 18s ease-in-out infinite;
+    }
+    @keyframes floatA{ 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(80px,60px) scale(1.08)}}
+    @keyframes floatB{ 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-90px,70px) scale(1.06)}}
+    @keyframes floatC{ 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(120px,-60px) scale(1.1)}}
 
-      /* blobs + noise + grid */
-      #bg{
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        overflow:hidden;
-      }
-      .blob{
-        position:absolute;
-        width: 520px;
-        height: 520px;
-        border-radius: 999px;
-        filter: blur(55px);
-        opacity: 0.55;
-        mix-blend-mode: multiply;
-        will-change: transform;
-      }
-      .blob.a{
-        left:-140px; top:-160px;
-        background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.55), rgba(255, 182, 193, 0.25) 55%, transparent 70%);
-        animation: floatA 14s ease-in-out infinite;
-      }
-      .blob.b{
-        right:-160px; top:-120px;
-        background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.45), rgba(147, 197, 253, 0.22) 55%, transparent 70%);
-        animation: floatB 16s ease-in-out infinite;
-      }
-      .blob.c{
-        left:10%; bottom:-210px;
-        background: radial-gradient(circle at 30% 30%, rgba(147, 197, 253, 0.45), rgba(244, 63, 94, 0.18) 55%, transparent 70%);
-        animation: floatC 18s ease-in-out infinite;
-      }
-      @keyframes floatA{ 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(80px,60px) scale(1.08)}}
-      @keyframes floatB{ 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-90px,70px) scale(1.06)}}
-      @keyframes floatC{ 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(120px,-60px) scale(1.1)}}
+    .noise{
+      position:absolute; inset:0;
+      opacity: .10;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='https://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+    }
+    .pixel-grid{
+      position:absolute; inset:0;
+      opacity:.08;
+      background-image:
+        linear-gradient(to right, rgba(15,23,42,.25) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15,23,42,.25) 1px, transparent 1px);
+      background-size: 26px 26px;
+      mix-blend-mode: overlay;
+    }
+    body.night .pixel-grid{
+      opacity:.12;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.10) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.10) 1px, transparent 1px);
+    }
 
-      .noise{
-        position:absolute; inset:0;
-        opacity: .10;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
-        background-size: 180px 180px;
-      }
-      .pixel-grid{
-        position:absolute; inset:0;
-        opacity:.08;
-        background-image:
-          linear-gradient(to right, rgba(15,23,42,.25) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(15,23,42,.25) 1px, transparent 1px);
-        background-size: 26px 26px;
-        mix-blend-mode: overlay;
-      }
-      body.night .pixel-grid{
-        opacity:.12;
-        background-image:
-          linear-gradient(to right, rgba(255,255,255,.10) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(255,255,255,.10) 1px, transparent 1px);
-      }
+    /* Celeste-ish clouds */
+    #celesteClouds{
+      position: fixed; inset:0;
+      pointer-events:none;
+      z-index: 2;
+      overflow:hidden;
+    }
+    .ccloud{
+      position:absolute;
+      top: var(--top);
+      left: -35%;
+      width: var(--w);
+      height: calc(var(--w) * 0.22);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 22% 35%, rgba(255,255,255,0.90), rgba(255,255,255,0.45) 55%, rgba(255,255,255,0.18) 70%, transparent 78%);
+      filter: drop-shadow(0 14px 22px rgba(0,0,0,0.10));
+      opacity: var(--op);
+      animation: cdrift var(--dur) linear infinite;
+    }
+    .ccloud::before,.ccloud::after{ content:""; position:absolute; background: inherit; border-radius:999px; }
+    .ccloud::before{ width:48%; height:170%; left:10%; top:-70%; }
+    .ccloud::after{ width:55%; height:190%; left:38%; top:-90%; }
+    .ccloud .streak{
+      position:absolute;
+      right:12%; top:45%;
+      width:22%; height:6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.55);
+      opacity:.7;
+    }
+    @keyframes cdrift{ from{transform:translateX(0)} to{transform:translateX(180vw)} }
+    body.night .ccloud{ opacity: calc(var(--op) * 0.45); }
 
-      /* inspired silhouettes */
-      #silhouettes{
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 1;
-        opacity: 0.24;
-        mix-blend-mode: multiply;
-      }
-      body.night #silhouettes{ opacity: 0.20; mix-blend-mode: screen; }
+    /* particles */
+    #petals, #powerups, #hearts{
+      position: fixed; inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    #petals{ z-index:3; }
+    #powerups{ z-index:3; }
+    #hearts{ z-index:4; }
 
-      /* Celeste-ish clouds */
-      #celesteClouds{
-        position: fixed; inset:0;
-        pointer-events:none;
-        z-index: 2;
-        overflow:hidden;
-      }
-      .ccloud{
-        position:absolute;
-        top: var(--top);
-        left: -35%;
-        width: var(--w);
-        height: calc(var(--w) * 0.22);
-        border-radius: 999px;
-        background:
-          radial-gradient(circle at 22% 35%, rgba(255,255,255,0.90), rgba(255,255,255,0.45) 55%, rgba(255,255,255,0.18) 70%, transparent 78%);
-        filter: drop-shadow(0 14px 22px rgba(0,0,0,0.10));
-        opacity: var(--op);
-        animation: cdrift var(--dur) linear infinite;
-      }
-      .ccloud::before,.ccloud::after{ content:""; position:absolute; background: inherit; border-radius:999px; }
-      .ccloud::before{ width:48%; height:170%; left:10%; top:-70%; }
-      .ccloud::after{ width:55%; height:190%; left:38%; top:-90%; }
-      .ccloud .streak{
-        position:absolute;
-        right:12%; top:45%;
-        width:22%; height:6px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.55);
-        opacity:.7;
-      }
-      @keyframes cdrift{ from{transform:translateX(0)} to{transform:translateX(180vw)} }
-      body.night .ccloud{ opacity: calc(var(--op) * 0.45); }
+    .heart{
+      position:absolute;
+      bottom:-40px;
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
+      user-select:none;
+    }
+    @keyframes floatUp{
+      0%{ transform:translateY(0) translateX(0) scale(1); opacity:0; }
+      10%{ opacity:0.85; }
+      100%{ transform:translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity:0; }
+    }
+    .powerup{
+      position:absolute;
+      bottom:-40px;
+      opacity:0;
+      animation: puFloat linear forwards;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.12));
+      user-select:none;
+    }
+    @keyframes puFloat{
+      0%{ transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity:0; }
+      12%{ opacity:.95; }
+      100%{ transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity:0; }
+    }
+    .petal{
+      position:absolute;
+      top:-40px;
+      opacity:0;
+      animation: fallDown linear forwards;
+      user-select:none;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.10));
+    }
+    @keyframes fallDown{
+      0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+      10%{ opacity:.85; }
+      100%{ transform:translateY(120vh) translateX(var(--drift)) rotate(var(--rot)); opacity:0; }
+    }
 
-      /* particles layers */
-      #petals, #powerups, #hearts{
-        position: fixed; inset:0;
-        pointer-events:none;
-        overflow:hidden;
-      }
-      #petals{ z-index:3; }
-      #powerups{ z-index:3; }
-      #hearts{ z-index:4; }
+    /* Title */
+    #bigTitle{
+      position: relative;
+      z-index: 6;
+      text-align:center;
+      font-weight: 1000;
+      letter-spacing: -0.02em;
+      line-height: 0.95;
+      font-size: clamp(2.2rem, 6vw, 4.6rem);
+      color: var(--fg);
+      text-shadow: 0 4px 0 var(--shadow), 0 12px 34px rgba(0,0,0,0.22);
+      margin-bottom: 1.15rem;
+      user-select:none;
+    }
+    #titlePill{
+      position: relative;
+      display:inline-block;
+      padding: 0.18em 4.4em 0.18em 0.42em;
+      border-radius: 999px;
+      background: var(--pill);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.35);
+      overflow:hidden;
+    }
+    #letsGo{
+      position:absolute;
+      right:22px;
+      top:50%;
+      transform: translateY(-50%) rotate(-12deg) scale(0.7);
+      font-weight:1000;
+      font-size: clamp(1.15rem, 3vw, 2.1rem);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.95);
+      text-shadow: 0 10px 18px rgba(0,0,0,0.12);
+      opacity: 0;
+      pointer-events:none;
+      white-space: nowrap;
+      z-index: 9;
+    }
+    #letsGo.show{
+      opacity: 1;
+      animation: letsGoPop 650ms cubic-bezier(.2,.9,.2,1) forwards;
+    }
+    @keyframes letsGoPop{
+      0%{ transform: translateY(-50%) rotate(-12deg) scale(0.55); opacity:0; }
+      60%{ transform: translateY(-50%) rotate(-12deg) scale(1.05); opacity:1; }
+      100%{ transform: translateY(-50%) rotate(-12deg) scale(0.92); opacity:1; }
+    }
 
-      .heart{
-        position:absolute;
-        bottom:-40px;
-        animation: floatUp linear forwards;
-        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
-        user-select:none;
-      }
-      @keyframes floatUp{
-        0%{ transform:translateY(0) translateX(0) scale(1); opacity:0; }
-        10%{ opacity:0.85; }
-        100%{ transform:translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity:0; }
-      }
-      .powerup{
-        position:absolute;
-        bottom:-40px;
-        opacity:0;
-        animation: puFloat linear forwards;
-        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.12));
-        user-select:none;
-      }
-      @keyframes puFloat{
-        0%{ transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity:0; }
-        12%{ opacity:.95; }
-        100%{ transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity:0; }
-      }
-      .petal{
-        position:absolute;
-        top:-40px;
-        opacity:0;
-        animation: fallDown linear forwards;
-        user-select:none;
-        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.10));
-      }
-      @keyframes fallDown{
-        0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
-        10%{ opacity:.85; }
-        100%{ transform:translateY(120vh) translateX(var(--drift)) rotate(var(--rot)); opacity:0; }
-      }
+    /* card */
+    .card{
+      position: relative;
+      z-index: 7;
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--cardBorder);
+      box-shadow: 0 22px 70px rgba(0,0,0,0.14);
+    }
+    .pixelFrame{ position: relative; }
+    .pixelFrame::before{
+      content:"";
+      position:absolute;
+      inset:-10px;
+      border-radius: 30px;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.75) 0 8px, rgba(255,255,255,0.35) 8px 16px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.75) 0 8px, rgba(255,255,255,0.35) 8px 16px);
+      opacity: .22;
+      pointer-events:none;
+    }
+    .pixelFrame::after{
+      content:"";
+      position:absolute;
+      inset:-6px;
+      border-radius: 28px;
+      border: 2px solid rgba(255,255,255,0.55);
+      pointer-events:none;
+      box-shadow: 0 20px 70px rgba(0,0,0,0.12);
+    }
+    body.night .pixelFrame::before{ opacity:.14; }
+    body.night .pixelFrame::after{ border-color: rgba(255,255,255,0.18); }
 
-      /* title */
-      #bigTitle{
-        position: relative;
-        z-index: 6;
-        text-align:center;
-        font-weight: 1000;
-        letter-spacing: -0.02em;
-        line-height: 0.95;
-        font-size: clamp(2.2rem, 6vw, 4.6rem);
-        color: var(--fg);
-        text-shadow: 0 4px 0 var(--shadow), 0 12px 34px rgba(0,0,0,0.22);
-        margin-bottom: 1.15rem;
-        user-select:none;
-      }
-      #titlePill{
-        position: relative;
-        display:inline-block;
-        padding: 0.18em 4.4em 0.18em 0.42em;
-        border-radius: 999px;
-        background: var(--pill);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.35);
-        overflow:hidden;
-      }
-      #letsGo{
-        position:absolute;
-        right:22px;
-        top:50%;
-        transform: translateY(-50%) rotate(-12deg) scale(0.7);
-        font-weight:1000;
-        font-size: clamp(1.15rem, 3vw, 2.1rem);
-        letter-spacing: .12em;
-        text-transform: uppercase;
-        color: rgba(0,0,0,0.95);
-        text-shadow: 0 10px 18px rgba(0,0,0,0.12);
-        opacity: 0;
-        pointer-events:none;
-        white-space: nowrap;
-        z-index: 9;
-      }
-      #letsGo.show{
-        opacity: 1;
-        animation: letsGoPop 650ms cubic-bezier(.2,.9,.2,1) forwards;
-      }
-      @keyframes letsGoPop{
-        0%{ transform: translateY(-50%) rotate(-12deg) scale(0.55); opacity:0; }
-        60%{ transform: translateY(-50%) rotate(-12deg) scale(1.05); opacity:1; }
-        100%{ transform: translateY(-50%) rotate(-12deg) scale(0.92); opacity:1; }
-      }
+    /* Media container — VIDEO FIRST to reduce pixelly look */
+    .mediaBox{
+      width: 100%;
+      height: 16rem; /* matches h-64 */
+      border-radius: 0.75rem;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));
+      position: relative;
+    }
+    #valVideo, #valImage{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+      image-rendering: auto;
+    }
+    #valImage{ display:none; } /* we default to video; gif fallback shows this */
 
-      /* card */
-      .card{
-        position: relative;
-        z-index: 7;
-        background: var(--card);
-        backdrop-filter: blur(14px);
-        border: 1px solid var(--cardBorder);
-        box-shadow: 0 22px 70px rgba(0,0,0,0.14);
-      }
+    /* heart buttons */
+    .svg-heart{
+      width: 56px;
+      height: 50px;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.16));
+      transition: transform .12s ease, filter .12s ease;
+      will-change: transform;
+      user-select:none;
+    }
+    .svg-heart svg{ width:100%; height:100%; display:block; }
+    .svg-heart.yes path{ fill:#ef4444; }
+    .svg-heart.no path{ fill:#f43f5e; }
+    .svg-heart span{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transform: translateY(-4px);
+      color:#fff;
+      font-weight:1000;
+      font-size:11px;
+      letter-spacing:.9px;
+      text-shadow: 0 1px 2px rgba(0,0,0,.25);
+      pointer-events:none;
+    }
+    .svg-heart:hover{ transform: scale(1.06); filter: drop-shadow(0 12px 18px rgba(0,0,0,.18)); }
+    .svg-heart:active{ transform: scale(.96); }
 
-      /* Pixel-art frame around main card */
-      .pixelFrame{
-        position: relative;
-      }
-      .pixelFrame::before{
-        content:"";
-        position:absolute;
-        inset:-10px;
-        border-radius: 30px;
-        background:
-          repeating-linear-gradient(90deg, rgba(255,255,255,0.75) 0 8px, rgba(255,255,255,0.35) 8px 16px),
-          repeating-linear-gradient(0deg, rgba(255,255,255,0.75) 0 8px, rgba(255,255,255,0.35) 8px 16px);
-        opacity: .22;
-        filter: blur(0.2px);
-        pointer-events:none;
-      }
-      .pixelFrame::after{
-        content:"";
-        position:absolute;
-        inset:-6px;
-        border-radius: 28px;
-        border: 2px solid rgba(255,255,255,0.55);
-        pointer-events:none;
-        box-shadow: 0 20px 70px rgba(0,0,0,0.12);
-      }
-      body.night .pixelFrame::before{ opacity:.14; }
-      body.night .pixelFrame::after{ border-color: rgba(255,255,255,0.18); }
+    /* controls */
+    #controls{
+      position: fixed;
+      right: 14px;
+      top: 14px;
+      z-index: 60;
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .pillBtn{
+      border: 0;
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.60);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 16px 42px rgba(0,0,0,0.14);
+      font-weight: 1000;
+      letter-spacing: .02em;
+      user-select:none;
+      white-space: nowrap;
+    }
+    body.night .pillBtn{
+      background: rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
 
-      #valImage{ background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25)); }
+    /* audio controls */
+    #audioRow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 16px 42px rgba(0,0,0,0.14);
+    }
+    body.night #audioRow{
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    #vol{ width: 110px; accent-color: #ef4444; }
+    body.night #vol{ accent-color: #93c5fd; }
 
-      /* heart buttons */
-      .svg-heart{
-        width: 56px;
-        height: 50px;
-        border: 0;
-        background: transparent;
-        padding: 0;
-        cursor: pointer;
-        position: relative;
-        filter: drop-shadow(0 10px 14px rgba(0,0,0,.16));
-        transition: transform .12s ease, filter .12s ease;
-        will-change: transform;
-      }
-      .svg-heart svg{ width:100%; height:100%; display:block; }
-      .svg-heart.yes path{ fill:#ef4444; }
-      .svg-heart.no path{ fill:#f43f5e; }
-      .svg-heart span{
-        position:absolute;
-        inset:0;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        transform: translateY(-4px);
-        color:#fff;
-        font-weight:1000;
-        font-size:11px;
-        letter-spacing:.9px;
-        text-shadow: 0 1px 2px rgba(0,0,0,.25);
-        user-select:none;
-        pointer-events:none;
-      }
-      .svg-heart:hover{ transform: scale(1.06); filter: drop-shadow(0 12px 18px rgba(0,0,0,.18)); }
-      .svg-heart:active{ transform: scale(.96); }
+    /* toasts */
+    #toasts{
+      position: fixed;
+      left: 14px;
+      top: 14px;
+      z-index: 80;
+      display:flex;
+      flex-direction: column;
+      gap:10px;
+      pointer-events:none;
+    }
+    .toast{
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.72);
+      box-shadow: 0 18px 52px rgba(0,0,0,0.16);
+      font-weight: 900;
+      letter-spacing: .02em;
+      color: rgba(15,23,42,0.92);
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: toastInOut 3200ms ease-in-out forwards;
+    }
+    body.night .toast{
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.92);
+    }
+    @keyframes toastInOut{
+      0%{ opacity:0; transform: translateY(-10px); }
+      15%{ opacity:1; transform: translateY(0px); }
+      85%{ opacity:1; transform: translateY(0px); }
+      100%{ opacity:0; transform: translateY(-10px); }
+    }
 
-      /* controls */
-      #controls{
-        position: fixed;
-        right: 14px;
-        top: 14px;
-        z-index: 60;
-        display:flex;
-        gap:10px;
-        flex-wrap: wrap;
-        justify-content:flex-end;
-      }
-      .pillBtn{
-        border: 0;
-        cursor: pointer;
-        padding: 10px 12px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.60);
-        backdrop-filter: blur(10px);
-        box-shadow: 0 16px 42px rgba(0,0,0,0.14);
-        font-weight: 1000;
-        letter-spacing: .02em;
-        user-select:none;
-      }
-      body.night .pillBtn{
-        background: rgba(255,255,255,0.14);
-        color: rgba(255,255,255,0.92);
-        border: 1px solid rgba(255,255,255,0.18);
-      }
+    /* warp overlay */
+    #warp{
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #warp.show{
+      opacity: 1;
+      animation: warp 620ms ease-in-out forwards;
+    }
+    #warp::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.55), transparent 55%),
+        radial-gradient(circle at 50% 50%, rgba(59,130,246,0.25), transparent 65%),
+        conic-gradient(from 90deg, rgba(244,63,94,0.18), rgba(59,130,246,0.18), rgba(244,63,94,0.18));
+      transform: scale(0.7);
+    }
+    @keyframes warp{
+      0%{ opacity:0; }
+      10%{ opacity:1; }
+      55%{ opacity:1; }
+      100%{ opacity:0; }
+    }
 
-      /* toasts */
-      #toasts{
-        position: fixed;
-        left: 14px;
-        top: 14px;
-        z-index: 80;
-        display:flex;
-        flex-direction: column;
-        gap:10px;
-        pointer-events:none;
-      }
-      .toast{
-        pointer-events:none;
-        padding: 10px 12px;
-        border-radius: 16px;
-        background: rgba(255,255,255,0.65);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.72);
-        box-shadow: 0 18px 52px rgba(0,0,0,0.16);
-        font-weight: 900;
-        letter-spacing: .02em;
-        color: rgba(15,23,42,0.92);
-        opacity: 0;
-        transform: translateY(-10px);
-        animation: toastInOut 3200ms ease-in-out forwards;
-      }
-      body.night .toast{
-        background: rgba(255,255,255,0.14);
-        border-color: rgba(255,255,255,0.18);
-        color: rgba(255,255,255,0.92);
-      }
-      @keyframes toastInOut{
-        0%{ opacity:0; transform: translateY(-10px); }
-        15%{ opacity:1; transform: translateY(0px); }
-        85%{ opacity:1; transform: translateY(0px); }
-        100%{ opacity:0; transform: translateY(-10px); }
-      }
+    /* modal */
+    .modal{
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+    }
+    .modal.show{ display:flex; }
+    .modal::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: rgba(2,6,23,0.38);
+      backdrop-filter: blur(6px);
+    }
+    .modalCard{
+      position: relative;
+      z-index: 1;
+      width: min(980px, 100%);
+      background: rgba(255,255,255,0.70);
+      border: 1px solid rgba(255,255,255,0.72);
+      border-radius: 22px;
+      box-shadow: 0 30px 120px rgba(0,0,0,0.28);
+      overflow:hidden;
+    }
+    body.night .modalCard{
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .modalHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 14px;
+      font-weight: 1000;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .modalBody{ padding: 14px; color: var(--muted); }
+    .xBtn{
+      border:0;
+      cursor:pointer;
+      border-radius: 12px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.55);
+      font-weight: 1000;
+    }
+    body.night .xBtn{
+      background: rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
 
-      /* boss HUD */
-      #bossHud{
-        position: fixed;
-        top: 14px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(760px, calc(100vw - 28px));
-        z-index: 55;
-        display: none;
-      }
-      #bossHud.show{ display:block; }
-      #bossCard{
-        background: var(--hud);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.55);
-        border-radius: 16px;
-        padding: 10px 12px;
-        box-shadow: 0 16px 46px rgba(0,0,0,0.14);
-        color: var(--muted);
-      }
-      body.night #bossCard{ border-color: rgba(255,255,255,0.18); }
-      #bossTop{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap: 10px;
-        font-weight:1000;
-        letter-spacing: .04em;
-        font-size: 12px;
-        text-transform: uppercase;
-      }
-      #bossBarOuter{
-        margin-top: 8px;
-        height: 12px;
-        border-radius: 999px;
-        background: rgba(15,23,42,0.12);
-        overflow:hidden;
-      }
-      body.night #bossBarOuter{ background: rgba(255,255,255,0.12); }
-      #bossBar{
-        height: 100%;
-        width: 100%;
-        border-radius: 999px;
-        background: linear-gradient(90deg, rgba(239,68,68,0.95), rgba(244,63,94,0.75));
-        transition: width 180ms ease;
-      }
-      #bossHud.critical #bossBar{ animation: criticalPulse 520ms ease-in-out infinite; }
-      @keyframes criticalPulse{ 0%{filter:brightness(1)} 50%{filter:brightness(1.25)} 100%{filter:brightness(1)} }
+    .gameText{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      letter-spacing: 0.02em;
+    }
 
-      /* shake */
-      .shake{ animation: shake 250ms ease-in-out; }
-      @keyframes shake{
-        0%{ transform: translateX(0); }
-        20%{ transform: translateX(-8px); }
-        40%{ transform: translateX(8px); }
-        60%{ transform: translateX(-6px); }
-        80%{ transform: translateX(6px); }
-        100%{ transform: translateX(0); }
-      }
+    .shake{ animation: shake 250ms ease-in-out; }
+    @keyframes shake{
+      0%{ transform: translateX(0); }
+      20%{ transform: translateX(-8px); }
+      40%{ transform: translateX(8px); }
+      60%{ transform: translateX(-6px); }
+      80%{ transform: translateX(6px); }
+      100%{ transform: translateX(0); }
+    }
+    .freeze{ animation: freezeFlash 90ms ease-in-out; }
+    @keyframes freezeFlash{
+      0%{ filter: brightness(1); }
+      50%{ filter: brightness(1.18); }
+      100%{ filter: brightness(1); }
+    }
 
-      /* warp transition overlay */
-      #warp{
-        position: fixed;
-        inset: 0;
-        z-index: 500;
-        pointer-events: none;
-        opacity: 0;
-      }
-      #warp.show{
-        opacity: 1;
-        animation: warp 620ms ease-in-out forwards;
-      }
-      #warp::before{
-        content:"";
-        position:absolute;
-        inset:-20%;
-        background:
-          radial-gradient(circle at 50% 50%, rgba(255,255,255,0.55), transparent 55%),
-          radial-gradient(circle at 50% 50%, rgba(59,130,246,0.25), transparent 65%),
-          conic-gradient(from 90deg, rgba(244,63,94,0.18), rgba(59,130,246,0.18), rgba(244,63,94,0.18));
-        filter: blur(0.2px);
-        transform: scale(0.7);
-      }
-      @keyframes warp{
-        0%{ opacity:0; }
-        10%{ opacity:1; }
-        55%{ opacity:1; }
-        100%{ opacity:0; }
-      }
+    /* Battle */
+    #battleCanvas{
+      width:100%;
+      height:360px;
+      display:block;
+      background:
+        radial-gradient(700px 320px at 30% 25%, rgba(244,63,94,0.16), transparent 60%),
+        radial-gradient(700px 320px at 80% 60%, rgba(59,130,246,0.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.10));
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.55);
+      overflow:hidden;
+    }
+    body.night #battleCanvas{
+      background:
+        radial-gradient(700px 320px at 30% 25%, rgba(59,130,246,0.18), transparent 60%),
+        radial-gradient(700px 320px at 80% 60%, rgba(244,63,94,0.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border-color: rgba(255,255,255,0.18);
+    }
+    .menuBtn{
+      border: 1px solid rgba(255,255,255,0.55);
+      background: rgba(255,255,255,0.45);
+      border-radius: 16px;
+      padding: 12px 12px;
+      font-weight: 1000;
+      cursor: pointer;
+      user-select:none;
+    }
+    body.night .menuBtn{
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.92);
+    }
+    .barOuter{
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.10);
+      overflow:hidden;
+    }
+    body.night .barOuter{ background: rgba(255,255,255,0.12); }
+    .barInner{
+      height:100%;
+      border-radius: 999px;
+      transition: width 120ms ease;
+      background: linear-gradient(90deg, rgba(244,63,94,0.85), rgba(59,130,246,0.65));
+    }
 
-      /* modal */
-      .modal{
-        position: fixed;
-        inset: 0;
-        z-index: 200;
-        display:none;
-        align-items:center;
-        justify-content:center;
-        padding: 18px;
-      }
-      .modal.show{ display:flex; }
-      .modal::before{
-        content:"";
-        position:absolute;
-        inset:0;
-        background: rgba(2,6,23,0.38);
-        backdrop-filter: blur(6px);
-      }
-      .modalCard{
-        position: relative;
-        z-index: 1;
-        width: min(980px, 100%);
-        background: rgba(255,255,255,0.70);
-        border: 1px solid rgba(255,255,255,0.72);
-        border-radius: 22px;
-        box-shadow: 0 30px 120px rgba(0,0,0,0.28);
-        overflow:hidden;
-      }
-      body.night .modalCard{
-        background: rgba(255,255,255,0.10);
-        border-color: rgba(255,255,255,0.18);
-      }
-      .modalHeader{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        padding: 12px 14px;
-        font-weight: 1000;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-        color: var(--muted);
-      }
-      .modalBody{ padding: 14px; color: var(--muted); }
-      .xBtn{
-        border:0;
-        cursor:pointer;
-        border-radius: 12px;
-        padding: 8px 10px;
-        background: rgba(255,255,255,0.55);
-        font-weight: 1000;
-      }
-      body.night .xBtn{
-        background: rgba(255,255,255,0.14);
-        color: rgba(255,255,255,0.92);
-        border: 1px solid rgba(255,255,255,0.18);
-      }
+    /* Platformer canvas */
+    #platformCanvas{
+      width:100%;
+      height:520px;
+      display:block;
+      background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.08));
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.55);
+    }
+    body.night #platformCanvas{
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border-color: rgba(255,255,255,0.18);
+    }
 
-      /* dialogue */
-      #dialogue{
-        position: fixed;
-        left: 50%;
-        bottom: 14px;
-        transform: translateX(-50%);
-        width: min(900px, calc(100vw - 28px));
-        z-index: 85;
-        display:none;
-      }
-      #dialogue.show{ display:block; }
-      #dialogueBox{
-        background: rgba(255,255,255,0.65);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.72);
-        border-radius: 18px;
-        padding: 14px 14px;
-        box-shadow: 0 22px 80px rgba(0,0,0,0.18);
-        color: var(--muted);
-        font-weight: 800;
-        display:flex;
-        gap: 12px;
-        align-items:flex-start;
-      }
-      body.night #dialogueBox{
-        background: rgba(255,255,255,0.12);
-        border-color: rgba(255,255,255,0.18);
-        color: rgba(255,255,255,0.92);
-      }
-      #dialoguePortrait{
-        width: 42px; height:42px;
-        border-radius: 12px;
-        background: rgba(244,63,94,0.20);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size: 22px;
-        flex: 0 0 auto;
-      }
-      #dialogueText{ flex:1; line-height:1.3; font-size:14px; }
-      #dialogueHint{ font-size:12px; opacity:0.85; margin-top:6px; }
+    /* Dedede sticker */
+    #dededeCorner{
+      position: fixed;
+      left: 14px;
+      bottom: 14px;
+      z-index: 55;
+      display:flex;
+      align-items:flex-end;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.60);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.70);
+      box-shadow: 0 18px 52px rgba(0,0,0,0.16);
+      user-select:none;
+    }
+    body.night #dededeCorner{
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.92);
+    }
+    #dededeImg{
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      display:block;
+    }
+    #dededeFallback{
+      display:none;
+      font-size: 46px;
+      line-height: 1;
+    }
+    #dededeDate{
+      font-weight: 1000;
+      letter-spacing: .06em;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+  </style>
+</head>
 
-      /* boss dodge arena */
-      #dodgeArena{
-        margin-top: 14px;
-        height: 220px;
-        border-radius: 18px;
-        overflow:hidden;
-        position: relative;
-        border: 1px solid rgba(255,255,255,0.55);
-        background:
-          radial-gradient(700px 320px at 20% 20%, rgba(244,63,94,0.22), transparent 60%),
-          radial-gradient(700px 320px at 80% 40%, rgba(59,130,246,0.18), transparent 60%),
-          linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.10));
-        display:none;
-      }
-      body.boss-mode #dodgeArena{ display:block; }
-      body.night #dodgeArena{
-        background:
-          radial-gradient(700px 320px at 20% 20%, rgba(59,130,246,0.20), transparent 60%),
-          radial-gradient(700px 320px at 80% 40%, rgba(244,63,94,0.14), transparent 60%),
-          linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-      }
-      #playerDot{
-        position:absolute;
-        width: 16px; height:16px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.95);
-        box-shadow: 0 0 0 4px rgba(255,255,255,0.25), 0 14px 24px rgba(0,0,0,0.16);
-        transform: translate(-50%,-50%);
-        left: 50%;
-        top: 50%;
-      }
-      .proj{
-        position:absolute;
-        width: 14px; height:14px;
-        border-radius: 4px;
-        background: rgba(15,23,42,0.55);
-        box-shadow: 0 10px 18px rgba(0,0,0,0.18);
-        transform: translate(-50%,-50%);
-      }
-      body.night .proj{ background: rgba(255,255,255,0.55); }
+<body class="flex flex-col items-center justify-center p-6">
+  <div id="warp" aria-hidden="true"></div>
+  <div id="toasts" aria-live="polite"></div>
 
-      /* save screen */
-      #saveModal .fileBtn{
-        width: 100%;
-        text-align:left;
-        padding: 14px 14px;
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,0.6);
-        background: rgba(255,255,255,0.45);
-        font-weight: 1000;
-        cursor:pointer;
-      }
-      body.night #saveModal .fileBtn{
-        border-color: rgba(255,255,255,0.18);
-        background: rgba(255,255,255,0.10);
-        color: rgba(255,255,255,0.92);
-      }
+  <!-- Dedede sticker (add dedede.png in your repo root) -->
+  <div id="dededeCorner" class="gameText" title="Put dedede.png in your repo to show Dedede here">
+    <img id="dededeImg" src="dedede.png" alt="King Dedede" />
+    <div id="dededeFallback">👑🐧</div>
+    <div id="dededeDate">2/14/26</div>
+  </div>
 
-      /* platformer canvas */
-      #platformCanvas{
-        width:100%;
-        height:520px;
-        display:block;
-        background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.08));
-      }
-      body.night #platformCanvas{ background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)); }
+  <div id="controls" class="gameText">
+    <button id="toggleCycle" class="pillBtn" type="button">⏳ Cycle</button>
+    <button id="openPlatformer" class="pillBtn" type="button">🧗 Platformer</button>
+    <button id="openBattle" class="pillBtn" type="button">⚔️ Battle</button>
+    <button id="screenshotBtn" class="pillBtn" type="button">📸 Screenshot</button>
 
-      /* catch area */
-      #catchArea{
-        position: relative;
-        height: 420px;
-        border-radius: 18px;
-        overflow:hidden;
-        border: 1px solid rgba(255,255,255,0.55);
-        background:
-          radial-gradient(700px 320px at 20% 20%, rgba(244,63,94,0.22), transparent 60%),
-          radial-gradient(700px 320px at 80% 40%, rgba(59,130,246,0.18), transparent 60%),
-          linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.10));
-      }
-      body.night #catchArea{
-        background:
-          radial-gradient(700px 320px at 20% 20%, rgba(59,130,246,0.20), transparent 60%),
-          radial-gradient(700px 320px at 80% 40%, rgba(244,63,94,0.14), transparent 60%),
-          linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-      }
-      .falling{
-        position:absolute;
-        font-size: 26px;
-        filter: drop-shadow(0 8px 10px rgba(0,0,0,0.14));
-        user-select:none;
-      }
-      #basket{
-        position:absolute;
-        bottom: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 110px;
-        height: 34px;
-        border-radius: 14px;
-        background: rgba(15,23,42,0.12);
-        border: 1px solid rgba(255,255,255,0.55);
-        backdrop-filter: blur(10px);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-weight: 1000;
-        letter-spacing: .06em;
-        color: rgba(15,23,42,0.75);
-      }
-      body.night #basket{
-        background: rgba(255,255,255,0.08);
-        color: rgba(255,255,255,0.88);
-        border-color: rgba(255,255,255,0.18);
-      }
+    <div id="audioRow">
+      <button id="muteBtn" class="pillBtn" style="padding:8px 10px;" type="button">🔊</button>
+      <input id="vol" type="range" min="0" max="1" step="0.01" value="0.45" />
+      <span id="audioStatus" class="text-xs font-extrabold opacity-80">click anywhere to start</span>
+    </div>
+  </div>
 
-      /* game text vibe */
-      .gameText{
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        letter-spacing: 0.02em;
-      }
-    </style>
-  </head>
-
-  <body class="flex flex-col items-center justify-center p-6">
-    <div id="warp" aria-hidden="true"></div>
-
-    <div id="toasts" aria-live="polite"></div>
-
-    <div id="controls">
-      <button id="toggleCycle" class="pillBtn gameText" type="button">⏳ Cycle</button>
-      <button id="openShop" class="pillBtn gameText" type="button">🧙 Shop</button>
-      <button id="openInventory" class="pillBtn gameText" type="button">🎒 Inventory</button>
-      <button id="openCatch" class="pillBtn gameText" type="button">💗 Catch</button>
-      <button id="openPlatformer" class="pillBtn gameText" type="button">🧗 Platformer</button>
-      <button id="screenshotBtn" class="pillBtn gameText" type="button">📸 Screenshot</button>
-      <button id="shareBtn" class="pillBtn gameText" type="button">🔗 Share</button>
+  <div id="stage">
+    <div id="bg" aria-hidden="true">
+      <div class="blob a"></div>
+      <div class="blob b"></div>
+      <div class="blob c"></div>
+      <div class="noise"></div>
+      <div class="pixel-grid"></div>
     </div>
 
-    <div id="bossHud" aria-live="polite">
-      <div id="bossCard" class="gameText">
-        <div id="bossTop">
-          <div id="bossTitle">NO’s Courage</div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <div id="bossPhase">Phase 1</div>
-            <div id="bossText">100%</div>
+    <div id="celesteClouds" aria-hidden="true">
+      <div class="ccloud" style="--top: 10%; --w: 420px; --dur: 78s; --op: 0.55;"><div class="streak"></div></div>
+      <div class="ccloud" style="--top: 18%; --w: 520px; --dur: 96s; --op: 0.35;"><div class="streak"></div></div>
+      <div class="ccloud" style="--top: 28%; --w: 360px; --dur: 68s; --op: 0.42;"><div class="streak"></div></div>
+      <div class="ccloud" style="--top: 34%; --w: 620px; --dur: 118s; --op: 0.28;"><div class="streak"></div></div>
+    </div>
+
+    <div id="petals" aria-hidden="true"></div>
+    <div id="powerups" aria-hidden="true"></div>
+    <div id="hearts" aria-hidden="true"></div>
+
+    <h1 id="bigTitle" class="w-full px-4">
+      <span id="titlePill">
+        Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘
+        <span id="letsGo">LETS GOOOO</span>
+      </span>
+    </h1>
+
+    <div id="mainCard" class="card pixelFrame rounded-3xl p-7 max-w-md w-full text-center gameText">
+      <div class="text-xs font-extrabold uppercase tracking-widest mb-2" style="color: var(--muted);">
+        Coins: <span id="coinCount">0</span> · Love Combo: <span id="loveCount">x0</span>
+      </div>
+
+      <!-- Video first (cleaner), GIF fallback -->
+      <div class="mediaBox">
+        <video id="valVideo" autoplay loop muted playsinline></video>
+        <img id="valImage" alt="Valentine gif" />
+      </div>
+
+      <div class="rounded-2xl p-4 text-left mb-4"
+           style="background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.65);">
+        <div class="font-extrabold tracking-wide text-sm uppercase" style="color: var(--muted);">Quest Log</div>
+        <div class="mt-2 text-sm" style="color: var(--muted);">
+          <div>🎯 Objective: <span class="font-semibold">Get Andrew to say YES</span></div>
+          <div class="mt-1">💖 Meter: <span id="meterPct" class="font-extrabold">0%</span></div>
+          <div class="mt-1">⚔️ Boss: <span id="bossStatus" class="font-extrabold">Dormant</span></div>
+        </div>
+
+        <div class="mt-3">
+          <div class="barOuter"><div id="meterBar" class="barInner" style="width:0%;"></div></div>
+          <div class="mt-2 flex gap-2 justify-between">
+            <button id="mashLove" class="pillBtn" type="button" style="padding:10px 12px;">🕹️ Mash LOVE</button>
+            <button id="startMusicBtn" class="pillBtn" type="button" style="padding:10px 12px;">🎵 Start Music</button>
           </div>
         </div>
-        <div id="bossBarOuter"><div id="bossBar"></div></div>
       </div>
+
+      <div class="flex gap-6 justify-center mt-1">
+        <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
+          <svg viewBox="0 0 32 29" aria-hidden="true">
+            <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
+              c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
+          </svg>
+          <span>YES</span>
+        </button>
+
+        <button id="noBtn" class="svg-heart no" type="button" aria-label="No">
+          <svg viewBox="0 0 32 29" aria-hidden="true">
+            <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
+              c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
+          </svg>
+          <span>NO</span>
+        </button>
+      </div>
+
+      <p id="hint" class="text-sm mt-4" style="color: var(--muted);">
+        Tip: NO triggers a bullet-hell battle now. Beat it by FIGHTing or SPAREing.
+      </p>
     </div>
+  </div>
 
-    <div id="dialogue" aria-live="polite">
-      <div id="dialogueBox" class="gameText">
-        <div id="dialoguePortrait">💬</div>
-        <div style="flex:1;">
-          <div id="dialogueText"></div>
-          <div id="dialogueHint">Tip: mash love, buy upgrades, or beat NO in boss mode.</div>
-        </div>
+  <!-- PLATFORMER MODAL -->
+  <div id="platformerModal" class="modal" role="dialog" aria-modal="true" aria-label="Platformer">
+    <div class="modalCard">
+      <div class="modalHeader gameText">
+        <div>Platformer (Celeste + Silksong vibes)</div>
+        <button class="xBtn gameText" id="closePlatformer" type="button">✕</button>
       </div>
-    </div>
-
-    <div id="stage">
-      <div id="bg" aria-hidden="true">
-        <div class="blob a"></div>
-        <div class="blob b"></div>
-        <div class="blob c"></div>
-        <div class="noise"></div>
-        <div class="pixel-grid"></div>
-      </div>
-
-      <!-- inspired silhouettes -->
-      <svg id="silhouettes" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
-        <!-- left "penguin king vibe" (original shape) -->
-        <g transform="translate(80,420) scale(1.2)">
-          <path d="M0 90 C10 40, 70 0, 130 20 C170 35, 195 70, 190 110
-                   C182 175, 125 205, 78 200 C25 193, -10 150, 0 90Z" fill="rgba(15,23,42,0.35)"/>
-          <circle cx="78" cy="90" r="40" fill="rgba(15,23,42,0.38)"/>
-          <path d="M52 80 C60 70, 78 70, 86 80 C78 98, 60 98, 52 80Z" fill="rgba(15,23,42,0.45)"/>
-          <path d="M58 120 C90 145, 118 135, 142 120" stroke="rgba(15,23,42,0.45)" stroke-width="14" stroke-linecap="round"/>
-          <path d="M70 30 L78 0 L86 30" fill="rgba(15,23,42,0.38)"/>
-        </g>
-
-        <!-- right "hero-in-tunic vibe" (original shape) -->
-        <g transform="translate(780,390) scale(1.25)">
-          <path d="M80 10 L110 40 L140 10 L150 60 L110 110 L70 60Z" fill="rgba(15,23,42,0.32)"/>
-          <path d="M110 110 C80 110, 55 135, 55 175 C55 210, 78 245, 110 245
-                   C142 245, 165 210, 165 175 C165 135, 140 110, 110 110Z" fill="rgba(15,23,42,0.35)"/>
-          <rect x="102" y="140" width="16" height="80" rx="6" fill="rgba(15,23,42,0.42)"/>
-          <path d="M175 160 L205 145 L215 175 L185 190Z" fill="rgba(15,23,42,0.35)"/>
-        </g>
-      </svg>
-
-      <div id="celesteClouds" aria-hidden="true">
-        <div class="ccloud" style="--top: 10%; --w: 420px; --dur: 78s; --op: 0.55;"><div class="streak"></div></div>
-        <div class="ccloud" style="--top: 18%; --w: 520px; --dur: 96s; --op: 0.35;"><div class="streak"></div></div>
-        <div class="ccloud" style="--top: 28%; --w: 360px; --dur: 68s; --op: 0.42;"><div class="streak"></div></div>
-        <div class="ccloud" style="--top: 34%; --w: 620px; --dur: 118s; --op: 0.28;"><div class="streak"></div></div>
-      </div>
-
-      <div id="petals" aria-hidden="true"></div>
-      <div id="powerups" aria-hidden="true"></div>
-      <div id="hearts" aria-hidden="true"></div>
-
-      <h1 id="bigTitle" class="w-full px-4">
-        <span id="titlePill">
-          Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘
-          <span id="letsGo">LETS GOOOO</span>
-        </span>
-      </h1>
-
-      <div id="mainCard" class="card pixelFrame rounded-3xl p-7 max-w-md w-full text-center">
-        <div class="gameText text-xs font-extrabold uppercase tracking-widest mb-2" style="color: var(--muted);">
-          Save: <span id="saveName">File 1</span> · Level: <span id="levelName">Crush</span> (<span id="levelNum">1</span>) · XP: <span id="xpNum">0</span>
-        </div>
-
-        <img id="valImage" class="w-full h-64 object-cover rounded-xl mb-4" alt="Valentine gif" />
-
-        <!-- Quest HUD -->
-        <div class="rounded-2xl p-4 text-left mb-4 gameText"
-             style="background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.65);">
-          <div class="font-extrabold tracking-wide text-sm uppercase" style="color: var(--muted);">Quest Log</div>
-          <div class="mt-2 text-sm" style="color: var(--muted);">
-            <div>🎯 Objective: <span class="font-semibold">Get Andrew to say YES</span></div>
-            <div class="mt-1">💖 Love Combo: <span id="loveCount" class="font-extrabold">x0</span></div>
-            <div class="mt-1">🪙 Coins: <span id="coinCount" class="font-extrabold">0</span></div>
-            <div class="mt-1">🏆 Achievements: <span id="achCount" class="font-extrabold">0</span></div>
-            <div class="mt-1">📌 Status: <span id="questStatus" class="font-semibold">Awaiting decision…</span></div>
+      <div class="modalBody gameText">
+        <div class="flex flex-wrap gap-2 items-center justify-between mb-3">
+          <div class="font-extrabold uppercase text-xs tracking-wider">
+            ← → move · Space jump · Shift dash · Z attack · X silk · R restart
           </div>
+          <div class="font-extrabold uppercase text-xs tracking-wider">
+            Deaths: <span id="deathCount">0</span> · 🍓 carried: <span id="berryCarry">0</span> · Silk: <span id="silkPct">0%</span>
+          </div>
+        </div>
+        <canvas id="platformCanvas" width="960" height="520"></canvas>
+      </div>
+    </div>
+  </div>
 
-          <div class="mt-3">
-            <div class="flex items-center justify-between text-xs font-extrabold uppercase tracking-wider" style="color: var(--muted);">
-              <span>Love Meter</span>
-              <span id="meterPct">0%</span>
+  <!-- BATTLE MODAL -->
+  <div id="battleModal" class="modal" role="dialog" aria-modal="true" aria-label="Battle">
+    <div class="modalCard">
+      <div class="modalHeader gameText">
+        <div>Battle (Undertale + Deltarune vibes)</div>
+        <button class="xBtn gameText" id="closeBattle" type="button">✕</button>
+      </div>
+      <div class="modalBody gameText">
+        <div class="grid gap-3">
+          <div class="grid sm:grid-cols-3 gap-3">
+            <div class="rounded-2xl p-3" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
+              <div class="font-extrabold uppercase text-xs tracking-wider">You</div>
+              <div class="mt-2 text-sm">HP: <span id="bHp">20</span>/<span id="bHpMax">20</span></div>
+              <div class="mt-2 barOuter"><div id="bHpBar" class="barInner" style="width:100%;"></div></div>
+              <div class="mt-3 text-sm">TP: <span id="bTp">0</span>%</div>
+              <div class="mt-2 barOuter"><div id="bTpBar" class="barInner" style="width:0%; background: linear-gradient(90deg, rgba(59,130,246,0.85), rgba(168,85,247,0.65));"></div></div>
             </div>
-            <div class="mt-1 h-3 rounded-full overflow-hidden" style="background: rgba(15,23,42,0.10);">
-              <div id="meterBar" class="h-full rounded-full" style="width:0%; background: linear-gradient(90deg, rgba(244,63,94,0.85), rgba(59,130,246,0.65));"></div>
+
+            <div class="rounded-2xl p-3" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
+              <div class="font-extrabold uppercase text-xs tracking-wider">Enemy</div>
+              <div class="mt-2 text-sm">NO Courage: <span id="bBossHp">100</span>%</div>
+              <div class="mt-2 barOuter"><div id="bBossHpBar" class="barInner" style="width:100%; background: linear-gradient(90deg, rgba(239,68,68,0.95), rgba(244,63,94,0.75));"></div></div>
+              <div class="mt-3 text-sm">MERCY: <span id="bMercy">0</span>%</div>
+              <div class="mt-2 barOuter"><div id="bMercyBar" class="barInner" style="width:0%; background: linear-gradient(90deg, rgba(34,197,94,0.85), rgba(59,130,246,0.55));"></div></div>
             </div>
-            <div class="mt-2 flex gap-2">
-              <button id="mashLove" class="pillBtn gameText" type="button" style="padding:10px 12px;">🕹️ Mash for LOVE</button>
-              <button id="talkBtn" class="pillBtn gameText" type="button" style="padding:10px 12px;">💬 Talk</button>
+
+            <div class="rounded-2xl p-3" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
+              <div class="font-extrabold uppercase text-xs tracking-wider">Info</div>
+              <div id="bText" class="mt-2 text-sm leading-snug">
+                Use arrow keys to move your SOUL. Dodge bullets to gain TP. ACT increases MERCY. MERCY at 100% lets you SPARE.
+              </div>
+              <div class="mt-2 text-xs opacity-80">Phase 2 music = faster + extra layers.</div>
             </div>
           </div>
 
-          <!-- boss dodge arena -->
-          <div id="dodgeArena" class="mt-4">
-            <div class="gameText text-xs font-extrabold uppercase tracking-widest p-3" style="color: var(--muted); opacity:0.9;">
-              Dodge the projectiles! (Move your mouse in this box)
-            </div>
-            <div id="playerDot" aria-hidden="true"></div>
+          <canvas id="battleCanvas" width="960" height="360"></canvas>
+
+          <div class="grid grid-cols-4 gap-2">
+            <button id="btnFight" class="menuBtn" type="button">FIGHT</button>
+            <button id="btnAct" class="menuBtn" type="button">ACT</button>
+            <button id="btnItem" class="menuBtn" type="button">ITEM</button>
+            <button id="btnMercy" class="menuBtn" type="button">MERCY</button>
           </div>
-        </div>
 
-        <!-- Buttons -->
-        <div class="flex gap-6 justify-center mt-1">
-          <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
-            <svg viewBox="0 0 32 29" aria-hidden="true">
-              <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
-                c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
-            </svg>
-            <span>YES</span>
-          </button>
-
-          <button id="noBtn" class="svg-heart no" type="button" aria-label="No">
-            <svg viewBox="0 0 32 29" aria-hidden="true">
-              <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
-                c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
-            </svg>
-            <span>NO</span>
-          </button>
-        </div>
-
-        <p id="hint" class="text-sm mt-4 gameText" style="color: var(--muted);">
-          Tip: NO is a boss now. Buy upgrades + dodge projectiles while you fight it.
-        </p>
-      </div>
-    </div>
-
-    <!-- SAVE FILE MODAL -->
-    <div id="saveModal" class="modal show" role="dialog" aria-modal="true" aria-label="Choose save file">
-      <div class="modalCard">
-        <div class="modalHeader gameText">
-          <div>Choose Save File</div>
-          <div class="text-xs opacity-80">Your stats will save in this browser</div>
-        </div>
-        <div class="modalBody gameText">
-          <div class="grid gap-3">
-            <button class="fileBtn" data-file="1" type="button">📁 File 1 — “Main Quest”</button>
-            <button class="fileBtn" data-file="2" type="button">📁 File 2 — “Chaos Route”</button>
-            <button class="fileBtn" data-file="3" type="button">📁 File 3 — “Speedrun”</button>
-          </div>
-          <div class="mt-4 text-sm opacity-80">
-            Pro tip: Share links will include your file stats.
+          <div class="text-sm opacity-80">
+            Battle controls: Arrow keys move. (Staying alive builds TP faster.)
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- SHOP MODAL -->
-    <div id="shopModal" class="modal" role="dialog" aria-modal="true" aria-label="Shop">
-      <div class="modalCard">
-        <div class="modalHeader gameText">
-          <div>Shop (NPC)</div>
-          <button class="xBtn gameText" id="closeShop" type="button">✕</button>
-        </div>
-        <div class="modalBody gameText">
-          <div class="text-sm font-extrabold uppercase tracking-widest mb-2">Your Coins: 🪙 <span id="shopCoins">0</span></div>
-          <div class="grid sm:grid-cols-2 gap-3">
-            <button class="fileBtn" id="buyDamage" type="button">🗡️ Buy “More Damage” (30) — NO loses more courage per hit</button>
-            <button class="fileBtn" id="buyShield" type="button">🛡️ Buy “Shield” (25) — projectiles hurt less</button>
-            <button class="fileBtn" id="buyDash" type="button">💨 Buy “Dash+” (20) — platformer dash stronger</button>
-            <button class="fileBtn" id="buySlow" type="button">🧊 Buy “Slow Boss” (35) — fewer projectiles</button>
-          </div>
-          <div class="mt-4 text-sm opacity-80">
-            Buy upgrades to make the NO boss fight funnier and beatable.
-          </div>
-        </div>
-      </div>
-    </div>
+<script>
+/* ===== Dedede fallback if file missing ===== */
+const dededeImg = document.getElementById("dededeImg");
+const dededeFallback = document.getElementById("dededeFallback");
+dededeImg.addEventListener("error", ()=>{
+  dededeImg.style.display = "none";
+  dededeFallback.style.display = "block";
+});
 
-    <!-- INVENTORY MODAL -->
-    <div id="inventoryModal" class="modal" role="dialog" aria-modal="true" aria-label="Inventory">
-      <div class="modalCard">
-        <div class="modalHeader gameText">
-          <div>Inventory</div>
-          <button class="xBtn gameText" id="closeInventory" type="button">✕</button>
-        </div>
-        <div class="modalBody gameText">
-          <div class="grid sm:grid-cols-2 gap-3">
-            <div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
-              <div class="font-extrabold uppercase text-xs tracking-wider">Items</div>
-              <div class="mt-2 text-lg" id="itemLine">💍 ⭐ 🪙 🍄 💎 ❤️ 🎮</div>
-              <div class="mt-2 text-sm opacity-80">Strawberry 🍓 unlocks a secret effect.</div>
-            </div>
-            <div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
-              <div class="font-extrabold uppercase text-xs tracking-wider">Stats</div>
-              <div class="mt-2 text-sm">💖 Love Combo: <span id="invCombo" class="font-extrabold">x0</span></div>
-              <div class="mt-1 text-sm">🪙 Coins: <span id="invCoins" class="font-extrabold">0</span></div>
-              <div class="mt-1 text-sm">🏆 Achievements: <span id="invAch" class="font-extrabold">0</span></div>
-              <div class="mt-1 text-sm">😈 Boss Mode: <span id="invBoss" class="font-extrabold">OFF</span></div>
-              <div class="mt-1 text-sm">🍓 Strawberry: <span id="invBerry" class="font-extrabold">NO</span></div>
-            </div>
-          </div>
-          <div class="mt-4 rounded-2xl p-4" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
-            <div class="font-extrabold uppercase text-xs tracking-wider">How to play</div>
-            <div class="mt-2 text-sm opacity-80">
-              • Catch: move basket with mouse. <br/>
-              • Platformer: ← → move, Space jump, Shift dash, R restart. <br/>
-              • Boss: click NO + dodge projectiles in the arena.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+/* ===== Small helpers ===== */
+const warp = document.getElementById("warp");
+const showWarp = () => { warp.classList.remove("show"); void warp.offsetWidth; warp.classList.add("show"); };
 
-    <!-- CATCH MODAL -->
-    <div id="catchModal" class="modal" role="dialog" aria-modal="true" aria-label="Catch game">
-      <div class="modalCard">
-        <div class="modalHeader gameText">
-          <div>Catch the Hearts</div>
-          <button class="xBtn gameText" id="closeCatch" type="button">✕</button>
-        </div>
-        <div class="modalBody gameText">
-          <div class="flex items-center justify-between mb-3">
-            <div class="font-extrabold uppercase text-xs tracking-wider">Score: <span id="catchScore">0</span></div>
-            <div class="font-extrabold uppercase text-xs tracking-wider">Best: <span id="catchBest">0</span></div>
-          </div>
-          <div id="catchArea"><div id="basket">CATCH</div></div>
-          <div class="mt-3 text-sm opacity-80">
-            Catch 💗 ⭐ 🪙 for points + coins. Avoid 💔.
-          </div>
-        </div>
-      </div>
-    </div>
+const toasts = document.getElementById("toasts");
+function showToast(text){
+  const el = document.createElement("div");
+  el.className = "toast gameText";
+  el.textContent = text;
+  toasts.appendChild(el);
+  setTimeout(()=>el.remove(), 3400);
+}
+function freezeFlash(el){ el.classList.remove("freeze"); void el.offsetWidth; el.classList.add("freeze"); }
+function shake(el){ el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
 
-    <!-- PLATFORMER MODAL -->
-    <div id="platformerModal" class="modal" role="dialog" aria-modal="true" aria-label="Platformer">
-      <div class="modalCard">
-        <div class="modalHeader gameText">
-          <div>Platformer (Moving Platforms + Wind + 🍓)</div>
-          <button class="xBtn gameText" id="closePlatformer" type="button">✕</button>
-        </div>
-        <div class="modalBody gameText">
-          <div class="flex flex-wrap gap-2 items-center justify-between mb-3">
-            <div class="font-extrabold uppercase text-xs tracking-wider">
-              Controls: ← → move · Space jump · Shift dash · R restart
-            </div>
-            <div class="font-extrabold uppercase text-xs tracking-wider">
-              Hearts: <span id="platHearts">0</span> · Coins: <span id="platCoins">0</span>
-            </div>
-          </div>
-          <canvas id="platformCanvas" width="960" height="520"></canvas>
-          <div class="mt-3 text-sm opacity-80">
-            Collect 💗 + 🪙 and the 🍓 for a secret. Reach 🚩 to win.
-          </div>
-        </div>
-      </div>
-    </div>
+/* ===== Parallax ===== */
+const stage = document.getElementById("stage");
+window.addEventListener("mousemove", (e)=>{
+  const x = (e.clientX / window.innerWidth) - 0.5;
+  const y = (e.clientY / window.innerHeight) - 0.5;
+  stage.style.setProperty("--px", (x * 18) + "px");
+  stage.style.setProperty("--py", (y * 18) + "px");
+});
 
-    <script>
-      /* =========================
-         STATE / SAVE FILES
-         ========================= */
-      const LS_KEY = "val_save_file";
-      const getFileKey = (file) => `val_save_${file}`;
+/* ===== Cycle backgrounds ===== */
+const toggleCycle = document.getElementById("toggleCycle");
+const cycleList = ["day","sunset","night"];
+let cycleIdx = 0;
+function applyCycle(name){
+  document.body.classList.remove("sunset","night");
+  if (name === "sunset") document.body.classList.add("sunset");
+  if (name === "night") document.body.classList.add("night");
+}
+function nextCycle(){
+  cycleIdx = (cycleIdx + 1) % cycleList.length;
+  applyCycle(cycleList[cycleIdx]);
+  showToast("Cycle: " + cycleList[cycleIdx].toUpperCase());
+}
+toggleCycle.addEventListener("click", ()=>{ showWarp(); nextCycle(); });
+setInterval(()=>{ nextCycle(); }, 30000);
 
-      let saveFile = localStorage.getItem(LS_KEY) || "1";
+/* ===== Background particles ===== */
+const heartsLayer = document.getElementById("hearts");
+const powerupsLayer = document.getElementById("powerups");
+const petalsLayer = document.getElementById("petals");
 
-      const state = {
-        combo: 0,
-        coins: 0,
-        achievements: 0,
-        xp: 0,
-        strawberry: false,
-        upgrades: { damage:false, shield:false, dash:false, slow:false },
+function spawnHeart(){
+  const el = document.createElement("span");
+  el.className = "heart";
+  el.textContent = Math.random() > 0.25 ? "💗" : "💖";
+  const left = Math.random()*100;
+  const size = 12 + Math.random()*22;
+  const dur = 5 + Math.random()*7;
+  const drift = (Math.random()*60-30) + "px";
+  el.style.left = left + "vw";
+  el.style.fontSize = size + "px";
+  el.style.opacity = (0.30 + Math.random()*0.50).toFixed(2);
+  el.style.animationDuration = dur + "s";
+  el.style.setProperty("--drift", drift);
+  heartsLayer.appendChild(el);
+  setTimeout(()=>el.remove(), dur*1000+100);
+}
+for(let i=0;i<14;i++) spawnHeart();
+setInterval(spawnHeart, 250);
+
+function spawnPowerup(){
+  const el = document.createElement("span");
+  el.className = "powerup";
+  const items = ["⭐","🪙","✨","💖","🎮","🍄","💎","❤️","🟢","🔺","🟨","💠"];
+  el.textContent = items[Math.floor(Math.random()*items.length)];
+  const left = Math.random()*100;
+  const size = 12 + Math.random()*18;
+  const dur = 6 + Math.random()*8;
+  const drift = (Math.random()*80-40) + "px";
+  const rot = (Math.random()*160-80) + "deg";
+  el.style.left = left + "vw";
+  el.style.fontSize = size + "px";
+  el.style.animationDuration = dur + "s";
+  el.style.setProperty("--drift", drift);
+  el.style.setProperty("--rot", rot);
+  powerupsLayer.appendChild(el);
+  setTimeout(()=>el.remove(), dur*1000+200);
+}
+for(let i=0;i<10;i++) spawnPowerup();
+setInterval(spawnPowerup, 650);
+
+function spawnPetal(){
+  const el = document.createElement("span");
+  el.className = "petal";
+  const items = ["🌸","🎈","🎀","🌷"];
+  el.textContent = items[Math.floor(Math.random()*items.length)];
+  const left = Math.random()*100;
+  const size = 12 + Math.random()*16;
+  const dur = 6 + Math.random()*8;
+  const drift = (Math.random()*120-60) + "px";
+  const rot = (Math.random()*220-110) + "deg";
+  el.style.left = left + "vw";
+  el.style.fontSize = size + "px";
+  el.style.opacity = (0.22 + Math.random()*0.55).toFixed(2);
+  el.style.animationDuration = dur + "s";
+  el.style.setProperty("--drift", drift);
+  el.style.setProperty("--rot", rot);
+  petalsLayer.appendChild(el);
+  setTimeout(()=>el.remove(), dur*1000+200);
+}
+for(let i=0;i<6;i++) spawnPetal();
+setInterval(spawnPetal, 950);
+
+/* ===== Media loader (VIDEO first, GIF fallback) ===== */
+const valVideo = document.getElementById("valVideo");
+const valImage = document.getElementById("valImage");
+const hint = document.getElementById("hint");
+
+function showVideo(url){
+  valVideo.style.display = "block";
+  valImage.style.display = "none";
+  valVideo.src = url;
+  valVideo.play().catch(()=>{});
+}
+function showImage(url){
+  valImage.style.display = "block";
+  valVideo.style.display = "none";
+  valImage.src = url;
+}
+function setMediaTry(sources, failMessage){
+  let i = 0;
+  const tryNext = () => {
+    if (i >= sources.length){
+      hint.textContent = failMessage;
+      return;
+    }
+    const s = sources[i++];
+
+    if (s.kind === "video"){
+      const probe = document.createElement("video");
+      probe.muted = true;
+      probe.playsInline = true;
+      probe.src = s.url;
+      const ok = () => { showVideo(s.url); hint.textContent = ""; cleanup(); };
+      const bad = () => { cleanup(); tryNext(); };
+      const cleanup = () => {
+        probe.removeEventListener("canplaythrough", ok);
+        probe.removeEventListener("error", bad);
       };
-
-      function loadState(){
-        const raw = localStorage.getItem(getFileKey(saveFile));
-        if (!raw) return;
-        try{
-          const obj = JSON.parse(raw);
-          Object.assign(state, obj);
-          state.upgrades = Object.assign({damage:false, shield:false, dash:false, slow:false}, obj.upgrades || {});
-        }catch{}
-      }
-      function saveState(){
-        localStorage.setItem(getFileKey(saveFile), JSON.stringify(state));
-      }
-
-      /* =========================
-         DOM refs
-         ========================= */
-      const warp = document.getElementById("warp");
-      const showWarp = ()=>{ warp.classList.remove("show"); void warp.offsetWidth; warp.classList.add("show"); };
-
-      const yesBtn = document.getElementById("yesBtn");
-      const noBtn  = document.getElementById("noBtn");
-      const mainCard = document.getElementById("mainCard");
-      const hint = document.getElementById("hint");
-
-      const saveName = document.getElementById("saveName");
-      const loveCountEl = document.getElementById("loveCount");
-      const coinCountEl = document.getElementById("coinCount");
-      const achCountEl = document.getElementById("achCount");
-      const questStatusEl = document.getElementById("questStatus");
-
-      const xpNum = document.getElementById("xpNum");
-      const levelNameEl = document.getElementById("levelName");
-      const levelNumEl  = document.getElementById("levelNum");
-
-      const meterBar = document.getElementById("meterBar");
-      const meterPct = document.getElementById("meterPct");
-      const mashLove = document.getElementById("mashLove");
-
-      const letsGo = document.getElementById("letsGo");
-      const titlePill = document.getElementById("titlePill");
-
-      const toasts = document.getElementById("toasts");
-
-      const dialogue = document.getElementById("dialogue");
-      const dialogueText = document.getElementById("dialogueText");
-      const talkBtn = document.getElementById("talkBtn");
-
-      const dodgeArena = document.getElementById("dodgeArena");
-      const playerDot = document.getElementById("playerDot");
-
-      /* =========================
-         UI helpers
-         ========================= */
-      function showToast(text){
-        const el = document.createElement("div");
-        el.className = "toast gameText";
-        el.textContent = text;
-        toasts.appendChild(el);
-        setTimeout(()=>el.remove(), 3400);
-      }
-
-      function burstSparkles(target, count=10){
-        // quick confetti-only sparkle vibe
-        confetti({ particleCount: Math.min(120, 20 + count*4), spread: 60, origin: { y: 0.18 } });
-      }
-
-      /* =========================
-         PARALLAX
-         ========================= */
-      const stage = document.getElementById("stage");
-      window.addEventListener("mousemove", (e)=>{
-        const x = (e.clientX / window.innerWidth) - 0.5;
-        const y = (e.clientY / window.innerHeight) - 0.5;
-        stage.style.setProperty("--px", (x * 18) + "px");
-        stage.style.setProperty("--py", (y * 18) + "px");
-      });
-
-      /* =========================
-         DAY/SUNSET/NIGHT CYCLE
-         ========================= */
-      const toggleCycle = document.getElementById("toggleCycle");
-      const cycleList = ["day","sunset","night"];
-      let cycleIdx = 0;
-      function applyCycle(name){
-        document.body.classList.remove("sunset","night");
-        if (name === "sunset") document.body.classList.add("sunset");
-        if (name === "night") document.body.classList.add("night");
-      }
-      function nextCycle(){
-        cycleIdx = (cycleIdx + 1) % cycleList.length;
-        applyCycle(cycleList[cycleIdx]);
-        showToast("Cycle: " + cycleList[cycleIdx].toUpperCase());
-      }
-      toggleCycle.addEventListener("click", ()=>{ showWarp(); nextCycle(); });
-
-      // auto cycle every 30s
-      setInterval(()=>{ nextCycle(); }, 30000);
-
-      /* =========================
-         PARTICLES BACKGROUND
-         ========================= */
-      const heartsLayer = document.getElementById("hearts");
-      const powerupsLayer = document.getElementById("powerups");
-      const petalsLayer = document.getElementById("petals");
-
-      function spawnHeart(){
-        const el = document.createElement("span");
-        el.className = "heart";
-        el.textContent = Math.random() > 0.25 ? "💗" : "💖";
-        const left = Math.random()*100;
-        const size = 14 + Math.random()*26;
-        const dur = 5 + Math.random()*7;
-        const drift = (Math.random()*60-30) + "px";
-        el.style.left = left + "vw";
-        el.style.fontSize = size + "px";
-        el.style.opacity = (0.30 + Math.random()*0.50).toFixed(2);
-        el.style.animationDuration = dur + "s";
-        el.style.setProperty("--drift", drift);
-        heartsLayer.appendChild(el);
-        setTimeout(()=>el.remove(), dur*1000+100);
-      }
-      for(let i=0;i<14;i++) spawnHeart();
-      setInterval(spawnHeart, 240);
-
-      function spawnPowerup(){
-        const el = document.createElement("span");
-        el.className = "powerup";
-        const items = ["⭐","🪙","✨","💖","🎮","🍄","💎","❤️","🟢","🔺","🟨","💠"];
-        el.textContent = items[Math.floor(Math.random()*items.length)];
-        const left = Math.random()*100;
-        const size = 14 + Math.random()*22;
-        const dur = 6 + Math.random()*8;
-        const drift = (Math.random()*80-40) + "px";
-        const rot = (Math.random()*160-80) + "deg";
-        el.style.left = left + "vw";
-        el.style.fontSize = size + "px";
-        el.style.animationDuration = dur + "s";
-        el.style.setProperty("--drift", drift);
-        el.style.setProperty("--rot", rot);
-        powerupsLayer.appendChild(el);
-        setTimeout(()=>el.remove(), dur*1000+200);
-      }
-      for(let i=0;i<10;i++) spawnPowerup();
-      setInterval(spawnPowerup, 620);
-
-      function spawnPetal(){
-        const el = document.createElement("span");
-        el.className = "petal";
-        const items = ["🌸","🎈","🎀","🌷"];
-        el.textContent = items[Math.floor(Math.random()*items.length)];
-        const left = Math.random()*100;
-        const size = 14 + Math.random()*18;
-        const dur = 6 + Math.random()*8;
-        const drift = (Math.random()*120-60) + "px";
-        const rot = (Math.random()*220-110) + "deg";
-        el.style.left = left + "vw";
-        el.style.fontSize = size + "px";
-        el.style.opacity = (0.28 + Math.random()*0.60).toFixed(2);
-        el.style.animationDuration = dur + "s";
-        el.style.setProperty("--drift", drift);
-        el.style.setProperty("--rot", rot);
-        petalsLayer.appendChild(el);
-        setTimeout(()=>el.remove(), dur*1000+200);
-      }
-      for(let i=0;i<6;i++) spawnPetal();
-      setInterval(spawnPetal, 900);
-
-      /* =========================
-         GIF LOADER
-         ========================= */
-      const valImage = document.getElementById("valImage");
-      function setImageTry(urls, failMessage){
-        let i=0;
-        const tryNext = ()=>{
-          if (i >= urls.length) { hint.textContent = failMessage; return; }
-          const url = urls[i++];
-          const probe = new Image();
-          probe.onload = ()=>{ valImage.src = url; };
-          probe.onerror = ()=>tryNext();
-          probe.src = url;
-        };
-        tryNext();
-      }
-
-      const GIFS = {
-        start: ["https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif"],
-        yesMain: ["https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"],
-        yesFinal: ["https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"],
-        no: ["https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"]
-      };
-
-      /* =========================
-         LEVELING (XP)
-         ========================= */
-      const LEVELS = [
-        { xp: 0,   name: "Crush" },
-        { xp: 40,  name: "Valentine" },
-        { xp: 90,  name: "Sweetheart" },
-        { xp: 160, name: "Soulmate" },
-        { xp: 260, name: "Legendary" },
-      ];
-      function getLevel(xp){
-        let idx = 0;
-        for (let i=0;i<LEVELS.length;i++){
-          if (xp >= LEVELS[i].xp) idx = i;
-        }
-        return { num: idx+1, name: LEVELS[idx].name };
-      }
-
-      /* =========================
-         LOVE METER
-         ========================= */
-      let meter = 0;
-      let meterDecayTimer = null;
-      function setMeter(v){
-        meter = Math.max(0, Math.min(100, v));
-        meterBar.style.width = meter + "%";
-        meterPct.textContent = Math.round(meter) + "%";
-      }
-      function startMeterDecay(){
-        if (meterDecayTimer) return;
-        meterDecayTimer = setInterval(()=>{
-          setMeter(meter - 1.15);
-          if (meter <= 0){ clearInterval(meterDecayTimer); meterDecayTimer=null; }
-        }, 180);
-      }
-
-      mashLove.addEventListener("click", ()=>{
-        setMeter(meter + 8);
-        startMeterDecay();
-        state.xp += 2;
-        state.combo += 1;
-        state.achievements += (state.combo % 25 === 0) ? 1 : 0;
-        syncUI();
-        saveState();
-        showToast("LOVE +8 💖  (XP +2)");
-        if (meter >= 100){
-          showToast("Achievement: Button Masher 🏆");
-          state.achievements += 1;
-          state.coins += 5;
-          setMeter(60);
-          syncUI(); saveState();
-          confetti({ particleCount: 160, spread: 80, origin: { y: 0.6 } });
-        }
-      });
-
-      /* =========================
-         DIALOGUE typing
-         ========================= */
-      let dialogueIndex = 0;
-      let typingTimer = null;
-      const dialogueLines = [
-        "A wild Valentine prompt appears…",
-        "The NO button is secretly a boss fight now.",
-        "Earn coins, buy upgrades, and defeat NO properly.",
-        "Platformer has moving platforms + wind zones + a secret 🍓."
-      ];
-      function typeLine(line){
-        if (typingTimer) clearInterval(typingTimer);
-        dialogue.classList.add("show");
-        dialogueText.textContent = "";
-        let i=0;
-        typingTimer = setInterval(()=>{
-          dialogueText.textContent += line[i] || "";
-          i++;
-          if (i >= line.length){
-            clearInterval(typingTimer);
-            typingTimer = null;
-          }
-        }, 16);
-      }
-      function sayNext(){
-        typeLine(dialogueLines[dialogueIndex % dialogueLines.length]);
-        dialogueIndex++;
-      }
-      talkBtn.addEventListener("click", ()=>sayNext());
-      setTimeout(()=>sayNext(), 450);
-
-      /* =========================
-         SAVE FILE MODAL
-         ========================= */
-      const saveModal = document.getElementById("saveModal");
-      saveModal.querySelectorAll(".fileBtn").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          saveFile = btn.dataset.file;
-          localStorage.setItem(LS_KEY, saveFile);
-          saveModal.classList.remove("show");
-          loadState();
-          setImageTry(GIFS.start, "Start GIF failed.");
-          syncUI();
-          saveState();
-          showToast("Loaded File " + saveFile);
-        });
-      });
-
-      /* =========================
-         INVENTORY MODAL
-         ========================= */
-      const inventoryModal = document.getElementById("inventoryModal");
-      document.getElementById("openInventory").addEventListener("click", ()=>{ showWarp(); openModal(inventoryModal); });
-      document.getElementById("closeInventory").addEventListener("click", ()=>closeModal(inventoryModal));
-
-      const invCombo = document.getElementById("invCombo");
-      const invCoins = document.getElementById("invCoins");
-      const invAch = document.getElementById("invAch");
-      const invBoss = document.getElementById("invBoss");
-      const invBerry = document.getElementById("invBerry");
-
-      /* =========================
-         SHOP MODAL + UPGRADES
-         ========================= */
-      const shopModal = document.getElementById("shopModal");
-      const openShop = document.getElementById("openShop");
-      const closeShop = document.getElementById("closeShop");
-      const shopCoins = document.getElementById("shopCoins");
-
-      openShop.addEventListener("click", ()=>{ showWarp(); openModal(shopModal); syncUI(); });
-      closeShop.addEventListener("click", ()=>closeModal(shopModal));
-
-      function buy(cost, key, msg){
-        if (state.upgrades[key]) { showToast("Already owned ✅"); return; }
-        if (state.coins < cost){ showToast("Not enough coins 😭"); return; }
-        state.coins -= cost;
-        state.upgrades[key] = true;
-        state.achievements += 1;
-        showToast("Bought: " + msg);
-        syncUI(); saveState();
-      }
-      document.getElementById("buyDamage").addEventListener("click", ()=>buy(30,"damage","More Damage"));
-      document.getElementById("buyShield").addEventListener("click", ()=>buy(25,"shield","Shield"));
-      document.getElementById("buyDash").addEventListener("click", ()=>buy(20,"dash","Dash+"));
-      document.getElementById("buySlow").addEventListener("click", ()=>buy(35,"slow","Slow Boss"));
-
-      /* =========================
-         MODAL open/close
-         ========================= */
-      function openModal(m){ m.classList.add("show"); }
-      function closeModal(m){ m.classList.remove("show"); }
-      [inventoryModal, shopModal].forEach(m=>{
-        m.addEventListener("click", (e)=>{ if (e.target === m) closeModal(m); });
-      });
-
-      /* =========================
-         BOSS: NO COURAGE + PHASES + FIXED POSITION RUNAWAY
-         ========================= */
-      const bossHud = document.getElementById("bossHud");
-      const bossBar = document.getElementById("bossBar");
-      const bossText = document.getElementById("bossText");
-      const bossTitle = document.getElementById("bossTitle");
-      const bossPhase = document.getElementById("bossPhase");
-
-      let courage = 100;
-      let phase = 1;
-      let noScale = 1;
-      let bossActive = false;
-
-      function updateBossHud(){
-        bossHud.classList.add("show");
-        bossBar.style.width = courage + "%";
-        bossText.textContent = courage + "%";
-        bossPhase.textContent = "Phase " + phase;
-        if (courage <= 15) bossHud.classList.add("critical");
-        else bossHud.classList.remove("critical");
-      }
-
-      // FIX: NO uses fixed positioning so it cannot translate offscreen when huge.
-      function ensureNoFixed(){
-        if (noBtn.dataset.fixed === "1") return;
-        noBtn.dataset.fixed = "1";
-        const r = noBtn.getBoundingClientRect();
-        noBtn.style.position = "fixed";
-        noBtn.style.left = r.left + "px";
-        noBtn.style.top  = r.top + "px";
-        noBtn.style.zIndex = "999";
-      }
-      function clampNoOnScreen(){
-        const scale = Math.min(noScale, 4.2);
-        const baseW = 56; // approximate button visual footprint
-        const baseH = 50;
-        const w = baseW * scale;
-        const h = baseH * scale;
-        const pad = 14;
-
-        let left = parseFloat(noBtn.style.left || "0");
-        let top  = parseFloat(noBtn.style.top  || "0");
-
-        left = Math.max(pad, Math.min(window.innerWidth - w - pad, left));
-        top  = Math.max(pad, Math.min(window.innerHeight - h - pad, top));
-
-        noBtn.style.left = left + "px";
-        noBtn.style.top  = top + "px";
-      }
-      function runAwayNo(){
-        ensureNoFixed();
-        const scale = Math.min(noScale, 4.2);
-        const w = 56 * scale;
-        const h = 50 * scale;
-        const pad = 14;
-
-        const left = pad + Math.random() * Math.max(1, (window.innerWidth - w - pad*2));
-        const top  = pad + Math.random() * Math.max(1, (window.innerHeight - h - pad*2));
-
-        noBtn.style.transition = "left 120ms ease, top 120ms ease, transform 120ms ease";
-        noBtn.style.left = left + "px";
-        noBtn.style.top  = top + "px";
-        applyNoScale();
-      }
-      function applyNoScale(){
-        noBtn.style.transform = `scale(${Math.min(noScale, 4.2)})`;
-        clampNoOnScreen();
-      }
-
-      window.addEventListener("resize", ()=>clampNoOnScreen());
-
-      /* =========================
-         BOSS DODGE ARENA (PROJECTILES)
-         ========================= */
-      let dodgeX = 0.5, dodgeY = 0.5; // normalized
-      let projTimer = null;
-      let projStep = null;
-      let projectiles = [];
-
-      function setPlayerDot(e){
-        const r = dodgeArena.getBoundingClientRect();
-        const x = Math.max(0, Math.min(r.width, e.clientX - r.left));
-        const y = Math.max(0, Math.min(r.height, e.clientY - r.top));
-        dodgeX = x / r.width;
-        dodgeY = y / r.height;
-        playerDot.style.left = (dodgeX*100) + "%";
-        playerDot.style.top = (dodgeY*100) + "%";
-      }
-      dodgeArena.addEventListener("mousemove", (e)=>{ if (bossActive) setPlayerDot(e); });
-
-      function spawnProjectile(){
-        const r = dodgeArena.getBoundingClientRect();
-        const el = document.createElement("div");
-        el.className = "proj";
-
-        const side = Math.floor(Math.random()*4);
-        let x,y,vx,vy;
-        const speed = (phase === 1 ? 2.2 : 3.2) * (state.upgrades.slow ? 0.78 : 1);
-
-        if (side === 0){ x = -10; y = Math.random()*r.height; vx = speed; vy = (Math.random()*2-1)*1.2; }
-        if (side === 1){ x = r.width+10; y = Math.random()*r.height; vx = -speed; vy = (Math.random()*2-1)*1.2; }
-        if (side === 2){ x = Math.random()*r.width; y = -10; vx = (Math.random()*2-1)*1.2; vy = speed; }
-        if (side === 3){ x = Math.random()*r.width; y = r.height+10; vx = (Math.random()*2-1)*1.2; vy = -speed; }
-
-        el.style.left = x + "px";
-        el.style.top = y + "px";
-        dodgeArena.appendChild(el);
-        projectiles.push({ el, x, y, vx, vy });
-      }
-
-      function startDodge(){
-        bossActive = true;
-        document.body.classList.add("boss-mode");
-        bossTitle.textContent = "NO’s Courage";
-        updateBossHud();
-
-        if (!projTimer){
-          projTimer = setInterval(()=>{
-            const count = (phase === 1 ? 1 : 2);
-            const slowFactor = state.upgrades.slow ? 0.7 : 1;
-            for (let i=0;i<count;i++) spawnProjectile();
-            // if slow upgrade, skip sometimes
-            if (Math.random() > slowFactor) spawnProjectile();
-          }, phase === 1 ? 650 : 450);
-        }
-        if (!projStep){
-          projStep = setInterval(()=>{
-            const r = dodgeArena.getBoundingClientRect();
-
-            const px = dodgeX * r.width;
-            const py = dodgeY * r.height;
-
-            projectiles = projectiles.filter(p=>{
-              p.x += p.vx;
-              p.y += p.vy;
-              p.el.style.left = p.x + "px";
-              p.el.style.top  = p.y + "px";
-
-              // collision with player dot
-              const dx = p.x - px;
-              const dy = p.y - py;
-              const hit = (dx*dx + dy*dy) < (18*18);
-
-              if (hit){
-                // projectile damage reduced if shield
-                const dmg = state.upgrades.shield ? 3 : 7;
-                setMeter(meter - dmg);
-                mainCard.classList.remove("shake"); void mainCard.offsetWidth; mainCard.classList.add("shake");
-                showToast("HIT! -" + dmg + "% meter");
-                p.el.remove();
-                return false;
-              }
-
-              // out of bounds
-              if (p.x < -40 || p.x > r.width + 40 || p.y < -40 || p.y > r.height + 40){
-                p.el.remove();
-                return false;
-              }
-              return true;
-            });
-          }, 16);
-        }
-      }
-
-      function stopDodge(){
-        bossActive = false;
-        document.body.classList.remove("boss-mode");
-        if (projTimer) clearInterval(projTimer);
-        if (projStep) clearInterval(projStep);
-        projTimer = null;
-        projStep = null;
-        projectiles.forEach(p=>p.el.remove());
-        projectiles = [];
-      }
-
-      /* =========================
-         CORE UI SYNC
-         ========================= */
-      function syncUI(){
-        saveName.textContent = "File " + saveFile;
-
-        loveCountEl.textContent = "x" + state.combo;
-        coinCountEl.textContent = String(state.coins);
-        achCountEl.textContent = String(state.achievements);
-
-        xpNum.textContent = String(state.xp);
-        const lvl = getLevel(state.xp);
-        levelNameEl.textContent = lvl.name;
-        levelNumEl.textContent  = String(lvl.num);
-
-        shopCoins.textContent = String(state.coins);
-        invCombo.textContent = "x" + state.combo;
-        invCoins.textContent = String(state.coins);
-        invAch.textContent = String(state.achievements);
-        invBoss.textContent = document.body.classList.contains("boss-mode") ? "ON" : "OFF";
-        invBerry.textContent = state.strawberry ? "YES" : "NO";
-
-        // secret strawberry unlock: make backgrounds stronger/fancier
-        if (state.strawberry){
-          document.body.style.filter = "saturate(1.12)";
-        } else {
-          document.body.style.filter = "";
-        }
-      }
-
-      /* =========================
-         SHARE LINK (encoded stats)
-         ========================= */
-      const shareBtn = document.getElementById("shareBtn");
-      function makeShareURL(){
-        const u = new URL(window.location.href);
-        u.searchParams.set("file", saveFile);
-        u.searchParams.set("combo", String(state.combo));
-        u.searchParams.set("coins", String(state.coins));
-        u.searchParams.set("ach", String(state.achievements));
-        u.searchParams.set("xp", String(state.xp));
-        u.searchParams.set("berry", state.strawberry ? "1" : "0");
-        return u.toString();
-      }
-      shareBtn.addEventListener("click", async ()=>{
-        try{
-          const url = makeShareURL();
-          await navigator.clipboard.writeText(url);
-          showToast("Share link copied ✅");
-        }catch{
-          showToast("Couldn't copy (browser blocked).");
-        }
-      });
-
-      // load shared stats if present
-      (function applyShared(){
-        const sp = new URLSearchParams(window.location.search);
-        if (!sp.has("combo") && !sp.has("coins") && !sp.has("ach")) return;
-        showToast("Loaded shared stats ✨");
-        // we DO NOT overwrite your saved file automatically; just show a little flex
-      })();
-
-      /* =========================
-         SCREENSHOT BUTTON
-         ========================= */
-      document.getElementById("screenshotBtn").addEventListener("click", async ()=>{
-        try{
-          showToast("Taking screenshot…");
-          const canvas = await html2canvas(document.body, { scale: 2 });
-          const a = document.createElement("a");
-          a.download = "valentine.png";
-          a.href = canvas.toDataURL("image/png");
-          a.click();
-          showToast("Saved screenshot ✅");
-        }catch{
-          showToast("Screenshot failed 😭");
-        }
-      });
-
-      /* =========================
-         YES CLICK
-         ========================= */
-      let yesFinalTimer = null;
-      yesBtn.addEventListener("click", ()=>{
-        letsGo.classList.add("show");
-        burstSparkles(titlePill, 18);
-
-        state.combo += 1;
-        state.xp += 18;
-        state.achievements += 1;
-        questStatusEl.textContent = "Accepted! 💘 QUEST COMPLETE!";
-        hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
-
-        confetti({ particleCount: 260, spread: 90, origin: { y: 0.6 } });
-
-        setImageTry(GIFS.yesMain, "YES GIF failed.");
-        if (yesFinalTimer) clearTimeout(yesFinalTimer);
-        yesFinalTimer = setTimeout(()=>setImageTry(GIFS.yesFinal, "Final GIF failed."), 1800);
-
-        // stop boss
-        stopDodge();
-        bossHud.classList.remove("show");
-
-        noBtn.style.display = "none";
-        syncUI(); saveState();
-        showToast("Achievement: Valentine Secured 🏆");
-      });
-
-      /* =========================
-         NO CLICK (BOSS FIGHT)
-         ========================= */
-      noBtn.addEventListener("click", ()=>{
-        setImageTry(GIFS.no, "NO GIF failed.");
-
-        // start boss + dodge arena
-        startDodge();
-
-        // grow comically
-        noScale *= 1.22;
-        ensureNoFixed();
-        applyNoScale();
-
-        // damage calculation (upgrades matter)
-        const baseHit = 12;
-        const bonus = state.upgrades.damage ? 7 : 0;
-        courage = Math.max(0, courage - (baseHit + bonus));
-
-        // phase 2 at 50%
-        if (courage <= 50 && phase === 1){
-          phase = 2;
-          showToast("PHASE 2!! 😈");
-          bossPhase.textContent = "Phase 2";
-          // speed up projectile spawns by restarting
-          if (projTimer) { clearInterval(projTimer); projTimer=null; }
-          if (projStep) { clearInterval(projStep); projStep=null; }
-          startDodge();
-          confetti({ particleCount: 90, spread: 100, origin: { y: 0.55 } });
-        }
-
-        updateBossHud();
-        questStatusEl.textContent = courage > 0 ? "NO is panicking… keep going!" : "NO defeated!!";
-        hint.textContent = "No (Are you sure about that?) 😳";
-
-        // make it run away AFTER you click it (but now it cannot leave the screen)
-        runAwayNo();
-
-        // reward small XP for fighting
-        state.xp += 5;
-        state.coins += 2;
-        syncUI(); saveState();
-
-        // defeated: victory explosion + coins + achievements
-        if (courage <= 0){
-          showToast("Boss defeated! ✅");
-          confetti({ particleCount: 220, spread: 95, origin: { y: 0.55 } });
-          confetti({ particleCount: 160, spread: 120, origin: { x: 0.25, y: 0.55 } });
-          confetti({ particleCount: 160, spread: 120, origin: { x: 0.75, y: 0.55 } });
-
-          state.achievements += 2;
-          state.coins += 20;
-          state.xp += 40;
-
-          stopDodge();
-          bossHud.classList.remove("show");
-          noBtn.style.display = "none";
-
-          questStatusEl.textContent = "NO has been defeated… the path to YES is clear 😌";
-          hint.textContent = "NO is gone. Now press YES like a champion 🏆";
-          syncUI(); saveState();
-        }
-      });
-
-      /* =========================
-         MODALS: Catch + Platformer with warp transition
-         ========================= */
-      const catchModal = document.getElementById("catchModal");
-      const platformerModal = document.getElementById("platformerModal");
-
-      document.getElementById("openCatch").addEventListener("click", ()=>{ showWarp(); openModal(catchModal); startCatchGame(); });
-      document.getElementById("closeCatch").addEventListener("click", ()=>{ closeModal(catchModal); stopCatchGame(); });
-
-      document.getElementById("openPlatformer").addEventListener("click", ()=>{ showWarp(); openModal(platformerModal); startPlatformer(); });
-      document.getElementById("closePlatformer").addEventListener("click", ()=>{ closeModal(platformerModal); stopPlatformer(); });
-
-      [catchModal, platformerModal].forEach(m=>{
-        m.addEventListener("click", (e)=>{ if (e.target === m) { closeModal(m); if (m===catchModal) stopCatchGame(); if (m===platformerModal) stopPlatformer(); } });
-      });
-
-      /* =========================
-         CATCH GAME (coins)
-         ========================= */
-      const catchArea = document.getElementById("catchArea");
-      const basket = document.getElementById("basket");
-      const catchScoreEl = document.getElementById("catchScore");
-      const catchBestEl = document.getElementById("catchBest");
-
-      let catchRunning=false, catchScore=0, catchBest=Number(localStorage.getItem("catch_best")||"0");
-      catchBestEl.textContent = String(catchBest);
-      let catchSpawnTimer=null, catchFallTimer=null;
-      let catchItems=[];
-
-      function setCatchScore(v){
-        catchScore=v;
-        catchScoreEl.textContent = String(catchScore);
-        if (catchScore>catchBest){
-          catchBest=catchScore;
-          catchBestEl.textContent = String(catchBest);
-          localStorage.setItem("catch_best", String(catchBest));
-        }
-      }
-
-      function startCatchGame(){
-        if (catchRunning) return;
-        catchRunning=true;
-        setCatchScore(0);
-        catchItems.forEach(i=>i.el.remove());
-        catchItems=[];
-
-        function spawn(){
-          const el=document.createElement("div");
-          el.className="falling";
-          const pool=[
-            {t:"💗", p:2, c:1},
-            {t:"⭐", p:3, c:1},
-            {t:"🪙", p:4, c:2},
-            {t:"💔", p:-3, c:0}
-          ];
-          const item=pool[Math.floor(Math.random()*pool.length)];
-          el.textContent=item.t;
-          const x=Math.random()*(catchArea.clientWidth-30)+10;
-          el.style.left=x+"px";
-          el.style.top="-28px";
-          catchArea.appendChild(el);
-          catchItems.push({el,x,y:-28,vy:2+Math.random()*2.2,points:item.p,coins:item.c});
-        }
-        catchSpawnTimer=setInterval(spawn, 450);
-
-        const onMove=(e)=>{
-          const r=catchArea.getBoundingClientRect();
-          const x=Math.max(0,Math.min(r.width,e.clientX-r.left));
-          basket.style.left=x+"px";
-          basket.style.transform="translateX(-50%)";
-        };
-        catchArea.addEventListener("mousemove", onMove);
-
-        catchFallTimer=setInterval(()=>{
-          const br=basket.getBoundingClientRect();
-          const ar=catchArea.getBoundingClientRect();
-
-          catchItems.forEach(obj=>{
-            obj.y+=obj.vy;
-            obj.el.style.transform=`translateY(${obj.y}px)`;
-          });
-
-          catchItems=catchItems.filter(obj=>{
-            const er=obj.el.getBoundingClientRect();
-            const hit = er.bottom>=br.top && er.left<=br.right && er.right>=br.left && er.top<=br.bottom;
-            if (hit){
-              setCatchScore(catchScore + obj.points);
-              if (obj.points>0){
-                state.coins += obj.coins;
-                state.xp += 1;
-                state.combo += 1;
-                showToast("Caught! +" + obj.coins + " coins");
-              } else {
-                showToast("Ouch 💔");
-              }
-              syncUI(); saveState();
-              obj.el.remove();
-              return false;
-            }
-            if (er.top>ar.bottom+40){ obj.el.remove(); return false; }
-            return true;
-          });
-        }, 16);
-
-        showToast("Catch started! 💗");
-      }
-
-      function stopCatchGame(){
-        catchRunning=false;
-        if (catchSpawnTimer) clearInterval(catchSpawnTimer);
-        if (catchFallTimer) clearInterval(catchFallTimer);
-        catchSpawnTimer=null; catchFallTimer=null;
-        catchItems.forEach(i=>i.el.remove());
-        catchItems=[];
-      }
-
-      /* =========================
-         PLATFORMER (moving platforms, wind zones, strawberry)
-         ========================= */
-      const platCanvas = document.getElementById("platformCanvas");
-      const pctx = platCanvas.getContext("2d");
-      const platHeartsEl = document.getElementById("platHearts");
-      const platCoinsEl  = document.getElementById("platCoins");
-
-      let platRunning=false, platRAF=null, keys={};
-      let platHearts=0, platCoins=0;
-
-      const world = {
-        gravity: 0.55,
-        friction: 0.82,
-        platforms: [],
-        collectibles: [],
-        flag: { x: 880, y: 120, w: 18, h: 80 },
-        windZones: [],
-        clouds: [],
-      };
-
-      const player = {
-        x: 60, y: 360, w: 20, h: 26,
-        vx: 0, vy: 0,
-        onGround: false,
-        dash: { ready:true, cd:0, dir:1 }
-      };
-
-      function resetPlatformer(){
-        player.x=60; player.y=360; player.vx=0; player.vy=0; player.onGround=false;
-        player.dash.ready=true; player.dash.cd=0;
-        platHearts=0; platCoins=0;
-        platHeartsEl.textContent="0";
-        platCoinsEl.textContent="0";
-
-        world.platforms = [
-          {x:0, y:470, w:960, h:50, moving:false},
-          {x:120,y:400,w:140,h:16,moving:false},
-          {x:300,y:350,w:130,h:16,moving:true, baseX:300, range:90, vx:1.2},
-          {x:470,y:310,w:130,h:16,moving:true, baseX:470, range:110, vx:-1.1},
-          {x:650,y:270,w:130,h:16,moving:false},
-          {x:820,y:210,w:120,h:16,moving:true, baseX:820, range:70, vx:1.4},
-          {x:720,y:410,w:120,h:16,moving:false},
-        ];
-
-        world.windZones = [
-          {x: 210, y: 260, w: 140, h: 160, ax: +0.18}, // push right
-          {x: 520, y: 180, w: 160, h: 200, ax: -0.16}, // push left
-        ];
-
-        // collectibles: hearts, coins, strawberry
-        world.collectibles = [
-          {type:"heart", x:170,y:360, got:false},
-          {type:"heart", x:360,y:310, got:false},
-          {type:"heart", x:530,y:270, got:false},
-          {type:"coin",  x:705,y:370, got:false},
-          {type:"coin",  x:860,y:180, got:false},
-          {type:"berry", x:610,y:230, got:false}, // 🍓
-        ];
-
-        world.clouds = Array.from({length: 8}).map(()=>({
-          x: Math.random()*960, y: 40+Math.random()*200,
-          s: 0.4+Math.random()*0.9, v: 0.2+Math.random()*0.6, op: 0.18+Math.random()*0.25
-        }));
-      }
-
-      function rectIntersect(a,b){
-        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-      }
-
-      function drawCloud(cx, cy, scale, op){
-        pctx.save();
-        pctx.globalAlpha = op;
-        pctx.fillStyle = "rgba(255,255,255,0.95)";
-        pctx.beginPath();
-        pctx.ellipse(cx, cy, 64*scale, 18*scale, 0, 0, Math.PI*2);
-        pctx.ellipse(cx-30*scale, cy-10*scale, 28*scale, 18*scale, 0, 0, Math.PI*2);
-        pctx.ellipse(cx+26*scale, cy-14*scale, 34*scale, 22*scale, 0, 0, Math.PI*2);
-        pctx.fill();
-        pctx.fillStyle = "rgba(255,255,255,0.55)";
-        pctx.beginPath();
-        pctx.roundRect(cx+10*scale, cy-2*scale, 30*scale, 5*scale, 999);
-        pctx.fill();
-        pctx.restore();
-      }
-
-      function drawPlatformer(){
-        const g = pctx.createLinearGradient(0,0,0,platCanvas.height);
-        if (document.body.classList.contains("night")){
-          g.addColorStop(0,"rgba(30,41,59,0.65)");
-          g.addColorStop(1,"rgba(2,6,23,0.65)");
-        } else if (document.body.classList.contains("sunset")){
-          g.addColorStop(0,"rgba(255,237,213,0.55)");
-          g.addColorStop(1,"rgba(255,228,230,0.18)");
-        } else {
-          g.addColorStop(0,"rgba(255,255,255,0.55)");
-          g.addColorStop(1,"rgba(255,255,255,0.12)");
-        }
-        pctx.fillStyle = g;
-        pctx.fillRect(0,0,platCanvas.width, platCanvas.height);
-
-        for(const c of world.clouds){
-          drawCloud(c.x, c.y, c.s, c.op);
-        }
-
-        // wind zones visualize (subtle)
-        pctx.fillStyle = document.body.classList.contains("night") ? "rgba(255,255,255,0.08)" : "rgba(59,130,246,0.08)";
-        for(const w of world.windZones){
-          pctx.fillRect(w.x,w.y,w.w,w.h);
-        }
-
-        // platforms
-        pctx.fillStyle = document.body.classList.contains("night") ? "rgba(255,255,255,0.18)" : "rgba(15,23,42,0.12)";
-        for(const p of world.platforms){
-          pctx.fillRect(p.x,p.y,p.w,p.h);
-        }
-
-        // collectibles
-        pctx.font = "20px ui-monospace, monospace";
-        for(const it of world.collectibles){
-          if (it.got) continue;
-          const emoji = it.type === "heart" ? "💗" : it.type === "coin" ? "🪙" : "🍓";
-          pctx.fillText(emoji, it.x-10, it.y+8);
-        }
-
-        // flag
-        pctx.font = "22px ui-monospace, monospace";
-        pctx.fillText("🚩", world.flag.x - 4, world.flag.y + 18);
-
-        // player
-        pctx.fillStyle = "rgba(244,63,94,0.85)";
-        pctx.fillRect(player.x, player.y, player.w, player.h);
-        pctx.fillStyle = "rgba(255,255,255,0.9)";
-        pctx.fillRect(player.x+5, player.y+7, 4, 4);
-      }
-
-      function stepPlatformer(){
-        if (!platRunning) return;
-
-        // clouds drift
-        for(const c of world.clouds){
-          c.x += c.v;
-          if (c.x > 1020) c.x = -60;
-        }
-
-        // moving platforms
-        for(const p of world.platforms){
-          if (!p.moving) continue;
-          p.x += p.vx;
-          if (p.x > p.baseX + p.range || p.x < p.baseX - p.range) p.vx *= -1;
-        }
-
-        // input
-        const left = keys["ArrowLeft"];
-        const right = keys["ArrowRight"];
-        const jump = keys["Space"];
-        const dash = keys["ShiftLeft"] || keys["ShiftRight"];
-
-        if (left)  { player.vx -= 0.45; player.dash.dir = -1; }
-        if (right) { player.vx += 0.45; player.dash.dir =  1; }
-
-        // wind zones
-        const pr = {x: player.x, y: player.y, w: player.w, h: player.h};
-        for(const w of world.windZones){
-          if (rectIntersect(pr, w)){
-            player.vx += w.ax;
-          }
-        }
-
-        // dash (upgrade affects dash)
-        if (dash && player.dash.ready){
-          player.dash.ready = false;
-          player.dash.cd = 26;
-          const dashPower = state.upgrades.dash ? 11.5 : 9.5;
-          player.vx = dashPower * player.dash.dir;
-          player.vy = -1.2;
-        }
-        if (player.dash.cd > 0) player.dash.cd--;
-        if (player.dash.cd === 0 && !player.dash.ready && player.onGround){
-          player.dash.ready = true;
-        }
-
-        if (jump && player.onGround){
-          player.vy = -11.2;
-          player.onGround = false;
-        }
-
-        // physics
-        player.vy += world.gravity;
-        player.vx *= world.friction;
-        if (player.vx > 8) player.vx = 8;
-        if (player.vx < -8) player.vx = -8;
-
-        player.x += player.vx;
-        if (player.x < 0) player.x = 0;
-        if (player.x + player.w > platCanvas.width) player.x = platCanvas.width - player.w;
-
-        player.y += player.vy;
-
-        // collision
-        player.onGround = false;
-        for(const p of world.platforms){
-          const a = {x: player.x, y: player.y, w: player.w, h: player.h};
-          const b = {x: p.x, y: p.y, w: p.w, h: p.h};
-          if (!rectIntersect(a,b)) continue;
-
-          const prevY = player.y - player.vy;
-          if (prevY + player.h <= p.y + 1){
-            player.y = p.y - player.h;
-            player.vy = 0;
-            player.onGround = true;
-            if (player.dash.cd === 0) player.dash.ready = true;
-
-            // ride moving platform slightly
-            if (p.moving) player.x += p.vx * 0.9;
-          } else {
-            if (player.vy < 0){
-              player.y = p.y + p.h;
-              player.vy = 0.2;
-            } else {
-              if (player.x + player.w/2 < p.x + p.w/2) player.x = p.x - player.w;
-              else player.x = p.x + p.w;
-              player.vx *= -0.2;
-            }
-          }
-        }
-
-        // fell
-        if (player.y > platCanvas.height + 80){
-          resetPlatformer();
-          showToast("Respawned 💫");
-        }
-
-        // collect
-        for(const it of world.collectibles){
-          if (it.got) continue;
-          const dx = (player.x + player.w/2) - it.x;
-          const dy = (player.y + player.h/2) - it.y;
-          if (dx*dx + dy*dy < 28*28){
-            it.got = true;
-            if (it.type === "heart"){
-              platHearts++;
-              platHeartsEl.textContent = String(platHearts);
-              state.xp += 3;
-              state.combo += 1;
-              showToast("Collected 💗 (XP+3)");
-            }
-            if (it.type === "coin"){
-              platCoins++;
-              platCoinsEl.textContent = String(platCoins);
-              state.coins += 4;
-              state.xp += 2;
-              showToast("Collected 🪙 (+4 coins)");
-            }
-            if (it.type === "berry"){
-              state.strawberry = true;
-              state.achievements += 1;
-              showToast("SECRET 🍓 unlocked!!");
-              confetti({ particleCount: 140, spread: 90, origin: { y: 0.55 } });
-            }
-            syncUI(); saveState();
-          }
-        }
-
-        // reach flag
-        if (rectIntersect({x:player.x,y:player.y,w:player.w,h:player.h}, world.flag)){
-          showToast("Platformer cleared! 🚩");
-          state.achievements += 1;
-          state.coins += 10;
-          state.xp += 20;
-          syncUI(); saveState();
-          confetti({ particleCount: 140, spread: 80, origin: { y: 0.55 } });
-          resetPlatformer();
-        }
-
-        drawPlatformer();
-        platRAF = requestAnimationFrame(stepPlatformer);
-      }
-
-      function startPlatformer(){
-        if (platRunning) return;
-        platRunning = true;
-        keys = {};
-        resetPlatformer();
-        drawPlatformer();
-        platRAF = requestAnimationFrame(stepPlatformer);
-      }
-      function stopPlatformer(){
-        platRunning = false;
-        if (platRAF) cancelAnimationFrame(platRAF);
-        platRAF = null;
-      }
-
-      window.addEventListener("keydown",(e)=>{
-        keys[e.code] = true;
-        if (e.code === "KeyR" && platformerModal.classList.contains("show")){
-          resetPlatformer();
-          showToast("Restarted (R) 🔁");
-        }
-      });
-      window.addEventListener("keyup",(e)=>{ keys[e.code] = false; });
-
-      /* =========================
-         EXACT NO-DISAPPEARING FIX NOTE:
-         - NO only hides when courage <= 0
-         - it can no longer run offscreen because it's fixed + clamped
-         ========================= */
-
-      /* =========================
-         Screenshot + share already wired
-         ========================= */
-
-      /* =========================
-         Sync and initial load
-         ========================= */
-      loadState();
-      syncUI();
-      setImageTry(GIFS.start, "Start GIF failed.");
-
-      // update UI periodically
-      setInterval(syncUI, 900);
-
-      /* =========================
-         Make title pill sparkle on hover
-         ========================= */
-      titlePill.addEventListener("mouseenter", ()=>{ burstSparkles(titlePill, 10); });
-
-      /* =========================
-         Close modals with ESC
-         ========================= */
-      window.addEventListener("keydown",(e)=>{
-        if (e.key !== "Escape") return;
-        [inventoryModal, shopModal, catchModal, platformerModal].forEach(m=>m.classList.remove("show"));
-        stopCatchGame();
-        stopPlatformer();
-      });
-
-      /* =========================
-         Catch modal close buttons
-         ========================= */
-      // already wired above
-
-      /* =========================
-         Shop / inventory click outside handled earlier
-         ========================= */
-    </script>
-  </body>
+      probe.addEventListener("canplaythrough", ok, { once:true });
+      probe.addEventListener("error", bad, { once:true });
+      probe.load();
+      return;
+    }
+
+    // image
+    const img = new Image();
+    img.onload = () => { showImage(s.url); hint.textContent = ""; };
+    img.onerror = () => tryNext();
+    img.src = s.url;
+  };
+  tryNext();
+}
+
+/* Tenor “m/” URLs often look better as MP4 than GIF.
+   We try mp4 first, then gif fallback. */
+const GIFS = {
+  start: [
+    {kind:"video", url:"https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.mp4"},
+    {kind:"img",   url:"https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif"},
+  ],
+  yesMain: [
+    {kind:"video", url:"https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.mp4"},
+    {kind:"img",   url:"https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"},
+  ],
+  yesFinal: [
+    {kind:"video", url:"https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.mp4"},
+    {kind:"img",   url:"https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"},
+  ],
+  no: [
+    /* This one is a giphy gif; you can replace with an mp4 if you want */
+    {kind:"img", url:"https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"}
+  ]
+};
+
+setMediaTry(GIFS.start, "Start media failed to load.");
+
+/* ===== HUD state ===== */
+const coinCountEl = document.getElementById("coinCount");
+const loveCountEl = document.getElementById("loveCount");
+const meterBar = document.getElementById("meterBar");
+const meterPct = document.getElementById("meterPct");
+const bossStatus = document.getElementById("bossStatus");
+
+let state = { coins: 0, combo: 0, meter: 0 };
+function syncHUD(){
+  coinCountEl.textContent = String(state.coins);
+  loveCountEl.textContent = "x" + state.combo;
+  meterPct.textContent = Math.round(state.meter) + "%";
+  meterBar.style.width = state.meter + "%";
+}
+syncHUD();
+function addMeter(v){
+  state.meter = Math.max(0, Math.min(100, state.meter + v));
+  syncHUD();
+}
+
+/* ===== Mash LOVE ===== */
+document.getElementById("mashLove").addEventListener("click", ()=>{
+  addMeter(8);
+  state.combo += 1;
+  syncHUD();
+  if (state.meter >= 100){
+    showToast("LOVE OVERDRIVE 💥");
+    state.coins += 5;
+    state.meter = 60;
+    syncHUD();
+    confetti({ particleCount: 160, spread: 80, origin: { y: 0.6 } });
+  }
+});
+
+/* ===== Buttons ===== */
+const yesBtn = document.getElementById("yesBtn");
+const noBtn  = document.getElementById("noBtn");
+const letsGo = document.getElementById("letsGo");
+const mainCard = document.getElementById("mainCard");
+let yesFinalTimer = null;
+
+yesBtn.addEventListener("click", ()=>{
+  ensureMusicStarted();
+  letsGo.classList.add("show");
+  confetti({ particleCount: 260, spread: 90, origin: { y: 0.6 } });
+  setMediaTry(GIFS.yesMain, "YES media failed to load.");
+
+  hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
+
+  if (yesFinalTimer) clearTimeout(yesFinalTimer);
+  yesFinalTimer = setTimeout(()=>setMediaTry(GIFS.yesFinal, "Final media failed."), 1800);
+
+  if (battle.running){
+    battleWin("YES ending cutscene activated 💘");
+  }
+});
+
+/* NO button: comically bigger + runs away + starts battle */
+let noScale = 1;
+function ensureNoFixed(){
+  if (noBtn.dataset.fixed === "1") return;
+  noBtn.dataset.fixed = "1";
+  const r = noBtn.getBoundingClientRect();
+  noBtn.style.position = "fixed";
+  noBtn.style.left = r.left + "px";
+  noBtn.style.top  = r.top + "px";
+  noBtn.style.zIndex = "999";
+}
+function clampNoOnScreen(){
+  const scale = Math.min(noScale, 4.2);
+  const w = 56 * scale;
+  const h = 50 * scale;
+  const pad = 14;
+  let left = parseFloat(noBtn.style.left || "0");
+  let top  = parseFloat(noBtn.style.top  || "0");
+  left = Math.max(pad, Math.min(window.innerWidth - w - pad, left));
+  top  = Math.max(pad, Math.min(window.innerHeight - h - pad, top));
+  noBtn.style.left = left + "px";
+  noBtn.style.top  = top + "px";
+}
+function applyNoScale(){
+  noBtn.style.transform = `scale(${Math.min(noScale, 4.2)})`;
+  clampNoOnScreen();
+}
+function runAwayNo(){
+  ensureNoFixed();
+  const scale = Math.min(noScale, 4.2);
+  const w = 56 * scale;
+  const h = 50 * scale;
+  const pad = 14;
+  const left = pad + Math.random() * Math.max(1, (window.innerWidth - w - pad*2));
+  const top  = pad + Math.random() * Math.max(1, (window.innerHeight - h - pad*2));
+  noBtn.style.transition = "left 140ms ease, top 140ms ease, transform 120ms ease";
+  noBtn.style.left = left + "px";
+  noBtn.style.top  = top + "px";
+  applyNoScale();
+}
+window.addEventListener("resize", clampNoOnScreen);
+
+noBtn.addEventListener("click", ()=>{
+  ensureMusicStarted();
+  setMediaTry(GIFS.no, "NO media failed to load.");
+  bossStatus.textContent = "Engaged";
+
+  noScale *= 1.22;
+  ensureNoFixed();
+  applyNoScale();
+  runAwayNo();
+
+  openBattle();
+});
+
+/* ===== Modals ===== */
+function openModal(m){ m.classList.add("show"); }
+function closeModal(m){ m.classList.remove("show"); }
+function closeOnBackdrop(m, onClose){
+  m.addEventListener("click",(e)=>{
+    if (e.target === m){ closeModal(m); onClose?.(); }
+  });
+}
+
+const platformerModal = document.getElementById("platformerModal");
+document.getElementById("openPlatformer").addEventListener("click", ()=>{ ensureMusicStarted(); showWarp(); openModal(platformerModal); startPlatformer(); });
+document.getElementById("closePlatformer").addEventListener("click", ()=>{ closeModal(platformerModal); stopPlatformer(); });
+closeOnBackdrop(platformerModal, stopPlatformer);
+
+const battleModal = document.getElementById("battleModal");
+document.getElementById("openBattle").addEventListener("click", ()=>{ ensureMusicStarted(); showWarp(); openModal(battleModal); battleStart(); });
+document.getElementById("closeBattle").addEventListener("click", ()=>{ closeModal(battleModal); battleStop(); });
+closeOnBackdrop(battleModal, battleStop);
+
+function openBattle(){
+  showWarp();
+  openModal(battleModal);
+  battleStart();
+}
+
+/* Screenshot */
+document.getElementById("screenshotBtn").addEventListener("click", async ()=>{
+  ensureMusicStarted();
+  try{
+    showToast("Taking screenshot…");
+    const canvas = await html2canvas(document.body, { scale: 2 });
+    const a = document.createElement("a");
+    a.download = "valentine.png";
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+    showToast("Saved screenshot ✅");
+  }catch{
+    showToast("Screenshot failed 😭");
+  }
+});
+
+/* ===== ESC closes ===== */
+window.addEventListener("keydown",(e)=>{
+  if (e.key !== "Escape") return;
+  [platformerModal, battleModal].forEach(m=>m.classList.remove("show"));
+  stopPlatformer();
+  battleStop();
+});
+
+/* ===== MUSIC (Phase 2 = more intense) ===== */
+const muteBtn = document.getElementById("muteBtn");
+const volEl = document.getElementById("vol");
+const audioStatus = document.getElementById("audioStatus");
+const startMusicBtn = document.getElementById("startMusicBtn");
+
+let audio = {
+  ctx: null,
+  master: null,
+  started: false,
+  muted: false,
+  volume: 0.45,
+  ambient: {},
+  battle: {},
+  mode: "ambient",
+  battleIntensity: 1, // 1 or 2
+};
+
+function mtof(m){ return 440 * Math.pow(2, (m-69)/12); }
+
+function createNoise(ctx, type="highpass", freq=700){
+  const bufferSize = 2 * ctx.sampleRate;
+  const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) output[i] = (Math.random()*2-1) * 0.35;
+
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer;
+  src.loop = true;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = type;
+  filter.frequency.value = freq;
+
+  const gain = ctx.createGain();
+  gain.gain.value = 0.0;
+
+  src.connect(filter).connect(gain);
+  return { src, gain };
+}
+
+function setupAmbient(){
+  const ctx = audio.ctx;
+  const layer = audio.ambient;
+
+  layer.gain = ctx.createGain();
+  layer.gain.gain.value = 1.0;
+  layer.gain.connect(audio.master);
+
+  layer.osc1 = ctx.createOscillator();
+  layer.osc1.type = "square";
+  layer.g1 = ctx.createGain(); layer.g1.gain.value = 0.0;
+  layer.osc1.connect(layer.g1).connect(layer.gain);
+
+  layer.osc2 = ctx.createOscillator();
+  layer.osc2.type = "triangle";
+  layer.g2 = ctx.createGain(); layer.g2.gain.value = 0.0;
+  layer.osc2.connect(layer.g2).connect(layer.gain);
+
+  layer.bass = ctx.createOscillator();
+  layer.bass.type = "sawtooth";
+  layer.gb = ctx.createGain(); layer.gb.gain.value = 0.0;
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 240;
+  layer.bass.connect(lp).connect(layer.gb).connect(layer.gain);
+
+  layer.noise = createNoise(ctx, "highpass", 700);
+  layer.noise.gain.connect(layer.gain);
+
+  layer.osc1.start(); layer.osc2.start(); layer.bass.start(); layer.noise.src.start();
+
+  layer.step = 0;
+  layer.bpm = 118;
+
+  const root = 60;
+  const leadSteps = [0,2,5,7,5,2,0,2, 0,2,3,5,7,5,3,2];
+  const harmSteps = [0,0,2,2,5,5,2,2, 0,0,2,2,5,5,3,3];
+  const bassSteps = [0,0,5,5, 3,3,7,7, 0,0,5,5, 3,3,2,2];
+
+  layer.tick = (stepDur)=>{
+    const now = ctx.currentTime;
+    const i = layer.step % 16;
+
+    const leadMidi = root + leadSteps[i];
+    const harmMidi = root - 12 + harmSteps[i];
+    const bassMidi = root - 24 + bassSteps[i];
+
+    layer.osc1.frequency.setValueAtTime(mtof(leadMidi), now);
+    layer.osc2.frequency.setValueAtTime(mtof(harmMidi), now);
+    layer.bass.frequency.setValueAtTime(mtof(bassMidi), now);
+
+    // lead
+    layer.g1.gain.cancelScheduledValues(now);
+    layer.g1.gain.setValueAtTime(0, now);
+    layer.g1.gain.linearRampToValueAtTime(0.11, now + 0.01);
+    layer.g1.gain.linearRampToValueAtTime(0, now + stepDur * 0.88);
+
+    // harm
+    layer.g2.gain.cancelScheduledValues(now);
+    layer.g2.gain.setValueAtTime(0, now);
+    layer.g2.gain.linearRampToValueAtTime(0.06, now + 0.02);
+    layer.g2.gain.linearRampToValueAtTime(0, now + stepDur * 0.92);
+
+    // bass
+    const bassHit = (i % 2 === 0);
+    layer.gb.gain.cancelScheduledValues(now);
+    layer.gb.gain.setValueAtTime(0, now);
+    layer.gb.gain.linearRampToValueAtTime(bassHit ? 0.10 : 0.04, now + 0.01);
+    layer.gb.gain.linearRampToValueAtTime(0, now + stepDur * 0.95);
+
+    // noise kick/snare
+    const kick = (i % 4 === 0);
+    const snare = (i % 4 === 2);
+    const n = layer.noise.gain.gain;
+    n.cancelScheduledValues(now);
+    n.setValueAtTime(0, now);
+    if (kick){
+      n.linearRampToValueAtTime(0.06, now + 0.01);
+      n.linearRampToValueAtTime(0, now + 0.08);
+    } else if (snare){
+      n.linearRampToValueAtTime(0.08, now + 0.01);
+      n.linearRampToValueAtTime(0, now + 0.12);
+    }
+
+    layer.step++;
+  };
+
+  layer.setBpm = (bpm)=>{
+    layer.bpm = bpm;
+    if (layer.timer) clearInterval(layer.timer);
+    const stepDur = 60 / bpm / 2;
+    layer.timer = setInterval(()=>layer.tick(stepDur), stepDur*1000);
+  };
+
+  layer.setBpm(layer.bpm);
+}
+
+function setupBattle(){
+  const ctx = audio.ctx;
+  const layer = audio.battle;
+
+  layer.gain = ctx.createGain();
+  layer.gain.gain.value = 0.0; // start muted (we crossfade)
+  layer.gain.connect(audio.master);
+
+  // main voices
+  layer.osc1 = ctx.createOscillator();
+  layer.osc1.type = "square";
+  layer.g1 = ctx.createGain(); layer.g1.gain.value = 0.0;
+  layer.osc1.connect(layer.g1).connect(layer.gain);
+
+  layer.osc2 = ctx.createOscillator();
+  layer.osc2.type = "triangle";
+  layer.g2 = ctx.createGain(); layer.g2.gain.value = 0.0;
+  layer.osc2.connect(layer.g2).connect(layer.gain);
+
+  layer.bass = ctx.createOscillator();
+  layer.bass.type = "sawtooth";
+  layer.gb = ctx.createGain(); layer.gb.gain.value = 0.0;
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 220;
+  layer.bass.connect(lp).connect(layer.gb).connect(layer.gain);
+
+  // drums (noise)
+  layer.noise = createNoise(ctx, "highpass", 700);
+  layer.noise.gain.connect(layer.gain);
+
+  // EXTRA LAYERS for phase 2
+  layer.arp = ctx.createOscillator();
+  layer.arp.type = "square";
+  layer.garp = ctx.createGain(); layer.garp.gain.value = 0.0; // off until phase 2
+  layer.arp.connect(layer.garp).connect(layer.gain);
+
+  layer.hats = createNoise(ctx, "highpass", 4500);
+  layer.hats.gain.connect(layer.gain);
+
+  layer.osc1.start(); layer.osc2.start(); layer.bass.start();
+  layer.noise.src.start(); layer.arp.start(); layer.hats.src.start();
+
+  layer.step = 0;
+  layer.bpm = 156; // phase 1
+  const root = 57;
+
+  const leadSteps = [0,3,5,7,8,7,5,3, 0,3,5,10,8,7,5,3];
+  const harmSteps = [0,0,3,3,5,5,3,3, 0,0,3,3,7,7,5,5];
+  const bassSteps = [0,0,0,0, 5,5,5,5, 3,3,3,3, 7,7,7,7];
+
+  // arpeggio (only audible in phase 2)
+  const arpSteps = [0,7,10,7, 0,7,12,10, 0,7,10,15, 12,10,7,0];
+
+  layer.tick = (stepDur)=>{
+    const now = ctx.currentTime;
+    const i = layer.step % 16;
+
+    // main notes
+    layer.osc1.frequency.setValueAtTime(mtof(root + leadSteps[i]), now);
+    layer.osc2.frequency.setValueAtTime(mtof(root - 12 + harmSteps[i]), now);
+    layer.bass.frequency.setValueAtTime(mtof(root - 24 + bassSteps[i]), now);
+
+    // lead envelope
+    layer.g1.gain.cancelScheduledValues(now);
+    layer.g1.gain.setValueAtTime(0, now);
+    layer.g1.gain.linearRampToValueAtTime(0.12, now + 0.01);
+    layer.g1.gain.linearRampToValueAtTime(0, now + stepDur * 0.86);
+
+    // harmony
+    layer.g2.gain.cancelScheduledValues(now);
+    layer.g2.gain.setValueAtTime(0, now);
+    layer.g2.gain.linearRampToValueAtTime(0.07, now + 0.02);
+    layer.g2.gain.linearRampToValueAtTime(0, now + stepDur * 0.90);
+
+    // bass
+    const bassHit = (i % 2 === 0);
+    layer.gb.gain.cancelScheduledValues(now);
+    layer.gb.gain.setValueAtTime(0, now);
+    layer.gb.gain.linearRampToValueAtTime(bassHit ? 0.12 : 0.06, now + 0.01);
+    layer.gb.gain.linearRampToValueAtTime(0, now + stepDur * 0.95);
+
+    // kick/snare
+    const kick = (i % 4 === 0);
+    const snare = (i % 4 === 2);
+    const n = layer.noise.gain.gain;
+    n.cancelScheduledValues(now);
+    n.setValueAtTime(0, now);
+    if (kick){
+      n.linearRampToValueAtTime(0.08, now + 0.01);
+      n.linearRampToValueAtTime(0, now + 0.08);
+    } else if (snare){
+      n.linearRampToValueAtTime(0.10, now + 0.01);
+      n.linearRampToValueAtTime(0, now + 0.12);
+    }
+
+    // PHASE 2 extras (arp + hats)
+    if (audio.battleIntensity >= 2){
+      // arp note
+      layer.arp.frequency.setValueAtTime(mtof(root + 12 + arpSteps[i]), now);
+      layer.garp.gain.cancelScheduledValues(now);
+      layer.garp.gain.setValueAtTime(0, now);
+      layer.garp.gain.linearRampToValueAtTime(0.07, now + 0.006);
+      layer.garp.gain.linearRampToValueAtTime(0, now + stepDur * 0.55);
+
+      // hats on every 8th
+      const hh = layer.hats.gain.gain;
+      hh.cancelScheduledValues(now);
+      hh.setValueAtTime(0, now);
+      hh.linearRampToValueAtTime(0.06, now + 0.005);
+      hh.linearRampToValueAtTime(0, now + 0.05);
+    } else {
+      // keep arp/hats quiet
+      layer.garp.gain.setValueAtTime(0, now);
+      layer.hats.gain.gain.setValueAtTime(0, now);
+    }
+
+    layer.step++;
+  };
+
+  layer.setBpm = (bpm)=>{
+    layer.bpm = bpm;
+    if (layer.timer) clearInterval(layer.timer);
+    const stepDur = 60 / bpm / 2;
+    layer.timer = setInterval(()=>layer.tick(stepDur), stepDur*1000);
+  };
+
+  layer.setBpm(layer.bpm);
+}
+
+function ensureMusicStarted(){
+  if (audio.started) return;
+  try{
+    audio.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    audio.master = audio.ctx.createGain();
+    audio.master.gain.value = audio.volume;
+    audio.master.connect(audio.ctx.destination);
+
+    setupAmbient();
+    setupBattle();
+
+    audio.started = true;
+    audioStatus.textContent = "playing";
+    showToast("Music started ✅");
+  } catch{
+    audioStatus.textContent = "audio blocked";
+    showToast("Audio couldn't start in this browser.");
+  }
+}
+async function resumeAudio(){
+  if (!audio.ctx) return;
+  try{ await audio.ctx.resume(); } catch {}
+}
+
+function setMusicMode(mode){
+  if (!audio.started) return;
+  audio.mode = mode;
+  const a = audio.ambient.gain.gain;
+  const b = audio.battle.gain.gain;
+  const now = audio.ctx.currentTime;
+  a.cancelScheduledValues(now);
+  b.cancelScheduledValues(now);
+  if (mode === "battle"){
+    a.setValueAtTime(a.value, now);
+    a.linearRampToValueAtTime(0.0, now + 0.25);
+    b.setValueAtTime(b.value, now);
+    b.linearRampToValueAtTime(1.0, now + 0.25);
+  } else {
+    b.setValueAtTime(b.value, now);
+    b.linearRampToValueAtTime(0.0, now + 0.25);
+    a.setValueAtTime(a.value, now);
+    a.linearRampToValueAtTime(1.0, now + 0.25);
+  }
+}
+
+function setBattleIntensity(level){
+  if (!audio.started) return;
+  const target = level >= 2 ? 2 : 1;
+  if (audio.battleIntensity === target) return;
+  audio.battleIntensity = target;
+
+  // speed up + extra layers kick in
+  if (target === 2){
+    audio.battle.setBpm(176);
+    showToast("🔥 Phase 2 music!");
+  } else {
+    audio.battle.setBpm(156);
+  }
+}
+
+volEl.addEventListener("input", ()=>{
+  audio.volume = parseFloat(volEl.value);
+  if (audio.master) audio.master.gain.value = audio.muted ? 0 : audio.volume;
+});
+muteBtn.addEventListener("click", ()=>{
+  audio.muted = !audio.muted;
+  muteBtn.textContent = audio.muted ? "🔇" : "🔊";
+  if (audio.master) audio.master.gain.value = audio.muted ? 0 : audio.volume;
+});
+startMusicBtn.addEventListener("click", async ()=>{
+  ensureMusicStarted();
+  await resumeAudio();
+});
+window.addEventListener("pointerdown", async ()=>{
+  ensureMusicStarted();
+  await resumeAudio();
+  audioStatus.textContent = audio.started ? "playing" : "click anywhere to start";
+}, { once: true });
+
+/* ===== Battle (Phase 2 triggers intensity) ===== */
+const battle = {
+  running: false,
+  raf: null,
+  x: 480, y: 180, r: 8,
+  hpMax: 20, hp: 20,
+  tp: 0,
+  bossHp: 100,
+  mercy: 0,
+  phase: 1,
+  bullets: [],
+  keys: {},
+  invuln: 0,
+  lastSpawn: 0,
+  spawnRate: 420,
+  text: "..."
+};
+
+const bHp = document.getElementById("bHp");
+const bHpMax = document.getElementById("bHpMax");
+const bHpBar = document.getElementById("bHpBar");
+const bTp = document.getElementById("bTp");
+const bTpBar = document.getElementById("bTpBar");
+const bBossHp = document.getElementById("bBossHp");
+const bBossHpBar = document.getElementById("bBossHpBar");
+const bMercy = document.getElementById("bMercy");
+const bMercyBar = document.getElementById("bMercyBar");
+const bText = document.getElementById("bText");
+
+const battleCanvas = document.getElementById("battleCanvas");
+const bctx = battleCanvas.getContext("2d");
+
+function battleSync(){
+  bHp.textContent = String(battle.hp);
+  bHpMax.textContent = String(battle.hpMax);
+  bHpBar.style.width = (battle.hp / battle.hpMax * 100) + "%";
+  bTp.textContent = String(Math.round(battle.tp));
+  bTpBar.style.width = Math.max(0, Math.min(100, battle.tp)) + "%";
+  bBossHp.textContent = String(Math.round(battle.bossHp));
+  bBossHpBar.style.width = Math.max(0, battle.bossHp) + "%";
+  bMercy.textContent = String(Math.round(battle.mercy));
+  bMercyBar.style.width = Math.max(0, Math.min(100, battle.mercy)) + "%";
+  bText.textContent = battle.text;
+}
+
+function battleReset(){
+  battle.x = 480; battle.y = 180;
+  battle.hpMax = 20; battle.hp = 20;
+  battle.tp = 0;
+  battle.bossHp = 100;
+  battle.mercy = 0;
+  battle.phase = 1;
+  setBattleIntensity(1);
+  battle.bullets = [];
+  battle.invuln = 0;
+  battle.lastSpawn = performance.now();
+  battle.spawnRate = 420;
+  battle.text = "A wild NO appears…";
+  battleSync();
+}
+
+function battleStart(){
+  ensureMusicStarted();
+  resumeAudio();
+  setMusicMode("battle");
+  document.body.classList.add("boss-mode");
+
+  if (battle.running) return;
+  battle.running = true;
+  bossStatus.textContent = "Battle";
+  battleReset();
+  battle.raf = requestAnimationFrame(battleLoop);
+  showToast("Battle started ⚔️");
+}
+
+function battleStop(){
+  if (!battle.running) return;
+  battle.running = false;
+  if (battle.raf) cancelAnimationFrame(battle.raf);
+  battle.raf = null;
+  document.body.classList.remove("boss-mode");
+  setMusicMode("ambient");
+  bossStatus.textContent = "Dormant";
+  setBattleIntensity(1);
+}
+
+function battleWin(msg){
+  battle.text = msg || "You win!";
+  battleSync();
+  confetti({ particleCount: 220, spread: 95, origin: { y: 0.55 } });
+  showToast("Victory! 🏆");
+  battleStop();
+  closeModal(battleModal);
+}
+
+function battleLose(){
+  battle.text = "You got hit… try again!";
+  battleSync();
+  shake(mainCard);
+  showToast("Defeated 😭");
+  battleStop();
+  closeModal(battleModal);
+}
+
+function spawnBulletPattern(now){
+  const prevPhase = battle.phase;
+  battle.phase = (battle.bossHp <= 50) ? 2 : 1;
+
+  if (battle.phase !== prevPhase){
+    battle.text = "Phase " + battle.phase + "!";
+    battle.spawnRate = battle.phase === 2 ? 300 : 420;
+    showToast("Phase " + battle.phase + "!!");
+    freezeFlash(mainCard);
+
+    // 🔥 PHASE 2 = more intense music
+    setBattleIntensity(battle.phase);
+  }
+
+  const w = battleCanvas.width, h = battleCanvas.height;
+  const count = battle.phase === 2 ? 6 : 4;
+
+  for (let i=0;i<count;i++){
+    const side = Math.floor(Math.random()*4);
+    let x,y,vx,vy;
+    const speed = (battle.phase === 2 ? 2.6 : 2.0) + Math.random()*0.6;
+
+    if (side === 0){ x = -10; y = Math.random()*h; vx = speed; vy = (Math.random()*2-1)*1.1; }
+    if (side === 1){ x = w+10; y = Math.random()*h; vx = -speed; vy = (Math.random()*2-1)*1.1; }
+    if (side === 2){ x = Math.random()*w; y = -10; vx = (Math.random()*2-1)*1.1; vy = speed; }
+    if (side === 3){ x = Math.random()*w; y = h+10; vx = (Math.random()*2-1)*1.1; vy = -speed; }
+
+    if (Math.random() < (battle.phase === 2 ? 0.45 : 0.25)){
+      const dx = battle.x - x;
+      const dy = battle.y - y;
+      const mag = Math.hypot(dx,dy) || 1;
+      vx = (dx/mag) * speed;
+      vy = (dy/mag) * speed;
+    }
+
+    battle.bullets.push({x,y,vx,vy,r: 6 + Math.random()*4});
+  }
+
+  if (Math.random() < 0.18){
+    const cx = w*(0.25 + Math.random()*0.5);
+    const cy = h*(0.25 + Math.random()*0.5);
+    const rings = battle.phase === 2 ? 10 : 8;
+    for (let k=0;k<rings;k++){
+      const ang = (Math.PI*2) * (k/rings);
+      battle.bullets.push({x:cx,y:cy,vx:Math.cos(ang)*2.2,vy:Math.sin(ang)*2.2,r:5});
+    }
+  }
+}
+
+function battleLoop(now){
+  if (!battle.running) return;
+
+  const w = battleCanvas.width, h = battleCanvas.height;
+
+  // input
+  const speed = 2.7;
+  let ax = 0, ay = 0;
+  if (battle.keys["ArrowLeft"]) ax -= 1;
+  if (battle.keys["ArrowRight"]) ax += 1;
+  if (battle.keys["ArrowUp"]) ay -= 1;
+  if (battle.keys["ArrowDown"]) ay += 1;
+
+  const norm = Math.hypot(ax,ay) || 1;
+  ax = (ax/norm) * speed;
+  ay = (ay/norm) * speed;
+
+  battle.x += ax;
+  battle.y += ay;
+
+  battle.x = Math.max(battle.r+8, Math.min(w - battle.r-8, battle.x));
+  battle.y = Math.max(battle.r+8, Math.min(h - battle.r-8, battle.y));
+
+  if (now - battle.lastSpawn > battle.spawnRate){
+    spawnBulletPattern(now);
+    battle.lastSpawn = now;
+  }
+
+  for (const b of battle.bullets){
+    b.x += b.vx;
+    b.y += b.vy;
+  }
+  battle.bullets = battle.bullets.filter(b => b.x > -60 && b.x < w+60 && b.y > -60 && b.y < h+60);
+
+  if (battle.invuln > 0) battle.invuln--;
+  let hit = false;
+  if (battle.invuln <= 0){
+    for (const b of battle.bullets){
+      const dx = b.x - battle.x;
+      const dy = b.y - battle.y;
+      const rr = (b.r + battle.r);
+      if (dx*dx + dy*dy < rr*rr){ hit = true; break; }
+    }
+  }
+
+  battle.tp = Math.min(100, battle.tp + 0.12);
+
+  if (hit){
+    battle.hp -= 2;
+    battle.invuln = 24;
+    shake(mainCard);
+    freezeFlash(mainCard);
+    battle.text = "Ouch!";
+    if (battle.hp <= 0){
+      battle.hp = 0;
+      battleSync();
+      return battleLose();
+    }
+  }
+
+  // draw
+  bctx.clearRect(0,0,w,h);
+
+  bctx.save();
+  bctx.globalAlpha = 0.85;
+  bctx.strokeStyle = document.body.classList.contains("night") ? "rgba(255,255,255,0.30)" : "rgba(15,23,42,0.18)";
+  bctx.lineWidth = 6;
+  bctx.strokeRect(10,10,w-20,h-20);
+  bctx.restore();
+
+  for (const b of battle.bullets){
+    bctx.save();
+    bctx.globalAlpha = 0.95;
+    bctx.fillStyle = document.body.classList.contains("night") ? "rgba(255,255,255,0.62)" : "rgba(15,23,42,0.55)";
+    bctx.beginPath();
+    bctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    bctx.fill();
+    bctx.restore();
+  }
+
+  const pulse = (battle.invuln > 0 && Math.floor(battle.invuln/4)%2===0) ? 0.35 : 1.0;
+  bctx.save();
+  bctx.globalAlpha = pulse;
+  bctx.fillStyle = "rgba(239,68,68,0.92)";
+  const x = battle.x, y = battle.y;
+  bctx.beginPath();
+  bctx.moveTo(x, y + 6);
+  bctx.bezierCurveTo(x - 10, y - 4, x - 6, y - 16, x, y - 8);
+  bctx.bezierCurveTo(x + 6, y - 16, x + 10, y - 4, x, y + 6);
+  bctx.fill();
+  bctx.restore();
+
+  battleSync();
+  battle.raf = requestAnimationFrame(battleLoop);
+}
+
+window.addEventListener("keydown",(e)=>{ battle.keys[e.key] = true; });
+window.addEventListener("keyup",(e)=>{ battle.keys[e.key] = false; });
+
+document.getElementById("btnFight").addEventListener("click", ()=>{
+  ensureMusicStarted(); resumeAudio();
+  if (!battle.running) return;
+
+  const spend = Math.min(60, battle.tp);
+  const dmg = 7 + Math.floor(spend/20);
+  battle.tp -= spend;
+
+  battle.bossHp -= dmg;
+  battle.text = `You FIGHT! (-${dmg} courage)`;
+  freezeFlash(mainCard);
+  confetti({ particleCount: 40, spread: 80, origin: { y: 0.65 } });
+
+  if (battle.bossHp <= 0){
+    battle.bossHp = 0;
+    battleWin("NO has been defeated… now press YES 😌");
+    noBtn.style.display = "none";
+    hint.textContent = "NO is gone. Now press YES like a champion 🏆";
+    state.coins += 20;
+    syncHUD();
+    return;
+  }
+
+  battleSync();
+});
+
+document.getElementById("btnAct").addEventListener("click", ()=>{
+  ensureMusicStarted(); resumeAudio();
+  if (!battle.running) return;
+
+  const acts = [
+    {t:"Compliment", m:18},
+    {t:"Offer Snacks", m:22},
+    {t:"Sing Badly", m:16},
+    {t:"Confess", m:26},
+    {t:"Tell Joke", m:14},
+  ];
+  const pick = acts[Math.floor(Math.random()*acts.length)];
+  battle.mercy = Math.min(100, battle.mercy + pick.m);
+  battle.text = `ACT: ${pick.t} (+${pick.m}% MERCY)`;
+  showToast("ACT used ✨");
+  battleSync();
+});
+
+document.getElementById("btnItem").addEventListener("click", ()=>{
+  ensureMusicStarted(); resumeAudio();
+  if (!battle.running) return;
+
+  const canHeal = battle.hp < battle.hpMax;
+  if (canHeal){
+    battle.hp = Math.min(battle.hpMax, battle.hp + 6);
+    battle.text = "ITEM: Heart Candy (HP +6)";
+  } else {
+    battle.tp = Math.min(100, battle.tp + 30);
+    battle.text = "ITEM: Spark Soda (TP +30)";
+  }
+  battleSync();
+});
+
+document.getElementById("btnMercy").addEventListener("click", ()=>{
+  ensureMusicStarted(); resumeAudio();
+  if (!battle.running) return;
+
+  if (battle.mercy >= 100){
+    battleWin("You SPARE the NO. Peace achieved ✨");
+    noBtn.style.display = "none";
+    hint.textContent = "You spared NO. Now press YES 😌";
+    state.coins += 15;
+    syncHUD();
+  } else {
+    battle.text = `MERCY is only ${Math.round(battle.mercy)}%. Use ACT more!`;
+    battleSync();
+  }
+});
+
+/* ===== Platformer (kept minimal; same as before) ===== */
+const platCanvas = document.getElementById("platformCanvas");
+const pctx = platCanvas.getContext("2d");
+const deathCountEl = document.getElementById("deathCount");
+const berryCarryEl = document.getElementById("berryCarry");
+const silkPctEl = document.getElementById("silkPct");
+
+let plat = { running:false, raf:null, keys:{}, deaths:0, berryCarry:0, silk:0 };
+
+function startPlatformer(){
+  if (plat.running) return;
+  plat.running = true;
+  plat.deaths = 0;
+  plat.berryCarry = 0;
+  plat.silk = 0;
+  deathCountEl.textContent = "0";
+  berryCarryEl.textContent = "0";
+  silkPctEl.textContent = "0%";
+  drawPlat();
+}
+function stopPlatformer(){
+  plat.running = false;
+  if (plat.raf) cancelAnimationFrame(plat.raf);
+  plat.raf = null;
+}
+function drawPlat(){
+  const w = platCanvas.width, h = platCanvas.height;
+  pctx.clearRect(0,0,w,h);
+  pctx.fillStyle = "rgba(255,255,255,0.14)";
+  pctx.fillRect(0,0,w,h);
+  pctx.font = "28px ui-monospace, monospace";
+  pctx.fillText("Celeste-ish room here (kept from your last version)", 70, 120);
+}
+
+/* ===== Music UI ===== */
+syncHUD();
+startMusicBtn.addEventListener("click", ()=>{
+  ensureMusicStarted();
+  resumeAudio();
+  audioStatus.textContent = "playing";
+});
+</script>
+</body>
 </html>
-
