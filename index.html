@@ -132,6 +132,34 @@
       100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity: 0; }
     }
 
+    /* ✅ Pixel clouds layer (pixel-art SVG) */
+    #pixelClouds{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+    .pixel-cloud{
+      position: absolute;
+      left: -260px;
+      top: var(--top);
+      width: 240px;
+      height: 120px;
+      opacity: 0.30;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.08));
+      image-rendering: pixelated;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      animation: cloudDrift linear forwards;
+      transform: translateZ(0);
+    }
+    body.boss-mode .pixel-cloud{ opacity: 0.18; }
+    @keyframes cloudDrift{
+      from { transform: translateX(0) scale(var(--s)); }
+      to   { transform: translateX(calc(100vw + 520px)) scale(var(--s)); }
+    }
+
     /* Big title */
     #bigTitle{
       position: relative;
@@ -210,7 +238,7 @@
       transition: width 160ms ease;
     }
 
-    /* MTG-ish card frame (inspired, not 1:1) */
+    /* MTG-ish card frame */
     .tcg-card{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.65);
@@ -239,14 +267,38 @@
       border: 1px solid rgba(15,23,42,0.10);
       font-weight: 900;
     }
+    .tcg-subbar{
+      margin-top: 10px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.65);
+      border: 1px solid rgba(15,23,42,0.10);
+    }
     .tcg-rules{
       background: rgba(255,255,255,0.70);
       border: 1px solid rgba(15,23,42,0.10);
       border-radius: 12px;
       padding: 12px;
     }
+    .mana-pip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.08);
+      border: 1px solid rgba(15,23,42,0.12);
+      font-weight: 900;
+      font-size: 12px;
+      margin-left: 6px;
+    }
 
-    /* Pokemon-ish encounter box */
+    /* Encounter (more detailed Pokémon UI) */
     .encounter{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.65);
@@ -258,6 +310,8 @@
       background: linear-gradient(180deg, rgba(34,197,94,0.16), rgba(59,130,246,0.14));
       border-bottom: 1px solid rgba(15,23,42,0.10);
       padding: 16px;
+      position: relative;
+      overflow:hidden;
     }
     .text-box{
       background: rgba(255,255,255,0.92);
@@ -265,6 +319,20 @@
       border-radius: 14px;
       padding: 12px;
       font-weight: 800;
+      min-height: 58px;
+    }
+    .hpbar{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.65);
+      overflow:hidden;
+    }
+    .hpbar > div{
+      height: 100%;
+      width: 100%;
+      transition: width 220ms ease;
+      background: linear-gradient(90deg, rgba(34,197,94,0.9), rgba(250,204,21,0.9), rgba(239,68,68,0.9));
     }
 
     /* Modal */
@@ -278,6 +346,21 @@
       padding: 18px;
     }
     .modal-backdrop.show{ display: flex; }
+
+    /* Boss blackhole gif */
+    #blackholeGif{
+      position: absolute;
+      left: 50%;
+      top: 44%;
+      transform: translate(-50%, -50%);
+      width: 160px;
+      height: 160px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+      filter: drop-shadow(0 12px 24px rgba(0,0,0,0.22));
+      mix-blend-mode: multiply;
+    }
   </style>
 </head>
 
@@ -292,16 +375,15 @@
   </div>
 
   <div id="powerups" aria-hidden="true"></div>
+  <div id="pixelClouds" aria-hidden="true"></div>
   <div id="hearts" aria-hidden="true"></div>
 
   <!-- Title -->
   <div class="relative z-[3] px-4 pt-6">
     <div class="max-w-7xl mx-auto">
-      <div class="flex items-center justify-center gap-3 mb-2">
-        <h1 id="bigTitle" class="w-full">
-          <span>Love Beyond the Multiverse 💘</span>
-        </h1>
-      </div>
+      <h1 id="bigTitle" class="w-full">
+        <span>Love Beyond the Multiverse 💘</span>
+      </h1>
 
       <!-- Mana / shiny -->
       <div id="manaWrap" class="rounded-2xl glass px-4 py-3 mb-4">
@@ -332,7 +414,7 @@
   <div class="relative z-[3] max-w-7xl mx-auto px-4 pb-10">
     <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-5 items-start">
 
-      <!-- LEFT: Valentine card pinned-ish -->
+      <!-- LEFT: Valentine card -->
       <aside class="lg:sticky lg:top-24">
         <div class="glass rounded-3xl p-6 text-center">
           <div class="mx-auto mb-3 w-28 mascot-bounce">
@@ -446,6 +528,9 @@
             <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
               <canvas id="bossCanvas" class="w-full block h-[420px]"></canvas>
 
+              <!-- ✅ blackhole GIF overlay -->
+              <img id="blackholeGif" alt="Black hole gif" />
+
               <div id="laughFlash"
                   class="absolute top-6 left-1/2 -translate-x-1/2 text-3xl sm:text-5xl font-black tracking-widest text-slate-900 drop-shadow-lg opacity-0 pointer-events-none">
                 MAGALOR: HAHAHA!
@@ -507,7 +592,7 @@
           </div>
         </section>
 
-        <!-- MTG-STYLE: Legendary card -->
+        <!-- MTG-STYLE: Legendary card (more detailed) -->
         <section class="tcg-card">
           <div class="p-6">
             <div class="flex items-center justify-between gap-3 mb-4">
@@ -527,39 +612,69 @@
             <div id="tcgCard" class="tcg-frame">
               <div class="tcg-titlebar">
                 <div id="cardName">Andrew Getzow, Keeper of My Heart</div>
-                <div class="text-xs font-black text-slate-700/70">Cost: 🍫❤️🍿</div>
+                <div class="text-xs font-black text-slate-700/70">
+                  Cost:
+                  <span class="mana-pip">🍫</span>
+                  <span class="mana-pip">❤️</span>
+                  <span class="mana-pip">🍿</span>
+                </div>
               </div>
 
-              <div class="mt-3 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3">
+              <div class="tcg-subbar">
+                <div class="text-xs font-black text-slate-700/70">Legendary Creature — Human Nerd</div>
+                <div class="text-xs font-black text-slate-700/70">
+                  P/T: <span class="mana-pip">7</span>/<span class="mana-pip">14</span>
+                </div>
+              </div>
+
+              <div class="mt-3 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-3">
                 <div class="rounded-xl overflow-hidden border border-slate-900/10 bg-white/70">
-                  <div id="cardArt" class="h-40 flex items-center justify-center font-black text-slate-700/70">
+                  <div id="cardArt" class="h-44 flex items-center justify-center font-black text-slate-700/70">
                     (Put a cute photo here later)
                   </div>
                 </div>
 
                 <div class="tcg-rules">
-                  <div class="text-xs font-black text-slate-700/70 mb-1">Legendary Creature — Human Nerd</div>
                   <div class="text-sm font-semibold text-slate-800/80 leading-relaxed">
-                    <div>Whenever you smile, create a <b>Heart token</b>.</div>
+                    <div><b>Whenever you smile</b>, create a <b>Heart token</b>.</div>
                     <div class="mt-1"><b>{T}:</b> Go on a date. If it’s Valentine’s Day, you may also get dessert.</div>
-                    <div class="mt-1">Partner with <b>You, Hopeless Romantic</b>.</div>
+                    <div class="mt-1"><b>Partner</b> with <b>You, Hopeless Romantic</b>.</div>
+                    <div class="mt-2 text-xs font-black text-slate-700/70">
+                      Reminder text: Heart tokens have “{1}: Make me blush. Scry 1.”
+                    </div>
                   </div>
                   <div class="mt-3 text-xs italic font-bold text-slate-700/70">
                     “I’d tap all my mana for you.”
                   </div>
                 </div>
               </div>
+
+              <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
+                  <div class="text-xs font-black text-slate-700/70">Flavor</div>
+                  <div class="text-sm font-semibold text-slate-800/80 mt-1">“Turn 1: I fell. Turn 2: I stayed.”</div>
+                </div>
+                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
+                  <div class="text-xs font-black text-slate-700/70">Synergy</div>
+                  <div class="text-sm font-semibold text-slate-800/80 mt-1">If love is a stack, my feelings have split second.</div>
+                </div>
+                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
+                  <div class="text-xs font-black text-slate-700/70">Inside Joke Slot</div>
+                  <div class="text-sm font-semibold text-slate-800/80 mt-1">“Our first date was basically a turn 1 love play.”</div>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
 
-        <!-- Choose a Date: Modal spell -->
+        <!-- Choose a Date (more detailed magic + “the stack”) -->
         <section class="glass rounded-3xl p-6">
           <div class="flex items-center justify-between gap-3">
             <div>
               <div class="text-2xl font-black text-slate-800/80">2) Choose a Date (Cast a Spell)</div>
               <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                Three spell-cards. Pick one.
+                Pick a spell — it goes on <b>the stack</b> ✨
               </div>
             </div>
             <button id="openDateModal"
@@ -569,8 +684,18 @@
             </button>
           </div>
 
-          <div id="chosenDate" class="mt-4 text-sm font-semibold text-slate-700/80">
-            Selected spell: <b>None yet</b>
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div id="chosenDate" class="text-sm font-semibold text-slate-700/80 rounded-2xl bg-white/70 border border-white/60 p-4">
+              Selected spell: <b>None yet</b>
+              <div class="mt-2 text-xs font-black text-slate-700/70">Mana spent: <span id="manaSpent">0</span></div>
+            </div>
+
+            <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+              <div class="text-xs font-black text-slate-700/70 mb-2">THE STACK</div>
+              <div id="spellStack" class="space-y-2 text-sm font-semibold text-slate-800/80">
+                <div class="opacity-70">— empty —</div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -594,27 +719,66 @@
           <div class="mt-4 text-sm font-semibold text-slate-700/80" id="tokenMsg">Tokens: <b id="tokenCount">0</b></div>
         </section>
 
-        <!-- Wild Valentine Appeared -->
+        <!-- ✅ Pokémon battle (more detailed) -->
         <section class="encounter">
           <div class="p-6">
             <div class="text-2xl font-black text-slate-800/80 mb-3">4) Wild Valentine Appeared!</div>
+
             <div class="encounter-screen rounded-2xl">
-              <div class="flex items-center justify-between gap-3">
-                <div class="font-black text-slate-800/80">VALENTINE (???)</div>
-                <div class="text-xs font-black text-slate-700/70">HP: ♡♡♡♡♡</div>
+              <div class="grid grid-cols-2 gap-3 items-start">
+                <!-- Enemy -->
+                <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="font-black text-slate-800/80">Valentine (???)
+                      <span class="text-xs font-black text-slate-700/70 ml-2">Lv. 14</span>
+                    </div>
+                    <div class="text-xs font-black text-slate-700/70">Type: 💖/✨</div>
+                  </div>
+                  <div class="mt-2 hpbar"><div id="enemyHPBar"></div></div>
+                  <div class="mt-2 text-4xl text-center select-none" id="enemySprite">💘</div>
+                </div>
+
+                <!-- Player -->
+                <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="font-black text-slate-800/80">You
+                      <span class="text-xs font-black text-slate-700/70 ml-2">Trainer</span>
+                    </div>
+                    <div class="text-xs font-black text-slate-700/70">Ability: 💬 Charm</div>
+                  </div>
+                  <div class="mt-2 hpbar"><div id="youHPBar"></div></div>
+                  <div class="mt-2 text-4xl text-center select-none">🫶</div>
+                </div>
               </div>
+
               <div class="mt-3 text-box" id="battleText">A wild Valentine appeared!</div>
             </div>
 
-            <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                id="btnFight">FIGHT</button>
-              <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                id="btnBag">BAG</button>
-              <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                id="btnTeam">TEAM</button>
-              <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                id="btnRun">RUN</button>
+            <div class="mt-4">
+              <div id="battleMenuMain" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
+                  id="btnFight">FIGHT</button>
+                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
+                  id="btnBag">BAG</button>
+                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
+                  id="btnTeam">TEAM</button>
+                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
+                  id="btnRun">RUN</button>
+              </div>
+
+              <div id="battleMenuFight" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                  style="background: linear-gradient(135deg, #fb7185, #ec4899);" data-move="Compliment Beam">Compliment Beam</button>
+                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                  style="background: linear-gradient(135deg, #60a5fa, #22c55e);" data-move="Snack Shield">Snack Shield</button>
+                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                  style="background: linear-gradient(135deg, #f59e0b, #fb7185);" data-move="Laugh Attack">Laugh Attack</button>
+                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                  style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy Aura</button>
+
+                <button class="sm:col-span-2 rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/85 border border-white/60 shadow active:scale-95 transition"
+                  id="btnBack">BACK</button>
+              </div>
             </div>
           </div>
         </section>
@@ -638,7 +802,7 @@
           </div>
         </section>
 
-        <!-- Fusion Finale: Saga -> Capture -->
+        <!-- Fusion Finale -->
         <section class="glass rounded-3xl p-6">
           <div class="text-2xl font-black text-slate-800/80">6) Fusion Finale: Saga → Capture Screen</div>
           <div class="text-sm font-semibold text-slate-700/80 mt-1">
@@ -687,7 +851,7 @@
           </div>
         </section>
 
-        <!-- Booster pack opening -->
+        <!-- Booster pack -->
         <section class="glass rounded-3xl p-6">
           <div class="flex items-center justify-between gap-3">
             <div>
@@ -728,39 +892,39 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
         <div class="tcg-card p-4">
           <div class="font-black text-slate-800/80">Cozy Date — Sorcery</div>
-          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: ☕❤️🧸</div>
+          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: ☕ <span class="mana-pip">1</span> ❤️ <span class="mana-pip">1</span> 🧸</div>
           <div class="text-sm font-semibold text-slate-700/80 mt-3">
             “Create 2 Cuddle tokens. Draw a movie.”
           </div>
           <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
             style="background: linear-gradient(135deg, #fb7185, #60a5fa);"
-            data-spell="Cozy Date">
+            data-spell="Cozy Date" data-cost="2">
             Cast this
           </button>
         </div>
 
         <div class="tcg-card p-4">
           <div class="font-black text-slate-800/80">Fancy Date — Instant</div>
-          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: 🌹❤️✨</div>
+          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: 🌹 <span class="mana-pip">2</span> ❤️ <span class="mana-pip">1</span> ✨</div>
           <div class="text-sm font-semibold text-slate-700/80 mt-3">
             “Go somewhere cute. Add dessert. Gain +10 happiness.”
           </div>
           <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
             style="background: linear-gradient(135deg, #ec4899, #f59e0b);"
-            data-spell="Fancy Date">
+            data-spell="Fancy Date" data-cost="3">
             Cast this
           </button>
         </div>
 
         <div class="tcg-card p-4">
           <div class="font-black text-slate-800/80">Chaos Date — Enchantment</div>
-          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: 🎮❤️🍟</div>
+          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: 🎮 <span class="mana-pip">2</span> ❤️ <span class="mana-pip">2</span> 🍟</div>
           <div class="text-sm font-semibold text-slate-700/80 mt-3">
             “Roll a d20. Whatever happens, it becomes a core memory.”
           </div>
           <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
             style="background: linear-gradient(135deg, #6366f1, #22c55e);"
-            data-spell="Chaos Date">
+            data-spell="Chaos Date" data-cost="4">
             Cast this
           </button>
         </div>
@@ -814,6 +978,45 @@
   for (let i = 0; i < 10; i++) spawnPowerup();
   setInterval(spawnPowerup, 600);
 
+  // ========== ✅ Pixel clouds ==========
+  const pixelCloudsLayer = document.getElementById("pixelClouds");
+
+  const pixelCloudSvg = encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="32" viewBox="0 0 64 32">
+      <rect width="64" height="32" fill="none"/>
+      <!-- chunky pixel cloud -->
+      <g fill="#ffffff">
+        <rect x="10" y="14" width="8" height="6"/>
+        <rect x="18" y="12" width="10" height="8"/>
+        <rect x="28" y="10" width="12" height="10"/>
+        <rect x="40" y="12" width="10" height="8"/>
+        <rect x="50" y="14" width="6" height="6"/>
+        <rect x="14" y="18" width="40" height="8"/>
+      </g>
+      <g fill="#e2e8f0" opacity="0.85">
+        <rect x="18" y="18" width="10" height="8"/>
+        <rect x="32" y="18" width="10" height="8"/>
+      </g>
+    </svg>
+  `);
+
+  function spawnPixelCloud(){
+    const el = document.createElement("div");
+    el.className = "pixel-cloud";
+    const top = (Math.random() * 55) + "vh";
+    const dur = (18 + Math.random() * 18) + "s";
+    const scale = (0.55 + Math.random() * 0.65).toFixed(2);
+    el.style.setProperty("--top", top);
+    el.style.setProperty("--s", scale);
+    el.style.animationDuration = dur;
+    el.style.backgroundImage = `url("data:image/svg+xml,${pixelCloudSvg}")`;
+    pixelCloudsLayer.appendChild(el);
+    setTimeout(() => el.remove(), parseFloat(dur) * 1000 + 300);
+  }
+
+  for (let i=0;i<6;i++) spawnPixelCloud();
+  setInterval(spawnPixelCloud, 1700);
+
   // ========== Mana bar ==========
   const manaBarInner = document.getElementById("manaBarInner");
   const manaPctEl = document.getElementById("manaPct");
@@ -843,22 +1046,23 @@
     }
   });
 
-  // ========== GIF loader ==========
-  const valImage = document.getElementById("valImage");
-  const hint = document.getElementById("hint");
-
-  function setImageTry(urls, failMessage) {
+  // ========== GIF loader (generic) ==========
+  function setImageTryFor(imgEl, urls, failMessage) {
     let i = 0;
     const tryNext = () => {
-      if (i >= urls.length) { hint.textContent = failMessage; return; }
+      if (i >= urls.length) { return; }
       const url = urls[i++];
       const probe = new Image();
-      probe.onload = () => { valImage.src = url; };
+      probe.onload = () => { imgEl.src = url; };
       probe.onerror = () => tryNext();
       probe.src = url;
     };
     tryNext();
   }
+
+  // ========== Valentine GIF loader ==========
+  const valImage = document.getElementById("valImage");
+  const hint = document.getElementById("hint");
 
   const GIFS = {
     start: ["https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif"],
@@ -869,12 +1073,20 @@
     ],
     no: ["https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"]
   };
-  setImageTry(GIFS.start, "Start GIF failed to load.");
+  setImageTryFor(valImage, GIFS.start, "Start GIF failed to load.");
+
+  // ✅ Blackhole GIF (shows during phase2 pull)
+  const blackholeGif = document.getElementById("blackholeGif");
+  const BLACKHOLE_GIFS = [
+    "https://media1.tenor.com/m/6yJ7wFZl7xgAAAAd/black-hole.gif",
+    "https://media1.tenor.com/m/3tPbfkYcDkMAAAAd/space-black-hole.gif",
+    "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif"
+  ];
+  setImageTryFor(blackholeGif, BLACKHOLE_GIFS, "Blackhole GIF failed.");
 
   // ========== Lock YES/NO until boss beaten ==========
   const yesBtn = document.getElementById("yesBtn");
   const noBtn = document.getElementById("noBtn");
-
   let yesLocked = true;
   let noLocked = true;
 
@@ -892,7 +1104,6 @@
     const span = btn.querySelector("span");
     if (span) span.textContent = label;
   }
-
   function lockYesNo(){
     yesLocked = true; noLocked = true;
     lockBtn(yesBtn, "LOCKED");
@@ -906,7 +1117,7 @@
   }
   lockYesNo();
 
-  // ========== Begin Event button ==========
+  // ========== Begin Event ==========
   const beginEvent = document.getElementById("beginEvent");
   const bossStartBtn = document.getElementById("bossStart");
   beginEvent.addEventListener("click", () => {
@@ -914,7 +1125,7 @@
     bossStartBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:520});
   });
 
-  // ========== YES/NO click handlers ==========
+  // ========== YES/NO handlers ==========
   let yesFinalTimer = null;
 
   yesBtn.addEventListener("click", () => {
@@ -923,12 +1134,12 @@
       yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
       return;
     }
-    setImageTry(GIFS.yesMain, "YES GIF failed to load.");
+    setImageTryFor(valImage, GIFS.yesMain, "YES GIF failed to load.");
     hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
     noBtn.style.display = "none";
     try { confetti({ particleCount: 250, spread: 80, origin: { y: 0.6 } }); } catch {}
     if (yesFinalTimer) clearTimeout(yesFinalTimer);
-    yesFinalTimer = setTimeout(() => setImageTry(GIFS.yesFinal, "Final Eevee GIF failed to load."), 2000);
+    yesFinalTimer = setTimeout(() => setImageTryFor(valImage, GIFS.yesFinal, "Final Eevee GIF failed to load."), 2000);
   });
 
   noBtn.addEventListener("click", () => {
@@ -937,11 +1148,11 @@
       noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
       return;
     }
-    setImageTry(GIFS.no, "NO GIF failed to load.");
+    setImageTryFor(valImage, GIFS.no, "NO GIF failed to load.");
     hint.textContent = "No (Are you sure about that?) 😳";
   });
 
-  // ========== Alt art toggle (placeholder) ==========
+  // ========== Alt art toggle ==========
   const altArtBtn = document.getElementById("altArtBtn");
   const cardArt = document.getElementById("cardArt");
   let altArt = false;
@@ -951,22 +1162,38 @@
     try { confetti({ particleCount: 80, spread: 60, origin: { y: 0.25 } }); } catch {}
   });
 
-  // ========== Date modal ==========
+  // ========== Date modal + stack ==========
   const dateModal = document.getElementById("dateModal");
   const openDateModal = document.getElementById("openDateModal");
   const closeDateModal = document.getElementById("closeDateModal");
   const chosenDate = document.getElementById("chosenDate");
+  const spellStack = document.getElementById("spellStack");
+  const manaSpentEl = document.getElementById("manaSpent");
+  let manaSpent = 0;
+
+  function pushToStack(name){
+    if (spellStack.textContent.includes("empty")) spellStack.innerHTML = "";
+    const row = document.createElement("div");
+    row.className = "rounded-xl bg-white/75 border border-white/60 px-3 py-2 shadow-sm";
+    row.textContent = name + " (on the stack)";
+    spellStack.prepend(row);
+    row.animate([{transform:"translateY(-6px)", opacity:0},{transform:"translateY(0px)", opacity:1}], {duration:320, easing:"cubic-bezier(.2,.9,.2,1)"});
+  }
 
   openDateModal.addEventListener("click", () => dateModal.classList.add("show"));
   closeDateModal.addEventListener("click", () => dateModal.classList.remove("show"));
-  dateModal.addEventListener("click", (e) => {
-    if (e.target === dateModal) dateModal.classList.remove("show");
-  });
+  dateModal.addEventListener("click", (e) => { if (e.target === dateModal) dateModal.classList.remove("show"); });
 
   dateModal.querySelectorAll("button[data-spell]").forEach(btn => {
     btn.addEventListener("click", () => {
       const s = btn.getAttribute("data-spell");
-      chosenDate.innerHTML = `Selected spell: <b>${s}</b>`;
+      const cost = Number(btn.getAttribute("data-cost") || "0");
+      manaSpent += cost;
+      manaSpentEl.textContent = String(manaSpent);
+
+      chosenDate.innerHTML = `Selected spell: <b>${s}</b><div class="mt-2 text-xs font-black text-slate-700/70">Mana spent: <span>${manaSpent}</span></div>`;
+      pushToStack(s);
+
       dateModal.classList.remove("show");
       try { confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 } }); } catch {}
     });
@@ -1000,48 +1227,189 @@
     }
   });
 
-  // ========== Encounter (FIGHT/BAG/TEAM/RUN) ==========
+  // ========== ✅ Pokémon battle logic (more detailed) ==========
   const battleText = document.getElementById("battleText");
+  const enemyHPBar = document.getElementById("enemyHPBar");
+  const youHPBar = document.getElementById("youHPBar");
+  const enemySprite = document.getElementById("enemySprite");
+
+  const battleMenuMain = document.getElementById("battleMenuMain");
+  const battleMenuFight = document.getElementById("battleMenuFight");
   const btnFight = document.getElementById("btnFight");
   const btnBag = document.getElementById("btnBag");
   const btnTeam = document.getElementById("btnTeam");
   const btnRun = document.getElementById("btnRun");
+  const btnBack = document.getElementById("btnBack");
 
-  const moves = [
-    "Compliment Beam — “You make everything better.”",
-    "Snack Shield — “You always take care of me.”",
-    "Laugh Attack — “You’re my favorite person to be silly with.”",
-    "Cozy Aura — “Everything feels safer with you.”"
-  ];
+  const poke = {
+    enemyHP: 100,
+    youHP: 100,
+    stunned: false,
+    teamPage: 0,
+    inBattle: true
+  };
+
+  const moveData = {
+    "Compliment Beam": { dmg: 18, text: "You fire a Compliment Beam! “You make everything better.” It’s super effective 💥💖" },
+    "Snack Shield":    { dmg: 6,  heal: 12, text: "Snack Shield! You block negativity with snacks. You feel safer (+HP) 🍪🛡️" },
+    "Laugh Attack":    { dmg: 14, stun: 0.35, text: "Laugh Attack! He can’t stop smiling… there’s a chance he loses a turn 😂" },
+    "Cozy Aura":       { dmg: 10, heal: 6, text: "Cozy Aura surrounds you. Warmth fills the arena (+HP) 🧸✨" }
+  };
+
   const bagItems = [
-    "Coupon: One (1) forehead kiss 💋",
-    "Coupon: Choose the movie 🎬",
-    "Coupon: Dessert add-on 🍰",
-    "Item: Love Ball 💘"
+    { name: "Love Ball 💘", effect: "capture", text: "You toss a Love Ball… it wobbles… 👀" },
+    { name: "Date Coupon 🍽️", effect: "buff", text: "Date Coupon activated. Future happiness increased." },
+    { name: "Chocolate Potion 🍫", effect: "heal", amt: 18, text: "Chocolate Potion! Sweet healing (+HP)." },
+    { name: "Shiny Charm ⭐", effect: "shiny", text: "Shiny Charm sparkles… the vibes improve ✨" }
   ];
+
   const teamRoster = [
     "Slot 1: Inside joke #1",
-    "Slot 2: A cute photo",
-    "Slot 3: Your funniest moment",
-    "Slot 4: The “we’re a team” one"
+    "Slot 2: The photo where you both look cute",
+    "Slot 3: The funniest moment ever",
+    "Slot 4: The “we’re a team” one",
+    "Slot 5: Your shared favorite thing"
   ];
 
-  let moveIndex = 0;
+  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+
+  function setHPBars(){
+    enemyHPBar.style.width = clamp(poke.enemyHP, 0, 100) + "%";
+    youHPBar.style.width   = clamp(poke.youHP, 0, 100) + "%";
+  }
+  setHPBars();
+
+  function showMainMenu(){
+    battleMenuFight.classList.add("hidden");
+    battleMenuMain.classList.remove("hidden");
+  }
+  function showFightMenu(){
+    battleMenuMain.classList.add("hidden");
+    battleMenuFight.classList.remove("hidden");
+  }
+
+  function enemyTurn(){
+    if (!poke.inBattle) return;
+
+    if (poke.stunned && Math.random() < 0.6){
+      poke.stunned = false;
+      battleText.textContent = "Valentine is too flustered to move… 😳";
+      return;
+    }
+    poke.stunned = false;
+
+    const attacks = [
+      { dmg: 12, text: "Valentine used Fluster Pulse! Your heart races 💓 (-HP)" },
+      { dmg: 10, text: "Valentine used Heart Spark! It’s adorable but dangerous ✨ (-HP)" },
+      { dmg: 14, text: "Valentine used Blush Blitz! Critical cuteness 😵 (-HP)" }
+    ];
+    const a = attacks[Math.floor(Math.random() * attacks.length)];
+    poke.youHP = clamp(poke.youHP - a.dmg, 0, 100);
+    setHPBars();
+    battleText.textContent = a.text;
+
+    if (poke.youHP <= 0){
+      poke.inBattle = false;
+      battleText.textContent = "You fainted… but LOVE revives you instantly. (Try again 😤💖)";
+      poke.youHP = 100;
+      poke.enemyHP = 100;
+      poke.inBattle = true;
+      setHPBars();
+      enemySprite.textContent = "💘";
+    }
+  }
+
+  function winPokemon(){
+    poke.inBattle = false;
+    enemySprite.textContent = "💞";
+    battleText.textContent = "Valentine was defeated… and wants to join you. Aww. 💖";
+    try { confetti({ particleCount: 140, spread: 85, origin: { y: 0.55 } }); } catch {}
+    setTimeout(() => {
+      poke.enemyHP = 100;
+      poke.youHP = 100;
+      poke.inBattle = true;
+      enemySprite.textContent = "💘";
+      setHPBars();
+      battleText.textContent = "A wild Valentine appeared! (Again… because it loves you.)";
+    }, 1800);
+  }
+
   btnFight.addEventListener("click", () => {
-    battleText.textContent = moves[moveIndex % moves.length];
-    moveIndex++;
+    if (!poke.inBattle) return;
+    showFightMenu();
+    battleText.textContent = "Choose a move!";
   });
+
+  btnBack.addEventListener("click", () => {
+    showMainMenu();
+    battleText.textContent = "What will you do?";
+  });
+
+  battleMenuFight.querySelectorAll("button[data-move]").forEach(b => {
+    b.addEventListener("click", () => {
+      if (!poke.inBattle) return;
+      const name = b.getAttribute("data-move");
+      const m = moveData[name];
+
+      poke.enemyHP = clamp(poke.enemyHP - m.dmg, 0, 100);
+      if (m.heal) poke.youHP = clamp(poke.youHP + m.heal, 0, 100);
+      if (m.stun && Math.random() < m.stun) poke.stunned = true;
+
+      setHPBars();
+      battleText.textContent = m.text;
+
+      if (poke.enemyHP <= 0){
+        winPokemon();
+        showMainMenu();
+        return;
+      }
+
+      setTimeout(() => enemyTurn(), 700);
+      showMainMenu();
+    });
+  });
+
   btnBag.addEventListener("click", () => {
-    const item = bagItems[Math.floor(Math.random() * bagItems.length)];
-    battleText.textContent = "You opened the bag… " + item;
+    if (!poke.inBattle) return;
+    const it = bagItems[Math.floor(Math.random() * bagItems.length)];
+    battleText.textContent = "BAG → " + it.text;
+
+    if (it.effect === "heal"){
+      poke.youHP = clamp(poke.youHP + it.amt, 0, 100);
+      setHPBars();
+    }
+    if (it.effect === "capture"){
+      // cute fake capture chance
+      const roll = Math.random();
+      if (roll > 0.72){
+        battleText.textContent = "The Love Ball clicked! Valentine is captured 💘 (it’s basically YES.)";
+        try { confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } }); } catch {}
+      } else {
+        setTimeout(() => enemyTurn(), 650);
+      }
+    } else {
+      setTimeout(() => enemyTurn(), 650);
+    }
   });
+
   btnTeam.addEventListener("click", () => {
-    const t = teamRoster[Math.floor(Math.random() * teamRoster.length)];
-    battleText.textContent = "TEAM roster: " + t;
+    if (!poke.inBattle) return;
+    poke.teamPage = (poke.teamPage + 1) % 3;
+    if (poke.teamPage === 0){
+      battleText.textContent = "TEAM → " + teamRoster.slice(0,2).join(" | ");
+    } else if (poke.teamPage === 1){
+      battleText.textContent = "TEAM → " + teamRoster.slice(2,4).join(" | ");
+    } else {
+      battleText.textContent = "TEAM → " + teamRoster.slice(4).join(" | ");
+    }
+    setTimeout(() => enemyTurn(), 650);
   });
+
   btnRun.addEventListener("click", () => {
+    if (!poke.inBattle) return;
     battleText.textContent = "You can’t run from love.";
     btnRun.animate([{transform:"translateX(0px)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0px)"}], {duration:360});
+    setTimeout(() => enemyTurn(), 650);
   });
 
   // ========== Saga -> Capture ==========
@@ -1060,7 +1428,6 @@
     2: `II — “We became my favorite team.”`,
     3: `III — “Will you be my Valentine?”`
   };
-
   function toRoman(n){ return n === 1 ? "I" : n === 2 ? "II" : "III"; }
 
   advanceSaga.addEventListener("click", () => {
@@ -1096,9 +1463,7 @@
     try { confetti({ particleCount: 160, spread: 85, origin: { y: 0.55 } }); } catch {}
   });
 
-  // ========== Boss fight + platformer code (kept + includes phase 2, laugh flash, black hole pull, etc.) ==========
-  // (This is the same logic you already had, just resized to fit the right column.)
-
+  // ========== Boss fight + platformer ==========
   const bossCanvas = document.getElementById("bossCanvas");
   const bossOverlay = document.getElementById("bossOverlay");
   const bossMsg = document.getElementById("bossMsg");
@@ -1108,7 +1473,6 @@
   const laughFlash = document.getElementById("laughFlash");
 
   const defaultBossOverlayHTML = bossOverlay.innerHTML;
-
   const bossCtx2 = bossCanvas.getContext("2d");
   let bossRaf = null;
 
@@ -1163,7 +1527,7 @@
     boss:   { x: 0, y: 0, r: 28, hp: 100, maxHp: 100, wob: 0 }
   };
 
-  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+  function clamp2(v, a, b){ return Math.max(a, Math.min(b, v)); }
   function dist2(ax, ay, bx, by){ const dx=ax-bx, dy=ay-by; return dx*dx + dy*dy; }
 
   function setBossBars(){
@@ -1211,6 +1575,8 @@
 
     bossGame.boss.hp = bossGame.boss.maxHp = 100;
     bossGame.boss.wob = 0;
+
+    blackholeGif.style.opacity = "0";
 
     setBossBars();
     bossOverlay.style.opacity = "1";
@@ -1297,7 +1663,6 @@
     ctx.fill();
     ctx.globalAlpha = 1;
 
-    // cloak
     ctx.beginPath();
     ctx.moveTo(-52, 10);
     ctx.quadraticCurveTo(0, 64, 52, 10);
@@ -1306,38 +1671,32 @@
     ctx.fillStyle = "#0b1224";
     ctx.fill();
 
-    // hood
     ctx.beginPath();
     ctx.ellipse(0, -6, 44, 38, 0, 0, Math.PI*2);
     ctx.fillStyle = "#2563eb";
     ctx.fill();
 
-    // ear points
     ctx.beginPath(); ctx.moveTo(-24, -30); ctx.lineTo(-52, -58); ctx.lineTo(-28, -60); ctx.closePath();
     ctx.fillStyle = "#3b82f6"; ctx.fill();
     ctx.beginPath(); ctx.moveTo(24, -30); ctx.lineTo(52, -58); ctx.lineTo(28, -60); ctx.closePath();
     ctx.fillStyle = "#3b82f6"; ctx.fill();
 
-    // face
     ctx.beginPath();
     ctx.ellipse(0, -6, 30, 24, 0, 0, Math.PI*2);
     ctx.fillStyle = "#0b1020";
     ctx.fill();
 
-    // eyes
     ctx.beginPath();
     ctx.ellipse(-10, -10, 5, 12, 0, 0, Math.PI*2);
     ctx.ellipse( 10, -10, 5, 12, 0, 0, Math.PI*2);
     ctx.fillStyle = "#fde047";
     ctx.fill();
 
-    // scarf
     ctx.beginPath();
     ctx.roundRect(-46, 4, 92, 24, 12);
     ctx.fillStyle = "#f8fafc";
     ctx.fill();
 
-    // hands
     ctx.beginPath();
     ctx.ellipse(-56, 10, 14, 12, 0, 0, Math.PI*2);
     ctx.ellipse( 56, 10, 14, 12, 0, 0, Math.PI*2);
@@ -1352,12 +1711,10 @@
     const w = bossCanvas.getBoundingClientRect().width;
     const h = bossCanvas.getBoundingClientRect().height;
 
-    // boss float
     bossGame.boss.wob += dt;
     bossGame.boss.x = w * 0.5 + Math.cos(bossGame.boss.wob * 0.9) * 95;
     bossGame.boss.y = 95 + Math.sin(bossGame.boss.wob * 1.1) * 16;
 
-    // player move
     let mx = 0, my = 0;
     if (keys.has("ArrowLeft") || keys.has("a")) mx -= 1;
     if (keys.has("ArrowRight") || keys.has("d")) mx += 1;
@@ -1367,13 +1724,13 @@
     if (bossTouchActive){
       const dx = bossTouchX - bossGame.player.x;
       const dy = bossTouchY - bossGame.player.y;
-      mx = clamp(dx / 30, -1, 1);
-      my = clamp(dy / 30, -1, 1);
+      mx = clamp2(dx / 30, -1, 1);
+      my = clamp2(dy / 30, -1, 1);
     }
 
     const speed = 4.25;
-    bossGame.player.x = clamp(bossGame.player.x + mx * speed, 18, w - 18);
-    bossGame.player.y = clamp(bossGame.player.y + my * speed, 120, h - 18);
+    bossGame.player.x = clamp2(bossGame.player.x + mx * speed, 18, w - 18);
+    bossGame.player.y = clamp2(bossGame.player.y + my * speed, 120, h - 18);
 
     if (keys.has(" ")) bossShoot();
 
@@ -1381,7 +1738,6 @@
     const intensity = 1 + (1 - bossGame.boss.hp / bossGame.boss.maxHp) * 1.7;
     if (bossGame.phaseTimer > 2.2) chooseBossPattern();
 
-    // Phase 2 at 50% HP
     if (!bossGame.phase2 && bossGame.boss.hp <= bossGame.boss.maxHp * 0.5) {
       bossGame.phase2 = true;
       magalorLaugh();
@@ -1390,7 +1746,6 @@
       spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "💘");
     }
 
-    // Black hole pull mechanic (phase2)
     if (bossGame.phase2) {
       bossGame.blackHole.cool -= dt;
       if (!bossGame.blackHole.active && bossGame.blackHole.cool <= 0) {
@@ -1402,9 +1757,11 @@
       }
 
       if (bossGame.blackHole.active) {
+        blackholeGif.style.opacity = "0.9";
         bossGame.blackHole.timer -= dt;
         if (bossGame.blackHole.timer <= 0) {
           bossGame.blackHole.active = false;
+          blackholeGif.style.opacity = "0";
           bossMsg.textContent = "Keep going!! Turn him into a Valentine 😤💞";
         } else {
           const dx = bossGame.boss.x - bossGame.player.x;
@@ -1413,14 +1770,17 @@
           const pull = 3.3 * (1 - Math.min(d / 520, 1));
           bossGame.player.x += (dx / d) * pull;
           bossGame.player.y += (dy / d) * pull;
-          bossGame.player.x = clamp(bossGame.player.x, 18, w - 18);
-          bossGame.player.y = clamp(bossGame.player.y, 120, h - 18);
+          bossGame.player.x = clamp2(bossGame.player.x, 18, w - 18);
+          bossGame.player.y = clamp2(bossGame.player.y, 120, h - 18);
           spawnBossParticle(bossGame.player.x, bossGame.player.y, "💔");
         }
+      } else {
+        blackholeGif.style.opacity = "0";
       }
+    } else {
+      blackholeGif.style.opacity = "0";
     }
 
-    // patterns
     if (bossGame.pattern === "spray"){
       if (Math.floor(bossGame.t * 12) !== Math.floor((bossGame.t - dt) * 12)){
         const ang = Math.atan2(bossGame.player.y - bossGame.boss.y, bossGame.player.x - bossGame.boss.x);
@@ -1450,21 +1810,17 @@
       }
     }
 
-    // update bullets
     for (const b of bossGame.bullets){ b.x += b.vx; b.y += b.vy; }
     bossGame.bullets = bossGame.bullets.filter(b => b.x > -70 && b.x < w+70 && b.y > -70 && b.y < h+70);
 
-    // update beams
     for (const p of bossGame.beams){ p.x += p.vx; p.y += p.vy; }
     bossGame.beams = bossGame.beams.filter(p => p.y > -50);
 
-    // particles
     for (const pt of bossGame.particles){
       pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.03; pt.life -= 1;
     }
     bossGame.particles = bossGame.particles.filter(pt => pt.life > 0);
 
-    // beams -> boss
     for (let i = bossGame.beams.length - 1; i >= 0; i--){
       const p = bossGame.beams[i];
       if (dist2(p.x,p.y, bossGame.boss.x,bossGame.boss.y) < (p.r + bossGame.boss.r) ** 2){
@@ -1477,7 +1833,6 @@
       }
     }
 
-    // bullets -> player
     if (bossGame.player.inv > 0) bossGame.player.inv -= dt;
     for (let i = bossGame.bullets.length - 1; i >= 0; i--){
       const b = bossGame.bullets[i];
@@ -1501,7 +1856,6 @@
 
     bossCtx2.clearRect(0,0,w,h);
 
-    // arena gradient
     const g = bossCtx2.createLinearGradient(0,0,0,h);
     g.addColorStop(0, "rgba(251, 113, 133, 0.20)");
     g.addColorStop(0.55, "rgba(236, 72, 153, 0.12)");
@@ -1509,7 +1863,6 @@
     bossCtx2.fillStyle = g;
     bossCtx2.fillRect(0,0,w,h);
 
-    // grid
     bossCtx2.globalAlpha = 0.10;
     bossCtx2.strokeStyle = "#0f172a";
     bossCtx2.lineWidth = 1;
@@ -1517,29 +1870,8 @@
     for (let y=0;y<h;y+=24){ bossCtx2.beginPath(); bossCtx2.moveTo(0,y); bossCtx2.lineTo(w,y); bossCtx2.stroke(); }
     bossCtx2.globalAlpha = 1;
 
-    // black hole visual
-    if (bossGame.phase2 && bossGame.blackHole.active) {
-      bossCtx2.save();
-      bossCtx2.translate(bossGame.boss.x, bossGame.boss.y);
-      bossCtx2.globalAlpha = 0.22;
-      bossCtx2.beginPath();
-      bossCtx2.arc(0, 14, 72, 0, Math.PI * 2);
-      bossCtx2.fillStyle = "#0b1020";
-      bossCtx2.fill();
-      bossCtx2.globalAlpha = 0.8;
-      bossCtx2.strokeStyle = "#ec4899";
-      bossCtx2.lineWidth = 3;
-      bossCtx2.beginPath();
-      bossCtx2.arc(0, 14, 60, 0, Math.PI * 2);
-      bossCtx2.stroke();
-      bossCtx2.restore();
-      bossCtx2.globalAlpha = 1;
-    }
-
-    // boss sprite
     drawMagolorLikeBoss(bossCtx2, bossGame.boss.x, bossGame.boss.y, 0.75);
 
-    // player heart
     bossCtx2.save();
     bossCtx2.translate(bossGame.player.x, bossGame.player.y);
     const blink = bossGame.player.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
@@ -1552,7 +1884,6 @@
     bossCtx2.fill();
     bossCtx2.restore();
 
-    // bullets
     for (const b of bossGame.bullets){
       bossCtx2.save();
       bossCtx2.translate(b.x, b.y);
@@ -1576,7 +1907,6 @@
     }
     bossCtx2.globalAlpha = 1;
 
-    // beams
     for (const p of bossGame.beams){
       bossCtx2.save();
       bossCtx2.translate(p.x, p.y);
@@ -1587,7 +1917,6 @@
       bossCtx2.restore();
     }
 
-    // particles
     for (const pt of bossGame.particles){
       bossCtx2.globalAlpha = Math.max(0, Math.min(1, pt.life/40));
       bossCtx2.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
@@ -1628,6 +1957,7 @@
     if (bossRaf) cancelAnimationFrame(bossRaf);
     bossRaf = null;
     document.body.classList.remove("boss-mode");
+    blackholeGif.style.opacity = "0";
   }
 
   function winBossFight(){
@@ -1671,7 +2001,7 @@
   bossStartBtn.addEventListener("click", startBossFight);
   resetBossFight();
 
-  // ========== Platformer ==========
+  // ========== Platformer (same as before) ==========
   const platCanvas = document.getElementById("platCanvas");
   const platCtx = platCanvas.getContext("2d");
   const platStartBtn = document.getElementById("platStart");
@@ -1696,6 +2026,10 @@
     hearts: [],
     goal: { x: 1420, y: 140, w: 24, h: 24 }
   };
+
+  function rectsOverlap(a, b){
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
 
   function resetPlatformer(){
     platGame.running = false;
@@ -1732,10 +2066,6 @@
     ];
   }
 
-  function rectsOverlap(a, b){
-    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-  }
-
   function updatePlatformer(){
     const w = platCanvas.getBoundingClientRect().width;
     const left = keys.has("ArrowLeft") || keys.has("a");
@@ -1750,7 +2080,7 @@
     if (left) p.vx -= accel;
     if (right) p.vx += accel;
     if (!left && !right) p.vx *= friction;
-    p.vx = clamp(p.vx, -maxV, maxV);
+    p.vx = clamp2(p.vx, -maxV, maxV);
 
     if (jump && p.onGround){
       p.vy = -9.3;
@@ -1758,12 +2088,12 @@
     }
 
     p.vy += platGame.gravity;
-    p.vy = clamp(p.vy, -20, 12);
+    p.vy = clamp2(p.vy, -20, 12);
 
     p.x += p.vx;
     p.y += p.vy;
 
-    p.x = clamp(p.x, 0, platGame.levelW - p.w);
+    p.x = clamp2(p.x, 0, platGame.levelW - p.w);
     if (p.y > 440) { p.y = 120; p.vy = 0; }
 
     p.onGround = false;
@@ -1795,7 +2125,7 @@
       }
     }
 
-    platGame.camX = clamp(p.x - w*0.35, 0, platGame.levelW - w);
+    platGame.camX = clamp2(p.x - w*0.35, 0, platGame.levelW - w);
 
     const goal = platGame.goal;
     const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
@@ -1905,13 +2235,10 @@
   platStartBtn.addEventListener("click", startPlatformer);
   resetPlatformer();
 
-  // Resize canvases properly on resize
   window.addEventListener("resize", () => {
     fitCanvasToCSS(bossCanvas, bossCtx2);
     fitCanvasToCSS(platCanvas, platCtx);
   });
-
 </script>
 </body>
 </html>
-
