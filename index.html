@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-      /* --------- Base dreamy background --------- */
+      /* --------- Complex dreamy background --------- */
       body {
         background:
           radial-gradient(900px 520px at 20% 15%, rgba(255, 182, 193, 0.55), transparent 60%),
@@ -18,28 +18,7 @@
           linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
       }
 
-      /* --------- Night mode --------- */
-      body.night{
-        background:
-          radial-gradient(900px 520px at 20% 20%, rgba(59, 130, 246, 0.25), transparent 60%),
-          radial-gradient(900px 520px at 80% 25%, rgba(168, 85, 247, 0.18), transparent 60%),
-          radial-gradient(900px 520px at 55% 85%, rgba(244, 63, 94, 0.15), transparent 60%),
-          linear-gradient(180deg, #0b1220 0%, #0f172a 50%, #111827 100%);
-      }
-      body.night #bigTitle{
-        color: rgba(255,255,255,0.92);
-        text-shadow:
-          0 4px 0 rgba(0,0,0,0.35),
-          0 16px 42px rgba(0,0,0,0.55);
-      }
-      body.night .card{
-        background: rgba(255,255,255,0.10);
-        border: 1px solid rgba(255,255,255,0.18);
-        box-shadow: 0 28px 90px rgba(0,0,0,0.55);
-      }
-      body.night #hint{ color: rgba(255,255,255,0.75); }
-
-      /* Boss mode tint */
+      /* Boss mode tint (kicks in when NO gets spicy) */
       body.boss-mode::before{
         content:"";
         position: fixed;
@@ -48,182 +27,15 @@
         pointer-events: none;
         background:
           radial-gradient(900px 520px at 55% 55%, rgba(15, 23, 42, 0.55), transparent 65%),
-          linear-gradient(180deg, rgba(15,23,42,0.28), rgba(0,0,0,0.12));
+          linear-gradient(180deg, rgba(15,23,42,0.25), rgba(0,0,0,0.10));
         opacity: 0.85;
         mix-blend-mode: multiply;
       }
 
-      /* --------- Parallax stage (moves slightly with mouse) --------- */
-      #stage{
-        transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
-        transition: transform 80ms linear;
-      }
-
-      /* Background layers */
-      #bg {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        overflow: hidden;
-      }
-
-      .blob {
-        position: absolute;
-        width: 520px;
-        height: 520px;
-        border-radius: 999px;
-        filter: blur(55px);
-        opacity: 0.55;
-        mix-blend-mode: multiply;
-        will-change: transform;
-      }
-
-      .blob.a {
-        left: -140px;
-        top: -160px;
-        background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.55), rgba(255, 182, 193, 0.25) 55%, transparent 70%);
-        animation: floatA 14s ease-in-out infinite;
-      }
-      .blob.b {
-        right: -160px;
-        top: -120px;
-        background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.45), rgba(147, 197, 253, 0.22) 55%, transparent 70%);
-        animation: floatB 16s ease-in-out infinite;
-      }
-      .blob.c {
-        left: 10%;
-        bottom: -210px;
-        background: radial-gradient(circle at 30% 30%, rgba(147, 197, 253, 0.45), rgba(244, 63, 94, 0.18) 55%, transparent 70%);
-        animation: floatC 18s ease-in-out infinite;
-      }
-
-      @keyframes floatA { 0%, 100% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(80px, 60px) scale(1.08); } }
-      @keyframes floatB { 0%, 100% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(-90px, 70px) scale(1.06); } }
-      @keyframes floatC { 0%, 100% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(120px, -60px) scale(1.1); } }
-
-      body.boss-mode .blob.a{ animation-duration: 9s; }
-      body.boss-mode .blob.b{ animation-duration: 10s; }
-      body.boss-mode .blob.c{ animation-duration: 11s; }
-
-      .noise {
-        position: absolute;
-        inset: 0;
-        opacity: 0.10;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
-        background-size: 180px 180px;
-      }
-
-      .pixel-grid{
-        position:absolute;
-        inset:0;
-        opacity:.08;
-        background-image:
-          linear-gradient(to right, rgba(15,23,42,.25) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(15,23,42,.25) 1px, transparent 1px);
-        background-size: 26px 26px;
-        mix-blend-mode: overlay;
-      }
-      body.night .pixel-grid{
-        opacity: .12;
-        background-image:
-          linear-gradient(to right, rgba(255,255,255,.10) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(255,255,255,.10) 1px, transparent 1px);
-      }
-
-      /* Clouds layer */
-      #clouds{
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 1;
-        overflow: hidden;
-        opacity: 0.55;
-      }
-      .cloud{
-        position: absolute;
-        top: var(--top);
-        left: -30%;
-        width: var(--w);
-        height: calc(var(--w) * 0.33);
-        background: rgba(255,255,255,0.55);
-        border-radius: 999px;
-        filter: blur(0.5px) drop-shadow(0 10px 18px rgba(0,0,0,0.08));
-        animation: cloudDrift var(--dur) linear infinite;
-      }
-      .cloud::before,.cloud::after{
-        content:"";
-        position:absolute;
-        background: inherit;
-        border-radius: 999px;
-      }
-      .cloud::before{
-        width: 45%;
-        height: 120%;
-        left: 12%;
-        top: -45%;
-      }
-      .cloud::after{
-        width: 55%;
-        height: 140%;
-        left: 40%;
-        top: -60%;
-      }
-      @keyframes cloudDrift{
-        from{ transform: translateX(0); }
-        to{ transform: translateX(160vw); }
-      }
-      body.night #clouds{ opacity: 0.20; }
-      body.night .cloud{ background: rgba(255,255,255,0.20); }
-
-      /* Power-ups + hearts */
-      #powerups{
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 2;
-        overflow: hidden;
-      }
-      .powerup{
-        position: absolute;
-        bottom: -40px;
-        opacity: 0;
-        animation: puFloat linear forwards;
-        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.12));
-        will-change: transform, opacity;
-        user-select: none;
-      }
-      @keyframes puFloat{
-        0%   { transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity: 0; }
-        12%  { opacity: .95; }
-        100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity: 0; }
-      }
-
-      #hearts {
-        position: fixed;
-        inset: 0;
-        overflow: hidden;
-        pointer-events: none;
-        z-index: 3;
-      }
-      .heart {
-        position: absolute;
-        bottom: -40px;
-        will-change: transform, opacity;
-        animation: floatUp linear forwards;
-        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
-        user-select: none;
-      }
-      @keyframes floatUp {
-        0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
-        10%  { opacity: 0.85; }
-        100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity: 0; }
-      }
-
-      /* Title */
+      /* ---------- BIG FULL-WIDTH TITLE ---------- */
       #bigTitle{
         position: relative;
-        z-index: 4;
+        z-index: 3;
         text-align: center;
         font-weight: 900;
         letter-spacing: -0.02em;
@@ -234,38 +46,38 @@
           0 4px 0 rgba(0,0,0,0.15),
           0 10px 28px rgba(0,0,0,0.22);
         margin-bottom: 1.25rem;
-        user-select: none;
       }
 
-      /* Pink pill behind title */
-      #titlePill{
-        position: relative;
+      /* The pink pill behind the title */
+      #bigTitle span{
         display: inline-block;
-        padding: 0.18em 4.4em 0.18em 0.42em; /* extra right padding creates empty area for LETS GOOOO */
+        padding: 0.18em 0.42em;
         border-radius: 999px;
         background: rgba(244, 63, 94, 0.20);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(255,255,255,0.35);
-        overflow: hidden;
-      }
-      body.night #titlePill{
-        background: rgba(59, 130, 246, 0.18);
-        border-color: rgba(255,255,255,0.22);
       }
 
-      /* ✅ LETS GOOOO: all black, off to the side (right) */
+      /* Make the pink pill a positioning container */
+      #titlePill{
+        position: relative;
+        display: inline-block;
+        overflow: hidden; /* keep stamp inside pill */
+      }
+
+      /* ✅ Updated: LETS GOOOO off to the side (right), all black */
       #letsGo{
         position: absolute;
-        right: 22px;
+        right: 22px;            /* move to the side where there’s no text */
         top: 50%;
         transform: translateY(-50%) rotate(-12deg) scale(0.7);
         font-weight: 1000;
         font-size: clamp(1.15rem, 3vw, 2.1rem);
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(0,0,0,0.92);
-        text-shadow: 0 10px 18px rgba(0,0,0,0.15);
+        color: rgba(0,0,0,0.92);           /* all black */
+        text-shadow: 0 10px 18px rgba(0,0,0,0.18); /* soft depth */
         opacity: 0;
         pointer-events: none;
         white-space: nowrap;
@@ -281,47 +93,145 @@
         100% { transform: translateY(-50%) rotate(-12deg) scale(0.92); opacity: 1; }
       }
 
-      /* Sparkle burst on title hover */
-      .sparkle{
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.95);
-        box-shadow: 0 0 0 3px rgba(255,255,255,0.35), 0 12px 20px rgba(0,0,0,0.12);
-        transform: translate(-50%, -50%) scale(0.7);
-        opacity: 0;
-        animation: sparklePop 650ms ease-out forwards;
-        pointer-events:none;
+      #bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
       }
-      @keyframes sparklePop{
-        0%{ opacity:0; transform: translate(-50%,-50%) scale(0.3); }
-        35%{ opacity:1; transform: translate(calc(-50% + var(--sx)), calc(-50% + var(--sy))) scale(1.0); }
-        100%{ opacity:0; transform: translate(calc(-50% + var(--sx)), calc(-50% + var(--sy))) scale(0.2); }
+
+      .blob {
+        position: absolute;
+        width: 520px;
+        height: 520px;
+        border-radius: 999px;
+        filter: blur(55px);
+        opacity: 0.55;
+        transform: translate3d(0,0,0);
+        mix-blend-mode: multiply;
+        will-change: transform;
+      }
+
+      .blob.a {
+        left: -140px;
+        top: -160px;
+        background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.55), rgba(255, 182, 193, 0.25) 55%, transparent 70%);
+        animation: floatA 14s ease-in-out infinite;
+      }
+
+      .blob.b {
+        right: -160px;
+        top: -120px;
+        background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.45), rgba(147, 197, 253, 0.22) 55%, transparent 70%);
+        animation: floatB 16s ease-in-out infinite;
+      }
+
+      .blob.c {
+        left: 10%;
+        bottom: -210px;
+        background: radial-gradient(circle at 30% 30%, rgba(147, 197, 253, 0.45), rgba(244, 63, 94, 0.18) 55%, transparent 70%);
+        animation: floatC 18s ease-in-out infinite;
+      }
+
+      @keyframes floatA {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50%      { transform: translate(80px, 60px) scale(1.08); }
+      }
+      @keyframes floatB {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50%      { transform: translate(-90px, 70px) scale(1.06); }
+      }
+      @keyframes floatC {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50%      { transform: translate(120px, -60px) scale(1.1); }
+      }
+
+      /* Boss mode = faster blobs */
+      body.boss-mode .blob.a{ animation-duration: 9s; }
+      body.boss-mode .blob.b{ animation-duration: 10s; }
+      body.boss-mode .blob.c{ animation-duration: 11s; }
+
+      /* subtle noise overlay */
+      .noise {
+        position: absolute;
+        inset: 0;
+        opacity: 0.10;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+        background-size: 180px 180px;
+      }
+
+      /* pixel grid overlay */
+      .pixel-grid{
+        position:absolute;
+        inset:0;
+        opacity:.08;
+        background-image:
+          linear-gradient(to right, rgba(15,23,42,.25) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(15,23,42,.25) 1px, transparent 1px);
+        background-size: 26px 26px;
+        mix-blend-mode: overlay;
+      }
+
+      /* Nintendo-ish polish */
+      .pixel-vibe { text-shadow: 0 2px 0 rgba(0,0,0,0.08); }
+      .mascot-bounce { animation: mascotBounce 1.8s ease-in-out infinite; }
+      @keyframes mascotBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
+
+      /* Power-ups layer */
+      #powerups{
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+      }
+      .powerup{
+        position: absolute;
+        bottom: -40px;
+        opacity: 0;
+        animation: puFloat linear forwards;
+        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.12));
+        will-change: transform, opacity;
+        user-select: none;
+      }
+      @keyframes puFloat{
+        0%   { transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity: 0; }
+        12%  { opacity: .9; }
+        100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity: 0; }
+      }
+
+      /* Hearts */
+      #hearts {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .heart {
+        position: absolute;
+        bottom: -40px;
+        will-change: transform, opacity;
+        animation: floatUp linear forwards;
+        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
+        user-select: none;
+      }
+      @keyframes floatUp {
+        0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+        10%  { opacity: 0.85; }
+        100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity: 0; }
       }
 
       /* Card */
       .card {
         position: relative;
-        z-index: 4;
+        z-index: 3;
         background: rgba(255, 255, 255, 0.78);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         border: 1px solid rgba(255, 255, 255, 0.65);
         box-shadow: 0 22px 70px rgba(0,0,0,0.14);
-      }
-
-      /* Screen shake */
-      .shake{
-        animation: shake 250ms ease-in-out;
-      }
-      @keyframes shake{
-        0%{ transform: translateX(0); }
-        20%{ transform: translateX(-8px); }
-        40%{ transform: translateX(8px); }
-        60%{ transform: translateX(-6px); }
-        80%{ transform: translateX(6px); }
-        100%{ transform: translateX(0); }
       }
 
       #valImage {
@@ -341,9 +251,11 @@
         transition: transform .12s ease, filter .12s ease;
         will-change: transform;
       }
+
       .svg-heart svg{ width: 100%; height: 100%; display: block; }
       .svg-heart.yes path{ fill: #ef4444; }
       .svg-heart.no  path{ fill: #f43f5e; }
+
       .svg-heart span{
         position: absolute;
         inset: 0;
@@ -359,312 +271,97 @@
         user-select: none;
         pointer-events: none;
       }
+
       .svg-heart:hover{
         transform: scale(1.06);
         filter: drop-shadow(0 12px 18px rgba(0,0,0,.18));
       }
       .svg-heart:active{ transform: scale(.96); }
+
       .svg-heart:focus-visible{
         outline: 3px solid rgba(239, 68, 68, .35);
         outline-offset: 6px;
-      }
-
-      /* Nintendo-ish polish */
-      .pixel-vibe { text-shadow: 0 2px 0 rgba(0,0,0,0.08); }
-      .mascot-bounce { animation: mascotBounce 1.8s ease-in-out infinite; }
-      @keyframes mascotBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
-
-      /* Boss health bar */
-      #bossHud{
-        position: fixed;
-        top: 14px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(720px, calc(100vw - 28px));
-        z-index: 20;
-        display: none;
-      }
-      #bossHud.show{ display: block; }
-      #bossCard{
-        background: rgba(255,255,255,0.55);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.55);
-        border-radius: 16px;
-        padding: 10px 12px;
-        box-shadow: 0 16px 46px rgba(0,0,0,0.14);
-      }
-      body.night #bossCard{
-        background: rgba(255,255,255,0.12);
-        border-color: rgba(255,255,255,0.18);
-        color: rgba(255,255,255,0.9);
-      }
-      #bossTop{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        font-weight: 900;
-        letter-spacing: .04em;
-        font-size: 12px;
-        text-transform: uppercase;
-      }
-      #bossBarOuter{
-        margin-top: 8px;
-        height: 12px;
-        border-radius: 999px;
-        background: rgba(15,23,42,0.12);
-        overflow: hidden;
-      }
-      body.night #bossBarOuter{ background: rgba(255,255,255,0.12); }
-      #bossBar{
-        height: 100%;
-        width: 100%;
-        border-radius: 999px;
-        background: linear-gradient(90deg, rgba(239,68,68,0.95), rgba(244,63,94,0.75));
-        transform-origin: left;
-        transition: width 180ms ease;
-      }
-
-      /* Quest complete overlay */
-      #victory{
-        position: fixed;
-        inset: 0;
-        z-index: 999;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-      }
-      #victory.show{ display: flex; }
-      #victoryBanner{
-        padding: 18px 22px;
-        border-radius: 22px;
-        background: rgba(255,255,255,0.65);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.75);
-        box-shadow: 0 26px 80px rgba(0,0,0,0.22);
-        font-weight: 1000;
-        letter-spacing: .06em;
-        text-transform: uppercase;
-        font-size: clamp(1.4rem, 4vw, 2.6rem);
-        color: rgba(15,23,42,0.95);
-        text-shadow: 0 2px 0 rgba(0,0,0,0.08);
-        transform: rotate(-2deg) scale(0.9);
-        opacity: 0;
-        animation: victoryPop 900ms cubic-bezier(.2,.9,.2,1) forwards;
-      }
-      @keyframes victoryPop{
-        0%{ opacity: 0; transform: rotate(-2deg) scale(0.75); }
-        55%{ opacity: 1; transform: rotate(-2deg) scale(1.08); }
-        100%{ opacity: 1; transform: rotate(-2deg) scale(1.0); }
-      }
-
-      /* Toggle button */
-      #toggleTheme{
-        position: fixed;
-        right: 14px;
-        top: 14px;
-        z-index: 50;
-        border: 0;
-        cursor: pointer;
-        padding: 10px 12px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.60);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        box-shadow: 0 16px 42px rgba(0,0,0,0.14);
-        font-weight: 900;
-        letter-spacing: .02em;
-      }
-      body.night #toggleTheme{
-        background: rgba(255,255,255,0.14);
-        color: rgba(255,255,255,0.92);
-        border: 1px solid rgba(255,255,255,0.18);
       }
     </style>
   </head>
 
   <body class="min-h-screen flex flex-col items-center justify-center p-6">
-    <!-- Theme toggle -->
-    <button id="toggleTheme" type="button" aria-label="Toggle day/night">🌙 / ☀️</button>
-
-    <!-- Boss HUD -->
-    <div id="bossHud" aria-live="polite">
-      <div id="bossCard">
-        <div id="bossTop">
-          <div id="bossTitle">NO’s Courage</div>
-          <div id="bossText">100%</div>
-        </div>
-        <div id="bossBarOuter">
-          <div id="bossBar"></div>
-        </div>
-      </div>
+    <div id="bg" aria-hidden="true">
+      <div class="blob a"></div>
+      <div class="blob b"></div>
+      <div class="blob c"></div>
+      <div class="noise"></div>
+      <div class="pixel-grid"></div>
     </div>
 
-    <!-- Victory overlay -->
-    <div id="victory" aria-hidden="true">
-      <div id="victoryBanner">QUEST COMPLETE!</div>
-    </div>
+    <div id="powerups" aria-hidden="true"></div>
+    <div id="hearts" aria-hidden="true"></div>
 
-    <div id="stage">
-      <div id="bg" aria-hidden="true">
-        <div class="blob a"></div>
-        <div class="blob b"></div>
-        <div class="blob c"></div>
-        <div class="noise"></div>
-        <div class="pixel-grid"></div>
+    <h1 id="bigTitle" class="w-full px-4">
+      <span id="titlePill">
+        Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘
+        <span id="letsGo">LETS GOOOO</span>
+      </span>
+    </h1>
+
+    <div class="card rounded-3xl p-7 max-w-md w-full text-center">
+      <div class="mx-auto mb-3 w-28 mascot-bounce">
+        <div class="w-24 h-24 mx-auto">
+          <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
+            <path d="M40 24 L64 10 L88 24 L82 44 H46 Z" fill="#fbbf24"/>
+            <circle cx="64" cy="22" r="6" fill="#f59e0b"/>
+            <ellipse cx="64" cy="62" rx="34" ry="28" fill="#60a5fa"/>
+            <ellipse cx="64" cy="70" rx="26" ry="18" fill="#93c5fd" opacity="0.9"/>
+            <ellipse cx="52" cy="58" rx="7" ry="10" fill="#0f172a"/>
+            <ellipse cx="76" cy="58" rx="7" ry="10" fill="#0f172a"/>
+            <circle cx="50" cy="55" r="2" fill="#fff"/>
+            <circle cx="74" cy="55" r="2" fill="#fff"/>
+            <path d="M64 64 C56 62 56 74 64 76 C72 74 72 62 64 64 Z" fill="#f59e0b"/>
+            <path d="M30 92 C34 78 48 72 64 72 C80 72 94 78 98 92
+                     C90 108 78 118 64 118 C50 118 38 108 30 92 Z"
+                  fill="#ef4444"/>
+            <path d="M38 94 C44 104 54 110 64 110 C74 110 84 104 90 94"
+                  stroke="#fff" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+            <rect x="92" y="70" width="8" height="30" rx="3" fill="#334155"/>
+            <rect x="84" y="60" width="26" height="14" rx="6" fill="#475569"/>
+            <circle cx="84" cy="67" r="6" fill="#475569"/>
+          </svg>
+        </div>
+
+        <div class="mt-1 text-center font-extrabold text-sm tracking-wide text-slate-800/80 pixel-vibe">
+          2/14/26
+        </div>
       </div>
 
-      <div id="clouds" aria-hidden="true">
-        <div class="cloud" style="--top: 12%; --w: 320px; --dur: 58s;"></div>
-        <div class="cloud" style="--top: 22%; --w: 420px; --dur: 76s; opacity: .42;"></div>
-        <div class="cloud" style="--top: 34%; --w: 280px; --dur: 64s; opacity: .38;"></div>
-        <div class="cloud" style="--top: 18%; --w: 520px; --dur: 92s; opacity: .30;"></div>
-      </div>
+      <img id="valImage" class="w-full h-64 object-cover rounded-xl mb-5" alt="Valentine gif" />
 
-      <div id="powerups" aria-hidden="true"></div>
-      <div id="hearts" aria-hidden="true"></div>
-
-      <h1 id="bigTitle" class="w-full px-4">
-        <span id="titlePill">
-          Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘
-          <span id="letsGo">LETS GOOOO</span>
-        </span>
-      </h1>
-
-      <div id="mainCard" class="card rounded-3xl p-7 max-w-md w-full text-center">
-        <!-- Mascot (click 5x = secret) -->
-        <button id="mascotBtn" class="mx-auto mb-3 w-28 mascot-bounce" type="button" aria-label="Mascot secret button" style="border:0;background:transparent;padding:0;cursor:pointer;">
-          <div class="w-24 h-24 mx-auto">
-            <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
-              <path d="M40 24 L64 10 L88 24 L82 44 H46 Z" fill="#fbbf24"/>
-              <circle cx="64" cy="22" r="6" fill="#f59e0b"/>
-              <ellipse cx="64" cy="62" rx="34" ry="28" fill="#60a5fa"/>
-              <ellipse cx="64" cy="70" rx="26" ry="18" fill="#93c5fd" opacity="0.9"/>
-              <ellipse cx="52" cy="58" rx="7" ry="10" fill="#0f172a"/>
-              <ellipse cx="76" cy="58" rx="7" ry="10" fill="#0f172a"/>
-              <circle cx="50" cy="55" r="2" fill="#fff"/>
-              <circle cx="74" cy="55" r="2" fill="#fff"/>
-              <path d="M64 64 C56 62 56 74 64 76 C72 74 72 62 64 64 Z" fill="#f59e0b"/>
-              <path d="M30 92 C34 78 48 72 64 72 C80 72 94 78 98 92
-                       C90 108 78 118 64 118 C50 118 38 108 30 92 Z"
-                    fill="#ef4444"/>
-              <path d="M38 94 C44 104 54 110 64 110 C74 110 84 104 90 94"
-                    stroke="#fff" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
-              <rect x="92" y="70" width="8" height="30" rx="3" fill="#334155"/>
-              <rect x="84" y="60" width="26" height="14" rx="6" fill="#475569"/>
-              <circle cx="84" cy="67" r="6" fill="#475569"/>
-            </svg>
-          </div>
-
-          <div class="mt-1 text-center font-extrabold text-sm tracking-wide text-slate-800/80 pixel-vibe">
-            2/14/26
-          </div>
+      <div class="flex gap-6 justify-center mt-2">
+        <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
+          <svg viewBox="0 0 32 29" aria-hidden="true">
+            <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
+              c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
+          </svg>
+          <span>YES</span>
         </button>
 
-        <img id="valImage" class="w-full h-64 object-cover rounded-xl mb-4" alt="Valentine gif" />
-
-        <!-- Quest log -->
-        <div class="rounded-2xl p-4 text-left mb-4" style="background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.65);">
-          <div class="font-extrabold tracking-wide text-slate-800/90 text-sm uppercase">Quest Log</div>
-          <div class="mt-2 text-slate-800/80 text-sm">
-            <div>🎯 Objective: <span class="font-semibold">Get Andrew to say YES</span></div>
-            <div class="mt-1">💖 Love Combo: <span id="loveCount" class="font-extrabold">x0</span></div>
-            <div class="mt-1">📌 Status: <span id="questStatus" class="font-semibold">Awaiting decision…</span></div>
-          </div>
-        </div>
-
-        <div class="flex gap-6 justify-center mt-1">
-          <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
-            <svg viewBox="0 0 32 29" aria-hidden="true">
-              <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
-                c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
-            </svg>
-            <span>YES</span>
-          </button>
-
-          <button id="noBtn" class="svg-heart no" type="button" aria-label="No">
-            <svg viewBox="0 0 32 29" aria-hidden="true">
-              <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
-                c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
-            </svg>
-            <span>NO</span>
-          </button>
-        </div>
-
-        <p id="hint" class="text-sm text-gray-600 mt-4">
-          Tip: click a button. If a GIF host blocks embeds, it’ll auto-try another link.
-        </p>
+        <button id="noBtn" class="svg-heart no" type="button" aria-label="No">
+          <svg viewBox="0 0 32 29" aria-hidden="true">
+            <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
+              c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
+          </svg>
+          <span>NO</span>
+        </button>
       </div>
+
+      <p id="hint" class="text-sm text-gray-600 mt-4">
+        Tip: click a button. If a GIF host blocks embeds, it’ll auto-try another link.
+      </p>
     </div>
 
     <script>
-      // ------------------ Helpers: tiny audio blip (hover sparkle sound) ------------------
-      let uiCtx = null;
-      function getUiCtx(){
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return null;
-        if (!uiCtx) uiCtx = new AudioCtx();
-        if (uiCtx.state === "suspended") uiCtx.resume().catch(()=>{});
-        return uiCtx;
-      }
-      function playBlip(freq = 880, dur = 0.06, type="sine"){
-        try{
-          const ctx = getUiCtx();
-          if (!ctx) return;
-          const t = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = type;
-          osc.frequency.setValueAtTime(freq, t);
-          gain.gain.setValueAtTime(0, t);
-          gain.gain.linearRampToValueAtTime(0.10, t + 0.01);
-          gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-          osc.connect(gain).connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + dur);
-        }catch{}
-      }
-
-      // ------------------ Parallax mouse move ------------------
-      const stage = document.getElementById("stage");
-      window.addEventListener("mousemove", (e) => {
-        const x = (e.clientX / window.innerWidth) - 0.5;
-        const y = (e.clientY / window.innerHeight) - 0.5;
-        // subtle parallax, clamp
-        const px = Math.max(-10, Math.min(10, x * 18));
-        const py = Math.max(-10, Math.min(10, y * 18));
-        stage.style.setProperty("--px", px + "px");
-        stage.style.setProperty("--py", py + "px");
-      });
-
-      // ------------------ Sparkle burst on title pill hover ------------------
-      const titlePill = document.getElementById("titlePill");
-      function burstSparkles(target, count = 10){
-        const rect = target.getBoundingClientRect();
-        for (let i=0; i<count; i++){
-          const s = document.createElement("span");
-          s.className = "sparkle";
-          const x = Math.random() * rect.width;
-          const y = Math.random() * rect.height;
-          const sx = (Math.random() * 60 - 30) + "px";
-          const sy = (Math.random() * 40 - 20) + "px";
-          s.style.left = x + "px";
-          s.style.top = y + "px";
-          s.style.setProperty("--sx", sx);
-          s.style.setProperty("--sy", sy);
-          target.appendChild(s);
-          s.addEventListener("animationend", () => s.remove());
-        }
-      }
-      titlePill.addEventListener("mouseenter", () => {
-        playBlip(1046, 0.06, "triangle");
-        burstSparkles(titlePill, 12);
-      });
-
       // ------------------ Moving hearts ------------------
       const heartsLayer = document.getElementById("hearts");
+
       function spawnHeart() {
         const el = document.createElement("span");
         el.className = "heart";
@@ -684,15 +381,17 @@
         heartsLayer.appendChild(el);
         setTimeout(() => el.remove(), dur * 1000 + 100);
       }
+
       for (let i = 0; i < 14; i++) spawnHeart();
       setInterval(spawnHeart, 220);
 
-      // ------------------ Power-ups particles (more Nintendo-ish variety) ------------------
+      // ------------------ Power-ups particles ------------------
       const powerupsLayer = document.getElementById("powerups");
+
       function spawnPowerup(){
         const el = document.createElement("span");
         el.className = "powerup";
-        const items = ["⭐","🪙","✨","💖","🎮","🍄","💎","💚","❤️","🟢","🔺","🟨"];
+        const items = ["⭐","🪙","✨","💖","🎮"];
         el.textContent = items[Math.floor(Math.random() * items.length)];
 
         const left = Math.random() * 100;
@@ -710,8 +409,9 @@
         powerupsLayer.appendChild(el);
         setTimeout(() => el.remove(), dur * 1000 + 200);
       }
-      for (let i = 0; i < 12; i++) spawnPowerup();
-      setInterval(spawnPowerup, 520);
+
+      for (let i = 0; i < 10; i++) spawnPowerup();
+      setInterval(spawnPowerup, 600);
 
       // ------------------ GIF loader ------------------
       const valImage = document.getElementById("valImage");
@@ -733,13 +433,6 @@
 
       const yesBtn = document.getElementById("yesBtn");
       const noBtn = document.getElementById("noBtn");
-      const mainCard = document.getElementById("mainCard");
-      const loveCount = document.getElementById("loveCount");
-      const questStatus = document.getElementById("questStatus");
-
-      // Hover blips for buttons
-      yesBtn.addEventListener("mouseenter", ()=>playBlip(988, 0.06, "sine"));
-      noBtn.addEventListener("mouseenter",  ()=>playBlip(262, 0.06, "square"));
 
       const GIFS = {
         start: ["https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif"],
@@ -753,7 +446,7 @@
 
       setImageTry(GIFS.start, "Start GIF failed to load.");
 
-      // ------------------ "Chest opening" style fanfare (original synth) ------------------
+      // ------------------ Chest-fanfare (original) ------------------
       function playGlueSong() {
         try {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -786,17 +479,26 @@
             if (note === "REST") return null;
             const m = /^([A-G])(#|b)?(\d)$/.exec(note);
             if (!m) return null;
+
             const [, letter, accidental, octaveStr] = m;
             const octave = Number(octaveStr);
             const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
             let n = SEMI[letter];
             if (accidental === "#") n += 1;
             if (accidental === "b") n -= 1;
+
             const midi = (octave + 1) * 12 + n;
             return 440 * Math.pow(2, (midi - 69) / 12);
           };
 
-          function schedule(sequence, { type="triangle", volume=0.12, offset=0, detune=0, toDelay=true } = {}) {
+          function schedule(sequence, {
+            type = "triangle",
+            volume = 0.12,
+            offset = 0,
+            detune = 0,
+            toDelay = true
+          } = {}) {
             let t = now + offset;
             for (const step of sequence) {
               const dur = step.beats * beat;
@@ -862,23 +564,9 @@
         } catch {}
       }
 
-      // ------------------ Boss HUD logic ------------------
-      const bossHud = document.getElementById("bossHud");
-      const bossBar = document.getElementById("bossBar");
-      const bossText = document.getElementById("bossText");
-      let courage = 100;
+      let yesFinalTimer = null;
 
-      function updateBossHud(){
-        bossHud.classList.add("show");
-        bossBar.style.width = courage + "%";
-        bossText.textContent = courage + "%";
-        if (courage <= 0){
-          bossText.textContent = "0%";
-          document.getElementById("bossTitle").textContent = "NO has been defeated!";
-        }
-      }
-
-      // ------------------ NO button: bigger each press + runs away + stereo panning battle music ------------------
+      // ------------------ NO button gets huge + runs away ------------------
       let noScale = 1;
       let noDodges = 0;
 
@@ -887,7 +575,6 @@
         noBtn.style.transform = `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) ${extra}`;
       }
 
-      // runs away after it’s been pressed a couple times
       noBtn.addEventListener("mouseenter", () => {
         if (noDodges < 2) return;
 
@@ -905,24 +592,14 @@
 
         noBtn.style.transition = "transform 0.15s ease";
         applyNoTransform();
-        updateBattlePan(); // keep battle sound following it
       });
 
-      // ------------------ Battle music (original synth, looped) + stereo pan ------------------
+      // ------------------ Battle music (original, looped) ------------------
       let battleCtx = null;
       let battleMaster = null;
-      let battlePanner = null;
       let battleInterval = null;
       let battleStep = 0;
       let battleIntensity = 1;
-
-      function updateBattlePan(){
-        if (!battleCtx || !battlePanner) return;
-        const rect = noBtn.getBoundingClientRect();
-        const center = rect.left + rect.width/2;
-        const pan = Math.max(-1, Math.min(1, (center / window.innerWidth) * 2 - 1));
-        try { battlePanner.pan.setValueAtTime(pan, battleCtx.currentTime); } catch {}
-      }
 
       function noiseHit(ctx, time, duration, volume, cutoffHz) {
         const bufferSize = Math.floor(ctx.sampleRate * duration);
@@ -971,15 +648,7 @@
 
         battleMaster = battleCtx.createGain();
         battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
-
-        // Stereo panner (if supported)
-        if (battleCtx.createStereoPanner) {
-          battlePanner = battleCtx.createStereoPanner();
-          battleMaster.connect(battlePanner).connect(battleCtx.destination);
-        } else {
-          battlePanner = null;
-          battleMaster.connect(battleCtx.destination);
-        }
+        battleMaster.connect(battleCtx.destination);
 
         battleStep = 0;
 
@@ -1036,17 +705,15 @@
           noiseHit(battleCtx, t, 0.02, 0.03 + capped * 0.004, 6000 + capped * 300);
 
           battleStep++;
-          updateBattlePan();
         };
 
         battleInterval = setInterval(tick, 90);
         tick();
-        updateBattlePan();
       }
 
       function updateBattleIntensity(intensity) {
         battleIntensity = intensity;
-        if (!battleCtx || !battleMaster) return;
+        if (!battleCtx) return;
         battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
       }
 
@@ -1058,7 +725,6 @@
           const ctx = battleCtx;
           battleCtx = null;
           battleMaster = null;
-          battlePanner = null;
           setTimeout(() => ctx.close().catch(() => {}), 50);
         }
       }
@@ -1067,41 +733,20 @@
         if (noDodges >= 3) document.body.classList.add("boss-mode");
       }
 
-      // ------------------ Victory overlay ------------------
-      const victory = document.getElementById("victory");
-      function showVictory(){
-        victory.classList.add("show");
-        setTimeout(()=>victory.classList.remove("show"), 2200);
-      }
-
       // ------------------ YES / NO click handlers ------------------
-      let yesFinalTimer = null;
-      let combo = 0;
-
       yesBtn.addEventListener("click", () => {
-        // LETS GOOOO
+        // ✅ show LETS GOOOO (black, on the right side of pill)
         document.getElementById("letsGo")?.classList.add("show");
-        burstSparkles(titlePill, 16);
-        playBlip(1318, 0.08, "triangle");
-
-        // update quest log
-        combo += 1;
-        loveCount.textContent = "x" + combo;
-        questStatus.textContent = "Accepted! 💘 QUEST COMPLETE!";
-        showVictory();
 
         stopBattleMusic();
         document.body.classList.remove("boss-mode");
 
         setImageTry(GIFS.yesMain, "YES GIF failed to load.");
         hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
-
-        // optional: hide NO
         noBtn.style.display = "none";
 
         playGlueSong();
-        confetti({ particleCount: 260, spread: 85, origin: { y: 0.6 } });
-        confetti({ particleCount: 120, spread: 55, origin: { y: 0.2 } });
+        confetti({ particleCount: 250, spread: 80, origin: { y: 0.6 } });
 
         if (yesFinalTimer) clearTimeout(yesFinalTimer);
         yesFinalTimer = setTimeout(() => {
@@ -1111,24 +756,10 @@
 
       noBtn.addEventListener("click", () => {
         setImageTry(GIFS.no, "NO GIF failed to load.");
+        hint.textContent = "No (Are you sure about that?) 😳";
 
-        // comically bigger each press
         noScale *= 1.35;
         noDodges += 1;
-
-        // boss health down
-        courage = Math.max(0, courage - 15);
-        updateBossHud();
-
-        // update quest log
-        questStatus.textContent = (courage <= 0)
-          ? "NO has been defeated… the path to YES is clear 😈"
-          : "NO is resisting… it’s getting nervous 😳";
-
-        // shake screen + boss mode
-        mainCard.classList.remove("shake");
-        void mainCard.offsetWidth; // restart animation
-        mainCard.classList.add("shake");
 
         startBattleMusic(noDodges);
         updateBattleIntensity(noDodges);
@@ -1147,46 +778,6 @@
         );
 
         applyNoTransform();
-        updateBattlePan();
-
-        // If boss defeated: stop battle, make NO give up
-        if (courage <= 0){
-          stopBattleMusic();
-          document.body.classList.remove("boss-mode");
-          hint.textContent = "NO has been defeated… okay okay, press YES already 😌";
-          noBtn.style.display = "none";
-          confetti({ particleCount: 140, spread: 70, origin: { y: 0.6 } });
-        } else {
-          hint.textContent = "No (Are you sure about that?) 😳";
-        }
-      });
-
-      // ------------------ Secret Easter Egg: click mascot 5 times ------------------
-      const mascotBtn = document.getElementById("mascotBtn");
-      let mascotClicks = 0;
-      mascotBtn.addEventListener("click", () => {
-        mascotClicks += 1;
-        playBlip(784, 0.06, "sine");
-        if (mascotClicks >= 5){
-          mascotClicks = 0;
-          hint.textContent = "SECRET UNLOCKED: BONUS LOOT DROP!! 🪙⭐";
-          questStatus.textContent = "Secret found! Bonus loot dropped!";
-          for (let i=0;i<10;i++) spawnPowerup();
-          confetti({ particleCount: 220, spread: 95, origin: { y: 0.45 } });
-          burstSparkles(titlePill, 22);
-        }
-      });
-
-      // ------------------ Theme toggle (persists) ------------------
-      const toggleTheme = document.getElementById("toggleTheme");
-      const saved = localStorage.getItem("val_theme");
-      if (saved === "night") document.body.classList.add("night");
-
-      toggleTheme.addEventListener("click", () => {
-        playBlip(523, 0.07, "triangle");
-        document.body.classList.toggle("night");
-        localStorage.setItem("val_theme", document.body.classList.contains("night") ? "night" : "day");
-        burstSparkles(titlePill, 10);
       });
     </script>
   </body>
