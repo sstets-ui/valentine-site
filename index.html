@@ -3,74 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Will you be my rEdACtEd Andrew Getzow?</title>
+  <title>Will you be my Valentine Andrew Getzow?</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    
-    /* =========================================================
-      NEW: Day/Night + prettier global palette using CSS vars
-    ========================================================= */
-    
-    :root{
-      --bg-a: rgba(255, 182, 193, 0.55);
-      --bg-b: rgba(255, 105, 180, 0.28);
-      --bg-c: rgba(147, 197, 253, 0.35);
-      --bg-l1: #fff1f2;
-      --bg-l2: #ffe4e6;
-      --bg-l3: #fdf2f8;
-      --bg-l4: #eff6ff;
-
-      --glass: rgba(255, 255, 255, 0.78);
-      --glass2: rgba(255, 255, 255, 0.70);
-      --ink: rgba(15, 23, 42, 0.85);
-      --muted: rgba(15, 23, 42, 0.65);
-
-      --frame: rgba(255,255,255,0.65);
-      --shadow: rgba(0,0,0,0.14);
-      --accent1: #fb7185;
-      --accent2: #ec4899;
-      --accent3: #6366f1;
-
-      --sectionRibbon: rgba(251, 113, 133, 0.22);
-      --sectionRibbon2: rgba(99, 102, 241, 0.18);
-    }
-
-    body.night-mode{
-      --bg-a: rgba(147, 51, 234, 0.35);
-      --bg-b: rgba(59, 130, 246, 0.22);
-      --bg-c: rgba(244, 63, 94, 0.20);
-      --bg-l1: #0b1020;
-      --bg-l2: #0f172a;
-      --bg-l3: #111827;
-      --bg-l4: #0b1020;
-
-      --glass: rgba(15, 23, 42, 0.62);
-      --glass2: rgba(15, 23, 42, 0.55);
-      --ink: rgba(248, 250, 252, 0.92);
-      --muted: rgba(226, 232, 240, 0.75);
-
-      --frame: rgba(255,255,255,0.16);
-      --shadow: rgba(0,0,0,0.28);
-
-      --sectionRibbon: rgba(236, 72, 153, 0.18);
-      --sectionRibbon2: rgba(59, 130, 246, 0.16);
-    }
-
-    body{
+    /* --------- Dreamy background --------- */
+    body {
       background:
-        radial-gradient(900px 520px at 20% 15%, var(--bg-a), transparent 60%),
-        radial-gradient(900px 520px at 80% 25%, var(--bg-b), transparent 60%),
-        radial-gradient(900px 520px at 55% 85%, var(--bg-c), transparent 60%),
-        linear-gradient(180deg, var(--bg-l1) 0%, var(--bg-l2) 40%, var(--bg-l3) 70%, var(--bg-l4) 100%);
-      overflow-x:hidden;
-      color: var(--ink);
+        radial-gradient(900px 520px at 20% 15%, rgba(255, 182, 193, 0.55), transparent 60%),
+        radial-gradient(900px 520px at 80% 25%, rgba(255, 105, 180, 0.28), transparent 60%),
+        radial-gradient(900px 520px at 55% 85%, rgba(147, 197, 253, 0.35), transparent 60%),
+        linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
+      overflow-x: hidden;
     }
-
-  
-    /* keep your shiny-mode, now it stacks with day/night */
     body.shiny-mode{
       background:
         radial-gradient(900px 520px at 20% 15%, rgba(167, 139, 250, 0.50), transparent 60%),
@@ -79,7 +26,6 @@
         linear-gradient(180deg, #f5f3ff 0%, #e0f2fe 50%, #fff7ed 100%);
     }
 
- 
     /* Boss mode tint */
     body.boss-mode::before{
       content:"";
@@ -94,43 +40,7 @@
       mix-blend-mode: multiply;
     }
 
-   
-    /* =========================================================
-      NEW: Extra “pretty” layout styling (frames + ribbons)
-    ========================================================= */
-
-    
-    .quest-shell{
-      position: relative;
-      border-radius: 28px;
-      border: 1px solid var(--frame);
-      background: var(--glass2);
-      box-shadow: 0 22px 70px var(--shadow);
-      overflow:hidden;
-    }
-    .quest-shell::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      pointer-events:none;
-      background:
-        radial-gradient(800px 240px at 20% 0%, var(--sectionRibbon), transparent 60%),
-        radial-gradient(800px 240px at 80% 30%, var(--sectionRibbon2), transparent 60%);
-      opacity: 0.95;
-      mix-blend-mode: overlay;
-    }
-    .quest-shell > *{ position: relative; z-index: 1; }
-
-    .pretty-divider{
-      height: 2px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(251,113,133,.0), rgba(251,113,133,.65), rgba(99,102,241,.55), rgba(251,113,133,.0));
-      opacity: .85;
-    }
-
-
-    /* BG layers */
-
+    /* Background layers */
     #bg {
       position: fixed;
       inset: 0;
@@ -149,15 +59,21 @@
       mix-blend-mode: multiply;
       will-change: transform;
     }
-    .blob.a { left:-140px; top:-160px;
+    .blob.a {
+      left: -140px;
+      top: -160px;
       background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.55), rgba(255, 182, 193, 0.25) 55%, transparent 70%);
       animation: floatA 14s ease-in-out infinite;
     }
-    .blob.b { right:-160px; top:-120px;
+    .blob.b {
+      right: -160px;
+      top: -120px;
       background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.45), rgba(147, 197, 253, 0.22) 55%, transparent 70%);
       animation: floatB 16s ease-in-out infinite;
     }
-    .blob.c { left:10%; bottom:-210px;
+    .blob.c {
+      left: 10%;
+      bottom: -210px;
       background: radial-gradient(circle at 30% 30%, rgba(147, 197, 253, 0.45), rgba(244, 63, 94, 0.18) 55%, transparent 70%);
       animation: floatC 18s ease-in-out infinite;
     }
@@ -176,10 +92,7 @@
       background-size: 180px 180px;
     }
 
-   
-    /* your black hole GIF grid */
-
-    
+    /* ✅ Grid background replaced with your black hole GIF */
     .pixel-grid{
       position:absolute;
       inset:0;
@@ -191,10 +104,8 @@
       filter: saturate(0.95) contrast(1.05);
     }
 
-  
     /* Floating particles */
-    
-    #powerups, #hearts, #petals{
+    #powerups, #hearts{
       position: fixed;
       inset: 0;
       pointer-events: none;
@@ -202,7 +113,7 @@
       overflow: hidden;
     }
     #powerups{ z-index: 1; }
-    .heart, .powerup, .petal{
+    .heart, .powerup{
       position: absolute;
       bottom: -40px;
       will-change: transform, opacity;
@@ -212,8 +123,6 @@
     }
     .heart{ animation: floatUp linear forwards; }
     .powerup{ animation: puFloat linear forwards; }
-    .petal{ animation: petalFloat linear forwards; }
-
     @keyframes floatUp {
       0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
       10%  { opacity: 0.85; }
@@ -224,15 +133,8 @@
       12%  { opacity: .9; }
       100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity: 0; }
     }
-    @keyframes petalFloat{
-      0%   { transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity: 0; }
-      10%  { opacity: .9; }
-      100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15) rotate(var(--rot)); opacity: 0; }
-    }
 
-
-    /* Pixel clouds */
-    
+    /* ✅ Pixel clouds layer (pixel-art SVG) */
     #pixelClouds{
       position: fixed;
       inset: 0;
@@ -260,9 +162,7 @@
       to   { transform: translateX(calc(100vw + 520px)) scale(var(--s)); }
     }
 
-   
     /* Big title */
-    
     #bigTitle{
       position: relative;
       z-index: 3;
@@ -274,7 +174,6 @@
       color: #ffffff;
       text-shadow: 0 4px 0 rgba(0,0,0,0.15), 0 10px 28px rgba(0,0,0,0.22);
       margin-bottom: 0.9rem;
-      user-select: none;
     }
     #bigTitle span{
       display: inline-block;
@@ -288,13 +187,14 @@
 
     /* card */
     .glass {
-      background: var(--glass);
+      background: rgba(255, 255, 255, 0.78);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--frame);
-      box-shadow: 0 22px 70px var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: 0 22px 70px rgba(0,0,0,0.14);
     }
 
+    /* Mascot bounce */
     .pixel-vibe { text-shadow: 0 2px 0 rgba(0,0,0,0.08); }
     .mascot-bounce { animation: mascotBounce 1.8s ease-in-out infinite; }
     @keyframes mascotBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
@@ -315,20 +215,6 @@
     .svg-heart svg{ width: 100%; height: 100%; display: block; }
     .svg-heart.yes path{ fill: #ef4444; }
     .svg-heart.no  path{ fill: #f43f5e; }
-
-    /* ✅ NEW: NO button is bigger + slightly “menacing” */
-    .svg-heart.no{
-      width: 78px;
-      height: 70px;
-      transform-origin: center;
-      animation: noBreath 1.6s ease-in-out infinite;
-      filter: drop-shadow(0 14px 20px rgba(0,0,0,.22));
-    }
-    @keyframes noBreath{
-      0%,100%{ transform: scale(1); }
-      50%{ transform: scale(1.06); }
-    }
-
     .svg-heart span{
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
@@ -354,45 +240,14 @@
       transition: width 160ms ease;
     }
 
-    /* Quest Map header (NEW) */
-    #questMap{
-      position: sticky;
-      top: 0;
-      z-index: 55;
-      margin-bottom: 10px;
-    }
-    .quest-chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--frame);
-      background: rgba(255,255,255,0.10);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: rgba(255,255,255,0.92);
-      box-shadow: 0 18px 45px rgba(0,0,0,0.14);
-      font-weight: 900;
-      user-select:none;
-    }
-    body.night-mode .quest-chip{
-      background: rgba(15,23,42,0.25);
-      color: rgba(248,250,252,0.92);
-    }
-
-    /* MTG-ish card frame (unchanged) */
+    /* MTG-ish card frame */
     .tcg-card{
       border-radius: 18px;
-      border: 1px solid var(--frame);
+      border: 1px solid rgba(255,255,255,0.65);
       background: linear-gradient(180deg, rgba(255,255,255,0.90), rgba(255,255,255,0.70));
       box-shadow: 0 18px 60px rgba(0,0,0,0.14);
       overflow: hidden;
       position: relative;
-    }
-    body.night-mode .tcg-card{
-      background: linear-gradient(180deg, rgba(15,23,42,0.70), rgba(15,23,42,0.55));
-      box-shadow: 0 18px 60px rgba(0,0,0,0.30);
     }
     .tcg-frame{
       border: 2px solid rgba(15,23,42,0.18);
@@ -403,14 +258,6 @@
         radial-gradient(600px 220px at 80% 30%, rgba(99, 102, 241, 0.18), transparent 60%),
         linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
     }
-    body.night-mode .tcg-frame{
-      border-color: rgba(248,250,252,0.14);
-      background:
-        radial-gradient(600px 220px at 20% 10%, rgba(236, 72, 153, 0.16), transparent 60%),
-        radial-gradient(600px 220px at 80% 30%, rgba(59, 130, 246, 0.14), transparent 60%),
-        linear-gradient(180deg, rgba(15,23,42,0.60), rgba(15,23,42,0.45));
-    }
-
     .tcg-titlebar{
       display: flex;
       align-items: center;
@@ -421,10 +268,6 @@
       background: rgba(15,23,42,0.06);
       border: 1px solid rgba(15,23,42,0.10);
       font-weight: 900;
-    }
-    body.night-mode .tcg-titlebar{
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.10);
     }
     .tcg-subbar{
       margin-top: 10px;
@@ -437,19 +280,11 @@
       background: rgba(255,255,255,0.65);
       border: 1px solid rgba(15,23,42,0.10);
     }
-    body.night-mode .tcg-subbar{
-      background: rgba(255,255,255,0.07);
-      border-color: rgba(255,255,255,0.10);
-    }
     .tcg-rules{
       background: rgba(255,255,255,0.70);
       border: 1px solid rgba(15,23,42,0.10);
       border-radius: 12px;
       padding: 12px;
-    }
-    body.night-mode .tcg-rules{
-      background: rgba(255,255,255,0.07);
-      border-color: rgba(255,255,255,0.10);
     }
     .mana-pip{
       display:inline-flex;
@@ -464,17 +299,12 @@
       font-size: 12px;
       margin-left: 6px;
     }
-    body.night-mode .mana-pip{
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.12);
-      color: rgba(248,250,252,0.9);
-    }
 
-    /* Encounter */
+    /* Encounter (more detailed Pokémon UI) */
     .encounter{
       border-radius: 18px;
-      border: 1px solid var(--frame);
-      background: var(--glass2);
+      border: 1px solid rgba(255,255,255,0.65);
+      background: rgba(255,255,255,0.72);
       box-shadow: 0 18px 60px rgba(0,0,0,0.12);
       overflow: hidden;
     }
@@ -485,10 +315,6 @@
       position: relative;
       overflow:hidden;
     }
-    body.night-mode .encounter-screen{
-      background: linear-gradient(180deg, rgba(59,130,246,0.12), rgba(236,72,153,0.10));
-      border-bottom-color: rgba(255,255,255,0.10);
-    }
     .text-box{
       background: rgba(255,255,255,0.92);
       border: 2px solid rgba(15,23,42,0.18);
@@ -497,21 +323,12 @@
       font-weight: 800;
       min-height: 58px;
     }
-    body.night-mode .text-box{
-      background: rgba(15,23,42,0.60);
-      border-color: rgba(255,255,255,0.14);
-      color: rgba(248,250,252,0.92);
-    }
     .hpbar{
       height: 10px;
       border-radius: 999px;
       background: rgba(255,255,255,0.75);
       border: 1px solid rgba(255,255,255,0.65);
       overflow:hidden;
-    }
-    body.night-mode .hpbar{
-      background: rgba(255,255,255,0.10);
-      border-color: rgba(255,255,255,0.12);
     }
     .hpbar > div{
       height: 100%;
@@ -523,7 +340,7 @@
     /* Modal */
     .modal-backdrop{
       position: fixed; inset: 0;
-      background: rgba(15,23,42,0.55);
+      background: rgba(15,23,42,0.45);
       z-index: 60;
       display: none;
       align-items: center;
@@ -532,7 +349,7 @@
     }
     .modal-backdrop.show{ display: flex; }
 
-    /* Boss blackhole gif overlay */
+    /* Boss blackhole gif overlay (phase 2 pull) */
     #blackholeGif{
       position: absolute;
       left: 50%;
@@ -547,57 +364,13 @@
       mix-blend-mode: screen;
     }
 
-    /* =========================================================
-      NEW: NO Boss Fight modal styling
-    ========================================================= */
-    #noBossCard{
-      width: min(1100px, 96vw);
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.22);
-      background: linear-gradient(180deg, rgba(15,23,42,0.78), rgba(15,23,42,0.62));
-      box-shadow: 0 26px 80px rgba(0,0,0,0.40);
-      overflow:hidden;
-      position: relative;
-    }
-    #noBossCard::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background:
-        radial-gradient(900px 420px at 25% 0%, rgba(244,63,94,0.25), transparent 65%),
-        radial-gradient(900px 420px at 80% 25%, rgba(99,102,241,0.18), transparent 65%),
-        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-      opacity: 0.95;
-      pointer-events:none;
-    }
-    #noBossCard > *{ position: relative; z-index: 1; }
-    #noBossCanvas{
-      width: 100%;
-      display:block;
-      height: 520px;
-      background: rgba(255,255,255,0.06);
-    }
-    @media (max-width: 640px){
-      #noBossCanvas{ height: 460px; }
-    }
+    /* ✅ Pixel crisp platformer */
+    #platCanvas { image-rendering: pixelated; }
 
-    /* =========================================================
-      NEW: Retro mode (Konami egg)
-    ========================================================= */
-    body.retro-mode .pixel-grid{
-      opacity: .35;
-      filter: saturate(1.1) contrast(1.25) hue-rotate(12deg);
-    }
-    body.retro-mode *{
-      text-shadow: 0 0 0 rgba(0,0,0,0);
-    }
-    body.retro-mode #bigTitle span{
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.25) inset, 0 14px 40px rgba(0,0,0,0.25);
-    }
-
-    /* Mirror mode (egg) */
-    body.mirror-mode{
-      filter: hue-rotate(150deg) saturate(1.2) contrast(1.08);
+    /* ✅ NO runaway mode */
+    .no-runaway {
+      position: fixed !important;
+      z-index: 80 !important;
     }
   </style>
 </head>
@@ -615,48 +388,26 @@
   <div id="powerups" aria-hidden="true"></div>
   <div id="pixelClouds" aria-hidden="true"></div>
   <div id="hearts" aria-hidden="true"></div>
-  <div id="petals" aria-hidden="true"></div>
 
   <!-- Title -->
   <div class="relative z-[3] px-4 pt-6">
     <div class="max-w-7xl mx-auto">
-
-      <!-- NEW: Quest Map header -->
-      <div id="questMap" class="flex flex-wrap justify-center gap-2 mb-4">
-        <div class="quest-chip">🗺️ QUEST MAP</div>
-        <div class="quest-chip">💘 Boss</div>
-        <div class="quest-chip">🕹️ Platformer</div>
-        <div class="quest-chip">🃏 TCG</div>
-        <div class="quest-chip">✨ Spells</div>
-        <div class="quest-chip">🫶 Pokémon</div>
-      </div>
-
       <h1 id="bigTitle" class="w-full">
         <span>Love Beyond the Multiverse 💘</span>
       </h1>
 
-      <!-- Mana / shiny / day-night -->
+      <!-- Mana / shiny -->
       <div id="manaWrap" class="rounded-2xl glass px-4 py-3 mb-4">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="text-sm font-extrabold" style="color: var(--muted);">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm font-extrabold text-slate-800/80">
             Affection Mana: <span id="manaPct">0</span>%
-            <span class="ml-2 text-xs font-black opacity-70" id="modeLabel"></span>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button id="dayNightBtn"
-              class="rounded-full px-4 py-2 font-black border border-white/60 bg-white/70 shadow active:scale-95 transition"
-              title="Day/Night">
-              🌞/🌙
-            </button>
-
-            <button id="shinyStar"
-              class="text-sm font-black transition"
-              style="color: var(--muted);"
-              title="psst… click me 3x">
-              ⭐ Shiny Chance
-            </button>
-          </div>
+          <button id="shinyStar"
+            class="text-sm font-black text-slate-700/80 hover:text-slate-900 transition"
+            title="psst… click me 3x">
+            ⭐ Shiny Chance
+          </button>
         </div>
         <div class="mt-2 h-3 rounded-full bg-white/70 border border-white/60 overflow-hidden">
           <div id="manaBarInner" class="h-full bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300"></div>
@@ -676,7 +427,7 @@
 
       <!-- LEFT: Valentine card -->
       <aside class="lg:sticky lg:top-24">
-        <div class="quest-shell p-6 text-center">
+        <div class="glass rounded-3xl p-6 text-center">
           <div class="mx-auto mb-3 w-28 mascot-bounce">
             <div class="w-24 h-24 mx-auto">
               <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
@@ -699,22 +450,18 @@
                 <circle cx="84" cy="67" r="6" fill="#475569"/>
               </svg>
             </div>
-
-            <!-- Easter egg target: clicking this date multiple times does something -->
-            <div id="dateStamp" class="mt-1 text-center font-extrabold text-sm tracking-wide opacity-80 pixel-vibe" style="color: var(--muted); cursor:pointer;">
+            <div class="mt-1 text-center font-extrabold text-sm tracking-wide text-slate-800/80 pixel-vibe">
               2/14/26
             </div>
           </div>
 
-          <div class="font-black mb-3" style="color: var(--muted);">
+          <div class="font-black text-slate-800/80 mb-3">
             Will you be my Valentine Andrew Getzow?
           </div>
 
           <img id="valImage" class="w-full h-64 object-cover rounded-xl mb-4"
                style="background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));"
                alt="Valentine gif" />
-
-          <div class="pretty-divider my-4"></div>
 
           <div class="flex gap-6 justify-center mt-2">
             <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
@@ -734,59 +481,55 @@
             </button>
           </div>
 
-          <p id="hint" class="text-sm mt-4 font-semibold opacity-80" style="color: var(--muted);">
+          <p id="hint" class="text-sm text-gray-600 mt-4 font-semibold">
             Both buttons are locked 😈 Beat the boss first.
-          </p>
-
-          <p class="text-xs font-black opacity-60 mt-2" style="color: var(--muted);">
-            (Psst: there are 7 easter eggs… one is Konami code.)
           </p>
         </div>
       </aside>
 
-      <!-- RIGHT: content -->
+      <!-- RIGHT: BIG open space for games + crossover -->
       <main class="space-y-5">
 
         <!-- EVENT START -->
-        <section class="quest-shell p-6">
+        <section class="glass rounded-3xl p-6">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <div class="text-2xl font-black opacity-90">Begin the Event</div>
-              <div class="text-sm font-semibold opacity-80 mt-1">
+              <div class="text-2xl font-black text-slate-800/80">Begin the Event</div>
+              <div class="text-sm font-semibold text-slate-700/80 mt-1">
                 A limited-time crossover has appeared… defeat the boss to unlock the ultimate question.
               </div>
             </div>
             <button id="beginEvent"
               class="rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));">
+              style="background: linear-gradient(135deg, #fb7185, #ec4899, #6366f1);">
               Begin the Event
             </button>
           </div>
         </section>
 
-        <!-- BOSS FIGHT (your existing boss fight kept) -->
+        <!-- BOSS FIGHT -->
         <section class="glass rounded-3xl overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-            <div class="font-black opacity-90">👾 Boss Fight (Love Edition)</div>
-            <div class="text-xs font-black opacity-70">Move: WASD/Arrows • Attack: Space / Tap</div>
+            <div class="font-black text-slate-800/80">👾 Boss Fight (Love Edition)</div>
+            <div class="text-xs font-black text-slate-700/70">Move: WASD/Arrows • Attack: Space / Tap</div>
           </div>
 
           <div class="px-6 py-5">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
               <div>
-                <div class="text-xs font-black opacity-80 mb-1">YOU 💖</div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">YOU 💖</div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="playerHPBar" class="h-full w-full bg-gradient-to-r from-rose-500 to-pink-500"></div>
                 </div>
               </div>
               <div>
-                <div class="text-xs font-black opacity-80 mb-1">BOSS ☄️</div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">BOSS ☄️</div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="bossHPBar" class="h-full w-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"></div>
                 </div>
               </div>
               <div>
-                <div class="text-xs font-black opacity-80 mb-1">LOVE METER 💘</div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">LOVE METER 💘</div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="loveBar" class="h-full w-0 bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300"></div>
                 </div>
@@ -796,6 +539,7 @@
             <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
               <canvas id="bossCanvas" class="w-full block h-[420px]"></canvas>
 
+              <!-- ✅ blackhole GIF overlay -->
               <img id="blackholeGif" alt="Black hole gif" />
 
               <div id="laughFlash"
@@ -804,7 +548,7 @@
               </div>
 
               <div id="bossOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
-                <div class="opacity-90">
+                <div class="text-slate-800/80">
                   <div class="text-3xl font-extrabold">A wild boss appeared!</div>
                   <div class="text-sm font-semibold mt-2">Dodge cursed hearts. Shoot love beams.</div>
                 </div>
@@ -812,30 +556,30 @@
 
               <button id="bossStart"
                 class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-                style="background: linear-gradient(135deg, var(--accent3), var(--accent2), var(--accent1));">
+                style="background: linear-gradient(135deg, #6366f1, #ec4899, #fb7185);">
                 Start Boss Fight
               </button>
             </div>
 
-            <div id="bossMsg" class="mt-3 text-sm font-semibold opacity-80">
+            <div id="bossMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
               Beat the boss to unlock YES + NO.
             </div>
           </div>
         </section>
 
-        <!-- PLATFORMER (kept) -->
+        <!-- PLATFORMER -->
         <section class="glass rounded-3xl overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-            <div class="font-black opacity-90">🕹️ Platformer: Collect the Hearts</div>
-            <div class="text-xs font-black opacity-70">Move: A/D or ←/→ • Jump: W/↑/Space</div>
+            <div class="font-black text-slate-800/80">🕹️ Platformer: Collect the Hearts</div>
+            <div class="text-xs font-black text-slate-700/70">Move: A/D or ←/→ • Jump: W/↑/Space</div>
           </div>
 
           <div class="px-6 py-5">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 items-center">
-              <div class="sm:col-span-2 text-sm font-semibold opacity-80" id="platMsg">
+              <div class="sm:col-span-2 text-sm font-semibold text-slate-700/80" id="platMsg">
                 Collect <b>7</b> hearts 💖 and touch the <b>love letter</b> 💌.
               </div>
-              <div class="text-xs font-black opacity-80 text-right">
+              <div class="text-xs font-black text-slate-700/80 text-right">
                 Hearts: <span id="platCount">0</span>/7
               </div>
             </div>
@@ -844,7 +588,7 @@
               <canvas id="platCanvas" class="w-full block h-[360px]"></canvas>
 
               <div id="platOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
-                <div class="opacity-90">
+                <div class="text-slate-800/80">
                   <div class="text-3xl font-extrabold">Tiny Love Quest 💌</div>
                   <div class="text-sm font-semibold mt-2">Jump on platforms, grab hearts, reach the letter.</div>
                 </div>
@@ -852,26 +596,26 @@
 
               <button id="platStart"
                 class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-                style="background: linear-gradient(135deg, var(--accent1), var(--accent2), #60a5fa);">
+                style="background: linear-gradient(135deg, #fb7185, #ec4899, #60a5fa);">
                 Start Platformer
               </button>
             </div>
           </div>
         </section>
 
-        <!-- MTG-STYLE (kept) -->
+        <!-- MTG-STYLE -->
         <section class="tcg-card">
           <div class="p-6">
             <div class="flex items-center justify-between gap-3 mb-4">
               <div>
-                <div class="text-2xl font-black opacity-90">1) Custom TCG Card: “Be My Valentine”</div>
-                <div class="text-sm font-semibold opacity-80 mt-1">
+                <div class="text-2xl font-black text-slate-800/80">1) Custom TCG Card: “Be My Valentine”</div>
+                <div class="text-sm font-semibold text-slate-700/80 mt-1">
                   Hover/click to reveal “alt art” 👀
                 </div>
               </div>
               <button id="altArtBtn"
                 class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
-                style="background: linear-gradient(135deg, var(--accent1), var(--accent3));">
+                style="background: linear-gradient(135deg, #fb7185, #6366f1);">
                 Reveal Alt Art
               </button>
             </div>
@@ -879,7 +623,7 @@
             <div id="tcgCard" class="tcg-frame">
               <div class="tcg-titlebar">
                 <div id="cardName">Andrew Getzow, Keeper of My Heart</div>
-                <div class="text-xs font-black opacity-70">
+                <div class="text-xs font-black text-slate-700/70">
                   Cost:
                   <span class="mana-pip">🍫</span>
                   <span class="mana-pip">❤️</span>
@@ -888,29 +632,29 @@
               </div>
 
               <div class="tcg-subbar">
-                <div class="text-xs font-black opacity-70">Legendary Creature — Human Nerd</div>
-                <div class="text-xs font-black opacity-70">
+                <div class="text-xs font-black text-slate-700/70">Legendary Creature — Human Nerd</div>
+                <div class="text-xs font-black text-slate-700/70">
                   P/T: <span class="mana-pip">7</span>/<span class="mana-pip">14</span>
                 </div>
               </div>
 
               <div class="mt-3 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-3">
                 <div class="rounded-xl overflow-hidden border border-slate-900/10 bg-white/70">
-                  <div id="cardArt" class="h-44 flex items-center justify-center font-black opacity-70">
+                  <div id="cardArt" class="h-44 flex items-center justify-center font-black text-slate-700/70">
                     (Put a cute photo here later)
                   </div>
                 </div>
 
                 <div class="tcg-rules">
-                  <div class="text-sm font-semibold opacity-90 leading-relaxed">
+                  <div class="text-sm font-semibold text-slate-800/80 leading-relaxed">
                     <div><b>Whenever you smile</b>, create a <b>Heart token</b>.</div>
                     <div class="mt-1"><b>{T}:</b> Go on a date. If it’s Valentine’s Day, you may also get dessert.</div>
                     <div class="mt-1"><b>Partner</b> with <b>You, Hopeless Romantic</b>.</div>
-                    <div class="mt-2 text-xs font-black opacity-70">
+                    <div class="mt-2 text-xs font-black text-slate-700/70">
                       Reminder text: Heart tokens have “{1}: Make me blush. Scry 1.”
                     </div>
                   </div>
-                  <div class="mt-3 text-xs italic font-bold opacity-70">
+                  <div class="mt-3 text-xs italic font-bold text-slate-700/70">
                     “I’d tap all my mana for you.”
                   </div>
                 </div>
@@ -918,16 +662,16 @@
 
               <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black opacity-70">Flavor</div>
-                  <div class="text-sm font-semibold opacity-90 mt-1">“Turn 1: I fell. Turn 2: I stayed.”</div>
+                  <div class="text-xs font-black text-slate-700/70">Flavor</div>
+                  <div class="text-sm font-semibold text-slate-800/80 mt-1">“Turn 1: I fell. Turn 2: I stayed.”</div>
                 </div>
                 <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black opacity-70">Synergy</div>
-                  <div class="text-sm font-semibold opacity-90 mt-1">If love is a stack, my feelings have split second.</div>
+                  <div class="text-xs font-black text-slate-700/70">Synergy</div>
+                  <div class="text-sm font-semibold text-slate-800/80 mt-1">If love is a stack, my feelings have split second.</div>
                 </div>
                 <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black opacity-70">Inside Joke Slot</div>
-                  <div class="text-sm font-semibold opacity-90 mt-1">“Our first date was basically a turn 1 love play.”</div>
+                  <div class="text-xs font-black text-slate-700/70">Inside Joke Slot</div>
+                  <div class="text-sm font-semibold text-slate-800/80 mt-1">“Our first date was basically a turn 1 love play.”</div>
                 </div>
               </div>
 
@@ -935,70 +679,70 @@
           </div>
         </section>
 
-        <!-- Choose a Date (kept) -->
-        <section class="quest-shell p-6">
+        <!-- Choose a Date -->
+        <section class="glass rounded-3xl p-6">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <div class="text-2xl font-black opacity-90">2) Choose a Date (Cast a Spell)</div>
-              <div class="text-sm font-semibold opacity-80 mt-1">
+              <div class="text-2xl font-black text-slate-800/80">2) Choose a Date (Cast a Spell)</div>
+              <div class="text-sm font-semibold text-slate-700/80 mt-1">
                 Pick a spell — it goes on <b>the stack</b> ✨
               </div>
             </div>
             <button id="openDateModal"
               class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, var(--accent2), #60a5fa);">
+              style="background: linear-gradient(135deg, #ec4899, #60a5fa);">
               Open Spellbook
             </button>
           </div>
 
           <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div id="chosenDate" class="text-sm font-semibold rounded-2xl bg-white/70 border border-white/60 p-4 opacity-90">
+            <div id="chosenDate" class="text-sm font-semibold text-slate-700/80 rounded-2xl bg-white/70 border border-white/60 p-4">
               Selected spell: <b>None yet</b>
-              <div class="mt-2 text-xs font-black opacity-70">Mana spent: <span id="manaSpent">0</span></div>
+              <div class="mt-2 text-xs font-black text-slate-700/70">Mana spent: <span id="manaSpent">0</span></div>
             </div>
 
             <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
-              <div class="text-xs font-black opacity-70 mb-2">THE STACK</div>
-              <div id="spellStack" class="space-y-2 text-sm font-semibold opacity-90">
+              <div class="text-xs font-black text-slate-700/70 mb-2">THE STACK</div>
+              <div id="spellStack" class="space-y-2 text-sm font-semibold text-slate-800/80">
                 <div class="opacity-70">— empty —</div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Token generator (kept) -->
-        <section class="quest-shell p-6">
+        <!-- Token generator -->
+        <section class="glass rounded-3xl p-6">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <div class="text-2xl font-black opacity-90">3) Heart Token Generator</div>
-              <div class="text-sm font-semibold opacity-80 mt-1">
+              <div class="text-2xl font-black text-slate-800/80">3) Heart Token Generator</div>
+              <div class="text-sm font-semibold text-slate-700/80 mt-1">
                 Generate love mana. Unlock messages at 5/10/20.
               </div>
             </div>
             <button id="tokenBtn"
               class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, var(--accent1), #f59e0b);">
+              style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
               Create a Heart Token
             </button>
           </div>
 
           <div class="mt-4 grid grid-cols-6 sm:grid-cols-10 gap-2" id="tokenGrid"></div>
-          <div class="mt-4 text-sm font-semibold opacity-80" id="tokenMsg">Tokens: <b id="tokenCount">0</b></div>
+          <div class="mt-4 text-sm font-semibold text-slate-700/80" id="tokenMsg">Tokens: <b id="tokenCount">0</b></div>
         </section>
 
-        <!-- Pokémon battle (kept) -->
+        <!-- Pokémon battle -->
         <section class="encounter">
           <div class="p-6">
-            <div class="text-2xl font-black opacity-90 mb-3">4) Wild Valentine Appeared!</div>
+            <div class="text-2xl font-black text-slate-800/80 mb-3">4) Wild Valentine Appeared!</div>
 
             <div class="encounter-screen rounded-2xl">
               <div class="grid grid-cols-2 gap-3 items-start">
                 <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
                   <div class="flex items-center justify-between gap-2">
-                    <div class="font-black opacity-90">Valentine (???)
-                      <span class="text-xs font-black opacity-70 ml-2">Lv. 14</span>
+                    <div class="font-black text-slate-800/80">Valentine (???)
+                      <span class="text-xs font-black text-slate-700/70 ml-2">Lv. 14</span>
                     </div>
-                    <div class="text-xs font-black opacity-70">Type: 💖/✨</div>
+                    <div class="text-xs font-black text-slate-700/70">Type: 💖/✨</div>
                   </div>
                   <div class="mt-2 hpbar"><div id="enemyHPBar"></div></div>
                   <div class="mt-2 text-4xl text-center select-none" id="enemySprite">💘</div>
@@ -1006,10 +750,10 @@
 
                 <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
                   <div class="flex items-center justify-between gap-2">
-                    <div class="font-black opacity-90">You
-                      <span class="text-xs font-black opacity-70 ml-2">Trainer</span>
+                    <div class="font-black text-slate-800/80">You
+                      <span class="text-xs font-black text-slate-700/70 ml-2">Trainer</span>
                     </div>
-                    <div class="text-xs font-black opacity-70">Ability: 💬 Charm</div>
+                    <div class="text-xs font-black text-slate-700/70">Ability: 💬 Charm</div>
                   </div>
                   <div class="mt-2 hpbar"><div id="youHPBar"></div></div>
                   <div class="mt-2 text-4xl text-center select-none">🫶</div>
@@ -1021,85 +765,85 @@
 
             <div class="mt-4">
               <div id="battleMenuMain" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <button class="rounded-xl px-4 py-3 font-black bg-white/80 border border-white/60 shadow active:scale-95 transition opacity-90"
+                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
                   id="btnFight">FIGHT</button>
-                <button class="rounded-xl px-4 py-3 font-black bg-white/80 border border-white/60 shadow active:scale-95 transition opacity-90"
+                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
                   id="btnBag">BAG</button>
-                <button class="rounded-xl px-4 py-3 font-black bg-white/80 border border-white/60 shadow active:scale-95 transition opacity-90"
+                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
                   id="btnTeam">TEAM</button>
-                <button class="rounded-xl px-4 py-3 font-black bg-white/80 border border-white/60 shadow active:scale-95 transition opacity-90"
+                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
                   id="btnRun">RUN</button>
               </div>
 
               <div id="battleMenuFight" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, var(--accent1), var(--accent2));" data-move="Compliment Beam">Compliment Beam</button>
+                  style="background: linear-gradient(135deg, #fb7185, #ec4899);" data-move="Compliment Beam">Compliment Beam</button>
                 <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
                   style="background: linear-gradient(135deg, #60a5fa, #22c55e);" data-move="Snack Shield">Snack Shield</button>
                 <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #f59e0b, var(--accent1));" data-move="Laugh Attack">Laugh Attack</button>
+                  style="background: linear-gradient(135deg, #f59e0b, #fb7185);" data-move="Laugh Attack">Laugh Attack</button>
                 <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, var(--accent3), var(--accent2));" data-move="Cozy Aura">Cozy Aura</button>
+                  style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy Aura</button>
 
-                <button class="sm:col-span-2 rounded-xl px-4 py-3 font-black bg-white/85 border border-white/60 shadow active:scale-95 transition opacity-90"
+                <button class="sm:col-span-2 rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/85 border border-white/60 shadow active:scale-95 transition"
                   id="btnBack">BACK</button>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Pokedex (kept) -->
-        <section class="quest-shell p-6">
-          <div class="text-2xl font-black opacity-90">5) Pokédex Entry: Boyfriendmon</div>
+        <!-- Pokedex -->
+        <section class="glass rounded-3xl p-6">
+          <div class="text-2xl font-black text-slate-800/80">5) Pokédex Entry: Boyfriendmon</div>
           <div class="mt-4 rounded-2xl border border-white/60 bg-white/70 p-4">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <div class="font-black opacity-90 text-lg">Boyfriendmon</div>
-                <div class="text-sm font-semibold opacity-80 mt-1">Type: <b>Electric / Fairy</b></div>
-                <div class="text-sm font-semibold opacity-80">Ability: <b>Makes Me Smile</b></div>
-                <div class="text-sm font-semibold opacity-80">Habitat: <b>My heart (permanent residence)</b></div>
+                <div class="font-black text-slate-800/80 text-lg">Boyfriendmon</div>
+                <div class="text-sm font-semibold text-slate-700/80 mt-1">Type: <b>Electric / Fairy</b></div>
+                <div class="text-sm font-semibold text-slate-700/80">Ability: <b>Makes Me Smile</b></div>
+                <div class="text-sm font-semibold text-slate-700/80">Habitat: <b>My heart (permanent residence)</b></div>
               </div>
               <div class="text-4xl">⚡💖</div>
             </div>
-            <div class="mt-3 text-sm font-semibold opacity-90">
+            <div class="mt-3 text-sm font-semibold text-slate-800/80">
               Pokédex: “Known to boost happiness instantly. If spotted, expect uncontrollable laughter and sudden date plans.”
             </div>
           </div>
         </section>
 
-        <!-- Fusion Finale (kept) -->
-        <section class="quest-shell p-6">
-          <div class="text-2xl font-black opacity-90">6) Fusion Finale: Saga → Capture Screen</div>
-          <div class="text-sm font-semibold opacity-80 mt-1">
+        <!-- Fusion Finale -->
+        <section class="glass rounded-3xl p-6">
+          <div class="text-2xl font-black text-slate-800/80">6) Fusion Finale: Saga → Capture Screen</div>
+          <div class="text-sm font-semibold text-slate-700/80 mt-1">
             Advance the saga… then the “capture” appears.
           </div>
 
           <div class="mt-4 rounded-2xl border border-white/60 bg-white/70 p-5">
             <div id="sagaView">
               <div class="flex items-center justify-between gap-3">
-                <div class="font-black opacity-90">Saga: <span id="sagaTitle">Love Beyond the Multiverse</span></div>
-                <div class="text-xs font-black opacity-70">Chapter <span id="sagaChapter">I</span>/III</div>
+                <div class="font-black text-slate-800/80">Saga: <span id="sagaTitle">Love Beyond the Multiverse</span></div>
+                <div class="text-xs font-black text-slate-700/70">Chapter <span id="sagaChapter">I</span>/III</div>
               </div>
 
-              <div class="mt-3 text-sm font-semibold opacity-90" id="sagaText">
+              <div class="mt-3 text-sm font-semibold text-slate-800/80" id="sagaText">
                 I — “We met and my life got better.”
               </div>
 
               <button id="advanceSaga"
                 class="mt-4 rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-                style="background: linear-gradient(135deg, var(--accent3), var(--accent2));">
+                style="background: linear-gradient(135deg, #6366f1, #ec4899);">
                 Advance Saga
               </button>
             </div>
 
             <div id="captureView" class="hidden">
-              <div class="font-black opacity-90 text-lg">Throw the Love Ball?</div>
-              <div class="text-sm font-semibold opacity-80 mt-1">Two options. Both are yes-coded.</div>
+              <div class="font-black text-slate-800/80 text-lg">Throw the Love Ball?</div>
+              <div class="text-sm font-semibold text-slate-700/80 mt-1">Two options. Both are yes-coded.</div>
 
               <div class="mt-4 flex flex-wrap gap-3">
                 <button id="throwLoveBall"
                   class="rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-                  style="background: linear-gradient(135deg, var(--accent1), #f59e0b);">
+                  style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
                   YES
                 </button>
                 <button id="throwShinyBall"
@@ -1109,32 +853,32 @@
                 </button>
               </div>
 
-              <div class="mt-3 text-sm font-semibold opacity-80" id="captureMsg">
+              <div class="mt-3 text-sm font-semibold text-slate-700/80" id="captureMsg">
                 (Still locked until the boss is defeated 😈)
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Booster pack (kept) -->
-        <section class="quest-shell p-6">
+        <!-- Booster pack -->
+        <section class="glass rounded-3xl p-6">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <div class="text-2xl font-black opacity-90">Bonus: Open a Booster Pack</div>
-              <div class="text-sm font-semibold opacity-80 mt-1">
+              <div class="text-2xl font-black text-slate-800/80">Bonus: Open a Booster Pack</div>
+              <div class="text-sm font-semibold text-slate-700/80 mt-1">
                 It reveals the final question card.
               </div>
             </div>
             <button id="openBooster"
               class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, #f59e0b, var(--accent2));">
+              style="background: linear-gradient(135deg, #f59e0b, #ec4899);">
               Open Booster
             </button>
           </div>
 
           <div id="boosterResult" class="mt-4 hidden rounded-2xl border border-white/60 bg-white/70 p-5">
-            <div class="font-black opacity-90 text-xl">✨ You pulled: “Will You Be My Valentine?”</div>
-            <div class="text-sm font-semibold opacity-80 mt-2">
+            <div class="font-black text-slate-800/80 text-xl">✨ You pulled: “Will You Be My Valentine?”</div>
+            <div class="text-sm font-semibold text-slate-700/80 mt-2">
               Congratulations. This is the rarest pull. (And also mandatory.) 💘
             </div>
           </div>
@@ -1144,11 +888,11 @@
     </div>
   </div>
 
-  <!-- DATE MODAL (kept) -->
+  <!-- DATE MODAL -->
   <div id="dateModal" class="modal-backdrop">
     <div class="glass rounded-3xl w-full max-w-3xl p-6">
       <div class="flex items-center justify-between gap-3">
-        <div class="text-2xl font-black opacity-90">Choose a Date (Spell Cards)</div>
+        <div class="text-2xl font-black text-slate-800/80">Choose a Date (Spell Cards)</div>
         <button id="closeDateModal" class="rounded-full px-4 py-2 font-extrabold bg-white/80 border border-white/60 shadow active:scale-95 transition">
           Close
         </button>
@@ -1156,39 +900,39 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
         <div class="tcg-card p-4">
-          <div class="font-black opacity-90">Cozy Date — Sorcery</div>
-          <div class="text-xs font-black opacity-70 mt-1">Cost: ☕ <span class="mana-pip">1</span> ❤️ <span class="mana-pip">1</span> 🧸</div>
-          <div class="text-sm font-semibold opacity-80 mt-3">
+          <div class="font-black text-slate-800/80">Cozy Date — Sorcery</div>
+          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: ☕ <span class="mana-pip">1</span> ❤️ <span class="mana-pip">1</span> 🧸</div>
+          <div class="text-sm font-semibold text-slate-700/80 mt-3">
             “Create 2 Cuddle tokens. Draw a movie.”
           </div>
           <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
-            style="background: linear-gradient(135deg, var(--accent1), #60a5fa);"
+            style="background: linear-gradient(135deg, #fb7185, #60a5fa);"
             data-spell="Cozy Date" data-cost="2">
             Cast this
           </button>
         </div>
 
         <div class="tcg-card p-4">
-          <div class="font-black opacity-90">Fancy Date — Instant</div>
-          <div class="text-xs font-black opacity-70 mt-1">Cost: 🌹 <span class="mana-pip">2</span> ❤️ <span class="mana-pip">1</span> ✨</div>
-          <div class="text-sm font-semibold opacity-80 mt-3">
+          <div class="font-black text-slate-800/80">Fancy Date — Instant</div>
+          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: 🌹 <span class="mana-pip">2</span> ❤️ <span class="mana-pip">1</span> ✨</div>
+          <div class="text-sm font-semibold text-slate-700/80 mt-3">
             “Go somewhere cute. Add dessert. Gain +10 happiness.”
           </div>
           <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
-            style="background: linear-gradient(135deg, var(--accent2), #f59e0b);"
+            style="background: linear-gradient(135deg, #ec4899, #f59e0b);"
             data-spell="Fancy Date" data-cost="3">
             Cast this
           </button>
         </div>
 
         <div class="tcg-card p-4">
-          <div class="font-black opacity-90">Chaos Date — Enchantment</div>
-          <div class="text-xs font-black opacity-70 mt-1">Cost: 🎮 <span class="mana-pip">2</span> ❤️ <span class="mana-pip">2</span> 🍟</div>
-          <div class="text-sm font-semibold opacity-80 mt-3">
+          <div class="font-black text-slate-800/80">Chaos Date — Enchantment</div>
+          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: 🎮 <span class="mana-pip">2</span> ❤️ <span class="mana-pip">2</span> 🍟</div>
+          <div class="text-sm font-semibold text-slate-700/80 mt-3">
             “Roll a d20. Whatever happens, it becomes a core memory.”
           </div>
           <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
-            style="background: linear-gradient(135deg, var(--accent3), #22c55e);"
+            style="background: linear-gradient(135deg, #6366f1, #22c55e);"
             data-spell="Chaos Date" data-cost="4">
             Cast this
           </button>
@@ -1197,91 +941,64 @@
     </div>
   </div>
 
-  <!-- ✅ NEW: NO BOSS FIGHT MODAL -->
-  <div id="noBossModal" class="modal-backdrop">
-    <div id="noBossCard">
-      <div class="px-6 py-4 flex items-center justify-between border-b border-white/10">
-        <div class="text-white font-black text-lg">🖤 NO BOSS FIGHT — “The Heart That Refuses”</div>
-        <div class="text-white/70 text-xs font-black">Move: WASD/Arrows • Shoot: Space/Tap</div>
-      </div>
-
-      <div class="px-6 py-4">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-          <div>
-            <div class="text-xs font-black text-white/80 mb-1">YOU 💞</div>
-            <div class="h-3 rounded-full bg-white/10 border border-white/10 overflow-hidden">
-              <div id="noPlayerHPBar" class="h-full w-full bg-gradient-to-r from-rose-500 to-pink-500"></div>
-            </div>
-          </div>
-          <div>
-            <div class="text-xs font-black text-white/80 mb-1">NO HEART 🖤</div>
-            <div class="h-3 rounded-full bg-white/10 border border-white/10 overflow-hidden">
-              <div id="noBossHPBar" class="h-full w-full bg-gradient-to-r from-fuchsia-500 to-indigo-500"></div>
-            </div>
-          </div>
-          <div>
-            <div class="text-xs font-black text-white/80 mb-1">TIP</div>
-            <div class="text-xs font-semibold text-white/70">Circle strafe + spam Space 😤</div>
-          </div>
-        </div>
-
-        <div class="relative rounded-2xl overflow-hidden border border-white/10">
-          <canvas id="noBossCanvas"></canvas>
-
-          <div id="noBossOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
-            <div class="text-white drop-shadow-lg">
-              <div class="text-4xl font-extrabold">YOU PRESSED “NO” 😳</div>
-              <div class="text-sm font-semibold mt-2">The NO heart escaped… and it’s MAD.</div>
-            </div>
-          </div>
-
-          <button id="noBossStart"
-            class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-            style="background: linear-gradient(135deg, #111827, #7c3aed, #ec4899);">
-            Start NO Boss Fight
-          </button>
-        </div>
-
-        <div class="mt-3 text-sm font-semibold text-white/75" id="noBossMsg">
-          Beat the NO heart to “clear the doubt” (then… go click YES).
-        </div>
-      </div>
-    </div>
-  </div>
-
 <script>
-  // =========================================================
-  // Floating hearts & powerups (kept) + NEW petals layer
-  // =========================================================
+  // =======================
+  // PERF / LAG FIXES (NEW)
+  // =======================
+  const PERF = (() => {
+    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const cores = navigator.hardwareConcurrency || 4;
+    const mem = navigator.deviceMemory || 4;
+    const lowEnd = cores <= 4 || mem <= 4;
+    return {
+      reduceMotion,
+      lowEnd,
+      heartInterval: reduceMotion ? 900 : (lowEnd ? 420 : 260),
+      powerInterval: reduceMotion ? 1500 : (lowEnd ? 1100 : 750),
+      cloudInterval: reduceMotion ? 2600 : (lowEnd ? 2100 : 1700),
+      maxHearts: lowEnd ? 40 : 80,
+      maxPowerups: lowEnd ? 18 : 36,
+      maxClouds: lowEnd ? 6 : 10
+    };
+  })();
+
+  // ========== Floating hearts & powerups ==========
   const heartsLayer = document.getElementById("hearts");
   const powerupsLayer = document.getElementById("powerups");
-  const petalsLayer = document.getElementById("petals");
+
+  function capChildren(el, max){
+    while (el.childElementCount > max) {
+      el.removeChild(el.firstElementChild);
+    }
+  }
 
   function spawnHeart() {
+    capChildren(heartsLayer, PERF.maxHearts);
     const el = document.createElement("span");
     el.className = "heart";
     el.textContent = Math.random() > 0.25 ? "💗" : "💖";
     const left = Math.random() * 100;
-    const size = 14 + Math.random() * 28;
-    const dur  = 5 + Math.random() * 7;
+    const size = 14 + Math.random() * 24;
+    const dur  = PERF.lowEnd ? (4.5 + Math.random() * 5) : (5 + Math.random() * 7);
     const drift = (Math.random() * 60 - 30) + "px";
     el.style.left = left + "vw";
     el.style.fontSize = size + "px";
-    el.style.opacity = (0.30 + Math.random() * 0.50).toFixed(2);
+    el.style.opacity = (0.28 + Math.random() * 0.50).toFixed(2);
     el.style.animationDuration = dur + "s";
     el.style.setProperty("--drift", drift);
     heartsLayer.appendChild(el);
-    setTimeout(() => el.remove(), dur * 1000 + 100);
+    setTimeout(() => el.remove(), dur * 1000 + 120);
   }
 
   function spawnPowerup(){
+    capChildren(powerupsLayer, PERF.maxPowerups);
     const el = document.createElement("span");
     el.className = "powerup";
     const items = ["⭐","🪙","✨","💖","🎮","💌","🌹"];
     el.textContent = items[Math.floor(Math.random() * items.length)];
     const left = Math.random() * 100;
-    const size = 14 + Math.random() * 22;
-    const dur  = 6 + Math.random() * 8;
+    const size = 14 + Math.random() * 18;
+    const dur  = PERF.lowEnd ? (5.5 + Math.random() * 5) : (6 + Math.random() * 8);
     const drift = (Math.random() * 80 - 40) + "px";
     const rot = (Math.random() * 160 - 80) + "deg";
     el.style.left = left + "vw";
@@ -1290,47 +1007,10 @@
     el.style.setProperty("--drift", drift);
     el.style.setProperty("--rot", rot);
     powerupsLayer.appendChild(el);
-    setTimeout(() => el.remove(), dur * 1000 + 200);
+    setTimeout(() => el.remove(), dur * 1000 + 220);
   }
 
-  let petalsOn = false;
-  let petalsTimer = null;
-  function spawnPetal(){
-    const el = document.createElement("span");
-    el.className = "petal";
-    const items = ["🌸","🌷","🌹"];
-    el.textContent = items[Math.floor(Math.random() * items.length)];
-    const left = Math.random() * 100;
-    const size = 14 + Math.random() * 20;
-    const dur  = 6 + Math.random() * 8;
-    const drift = (Math.random() * 80 - 40) + "px";
-    const rot = (Math.random() * 360 - 180) + "deg";
-    el.style.left = left + "vw";
-    el.style.fontSize = size + "px";
-    el.style.animationDuration = dur + "s";
-    el.style.setProperty("--drift", drift);
-    el.style.setProperty("--rot", rot);
-    petalsLayer.appendChild(el);
-    setTimeout(() => el.remove(), dur * 1000 + 250);
-  }
-  function setPetalsMode(on){
-    petalsOn = on;
-    if (petalsTimer) clearInterval(petalsTimer);
-    petalsTimer = null;
-    if (on){
-      for (let i=0;i<10;i++) spawnPetal();
-      petalsTimer = setInterval(spawnPetal, 420);
-    }
-  }
-
-  for (let i = 0; i < 14; i++) spawnHeart();
-  setInterval(spawnHeart, 220);
-  for (let i = 0; i < 10; i++) spawnPowerup();
-  setInterval(spawnPowerup, 600);
-
-  // =========================================================
-  // Pixel clouds (kept)
-  // =========================================================
+  // ========== ✅ Pixel clouds ==========
   const pixelCloudsLayer = document.getElementById("pixelClouds");
 
   const pixelCloudSvg = encodeURIComponent(`
@@ -1352,10 +1032,11 @@
   `);
 
   function spawnPixelCloud(){
+    capChildren(pixelCloudsLayer, PERF.maxClouds);
     const el = document.createElement("div");
     el.className = "pixel-cloud";
     const top = (Math.random() * 55) + "vh";
-    const dur = (18 + Math.random() * 18) + "s";
+    const dur = (PERF.lowEnd ? (16 + Math.random() * 16) : (18 + Math.random() * 18)) + "s";
     const scale = (0.55 + Math.random() * 0.65).toFixed(2);
     el.style.setProperty("--top", top);
     el.style.setProperty("--s", scale);
@@ -1365,12 +1046,30 @@
     setTimeout(() => el.remove(), parseFloat(dur) * 1000 + 300);
   }
 
-  for (let i=0;i<6;i++) spawnPixelCloud();
-  setInterval(spawnPixelCloud, 1700);
+  // Start/stop ambient effects to avoid lag in background tabs
+  let ambientTimers = [];
+  function startAmbientFX(){
+    stopAmbientFX();
+    // initial burst (smaller on low end)
+    for (let i = 0; i < (PERF.lowEnd ? 8 : 14); i++) spawnHeart();
+    for (let i = 0; i < (PERF.lowEnd ? 6 : 10); i++) spawnPowerup();
+    for (let i = 0; i < (PERF.lowEnd ? 4 : 6); i++) spawnPixelCloud();
 
-  // =========================================================
-  // Mana bar (kept)
-  // =========================================================
+    ambientTimers.push(setInterval(spawnHeart, PERF.heartInterval));
+    ambientTimers.push(setInterval(spawnPowerup, PERF.powerInterval));
+    ambientTimers.push(setInterval(spawnPixelCloud, PERF.cloudInterval));
+  }
+  function stopAmbientFX(){
+    ambientTimers.forEach(t => clearInterval(t));
+    ambientTimers = [];
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopAmbientFX();
+    else startAmbientFX();
+  });
+  startAmbientFX();
+
+  // ========== Mana bar ==========
   const manaBarInner = document.getElementById("manaBarInner");
   const manaPctEl = document.getElementById("manaPct");
 
@@ -1385,37 +1084,7 @@
   window.addEventListener("scroll", updateMana, { passive: true });
   updateMana();
 
-  // =========================================================
-  // NEW: Day/Night mode toggle + auto-set + persistence
-  // =========================================================
-  const dayNightBtn = document.getElementById("dayNightBtn");
-  const modeLabel = document.getElementById("modeLabel");
-
-  function setMode(night){
-    document.body.classList.toggle("night-mode", !!night);
-    localStorage.setItem("val_mode", night ? "night" : "day");
-    modeLabel.textContent = night ? "🌙 Night Mode" : "🌞 Day Mode";
-  }
-
-  (function initMode(){
-    const saved = localStorage.getItem("val_mode");
-    if (saved === "night") return setMode(true);
-    if (saved === "day") return setMode(false);
-
-    // auto: night if 7pm-6am
-    const h = new Date().getHours();
-    const autoNight = (h >= 19 || h < 6);
-    setMode(autoNight);
-  })();
-
-  dayNightBtn.addEventListener("click", () => {
-    setMode(!document.body.classList.contains("night-mode"));
-    try { confetti({ particleCount: 80, spread: 70, origin: { y: 0.15 } }); } catch {}
-  });
-
-  // =========================================================
-  // Shiny mode easter egg (kept)
-  // =========================================================
+  // ========== Shiny mode easter egg ==========
   const shinyStar = document.getElementById("shinyStar");
   let shinyClicks = 0;
   shinyStar.addEventListener("click", () => {
@@ -1423,15 +1092,13 @@
     if (shinyClicks >= 3){
       document.body.classList.toggle("shiny-mode");
       shinyClicks = 0;
-      try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.2 } }); } catch {}
+      try { confetti({ particleCount: PERF.lowEnd ? 70 : 120, spread: 80, origin: { y: 0.2 } }); } catch {}
     } else {
       shinyStar.animate([{transform:"scale(1)"},{transform:"scale(1.2)"},{transform:"scale(1)"}], {duration:260});
     }
   });
 
-  // =========================================================
-  // GIF loader (kept)
-  // =========================================================
+  // ========== GIF loader (generic) ==========
   function setImageTryFor(imgEl, urls) {
     let i = 0;
     const tryNext = () => {
@@ -1445,9 +1112,7 @@
     tryNext();
   }
 
-  // =========================================================
-  // Valentine GIF loader (kept)
-  // =========================================================
+  // ========== Valentine GIF loader ==========
   const valImage = document.getElementById("valImage");
   const hint = document.getElementById("hint");
 
@@ -1462,16 +1127,14 @@
   };
   setImageTryFor(valImage, GIFS.start);
 
-  // Blackhole GIF
+  // ✅ Blackhole GIF (shows during phase2 pull) - uses YOUR gif first
   const blackholeGif = document.getElementById("blackholeGif");
   const BLACKHOLE_GIFS = [
     "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif"
   ];
   setImageTryFor(blackholeGif, BLACKHOLE_GIFS);
 
-  // =========================================================
-  // MUSIC (kept)
-  // =========================================================
+  // ========== ✅ MUSIC (YES + NO + Boss fight) ==========
   function playGlueSong() {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1579,17 +1242,16 @@
         { note: "D7", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 },
       ];
 
-      const t1 = schedule(lead,    { type: "triangle", volume: 0.14, offset: 0.00, detune: +4 });
-      const t2 = schedule(harmony, { type: "sine",     volume: 0.10, offset: 0.02, detune: -3 });
-      const t3 = schedule(bass,    { type: "square",   volume: 0.06, offset: 0.00, detune:  0, toDelay: false });
-      const t4 = schedule(sparkle, { type: "sine",     volume: 0.07, offset: 0.10, detune: +6 });
+      schedule(lead,    { type: "triangle", volume: 0.14, offset: 0.00, detune: +4 });
+      schedule(harmony, { type: "sine",     volume: 0.10, offset: 0.02, detune: -3 });
+      schedule(bass,    { type: "square",   volume: 0.06, offset: 0.00, detune:  0, toDelay: false });
+      const end = schedule(sparkle, { type: "sine", volume: 0.07, offset: 0.10, detune: +6 });
 
-      const end = Math.max(t1, t2, t3, t4);
       setTimeout(() => ctx.close().catch(() => {}), Math.ceil((end - now + 0.35) * 1000));
     } catch {}
   }
 
-  // battle loop music (kept)
+  // Battle loop music (used for boss fight + NO sting)
   let battleCtx = null;
   let battleMaster = null;
   let battleInterval = null;
@@ -1723,9 +1385,7 @@
     }
   }
 
-  // =========================================================
-  // Lock YES/NO until boss beaten (kept)
-  // =========================================================
+  // ========== Lock YES/NO until boss beaten ==========
   const yesBtn = document.getElementById("yesBtn");
   const noBtn = document.getElementById("noBtn");
   let yesLocked = true;
@@ -1758,9 +1418,7 @@
   }
   lockYesNo();
 
-  // =========================================================
-  // Begin Event scroll (kept)
-  // =========================================================
+  // ========== Begin Event ==========
   const beginEvent = document.getElementById("beginEvent");
   const bossStartBtn = document.getElementById("bossStart");
   beginEvent.addEventListener("click", () => {
@@ -1768,11 +1426,107 @@
     bossStartBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:520});
   });
 
-  // =========================================================
-  // YES handler (kept)
-  // =========================================================
+  // ================================
+  // ✅ NO runaway mode (NEW)
+  // ================================
+  let noRunActive = false;
+  let noRunTimer = null;
+  let noPlaceholder = null;
+
+  function activateNoRunaway() {
+    if (noRunActive) return;
+    noRunActive = true;
+
+    const rect = noBtn.getBoundingClientRect();
+    noPlaceholder = document.createElement("div");
+    noPlaceholder.style.width = rect.width + "px";
+    noPlaceholder.style.height = rect.height + "px";
+    noPlaceholder.style.flex = "0 0 auto";
+    noBtn.parentNode.insertBefore(noPlaceholder, noBtn);
+
+    document.body.appendChild(noBtn);
+    noBtn.classList.add("no-runaway");
+    noBtn.style.left = rect.left + "px";
+    noBtn.style.top  = rect.top  + "px";
+
+    noBtn.style.transform = "scale(1.35)";
+    noBtn.style.opacity = "1";
+    noBtn.style.cursor = "pointer";
+
+    jumpNoBtn(true);
+    noRunTimer = setInterval(() => jumpNoBtn(false), PERF.lowEnd ? 800 : 650);
+
+    noBtn.addEventListener("pointerenter", onNoHoverJump);
+    noBtn.addEventListener("pointerdown", onNoHoverJump);
+  }
+
+  function onNoHoverJump() {
+    if (!noRunActive) return;
+    jumpNoBtn(true);
+  }
+
+  function jumpNoBtn(instant) {
+    if (!noRunActive) return;
+
+    const margin = 12;
+    const r = noBtn.getBoundingClientRect();
+    const maxX = Math.max(margin, window.innerWidth  - r.width  - margin);
+    const maxY = Math.max(margin, window.innerHeight - r.height - margin);
+
+    const x = margin + Math.random() * (maxX - margin);
+    const y = margin + Math.random() * (maxY - margin);
+
+    const curLeft = parseFloat(noBtn.style.left || r.left);
+    const curTop  = parseFloat(noBtn.style.top  || r.top);
+
+    try {
+      noBtn.animate(
+        [
+          { left: curLeft + "px", top: curTop + "px", transform: "scale(1.35) rotate(0deg)" },
+          { left: x + "px",      top: y + "px",      transform: "scale(1.35) rotate(" + (Math.random()*16 - 8).toFixed(1) + "deg)" }
+        ],
+        { duration: instant ? 220 : 360, easing: "cubic-bezier(.2,.9,.2,1)", fill: "forwards" }
+      );
+    } catch {
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+    }
+
+    noBtn.style.left = x + "px";
+    noBtn.style.top  = y + "px";
+  }
+
+  function deactivateNoRunaway() {
+    if (!noRunActive) return;
+    noRunActive = false;
+
+    if (noRunTimer) clearInterval(noRunTimer);
+    noRunTimer = null;
+
+    noBtn.removeEventListener("pointerenter", onNoHoverJump);
+    noBtn.removeEventListener("pointerdown", onNoHoverJump);
+
+    noBtn.classList.remove("no-runaway");
+    noBtn.style.position = "";
+    noBtn.style.left = "";
+    noBtn.style.top = "";
+    noBtn.style.zIndex = "";
+    noBtn.style.transform = "";
+
+    if (noPlaceholder && noPlaceholder.parentNode) {
+      noPlaceholder.parentNode.insertBefore(noBtn, noPlaceholder);
+      noPlaceholder.remove();
+    }
+    noPlaceholder = null;
+  }
+
+  // ========== YES/NO handlers ==========
   let yesFinalTimer = null;
+
   yesBtn.addEventListener("click", () => {
+    // ✅ stop NO from running around if YES is pressed
+    deactivateNoRunaway();
+
     if (yesLocked){
       hint.textContent = "YES is locked 😈 Beat the boss first!";
       yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
@@ -1781,461 +1535,45 @@
 
     stopBattleMusic();
     playGlueSong();
+
     setImageTryFor(valImage, GIFS.yesMain);
     hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
     noBtn.style.display = "none";
-    try { confetti({ particleCount: 250, spread: 80, origin: { y: 0.6 } }); } catch {}
+    try { confetti({ particleCount: PERF.lowEnd ? 120 : 250, spread: 80, origin: { y: 0.6 } }); } catch {}
     if (yesFinalTimer) clearTimeout(yesFinalTimer);
     yesFinalTimer = setTimeout(() => setImageTryFor(valImage, GIFS.yesFinal), 2000);
   });
 
-  // =========================================================
-  // ✅ NEW: NO handler becomes ENTIRE boss fight
-  // =========================================================
-  const noBossModal = document.getElementById("noBossModal");
-  const noBossStart = document.getElementById("noBossStart");
-  const noBossOverlay = document.getElementById("noBossOverlay");
-  const noBossMsg = document.getElementById("noBossMsg");
-  const noBossCanvas = document.getElementById("noBossCanvas");
-  const noCtx = noBossCanvas.getContext("2d");
-
-  const noPlayerHPBar = document.getElementById("noPlayerHPBar");
-  const noBossHPBar = document.getElementById("noBossHPBar");
-
-  function fitCanvasToCSS(canvas, ctx) {
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.floor(rect.width * dpr);
-    canvas.height = Math.floor(rect.height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  // Shared keys (kept)
-  const keys = new Set();
-  window.addEventListener("keydown", (e) => {
-    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"," "].includes(e.key)) {
-      keys.add(e.key);
-      if (e.key === " ") e.preventDefault();
-    }
-  });
-  window.addEventListener("keyup", (e) => keys.delete(e.key));
-
-  // NO boss touch controls
-  let noTouchActive=false, noTouchX=0, noTouchY=0;
-  noBossCanvas.addEventListener("pointerdown", (e) => {
-    noTouchActive = true;
-    const r = noBossCanvas.getBoundingClientRect();
-    noTouchX = e.clientX - r.left;
-    noTouchY = e.clientY - r.top;
-    if (noGame.running) noShoot();
-  });
-  noBossCanvas.addEventListener("pointermove", (e) => {
-    if (!noTouchActive) return;
-    const r = noBossCanvas.getBoundingClientRect();
-    noTouchX = e.clientX - r.left;
-    noTouchY = e.clientY - r.top;
-  });
-  window.addEventListener("pointerup", () => (noTouchActive = false));
-
-  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-  function dist2(ax, ay, bx, by){ const dx=ax-bx, dy=ay-by; return dx*dx + dy*dy; }
-
-  const noGame = {
-    running:false,
-    t:0,
-    lastShot:0,
-    bullets:[],      // boss bullets
-    beams:[],        // player shots
-    particles:[],
-    player:{ x:120, y:320, r:10, hp:6, maxHp:6, inv:0 },
-    boss:{ x:520, y:120, r:24, hp:120, maxHp:120, vx:3.4, vy:2.7, rage:1 }
-  };
-
-  function setNoBars(){
-    noPlayerHPBar.style.width = (noGame.player.hp/noGame.player.maxHp*100) + "%";
-    noBossHPBar.style.width = (noGame.boss.hp/noGame.boss.maxHp*100) + "%";
-  }
-
-  function resetNoFight(){
-    noGame.running = false;
-    noGame.t = 0;
-    noGame.lastShot = 0;
-    noGame.bullets.length = 0;
-    noGame.beams.length = 0;
-    noGame.particles.length = 0;
-
-    noGame.player.x = 160; noGame.player.y = 360;
-    noGame.player.hp = noGame.player.maxHp = 6;
-    noGame.player.inv = 0;
-
-    noGame.boss.x = 620; noGame.boss.y = 140;
-    noGame.boss.hp = noGame.boss.maxHp = 120;
-    noGame.boss.vx = 3.4; noGame.boss.vy = 2.7;
-    noGame.boss.rage = 1;
-
-    setNoBars();
-    noBossOverlay.style.opacity = "1";
-    noBossStart.style.opacity = "1";
-    noBossStart.style.pointerEvents = "auto";
-    noBossStart.textContent = "Start NO Boss Fight";
-    noBossMsg.textContent = "Beat the NO heart to “clear the doubt” (then… go click YES).";
-  }
-
-  function spawnNoParticle(x,y,emoji){
-    noGame.particles.push({
-      x,y,
-      vx:(Math.random()*2-1)*1.3,
-      vy:(Math.random()*2-1)*1.3 - 0.8,
-      life: 40 + Math.random()*20,
-      emoji
-    });
-  }
-
-  function noShoot(){
-    const now = performance.now();
-    if (now - noGame.lastShot < 120) return;
-    noGame.lastShot = now;
-    noGame.beams.push({ x:noGame.player.x, y:noGame.player.y-12, vx:0, vy:-7.8, r:6 });
-    spawnNoParticle(noGame.player.x, noGame.player.y-10, "💞");
-  }
-
-  function fireNoBullet(angle, speed, kind="no"){
-    noGame.bullets.push({
-      x:noGame.boss.x,
-      y:noGame.boss.y,
-      vx:Math.cos(angle)*speed,
-      vy:Math.sin(angle)*speed,
-      r: kind === "orb" ? 9 : 7,
-      kind
-    });
-  }
-
-  function drawHeartShape(ctx, x, y, size){
-    ctx.beginPath();
-    ctx.moveTo(x, y + size*0.25);
-    ctx.bezierCurveTo(x - size, y - size*0.35, x - size*0.6, y - size, x, y - size*0.45);
-    ctx.bezierCurveTo(x + size*0.6, y - size, x + size, y - size*0.35, x, y + size*0.25);
-    ctx.closePath();
-  }
-  function roundRectPath(ctx, x, y, w, h, r) {
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.arcTo(x + w, y, x + w, y + h, rr);
-    ctx.arcTo(x + w, y + h, x, y + h, rr);
-    ctx.arcTo(x, y + h, x, y, rr);
-    ctx.arcTo(x, y, x + w, y, rr);
-    ctx.closePath();
-  }
-
-  function updateNo(dt){
-    noGame.t += dt;
-
-    const w = noBossCanvas.getBoundingClientRect().width;
-    const h = noBossCanvas.getBoundingClientRect().height;
-
-    // player move
-    let mx=0,my=0;
-    if (keys.has("ArrowLeft") || keys.has("a")) mx -= 1;
-    if (keys.has("ArrowRight") || keys.has("d")) mx += 1;
-    if (keys.has("ArrowUp") || keys.has("w")) my -= 1;
-    if (keys.has("ArrowDown") || keys.has("s")) my += 1;
-
-    if (noTouchActive){
-      const dx = noTouchX - noGame.player.x;
-      const dy = noTouchY - noGame.player.y;
-      mx = clamp(dx/30, -1, 1);
-      my = clamp(dy/30, -1, 1);
-    }
-
-    const speed = 4.4;
-    noGame.player.x = clamp(noGame.player.x + mx*speed, 18, w-18);
-    noGame.player.y = clamp(noGame.player.y + my*speed, 80, h-18);
-
-    if (keys.has(" ")) noShoot();
-
-    // boss “runs around” + gets angrier as HP drops
-    const hpPct = noGame.boss.hp / noGame.boss.maxHp;
-    noGame.boss.rage = 1 + Math.floor((1 - hpPct) * 4);
-
-    noGame.boss.x += noGame.boss.vx * (1 + noGame.boss.rage*0.08);
-    noGame.boss.y += noGame.boss.vy * (1 + noGame.boss.rage*0.08);
-
-    if (noGame.boss.x < 24 || noGame.boss.x > w-24) noGame.boss.vx *= -1;
-    if (noGame.boss.y < 24 || noGame.boss.y > h*0.55) noGame.boss.vy *= -1;
-
-    // boss shoots at you
-    const shootRate = 0.18 + noGame.boss.rage*0.05; // probability per tick window
-    if (Math.random() < shootRate * dt * 8.0){
-      const ang = Math.atan2(noGame.player.y - noGame.boss.y, noGame.player.x - noGame.boss.x);
-      const spread = 0.22 + noGame.boss.rage*0.06;
-      const speedB = 2.8 + noGame.boss.rage*0.55;
-      fireNoBullet(ang + (Math.random()*2-1)*spread, speedB, "no");
-      if (noGame.boss.rage >= 4 && Math.random() < 0.25){
-        // occasional ring burst
-        const n = 8 + Math.floor(Math.random()*6);
-        for (let i=0;i<n;i++){
-          fireNoBullet((Math.PI*2)*(i/n), 2.0 + noGame.boss.rage*0.25, "orb");
-        }
-        spawnNoParticle(noGame.boss.x, noGame.boss.y, "🖤");
-      }
-    }
-
-    // move bullets
-    for (const b of noGame.bullets){ b.x += b.vx; b.y += b.vy; }
-    noGame.bullets = noGame.bullets.filter(b => b.x>-70 && b.x<w+70 && b.y>-70 && b.y<h+70);
-
-    // move beams
-    for (const p of noGame.beams){ p.x += p.vx; p.y += p.vy; }
-    noGame.beams = noGame.beams.filter(p => p.y>-50);
-
-    // particles
-    for (const pt of noGame.particles){
-      pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.03; pt.life -= 1;
-    }
-    noGame.particles = noGame.particles.filter(pt => pt.life > 0);
-
-    // beam hits boss
-    for (let i=noGame.beams.length-1;i>=0;i--){
-      const p = noGame.beams[i];
-      if (dist2(p.x,p.y, noGame.boss.x,noGame.boss.y) < (p.r+noGame.boss.r)**2){
-        noGame.beams.splice(i,1);
-        noGame.boss.hp = Math.max(0, noGame.boss.hp - 3);
-        spawnNoParticle(noGame.boss.x, noGame.boss.y, "✨");
-        spawnNoParticle(noGame.boss.x, noGame.boss.y, "💘");
-        setNoBars();
-        if (noGame.boss.hp <= 0) winNoFight();
-      }
-    }
-
-    // bullets hit player
-    if (noGame.player.inv > 0) noGame.player.inv -= dt;
-    for (let i=noGame.bullets.length-1;i>=0;i--){
-      const b = noGame.bullets[i];
-      if (dist2(b.x,b.y, noGame.player.x,noGame.player.y) < (b.r+noGame.player.r)**2){
-        noGame.bullets.splice(i,1);
-        if (noGame.player.inv <= 0){
-          noGame.player.hp = Math.max(0, noGame.player.hp - 1);
-          noGame.player.inv = 0.9;
-          spawnNoParticle(noGame.player.x, noGame.player.y, "💥");
-          spawnNoParticle(noGame.player.x, noGame.player.y, "💔");
-          setNoBars();
-          if (noGame.player.hp <= 0) loseNoFight();
-        }
-      }
-    }
-  }
-
-  function drawNo(){
-    const w = noBossCanvas.getBoundingClientRect().width;
-    const h = noBossCanvas.getBoundingClientRect().height;
-
-    noCtx.clearRect(0,0,w,h);
-
-    // background
-    const g = noCtx.createLinearGradient(0,0,0,h);
-    g.addColorStop(0, "rgba(15,23,42,0.35)");
-    g.addColorStop(1, "rgba(15,23,42,0.72)");
-    noCtx.fillStyle = g;
-    noCtx.fillRect(0,0,w,h);
-
-    // faint stars
-    noCtx.globalAlpha = 0.35;
-    noCtx.fillStyle = "#ffffff";
-    for (let i=0;i<40;i++){
-      const sx = (i*97 + Math.floor(noGame.t*80)) % w;
-      const sy = (i*53) % Math.max(1, Math.floor(h*0.8));
-      noCtx.fillRect(sx, sy, 2, 2);
-    }
-    noCtx.globalAlpha = 1;
-
-    // boss: big heart with "NO"
-    noCtx.save();
-    noCtx.translate(noGame.boss.x, noGame.boss.y);
-    noCtx.globalAlpha = 0.96;
-    drawHeartShape(noCtx, 0, 0, 22 + noGame.boss.rage*2.5);
-    noCtx.fillStyle = "rgba(17,24,39,0.95)";
-    noCtx.fill();
-    noCtx.lineWidth = 2;
-    noCtx.strokeStyle = "rgba(236,72,153,0.45)";
-    noCtx.stroke();
-    noCtx.font = "900 14px system-ui";
-    noCtx.fillStyle = "rgba(248,250,252,0.95)";
-    noCtx.textAlign = "center";
-    noCtx.fillText("NO", 0, 6);
-    noCtx.restore();
-
-    // player heart
-    noCtx.save();
-    noCtx.translate(noGame.player.x, noGame.player.y);
-    const blink = noGame.player.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
-    noCtx.globalAlpha = blink;
-    drawHeartShape(noCtx, 0, 2, 14);
-    noCtx.fillStyle = "rgba(239,68,68,0.95)";
-    noCtx.fill();
-    noCtx.restore();
-
-    // bullets
-    for (const b of noGame.bullets){
-      noCtx.save();
-      noCtx.translate(b.x,b.y);
-      if (b.kind === "orb"){
-        noCtx.globalAlpha = 0.90;
-        noCtx.beginPath(); noCtx.arc(0,0,b.r,0,Math.PI*2);
-        noCtx.fillStyle = "rgba(124,58,237,0.95)";
-        noCtx.fill();
-      } else {
-        noCtx.globalAlpha = 0.92;
-        drawHeartShape(noCtx, 0, 0, b.r);
-        noCtx.fillStyle = "rgba(244,63,94,0.90)";
-        noCtx.fill();
-      }
-      noCtx.restore();
-    }
-
-    // beams
-    for (const p of noGame.beams){
-      noCtx.save();
-      noCtx.translate(p.x,p.y);
-      noCtx.globalAlpha = 0.90;
-      roundRectPath(noCtx, -3, -12, 6, 24, 6);
-      noCtx.fillStyle = "rgba(34,197,94,0.95)";
-      noCtx.fill();
-      noCtx.restore();
-    }
-
-    // particles
-    for (const pt of noGame.particles){
-      noCtx.globalAlpha = Math.max(0, Math.min(1, pt.life/40));
-      noCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-      noCtx.fillText(pt.emoji, pt.x, pt.y);
-    }
-    noCtx.globalAlpha = 1;
-  }
-
-  let noRaf=null, noLast=0;
-  function noLoop(ts){
-    if (!noGame.running) return;
-    if (!noLast) noLast = ts;
-    const dt = Math.min(0.033, (ts-noLast)/1000);
-    noLast = ts;
-
-    updateNo(dt);
-    drawNo();
-    noRaf = requestAnimationFrame(noLoop);
-  }
-
-  function startNoFight(){
-    fitCanvasToCSS(noBossCanvas, noCtx);
-    resetNoFight();
-
-    noGame.running = true;
-    noBossOverlay.style.opacity = "0";
-    noBossStart.style.opacity = "0";
-    noBossStart.style.pointerEvents = "none";
-
-    startBattleMusic(3);
-    updateBattleIntensity(3);
-
-    noBossMsg.textContent = "It’s running. It’s fighting. It’s chaos. (Shoot it.)";
-    try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.4 } }); } catch {}
-
-    noLast = 0;
-    noRaf = requestAnimationFrame(noLoop);
-  }
-
-  function stopNoFight(){
-    noGame.running = false;
-    if (noRaf) cancelAnimationFrame(noRaf);
-    noRaf = null;
-    stopBattleMusic();
-  }
-
-  function winNoFight(){
-    stopNoFight();
-    noBossOverlay.style.opacity = "1";
-    noBossOverlay.innerHTML = `
-      <div class="text-white drop-shadow-lg">
-        <div class="text-4xl font-extrabold">NO DEFEATED 💘</div>
-        <div class="text-sm font-semibold mt-2">Okay… now go click YES 😤💞</div>
-      </div>
-    `;
-    noBossStart.style.opacity = "1";
-    noBossStart.style.pointerEvents = "auto";
-    noBossStart.textContent = "Rematch (optional)";
-    noBossMsg.textContent = "Doubt cleared. Your destiny is YES.";
-    try { confetti({ particleCount: 220, spread: 90, origin: { y: 0.6 } }); } catch {}
-
-    // close after a beat
-    setTimeout(() => {
-      noBossModal.classList.remove("show");
-      hint.textContent = "NO tried to fight you… and lost. Click YES 😤💞";
-      yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.12)"},{transform:"scale(1)"}], {duration:700, iterations:2});
-    }, 1200);
-  }
-
-  function loseNoFight(){
-    stopNoFight();
-    noBossOverlay.style.opacity = "1";
-    noBossOverlay.innerHTML = `
-      <div class="text-white drop-shadow-lg">
-        <div class="text-4xl font-extrabold">YOU GOT BONKED 💥</div>
-        <div class="text-sm font-semibold mt-2">Try again. (It can’t win forever.)</div>
-      </div>
-    `;
-    noBossStart.style.opacity = "1";
-    noBossStart.style.pointerEvents = "auto";
-    noBossStart.textContent = "Try Again";
-    noBossMsg.textContent = "Tip: Keep moving + shoot constantly.";
-  }
-
-  noBossStart.addEventListener("click", startNoFight);
-  resetNoFight();
-
   noBtn.addEventListener("click", () => {
     if (noLocked){
       hint.textContent = "NO is locked 😈 Beat the boss first!";
-      noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.10)"},{transform:"scale(1)"}], {duration:340});
+      noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
       return;
     }
 
-    // show “NO boss” instead of just a gif
+    // keep a little "battle vibe" on NO too
+    startBattleMusic(3);
+    updateBattleIntensity(3);
+    setTimeout(() => { if (!bossGame?.running) stopBattleMusic(); }, 2200);
+
     setImageTryFor(valImage, GIFS.no);
-    hint.textContent = "You pressed NO… and it escaped. 😳";
-    noBossModal.classList.add("show");
-    noBossOverlay.style.opacity = "1";
-    noBossOverlay.innerHTML = `
-      <div class="text-white drop-shadow-lg">
-        <div class="text-4xl font-extrabold">NO RUNS AWAY 🖤</div>
-        <div class="text-sm font-semibold mt-2">Catch it in the arena.</div>
-      </div>
-    `;
-    noBossStart.textContent = "Start NO Boss Fight";
+    hint.textContent = "No? 😳 okay then CATCH ME.";
+
+    // ✅ runaway jump mode
+    activateNoRunaway();
   });
 
-  // prevent click outside closing the NO boss (it’s a “fight”)
-  noBossModal.addEventListener("click", (e) => {
-    if (e.target === noBossModal && !noGame.running){
-      // allow closing only when not running
-      noBossModal.classList.remove("show");
-    }
-  });
-
-  // =========================================================
-  // Alt art toggle (kept)
-  // =========================================================
+  // ========== Alt art toggle ==========
   const altArtBtn = document.getElementById("altArtBtn");
   const cardArt = document.getElementById("cardArt");
   let altArt = false;
   altArtBtn.addEventListener("click", () => {
     altArt = !altArt;
     cardArt.textContent = altArt ? "(ALT ART: put another photo here)" : "(Put a cute photo here later)";
-    try { confetti({ particleCount: 80, spread: 60, origin: { y: 0.25 } }); } catch {}
+    try { confetti({ particleCount: PERF.lowEnd ? 45 : 80, spread: 60, origin: { y: 0.25 } }); } catch {}
   });
 
-  // =========================================================
-  // Date modal + stack (kept)
-  // =========================================================
+  // ========== Date modal + stack ==========
   const dateModal = document.getElementById("dateModal");
   const openDateModal = document.getElementById("openDateModal");
   const closeDateModal = document.getElementById("closeDateModal");
@@ -2264,17 +1602,15 @@
       manaSpent += cost;
       manaSpentEl.textContent = String(manaSpent);
 
-      chosenDate.innerHTML = `Selected spell: <b>${s}</b><div class="mt-2 text-xs font-black opacity-70">Mana spent: <span>${manaSpent}</span></div>`;
+      chosenDate.innerHTML = `Selected spell: <b>${s}</b><div class="mt-2 text-xs font-black text-slate-700/70">Mana spent: <span>${manaSpent}</span></div>`;
       pushToStack(s);
 
       dateModal.classList.remove("show");
-      try { confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 } }); } catch {}
+      try { confetti({ particleCount: PERF.lowEnd ? 55 : 90, spread: 70, origin: { y: 0.7 } }); } catch {}
     });
   });
 
-  // =========================================================
-  // Token generator (kept)
-  // =========================================================
+  // ========== Token generator ==========
   const tokenBtn = document.getElementById("tokenBtn");
   const tokenGrid = document.getElementById("tokenGrid");
   const tokenCountEl = document.getElementById("tokenCount");
@@ -2298,13 +1634,11 @@
     const msg = tokenUnlockMessage(tokens);
     if (msg){
       tokenMsg.innerHTML = `Tokens: <b>${tokens}</b> — <span class="font-black">${msg}</span>`;
-      try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } }); } catch {}
+      try { confetti({ particleCount: PERF.lowEnd ? 80 : 120, spread: 80, origin: { y: 0.6 } }); } catch {}
     }
   });
 
-  // =========================================================
-  // Pokémon battle logic (kept)
-  // =========================================================
+  // ========== Pokémon battle logic ==========
   const battleText = document.getElementById("battleText");
   const enemyHPBar = document.getElementById("enemyHPBar");
   const youHPBar = document.getElementById("youHPBar");
@@ -2348,11 +1682,11 @@
     "Slot 5: Your shared favorite thing"
   ];
 
-  function clampHP(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 
   function setHPBars(){
-    enemyHPBar.style.width = clampHP(poke.enemyHP, 0, 100) + "%";
-    youHPBar.style.width   = clampHP(poke.youHP, 0, 100) + "%";
+    enemyHPBar.style.width = clamp(poke.enemyHP, 0, 100) + "%";
+    youHPBar.style.width   = clamp(poke.youHP, 0, 100) + "%";
   }
   setHPBars();
 
@@ -2381,7 +1715,7 @@
       { dmg: 14, text: "Valentine used Blush Blitz! Critical cuteness 😵 (-HP)" }
     ];
     const a = attacks[Math.floor(Math.random() * attacks.length)];
-    poke.youHP = clampHP(poke.youHP - a.dmg, 0, 100);
+    poke.youHP = clamp(poke.youHP - a.dmg, 0, 100);
     setHPBars();
     battleText.textContent = a.text;
 
@@ -2400,7 +1734,7 @@
     poke.inBattle = false;
     enemySprite.textContent = "💞";
     battleText.textContent = "Valentine was defeated… and wants to join you. Aww. 💖";
-    try { confetti({ particleCount: 140, spread: 85, origin: { y: 0.55 } }); } catch {}
+    try { confetti({ particleCount: PERF.lowEnd ? 90 : 140, spread: 85, origin: { y: 0.55 } }); } catch {}
     setTimeout(() => {
       poke.enemyHP = 100;
       poke.youHP = 100;
@@ -2428,8 +1762,8 @@
       const name = b.getAttribute("data-move");
       const m = moveData[name];
 
-      poke.enemyHP = clampHP(poke.enemyHP - m.dmg, 0, 100);
-      if (m.heal) poke.youHP = clampHP(poke.youHP + m.heal, 0, 100);
+      poke.enemyHP = clamp(poke.enemyHP - m.dmg, 0, 100);
+      if (m.heal) poke.youHP = clamp(poke.youHP + m.heal, 0, 100);
       if (m.stun && Math.random() < m.stun) poke.stunned = true;
 
       setHPBars();
@@ -2452,14 +1786,14 @@
     battleText.textContent = "BAG → " + it.text;
 
     if (it.effect === "heal"){
-      poke.youHP = clampHP(poke.youHP + it.amt, 0, 100);
+      poke.youHP = clamp(poke.youHP + it.amt, 0, 100);
       setHPBars();
     }
     if (it.effect === "capture"){
       const roll = Math.random();
       if (roll > 0.72){
         battleText.textContent = "The Love Ball clicked! Valentine is captured 💘 (it’s basically YES.)";
-        try { confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } }); } catch {}
+        try { confetti({ particleCount: PERF.lowEnd ? 70 : 110, spread: 75, origin: { y: 0.6 } }); } catch {}
       } else {
         setTimeout(() => enemyTurn(), 650);
       }
@@ -2488,9 +1822,7 @@
     setTimeout(() => enemyTurn(), 650);
   });
 
-  // =========================================================
-  // Saga -> Capture (kept)
-  // =========================================================
+  // ========== Saga -> Capture ==========
   const sagaChapterEl = document.getElementById("sagaChapter");
   const sagaText = document.getElementById("sagaText");
   const advanceSaga = document.getElementById("advanceSaga");
@@ -2515,7 +1847,7 @@
     if (sagaStep === 3){
       sagaView.classList.add("hidden");
       captureView.classList.remove("hidden");
-      try { confetti({ particleCount: 140, spread: 90, origin: { y: 0.55 } }); } catch {}
+      try { confetti({ particleCount: PERF.lowEnd ? 90 : 140, spread: 90, origin: { y: 0.55 } }); } catch {}
     }
   });
 
@@ -2525,27 +1857,23 @@
       return;
     }
     captureMsg.textContent = shiny ? "Shiny captured!! 💚✨ Valentine accepted!!" : "Captured!! 💘 Valentine accepted!!";
-    try { confetti({ particleCount: 220, spread: 95, origin: { y: 0.6 } }); } catch {}
+    try { confetti({ particleCount: PERF.lowEnd ? 130 : 220, spread: 95, origin: { y: 0.6 } }); } catch {}
     hint.textContent = "Okay now go click YES 😤💞";
     yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.12)"},{transform:"scale(1)"}], {duration:700, iterations:2});
   }
   throwLoveBall.addEventListener("click", () => captureAttempt(false));
   throwShinyBall.addEventListener("click", () => captureAttempt(true));
 
-  // =========================================================
-  // Booster (kept)
-  // =========================================================
+  // ========== Booster ==========
   const openBooster = document.getElementById("openBooster");
   const boosterResult = document.getElementById("boosterResult");
   openBooster.addEventListener("click", () => {
     boosterResult.classList.remove("hidden");
     boosterResult.animate([{transform:"scale(0.98)", opacity:0},{transform:"scale(1)", opacity:1}], {duration:420, easing:"cubic-bezier(.2,.9,.2,1)"});
-    try { confetti({ particleCount: 160, spread: 85, origin: { y: 0.55 } }); } catch {}
+    try { confetti({ particleCount: PERF.lowEnd ? 95 : 160, spread: 85, origin: { y: 0.55 } }); } catch {}
   });
 
-  // =========================================================
-  // Boss arena background (kept)
-  // =========================================================
+  // ========== Boss arena background image (PUT YOUR FILE NEXT TO THIS HTML) ==========
   const BOSS_BG_URL = "boss-bg.png";
   const bossBgImg = new Image();
   bossBgImg.src = BOSS_BG_URL;
@@ -2564,9 +1892,7 @@
     ctx.drawImage(img, x, y, nw, nh);
   }
 
-  // =========================================================
-  // Boss fight (your existing boss fight logic kept EXACTLY)
-  // =========================================================
+  // ========== Boss fight + platformer ==========
   const bossCanvas = document.getElementById("bossCanvas");
   const bossOverlay = document.getElementById("bossOverlay");
   const bossMsg = document.getElementById("bossMsg");
@@ -2579,7 +1905,41 @@
   const bossCtx2 = bossCanvas.getContext("2d");
   let bossRaf = null;
 
+  function fitCanvasToCSS(canvas, ctx) {
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
   fitCanvasToCSS(bossCanvas, bossCtx2);
+
+  // Shared keys
+  const keys = new Set();
+  window.addEventListener("keydown", (e) => {
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"," "].includes(e.key)) {
+      keys.add(e.key);
+      if (e.key === " ") e.preventDefault();
+    }
+  });
+  window.addEventListener("keyup", (e) => keys.delete(e.key));
+
+  // Boss touch controls
+  let bossTouchActive = false, bossTouchX = 0, bossTouchY = 0;
+  bossCanvas.addEventListener("pointerdown", (e) => {
+    bossTouchActive = true;
+    const r = bossCanvas.getBoundingClientRect();
+    bossTouchX = e.clientX - r.left;
+    bossTouchY = e.clientY - r.top;
+    if (bossGame.running) bossShoot();
+  });
+  bossCanvas.addEventListener("pointermove", (e) => {
+    if (!bossTouchActive) return;
+    const r = bossCanvas.getBoundingClientRect();
+    bossTouchX = e.clientX - r.left;
+    bossTouchY = e.clientY - r.top;
+  });
+  window.addEventListener("pointerup", () => (bossTouchActive = false));
 
   const bossGame = {
     running: false,
@@ -2597,7 +1957,7 @@
   };
 
   function clamp2(v, a, b){ return Math.max(a, Math.min(b, v)); }
-  function distBoss(ax, ay, bx, by){ const dx=ax-bx, dy=ay-by; return dx*dx + dy*dy; }
+  function dist2(ax, ay, bx, by){ const dx=ax-bx, dy=ay-by; return dx*dx + dy*dy; }
 
   function setBossBars(){
     playerHPBar.style.width = (bossGame.player.hp / bossGame.player.maxHp * 100) + "%";
@@ -2707,6 +2067,25 @@
     bossGame.phaseTimer = 0;
   }
 
+  function roundRectPath(ctx, x, y, w, h, r) {
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+  }
+
+  function drawHeartShape(ctx, x, y, size){
+    ctx.beginPath();
+    ctx.moveTo(x, y + size*0.25);
+    ctx.bezierCurveTo(x - size, y - size*0.35, x - size*0.6, y - size, x, y - size*0.45);
+    ctx.bezierCurveTo(x + size*0.6, y - size, x + size, y - size*0.35, x, y + size*0.25);
+    ctx.closePath();
+  }
+
   function drawMagolorLikeBoss(ctx, x, y, scale){
     ctx.save();
     ctx.translate(x, y);
@@ -2777,7 +2156,6 @@
     if (keys.has("ArrowUp") || keys.has("w")) my -= 1;
     if (keys.has("ArrowDown") || keys.has("s")) my += 1;
 
-    // boss touch
     if (bossTouchActive){
       const dx = bossTouchX - bossGame.player.x;
       const dy = bossTouchY - bossGame.player.y;
@@ -2880,7 +2258,7 @@
 
     for (let i = bossGame.beams.length - 1; i >= 0; i--){
       const p = bossGame.beams[i];
-      if (distBoss(p.x,p.y, bossGame.boss.x,bossGame.boss.y) < (p.r + bossGame.boss.r) ** 2){
+      if (dist2(p.x,p.y, bossGame.boss.x,bossGame.boss.y) < (p.r + bossGame.boss.r) ** 2){
         bossGame.beams.splice(i,1);
         bossGame.boss.hp = Math.max(0, bossGame.boss.hp - 2);
         spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "✨");
@@ -2893,7 +2271,7 @@
     if (bossGame.player.inv > 0) bossGame.player.inv -= dt;
     for (let i = bossGame.bullets.length - 1; i >= 0; i--){
       const b = bossGame.bullets[i];
-      if (distBoss(b.x,b.y, bossGame.player.x,bossGame.player.y) < (b.r + bossGame.player.r) ** 2){
+      if (dist2(b.x,b.y, bossGame.player.x,bossGame.player.y) < (b.r + bossGame.player.r) ** 2){
         bossGame.bullets.splice(i,1);
         if (bossGame.player.inv <= 0){
           bossGame.player.hp = Math.max(0, bossGame.player.hp - 1);
@@ -2991,24 +2369,6 @@
   }
 
   let bossLast = 0;
-
-  // boss touch controls (kept)
-  let bossTouchActive = false, bossTouchX = 0, bossTouchY = 0;
-  bossCanvas.addEventListener("pointerdown", (e) => {
-    bossTouchActive = true;
-    const r = bossCanvas.getBoundingClientRect();
-    bossTouchX = e.clientX - r.left;
-    bossTouchY = e.clientY - r.top;
-    if (bossGame.running) bossShoot();
-  });
-  bossCanvas.addEventListener("pointermove", (e) => {
-    if (!bossTouchActive) return;
-    const r = bossCanvas.getBoundingClientRect();
-    bossTouchX = e.clientX - r.left;
-    bossTouchY = e.clientY - r.top;
-  });
-  window.addEventListener("pointerup", () => (bossTouchActive = false));
-
   function bossLoop(ts){
     if (!bossGame.running) return;
     if (!bossLast) bossLast = ts;
@@ -3065,7 +2425,7 @@
     bossMsg.textContent = "Unlocked! YES + NO are now available.";
     unlockYesNo();
 
-    try { confetti({ particleCount: 220, spread: 85, origin: { y: 0.6 } }); } catch {}
+    try { confetti({ particleCount: PERF.lowEnd ? 120 : 220, spread: 85, origin: { y: 0.6 } }); } catch {}
   }
 
   function loseBossFight(){
@@ -3088,9 +2448,7 @@
   bossStartBtn.addEventListener("click", startBossFight);
   resetBossFight();
 
-  // =========================================================
-  // Platformer (kept)
-  // =========================================================
+  // ========== Platformer ==========
   const platCanvas = document.getElementById("platCanvas");
   const platCtx = platCanvas.getContext("2d");
   const platStartBtn = document.getElementById("platStart");
@@ -3209,7 +2567,7 @@
         heart.taken = true;
         platGame.heartsGot += 1;
         platCountEl.textContent = String(platGame.heartsGot);
-        try { confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 } }); } catch {}
+        try { confetti({ particleCount: PERF.lowEnd ? 35 : 60, spread: 55, origin: { y: 0.7 } }); } catch {}
         platMsg.innerHTML = `Aww 💖 ${platGame.heartsGot}/${platGame.heartsTarget} collected!`;
       }
     }
@@ -3224,63 +2582,181 @@
     }
   }
 
-  function drawPlatformer(){
-    const w = platCanvas.getBoundingClientRect().width;
-    const h = platCanvas.getBoundingClientRect().height;
-    platCtx.clearRect(0,0,w,h);
+  // ======================================================
+  // ✅ Pixel/retro platformer rendering (RESTORED GRAPHICS)
+  // ======================================================
+  const platRender = {
+    off: document.createElement("canvas"),
+    offCtx: null,
+    scale: PERF.lowEnd ? 4 : 3, // chunkier pixels on low end = faster
+    lastW: 0,
+    lastH: 0,
+    cacheKey: ""
+  };
+  platRender.offCtx = platRender.off.getContext("2d");
 
-    // slightly prettier depending on mode
-    const g = platCtx.createLinearGradient(0,0,0,h);
-    if (document.body.classList.contains("night-mode")){
-      g.addColorStop(0, "rgba(59,130,246,0.18)");
-      g.addColorStop(1, "rgba(236,72,153,0.14)");
-    } else {
-      g.addColorStop(0, "rgba(255, 192, 203, 0.20)");
-      g.addColorStop(1, "rgba(173, 216, 230, 0.22)");
+  function ensurePlatOffscreen() {
+    const cssW = platCanvas.getBoundingClientRect().width;
+    const cssH = platCanvas.getBoundingClientRect().height;
+
+    const w = Math.max(220, Math.floor(cssW / platRender.scale));
+    const h = Math.max(140, Math.floor(cssH / platRender.scale));
+
+    if (w !== platRender.lastW || h !== platRender.lastH) {
+      platRender.lastW = w;
+      platRender.lastH = h;
+      platRender.off.width = w;
+      platRender.off.height = h;
+      platRender.cacheKey = ""; // invalidate cache on resize
     }
-    platCtx.fillStyle = g;
-    platCtx.fillRect(0,0,w,h);
+  }
+
+  function pxRect(ctx, x, y, w, h, fill, stroke = null) {
+    ctx.fillStyle = fill;
+    ctx.fillRect(x, y, w, h);
+    if (stroke) {
+      ctx.strokeStyle = stroke;
+      ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    }
+  }
+
+  function drawPixelHeart(ctx, x, y, c1, c2) {
+    const H = [
+      "0110010",
+      "1111111",
+      "1111111",
+      "1111111",
+      "0111110",
+      "0011100",
+      "0001000",
+    ];
+    for (let r = 0; r < H.length; r++) {
+      for (let c = 0; c < H[r].length; c++) {
+        if (H[r][c] === "1") {
+          const shade = (r <= 2 && (c === 1 || c === 5)) ? c2 : c1;
+          ctx.fillStyle = shade;
+          ctx.fillRect(x + c, y + r, 1, 1);
+        }
+      }
+    }
+  }
+
+  function drawPixelCloud(ctx, x, y, col) {
+    ctx.fillStyle = col;
+    ctx.fillRect(x + 2, y + 2, 10, 4);
+    ctx.fillRect(x + 0, y + 4, 14, 4);
+    ctx.fillRect(x + 2, y + 6, 18, 4);
+    ctx.fillRect(x + 6, y + 8, 10, 3);
+  }
+
+  function worldToPx(v) {
+    return v / platRender.scale;
+  }
+
+  function drawPlatformer(){
+    ensurePlatOffscreen();
+
+    const ctx = platCtx;
+    const px = platRender.offCtx;
+    const W = platRender.off.width;
+    const H = platRender.off.height;
+
+    // Clear offscreen
+    px.clearRect(0, 0, W, H);
+
+    // (Optional) night palette if you later add night-mode class
+    const night = document.body.classList.contains("night-mode");
+    const skyTop = night ? "#0b1020" : "#8fd3ff";
+    const skyBot = night ? "#111827" : "#dff7ff";
+    const dirt   = night ? "#1f2937" : "#7c5a3a";
+    const grass  = night ? "#334155" : "#a3e635";
+    const outline = night ? "rgba(255,255,255,0.18)" : "rgba(15,23,42,0.18)";
+
+    // Sky gradient (cached-ish)
+    const k = `${W}x${H}:${night ? "n" : "d"}`;
+    if (platRender.cacheKey !== k) {
+      platRender.cacheKey = k;
+      // nothing else to cache; gradient created below is cheap at low res
+    }
+    const g = px.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, skyTop);
+    g.addColorStop(1, skyBot);
+    px.fillStyle = g;
+    px.fillRect(0, 0, W, H);
+
+    // Pixel stars at night / clouds at day
+    if (night) {
+      px.fillStyle = "rgba(255,255,255,0.75)";
+      for (let i = 0; i < (PERF.lowEnd ? 28 : 48); i++) {
+        const sx = (i * 37 + Math.floor(platGame.player.x * 0.12)) % W;
+        const sy = (i * 23) % Math.floor(H * 0.65);
+        px.fillRect(sx, sy, 1, 1);
+      }
+    } else {
+      drawPixelCloud(px, 20 + ((platGame.player.x * 0.03) % 50), 18, "rgba(255,255,255,0.95)");
+      drawPixelCloud(px, 120 + ((platGame.player.x * 0.02) % 60), 32, "rgba(255,255,255,0.85)");
+      drawPixelCloud(px, 220 + ((platGame.player.x * 0.025) % 70), 14, "rgba(255,255,255,0.88)");
+    }
 
     const cam = platGame.camX;
-    platCtx.save();
-    platCtx.translate(-cam, 0);
 
+    // Platforms as chunky tiles
     for (const plat of platGame.platforms){
-      platCtx.globalAlpha = 0.95;
-      platCtx.fillStyle = "rgba(255,255,255,0.90)";
-      platCtx.strokeStyle = "rgba(15, 23, 42, 0.15)";
-      platCtx.lineWidth = 2;
-      roundRectPath(platCtx, plat.x, plat.y, plat.w, plat.h, 12);
-      platCtx.fill();
-      platCtx.stroke();
-      platCtx.globalAlpha = 1;
+      const x = Math.round(worldToPx(plat.x - cam));
+      const y = Math.round(worldToPx(plat.y));
+      const w = Math.round(worldToPx(plat.w));
+      const h = Math.max(3, Math.round(worldToPx(plat.h)));
 
-      // tiny sparkles on platforms (prettier)
-      if (Math.random() < 0.03){
-        platCtx.globalAlpha = 0.55;
-        platCtx.fillText("✨", plat.x + 10 + Math.random()*20, plat.y - 6);
-        platCtx.globalAlpha = 1;
+      if (x > W || x + w < 0) continue;
+
+      pxRect(px, x, y, w, Math.min(3, h), grass, outline);
+      pxRect(px, x, y + Math.min(3, h), w, h - Math.min(3, h), dirt, outline);
+
+      px.fillStyle = night ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+      for (let tx = x + 2; tx < x + w - 2; tx += 8) {
+        px.fillRect(tx, y + h - 2, 2, 1);
       }
     }
 
+    // Hearts (pixel hearts)
     for (const heart of platGame.hearts){
       if (heart.taken) continue;
-      platCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-      platCtx.fillText("💖", heart.x - 8, heart.y + 6);
+      const hx = Math.round(worldToPx(heart.x - cam));
+      const hy = Math.round(worldToPx(heart.y));
+      if (hx < -20 || hx > W + 20) continue;
+      drawPixelHeart(px, hx - 3, hy - 3, "#ff3b7a", "#ffd1e1");
     }
 
-    platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-    platCtx.fillText("💌", platGame.goal.x - 4, platGame.goal.y + 20);
+    // Goal (pixel-ish love letter)
+    {
+      const gx = Math.round(worldToPx(platGame.goal.x - cam));
+      const gy = Math.round(worldToPx(platGame.goal.y));
+      pxRect(px, gx - 5, gy - 4, 10, 8, night ? "#e5e7eb" : "#fff7ed", outline);
+      px.fillStyle = night ? "#111827" : "#7c2d12";
+      px.fillRect(gx - 3, gy - 2, 6, 1);
+      px.fillRect(gx - 3, gy, 5, 1);
+    }
 
-    const p = platGame.player;
-    platCtx.save();
-    platCtx.translate(p.x + p.w/2, p.y + p.h/2);
-    platCtx.fillStyle = "#ef4444";
-    drawHeartShape(platCtx, 0, 2, 14);
-    platCtx.fill();
-    platCtx.restore();
+    // Player (pixel character)
+    {
+      const p = platGame.player;
+      const pxX = Math.round(worldToPx(p.x - cam));
+      const pxY = Math.round(worldToPx(p.y));
 
-    platCtx.restore();
+      pxRect(px, pxX, pxY, 8, 10, night ? "#fb7185" : "#ef4444", outline);
+      px.fillStyle = "rgba(0,0,0,0.6)";
+      px.fillRect(pxX + 2, pxY + 3, 1, 1);
+      px.fillRect(pxX + 5, pxY + 3, 1, 1);
+      px.fillStyle = night ? "rgba(59,130,246,0.7)" : "rgba(96,165,250,0.75)";
+      px.fillRect(pxX - 2, pxY + 4, 2, 5);
+    }
+
+    // Blit pixel buffer -> main canvas (crispy pixels)
+    ctx.imageSmoothingEnabled = false;
+    const cssW = platCanvas.getBoundingClientRect().width;
+    const cssH = platCanvas.getBoundingClientRect().height;
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.drawImage(platRender.off, 0, 0, W, H, 0, 0, cssW, cssH);
   }
 
   function platformerLoop(ts){
@@ -3322,7 +2798,7 @@
     stopPlatformer(false);
     platOverlay.style.opacity = "1";
     platOverlay.innerHTML = `
-      <div class="opacity-90">
+      <div class="text-slate-800/80">
         <div class="text-4xl font-extrabold">LOVE QUEST COMPLETE 💌</div>
         <div class="text-sm font-semibold mt-2">Okay… that was adorable.</div>
       </div>
@@ -3331,7 +2807,7 @@
     platStartBtn.style.pointerEvents = "auto";
     platStartBtn.textContent = "Play Again";
     platMsg.innerHTML = `Awwww 💖 You did it!`;
-    try { confetti({ particleCount: 180, spread: 90, origin: { y: 0.65 } }); } catch {}
+    try { confetti({ particleCount: PERF.lowEnd ? 110 : 180, spread: 90, origin: { y: 0.65 } }); } catch {}
   }
 
   platStartBtn.addEventListener("click", startPlatformer);
@@ -3340,117 +2816,9 @@
   window.addEventListener("resize", () => {
     fitCanvasToCSS(bossCanvas, bossCtx2);
     fitCanvasToCSS(platCanvas, platCtx);
-    fitCanvasToCSS(noBossCanvas, noCtx);
+    // keep pixel scale consistent
+    platRender.cacheKey = "";
   });
-
-  // =========================================================
-  // =========================================================
-  // ✅ 7 EASTER EGGS (ONE = KONAMI)
-  // =========================================================
-  // =========================================================
-
-  // (1) KONAMI CODE → toggles retro-mode + confetti + petals
-  const KONAMI = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
-  let konamiIdx = 0;
-
-  window.addEventListener("keydown", (e) => {
-    const key = e.key;
-    const expected = KONAMI[konamiIdx];
-    if (key === expected){
-      konamiIdx++;
-      if (konamiIdx >= KONAMI.length){
-        konamiIdx = 0;
-        document.body.classList.toggle("retro-mode");
-        setPetalsMode(true);
-        try { confetti({ particleCount: 260, spread: 95, origin: { y: 0.35 } }); } catch {}
-        hint.textContent = "KONAMI CODE FOUND 🕹️💘 Retro Love Mode activated!";
-        startBattleMusic(2);
-        setTimeout(() => stopBattleMusic(), 1200);
-      }
-    } else {
-      konamiIdx = (key === KONAMI[0]) ? 1 : 0;
-    }
-  });
-
-  // (2) Double-click the title → mirror-mode
-  const bigTitle = document.getElementById("bigTitle");
-  bigTitle.addEventListener("dblclick", () => {
-    document.body.classList.toggle("mirror-mode");
-    try { confetti({ particleCount: 90, spread: 70, origin: { y: 0.2 } }); } catch {}
-    hint.textContent = document.body.classList.contains("mirror-mode")
-      ? "Mirror Mode 💫 (everything feels… alternate-universe-y)"
-      : "Mirror Mode off 💗";
-  });
-
-  // (3) Click the date stamp 7 times → secret petals mode toggle
-  const dateStamp = document.getElementById("dateStamp");
-  let dateClicks = 0;
-  dateStamp.addEventListener("click", () => {
-    dateClicks++;
-    dateStamp.animate([{transform:"scale(1)"},{transform:"scale(1.15)"},{transform:"scale(1)"}], {duration:240});
-    if (dateClicks >= 7){
-      dateClicks = 0;
-      setPetalsMode(!petalsOn);
-      try { confetti({ particleCount: 120, spread: 85, origin: { y: 0.2 } }); } catch {}
-      hint.textContent = petalsOn ? "Petal rain ON 🌸" : "Petal rain OFF";
-    }
-  });
-
-  // (4) Type LOVE quickly → heart superburst
-  let typed = "";
-  let typedTimer = null;
-  window.addEventListener("keydown", (e) => {
-    if (e.key.length === 1){
-      typed += e.key.toLowerCase();
-      if (typedTimer) clearTimeout(typedTimer);
-      typedTimer = setTimeout(() => typed = "", 650);
-      if (typed.endsWith("love")){
-        typed = "";
-        try { confetti({ particleCount: 220, spread: 100, origin: { y: 0.5 } }); } catch {}
-        hint.textContent = "LOVE typed 💖 Superburst!";
-      }
-    }
-  });
-
-  // (5) Hold YES for 1.2s → “Yes Magnet” pulses + confetti
-  let yesHoldTimer = null;
-  yesBtn.addEventListener("pointerdown", () => {
-    yesHoldTimer = setTimeout(() => {
-      yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.16)"},{transform:"scale(1)"}], {duration:620, iterations:2});
-      try { confetti({ particleCount: 140, spread: 90, origin: { y: 0.65 } }); } catch {}
-      hint.textContent = "YES MAGNET ACTIVATED 🧲💘 (you’re getting warmer...)";
-    }, 1200);
-  });
-  window.addEventListener("pointerup", () => { if (yesHoldTimer) clearTimeout(yesHoldTimer); yesHoldTimer = null; });
-
-  // (6) Click mana percent 10 times → instantly show 100% + sparkle
-  let manaClicks = 0;
-  manaPctEl.style.cursor = "pointer";
-  manaPctEl.addEventListener("click", () => {
-    manaClicks++;
-    if (manaClicks >= 10){
-      manaClicks = 0;
-      manaBarInner.style.width = "100%";
-      manaPctEl.textContent = "100";
-      try { confetti({ particleCount: 160, spread: 100, origin: { y: 0.1 } }); } catch {}
-      hint.textContent = "Affection Mana MAXED ✨";
-    }
-  });
-
-  // (7) Secret: scroll to bottom once → “Portal” message + music blip
-  let bottomEggDone = false;
-  window.addEventListener("scroll", () => {
-    if (bottomEggDone) return;
-    const doc = document.documentElement;
-    const nearBottom = (doc.scrollTop + doc.clientHeight) >= (doc.scrollHeight - 12);
-    if (nearBottom){
-      bottomEggDone = true;
-      hint.textContent = "You reached the end of the quest map 🗺️💘 Portal unlocked!";
-      try { confetti({ particleCount: 140, spread: 85, origin: { y: 0.95 } }); } catch {}
-      playGlueSong();
-    }
-  }, { passive:true });
-
 </script>
 </body>
 </html>
