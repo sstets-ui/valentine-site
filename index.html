@@ -92,17 +92,16 @@
       background-size: 180px 180px;
     }
 
-    /* ✅ CHANGED: the grid overlay is now your BLACK HOLE GIF */
+    /* ✅ Grid background replaced with your black hole GIF */
     .pixel-grid{
       position:absolute;
       inset:0;
-      opacity: .32; /* tweak: 0.15 subtle, 0.45 intense */
+      opacity:.22;
       background-image: url("https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif");
       background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
       mix-blend-mode: overlay;
-      filter: saturate(1.15) contrast(1.08);
+      filter: saturate(0.95) contrast(1.05);
     }
 
     /* Floating particles */
@@ -350,19 +349,19 @@
     }
     .modal-backdrop.show{ display: flex; }
 
-    /* Boss blackhole gif */
+    /* Boss blackhole gif overlay (phase 2 pull) */
     #blackholeGif{
       position: absolute;
       left: 50%;
       top: 44%;
       transform: translate(-50%, -50%);
-      width: 160px;
-      height: 160px;
+      width: 170px;
+      height: 170px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 160ms ease;
       filter: drop-shadow(0 12px 24px rgba(0,0,0,0.22));
-      mix-blend-mode: multiply;
+      mix-blend-mode: screen;
     }
   </style>
 </head>
@@ -474,7 +473,7 @@
           </div>
 
           <p id="hint" class="text-sm text-gray-600 mt-4 font-semibold">
-            Both buttons are locked 😈 Beat MAGALOR (NOT COPYWRITE) first.
+            Both buttons are locked 😈 Beat the boss first.
           </p>
         </div>
       </aside>
@@ -488,7 +487,7 @@
             <div>
               <div class="text-2xl font-black text-slate-800/80">Begin the Event</div>
               <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                A limited-time crossover has appeared… defeat MAGALOR to unlock the ultimate question.
+                A limited-time crossover has appeared… defeat the boss to unlock the ultimate question.
               </div>
             </div>
             <button id="beginEvent"
@@ -502,7 +501,7 @@
         <!-- BOSS FIGHT -->
         <section class="glass rounded-3xl overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-            <div class="font-black text-slate-800/80">👾 Boss Fight: MAGALOR (Love Edition)</div>
+            <div class="font-black text-slate-800/80">👾 Boss Fight (Love Edition)</div>
             <div class="text-xs font-black text-slate-700/70">Move: WASD/Arrows • Attack: Space / Tap</div>
           </div>
 
@@ -515,7 +514,7 @@
                 </div>
               </div>
               <div>
-                <div class="text-xs font-black text-slate-700/80 mb-1">MAGALOR ☄️</div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">BOSS ☄️</div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="bossHPBar" class="h-full w-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"></div>
                 </div>
@@ -535,13 +534,13 @@
               <img id="blackholeGif" alt="Black hole gif" />
 
               <div id="laughFlash"
-                  class="absolute top-6 left-1/2 -translate-x-1/2 text-3xl sm:text-5xl font-black tracking-widest text-slate-900 drop-shadow-lg opacity-0 pointer-events-none">
-                MAGALOR: HAHAHA!
+                  class="absolute top-6 left-1/2 -translate-x-1/2 text-3xl sm:text-5xl font-black tracking-widest text-white drop-shadow-lg opacity-0 pointer-events-none">
+                MAGALOR LAUGH
               </div>
 
               <div id="bossOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
                 <div class="text-slate-800/80">
-                  <div class="text-3xl font-extrabold">A wild MAGALOR appeared!</div>
+                  <div class="text-3xl font-extrabold">A wild boss appeared!</div>
                   <div class="text-sm font-semibold mt-2">Dodge cursed hearts. Shoot love beams.</div>
                 </div>
               </div>
@@ -554,7 +553,7 @@
             </div>
 
             <div id="bossMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
-              Beat MAGALOR to unlock YES + NO.
+              Beat the boss to unlock YES + NO.
             </div>
           </div>
         </section>
@@ -595,7 +594,7 @@
           </div>
         </section>
 
-        <!-- MTG-STYLE: Legendary card (more detailed) -->
+        <!-- MTG-STYLE -->
         <section class="tcg-card">
           <div class="p-6">
             <div class="flex items-center justify-between gap-3 mb-4">
@@ -671,7 +670,7 @@
           </div>
         </section>
 
-        <!-- Choose a Date (more detailed magic + “the stack”) -->
+        <!-- Choose a Date -->
         <section class="glass rounded-3xl p-6">
           <div class="flex items-center justify-between gap-3">
             <div>
@@ -722,14 +721,13 @@
           <div class="mt-4 text-sm font-semibold text-slate-700/80" id="tokenMsg">Tokens: <b id="tokenCount">0</b></div>
         </section>
 
-        <!-- ✅ Pokémon battle (more detailed) -->
+        <!-- Pokémon battle -->
         <section class="encounter">
           <div class="p-6">
             <div class="text-2xl font-black text-slate-800/80 mb-3">4) Wild Valentine Appeared!</div>
 
             <div class="encounter-screen rounded-2xl">
               <div class="grid grid-cols-2 gap-3 items-start">
-                <!-- Enemy -->
                 <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
                   <div class="flex items-center justify-between gap-2">
                     <div class="font-black text-slate-800/80">Valentine (???)
@@ -741,7 +739,6 @@
                   <div class="mt-2 text-4xl text-center select-none" id="enemySprite">💘</div>
                 </div>
 
-                <!-- Player -->
                 <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
                   <div class="flex items-center justify-between gap-2">
                     <div class="font-black text-slate-800/80">You
@@ -848,7 +845,7 @@
               </div>
 
               <div class="mt-3 text-sm font-semibold text-slate-700/80" id="captureMsg">
-                (Still locked until MAGALOR is defeated 😈)
+                (Still locked until the boss is defeated 😈)
               </div>
             </div>
           </div>
@@ -1049,7 +1046,7 @@
   });
 
   // ========== GIF loader (generic) ==========
-  function setImageTryFor(imgEl, urls, failMessage) {
+  function setImageTryFor(imgEl, urls) {
     let i = 0;
     const tryNext = () => {
       if (i >= urls.length) { return; }
@@ -1075,20 +1072,16 @@
     ],
     no: ["https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"]
   };
-  setImageTryFor(valImage, GIFS.start, "Start GIF failed to load.");
+  setImageTryFor(valImage, GIFS.start);
 
-  // ✅ Blackhole GIF (shows during phase2 pull)
+  // ✅ Blackhole GIF (shows during phase2 pull) - uses YOUR gif first
   const blackholeGif = document.getElementById("blackholeGif");
   const BLACKHOLE_GIFS = [
-    "https://media1.tenor.com/m/6yJ7wFZl7xgAAAAd/black-hole.gif",
-    "https://media1.tenor.com/m/3tPbfkYcDkMAAAAd/space-black-hole.gif",
-    "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif"
+    "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif"
   ];
-  setImageTryFor(blackholeGif, BLACKHOLE_GIFS, "Blackhole GIF failed.");
+  setImageTryFor(blackholeGif, BLACKHOLE_GIFS);
 
-  // ============================================================
-  // ✅ MUSIC (added): fanfare on YES + battle loop on NO
-  // ============================================================
+  // ========== ✅ MUSIC (YES + NO + Boss fight) ==========
   function playGlueSong() {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1206,6 +1199,7 @@
     } catch {}
   }
 
+  // Battle loop music (used for boss fight + NO sting)
   let battleCtx = null;
   let battleMaster = null;
   let battleInterval = null;
@@ -1250,8 +1244,8 @@
 
   function startBattleMusic(intensity = 1) {
     if (battleCtx) return;
-    battleIntensity = intensity;
 
+    battleIntensity = intensity;
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     battleCtx = new AudioCtx();
     if (battleCtx.state === "suspended") battleCtx.resume();
@@ -1323,7 +1317,7 @@
 
   function updateBattleIntensity(intensity) {
     battleIntensity = intensity;
-    if (!battleCtx) return;
+    if (!battleCtx || !battleMaster) return;
     battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
   }
 
@@ -1382,41 +1376,38 @@
 
   // ========== YES/NO handlers ==========
   let yesFinalTimer = null;
-  let noClickCount = 0; // ✅ added: so NO music ramps up each click
 
   yesBtn.addEventListener("click", () => {
     if (yesLocked){
-      hint.textContent = "YES is locked 😈 Beat MAGALOR first!";
+      hint.textContent = "YES is locked 😈 Beat the boss first!";
       yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
       return;
     }
 
-    // ✅ MUSIC still plays on YES
-    stopBattleMusic();
+    stopBattleMusic(); // keep it clean for the YES fanfare
     playGlueSong();
-    noClickCount = 0;
 
-    setImageTryFor(valImage, GIFS.yesMain, "YES GIF failed to load.");
+    setImageTryFor(valImage, GIFS.yesMain);
     hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
     noBtn.style.display = "none";
     try { confetti({ particleCount: 250, spread: 80, origin: { y: 0.6 } }); } catch {}
     if (yesFinalTimer) clearTimeout(yesFinalTimer);
-    yesFinalTimer = setTimeout(() => setImageTryFor(valImage, GIFS.yesFinal, "Final Eevee GIF failed to load."), 2000);
+    yesFinalTimer = setTimeout(() => setImageTryFor(valImage, GIFS.yesFinal), 2000);
   });
 
   noBtn.addEventListener("click", () => {
     if (noLocked){
-      hint.textContent = "NO is locked 😈 Beat MAGALOR first!";
+      hint.textContent = "NO is locked 😈 Beat the boss first!";
       noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
       return;
     }
 
-    // ✅ MUSIC still plays on NO (battle loop)
-    noClickCount++;
-    startBattleMusic(noClickCount);
-    updateBattleIntensity(noClickCount);
+    // keep a little "battle vibe" on NO too
+    startBattleMusic(3);
+    updateBattleIntensity(3);
+    setTimeout(() => { if (!bossGame?.running) stopBattleMusic(); }, 2200);
 
-    setImageTryFor(valImage, GIFS.no, "NO GIF failed to load.");
+    setImageTryFor(valImage, GIFS.no);
     hint.textContent = "No (Are you sure about that?) 😳";
   });
 
@@ -1477,7 +1468,7 @@
   function tokenUnlockMessage(n){
     if (n === 5)  return "You’ve generated enough love mana.";
     if (n === 10) return "Warning: lethal affection incoming.";
-    if (n === 20) return "Ultimate achieved: Ask unlocked. (…if MAGALOR is defeated 😈)";
+    if (n === 20) return "Ultimate achieved: Ask unlocked. (…if the boss is defeated 😈)";
     return null;
   }
 
@@ -1495,7 +1486,7 @@
     }
   });
 
-  // ========== ✅ Pokémon battle logic (more detailed) ==========
+  // ========== Pokémon battle logic ==========
   const battleText = document.getElementById("battleText");
   const enemyHPBar = document.getElementById("enemyHPBar");
   const youHPBar = document.getElementById("youHPBar");
@@ -1710,7 +1701,7 @@
 
   function captureAttempt(shiny=false){
     if (yesLocked || noLocked){
-      captureMsg.textContent = "LOCKED 😈 Defeat MAGALOR first!";
+      captureMsg.textContent = "LOCKED 😈 Defeat the boss first!";
       return;
     }
     captureMsg.textContent = shiny ? "Shiny captured!! 💚✨ Valentine accepted!!" : "Captured!! 💘 Valentine accepted!!";
@@ -1729,6 +1720,26 @@
     boosterResult.animate([{transform:"scale(0.98)", opacity:0},{transform:"scale(1)", opacity:1}], {duration:420, easing:"cubic-bezier(.2,.9,.2,1)"});
     try { confetti({ particleCount: 160, spread: 85, origin: { y: 0.55 } }); } catch {}
   });
+
+  // ========== Boss arena background image (PUT YOUR FILE NEXT TO THIS HTML) ==========
+  // Save your castle image as: boss-bg.png (same folder as this HTML)
+  const BOSS_BG_URL = "boss-bg.png";
+  const bossBgImg = new Image();
+  bossBgImg.src = BOSS_BG_URL;
+  let bossBgReady = false;
+  bossBgImg.onload = () => (bossBgReady = true);
+
+  function drawCoverImage(ctx, img, w, h) {
+    const iw = img.naturalWidth || img.width;
+    const ih = img.naturalHeight || img.height;
+    if (!iw || !ih) return;
+    const scale = Math.max(w / iw, h / ih);
+    const nw = iw * scale;
+    const nh = ih * scale;
+    const x = (w - nw) / 2;
+    const y = (h - nh) / 2;
+    ctx.drawImage(img, x, y, nw, nh);
+  }
 
   // ========== Boss fight + platformer ==========
   const bossCanvas = document.getElementById("bossCanvas");
@@ -1802,6 +1813,13 @@
     bossHPBar.style.width = (bossGame.boss.hp / bossGame.boss.maxHp * 100) + "%";
     const lovePct = (1 - bossGame.boss.hp / bossGame.boss.maxHp) * 100;
     loveBar.style.width = lovePct.toFixed(1) + "%";
+
+    // keep battle music intensity synced during boss fight
+    if (bossGame.running && battleCtx) {
+      const hpPct = bossGame.boss.hp / bossGame.boss.maxHp;
+      const intensity = 1 + Math.floor((1 - hpPct) * 5);
+      updateBattleIntensity(intensity);
+    }
   }
 
   function magalorLaugh() {
@@ -1923,10 +1941,10 @@
     ctx.translate(x, y);
     ctx.scale(scale, scale);
 
-    ctx.globalAlpha = 0.22;
+    ctx.globalAlpha = 0.24;
     ctx.beginPath();
     ctx.ellipse(0, 14, 54, 28, 0, 0, Math.PI*2);
-    ctx.fillStyle = "#7c3aed";
+    ctx.fillStyle = "#111827";
     ctx.fill();
     ctx.globalAlpha = 1;
 
@@ -2008,7 +2026,7 @@
     if (!bossGame.phase2 && bossGame.boss.hp <= bossGame.boss.maxHp * 0.5) {
       bossGame.phase2 = true;
       magalorLaugh();
-      bossMsg.textContent = "PHASE 2 😳 MAGALOR opened a black hole pull!";
+      bossMsg.textContent = "PHASE 2 😳 BLACK HOLE PULL ACTIVATED!";
       spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "🖤");
       spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "💘");
     }
@@ -2020,16 +2038,16 @@
         bossGame.blackHole.timer = 1.6;
         bossGame.blackHole.cool = 4.2;
         magalorLaugh();
-        bossMsg.textContent = "MAGALOR casts: BLACK HOLE PULL 🖤💫";
+        bossMsg.textContent = "BLACK HOLE PULL 🖤💫";
       }
 
       if (bossGame.blackHole.active) {
-        blackholeGif.style.opacity = "0.9";
+        blackholeGif.style.opacity = "0.95";
         bossGame.blackHole.timer -= dt;
         if (bossGame.blackHole.timer <= 0) {
           bossGame.blackHole.active = false;
           blackholeGif.style.opacity = "0";
-          bossMsg.textContent = "Keep going!! Turn him into a Valentine 😤💞";
+          bossMsg.textContent = "Keep going!! Turn chaos into cuddles 😤💞";
         } else {
           const dx = bossGame.boss.x - bossGame.player.x;
           const dy = bossGame.boss.y - bossGame.player.y;
@@ -2123,22 +2141,36 @@
 
     bossCtx2.clearRect(0,0,w,h);
 
-    const g = bossCtx2.createLinearGradient(0,0,0,h);
-    g.addColorStop(0, "rgba(251, 113, 133, 0.20)");
-    g.addColorStop(0.55, "rgba(236, 72, 153, 0.12)");
-    g.addColorStop(1, "rgba(96, 165, 250, 0.16)");
-    bossCtx2.fillStyle = g;
+    // ✅ CASTLE BACKGROUND (your screenshot) — save it as boss-bg.png next to this HTML
+    if (bossBgReady) {
+      drawCoverImage(bossCtx2, bossBgImg, w, h);
+    } else {
+      // fallback while loading
+      const g = bossCtx2.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, "rgba(2, 6, 23, 0.75)");
+      g.addColorStop(1, "rgba(88, 28, 135, 0.45)");
+      bossCtx2.fillStyle = g;
+      bossCtx2.fillRect(0, 0, w, h);
+    }
+
+    // overlay for readability
+    bossCtx2.fillStyle = "rgba(0,0,0,0.18)";
     bossCtx2.fillRect(0,0,w,h);
 
-    bossCtx2.globalAlpha = 0.10;
-    bossCtx2.strokeStyle = "#0f172a";
-    bossCtx2.lineWidth = 1;
-    for (let x=0;x<w;x+=24){ bossCtx2.beginPath(); bossCtx2.moveTo(x,0); bossCtx2.lineTo(x,h); bossCtx2.stroke(); }
-    for (let y=0;y<h;y+=24){ bossCtx2.beginPath(); bossCtx2.moveTo(0,y); bossCtx2.lineTo(w,y); bossCtx2.stroke(); }
+    // twinkle pixels
+    bossCtx2.globalAlpha = 0.35;
+    bossCtx2.fillStyle = "#ffffff";
+    for (let i = 0; i < 26; i++) {
+      const sx = (i * 97) % w;
+      const sy = (i * 53) % Math.max(1, Math.floor(h * 0.6));
+      bossCtx2.fillRect(sx, sy, 2, 2);
+    }
     bossCtx2.globalAlpha = 1;
 
+    // boss
     drawMagolorLikeBoss(bossCtx2, bossGame.boss.x, bossGame.boss.y, 0.75);
 
+    // player
     bossCtx2.save();
     bossCtx2.translate(bossGame.player.x, bossGame.player.y);
     const blink = bossGame.player.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
@@ -2151,6 +2183,7 @@
     bossCtx2.fill();
     bossCtx2.restore();
 
+    // bullets
     for (const b of bossGame.bullets){
       bossCtx2.save();
       bossCtx2.translate(b.x, b.y);
@@ -2174,16 +2207,18 @@
     }
     bossCtx2.globalAlpha = 1;
 
+    // beams
     for (const p of bossGame.beams){
       bossCtx2.save();
       bossCtx2.translate(p.x, p.y);
-      bossCtx2.globalAlpha = 0.85;
+      bossCtx2.globalAlpha = 0.88;
       roundRectPath(bossCtx2, -3, -12, 6, 24, 6);
       bossCtx2.fillStyle = "#22c55e";
       bossCtx2.fill();
       bossCtx2.restore();
     }
 
+    // particles
     for (const pt of bossGame.particles){
       bossCtx2.globalAlpha = Math.max(0, Math.min(1, pt.life/40));
       bossCtx2.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
@@ -2208,6 +2243,10 @@
     resetBossFight();
     bossGame.running = true;
 
+    // start boss music on user click (allowed)
+    startBattleMusic(1);
+    updateBattleIntensity(1);
+
     bossOverlay.style.opacity = "0";
     bossStartBtn.style.opacity = "0";
     bossStartBtn.style.pointerEvents = "none";
@@ -2225,6 +2264,7 @@
     bossRaf = null;
     document.body.classList.remove("boss-mode");
     blackholeGif.style.opacity = "0";
+    stopBattleMusic();
   }
 
   function winBossFight(){
@@ -2232,8 +2272,8 @@
 
     bossOverlay.style.opacity = "1";
     bossOverlay.innerHTML = `
-      <div class="text-slate-800/80">
-        <div class="text-4xl font-extrabold">MAGALOR DEFEATED 💘</div>
+      <div class="text-white drop-shadow-lg">
+        <div class="text-4xl font-extrabold">BOSS DEFEATED 💘</div>
         <div class="text-sm font-semibold mt-2">Unlocked! Now click YES 😤💞</div>
       </div>
     `;
@@ -2253,7 +2293,7 @@
 
     bossOverlay.style.opacity = "1";
     bossOverlay.innerHTML = `
-      <div class="text-slate-800/80">
+      <div class="text-white drop-shadow-lg">
         <div class="text-4xl font-extrabold">You got bonked 💥</div>
         <div class="text-sm font-semibold mt-2">Try again… turn chaos into cuddles 😤</div>
       </div>
@@ -2268,7 +2308,7 @@
   bossStartBtn.addEventListener("click", startBossFight);
   resetBossFight();
 
-  // ========== Platformer (same as before) ==========
+  // ========== Platformer ==========
   const platCanvas = document.getElementById("platCanvas");
   const platCtx = platCanvas.getContext("2d");
   const platStartBtn = document.getElementById("platStart");
@@ -2509,4 +2549,3 @@
 </script>
 </body>
 </html>
-
