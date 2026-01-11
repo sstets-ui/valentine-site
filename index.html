@@ -9,7 +9,19 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-      /* --------- Base dreamy background --------- */
+      /* =========================
+         THEME + BACKGROUND
+         ========================= */
+      :root{
+        --fg: rgba(255,255,255,0.96);
+        --shadow: rgba(0,0,0,0.18);
+        --pill: rgba(244,63,94,0.20);
+        --card: rgba(255,255,255,0.78);
+        --cardBorder: rgba(255,255,255,0.65);
+        --muted: rgba(15,23,42,0.70);
+        --hud: rgba(255,255,255,0.55);
+      }
+
       body {
         background:
           radial-gradient(900px 520px at 20% 15%, rgba(255, 182, 193, 0.55), transparent 60%),
@@ -18,28 +30,23 @@
           linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
       }
 
-      /* --------- Night mode --------- */
       body.night{
+        --fg: rgba(255,255,255,0.92);
+        --shadow: rgba(0,0,0,0.55);
+        --pill: rgba(59,130,246,0.18);
+        --card: rgba(255,255,255,0.10);
+        --cardBorder: rgba(255,255,255,0.18);
+        --muted: rgba(255,255,255,0.78);
+        --hud: rgba(255,255,255,0.12);
+
         background:
           radial-gradient(900px 520px at 20% 20%, rgba(59, 130, 246, 0.25), transparent 60%),
           radial-gradient(900px 520px at 80% 25%, rgba(168, 85, 247, 0.18), transparent 60%),
           radial-gradient(900px 520px at 55% 85%, rgba(244, 63, 94, 0.15), transparent 60%),
           linear-gradient(180deg, #0b1220 0%, #0f172a 50%, #111827 100%);
       }
-      body.night #bigTitle{
-        color: rgba(255,255,255,0.92);
-        text-shadow:
-          0 4px 0 rgba(0,0,0,0.35),
-          0 16px 42px rgba(0,0,0,0.55);
-      }
-      body.night .card{
-        background: rgba(255,255,255,0.10);
-        border: 1px solid rgba(255,255,255,0.18);
-        box-shadow: 0 28px 90px rgba(0,0,0,0.55);
-      }
-      body.night #hint{ color: rgba(255,255,255,0.75); }
 
-      /* Boss mode tint */
+      /* boss tint */
       body.boss-mode::before{
         content:"";
         position: fixed;
@@ -53,13 +60,13 @@
         mix-blend-mode: multiply;
       }
 
-      /* --------- Parallax stage (moves slightly with mouse) --------- */
+      /* parallax stage */
       #stage{
         transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
         transition: transform 80ms linear;
       }
 
-      /* Background layers */
+      /* blobs + noise + grid */
       #bg {
         position: fixed;
         inset: 0;
@@ -97,7 +104,6 @@
         background: radial-gradient(circle at 30% 30%, rgba(147, 197, 253, 0.45), rgba(244, 63, 94, 0.18) 55%, transparent 70%);
         animation: floatC 18s ease-in-out infinite;
       }
-
       @keyframes floatA { 0%, 100% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(80px, 60px) scale(1.08); } }
       @keyframes floatB { 0%, 100% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(-90px, 70px) scale(1.06); } }
       @keyframes floatC { 0%, 100% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(120px, -60px) scale(1.1); } }
@@ -125,73 +131,110 @@
         mix-blend-mode: overlay;
       }
       body.night .pixel-grid{
-        opacity: .12;
+        opacity:.12;
         background-image:
           linear-gradient(to right, rgba(255,255,255,.10) 1px, transparent 1px),
           linear-gradient(to bottom, rgba(255,255,255,.10) 1px, transparent 1px);
       }
 
-      /* Clouds layer */
-      #clouds{
+      /* twinkling pixel stars */
+      #twinkles{
         position: fixed;
         inset: 0;
         pointer-events: none;
         z-index: 1;
         overflow: hidden;
-        opacity: 0.55;
       }
-      .cloud{
-        position: absolute;
-        top: var(--top);
-        left: -30%;
-        width: var(--w);
-        height: calc(var(--w) * 0.33);
-        background: rgba(255,255,255,0.55);
-        border-radius: 999px;
-        filter: blur(0.5px) drop-shadow(0 10px 18px rgba(0,0,0,0.08));
-        animation: cloudDrift var(--dur) linear infinite;
-      }
-      .cloud::before,.cloud::after{
-        content:"";
+      .tw{
         position:absolute;
-        background: inherit;
-        border-radius: 999px;
+        width: 6px;
+        height: 6px;
+        background: rgba(255,255,255,0.85);
+        border-radius: 2px;
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.14);
+        opacity: 0;
+        animation: twinkle 2.8s ease-in-out infinite;
       }
-      .cloud::before{
-        width: 45%;
-        height: 120%;
-        left: 12%;
-        top: -45%;
+      @keyframes twinkle{
+        0%{ opacity: 0; transform: scale(0.7); }
+        30%{ opacity: .85; transform: scale(1); }
+        70%{ opacity: .35; transform: scale(0.85); }
+        100%{ opacity: 0; transform: scale(0.7); }
       }
-      .cloud::after{
-        width: 55%;
-        height: 140%;
-        left: 40%;
-        top: -60%;
-      }
-      @keyframes cloudDrift{
-        from{ transform: translateX(0); }
-        to{ transform: translateX(160vw); }
-      }
-      body.night #clouds{ opacity: 0.20; }
-      body.night .cloud{ background: rgba(255,255,255,0.20); }
 
-      /* Power-ups + hearts */
-      #powerups{
+      /* =========================
+         "CELESTE-ISH" CLOUDS
+         ========================= */
+      #celesteClouds{
         position: fixed;
         inset: 0;
         pointer-events: none;
         z-index: 2;
         overflow: hidden;
       }
+      .ccloud{
+        position:absolute;
+        top: var(--top);
+        left: -35%;
+        width: var(--w);
+        height: calc(var(--w) * 0.22);
+        border-radius: 999px;
+        background:
+          radial-gradient(circle at 22% 35%, rgba(255,255,255,0.90), rgba(255,255,255,0.45) 55%, rgba(255,255,255,0.18) 70%, transparent 78%);
+        filter: drop-shadow(0 14px 22px rgba(0,0,0,0.10));
+        opacity: var(--op);
+        animation: cdrift var(--dur) linear infinite;
+        image-rendering: pixelated;
+      }
+      .ccloud::before,.ccloud::after{
+        content:"";
+        position:absolute;
+        background: inherit;
+        border-radius: 999px;
+      }
+      .ccloud::before{ width: 48%; height: 170%; left: 10%; top: -70%; }
+      .ccloud::after { width: 55%; height: 190%; left: 38%; top: -90%; }
+
+      /* little "streak" highlight like a dash line */
+      .ccloud .streak{
+        position:absolute;
+        right: 12%;
+        top: 45%;
+        width: 22%;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.55);
+        filter: blur(0.2px);
+        opacity: .7;
+      }
+
+      @keyframes cdrift{
+        from{ transform: translateX(0); }
+        to{ transform: translateX(180vw); }
+      }
+      body.night .ccloud{ opacity: calc(var(--op) * 0.45); }
+
+      /* =========================
+         HEARTS + POWERUPS + PETALS/BALLOONS
+         ========================= */
+      #powerups, #hearts, #petals {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      #powerups{ z-index: 3; }
+      #hearts{ z-index: 4; }
+      #petals{ z-index: 3; }
+
       .powerup{
-        position: absolute;
-        bottom: -40px;
-        opacity: 0;
+        position:absolute;
+        bottom:-40px;
+        opacity:0;
         animation: puFloat linear forwards;
         filter: drop-shadow(0 6px 10px rgba(0,0,0,0.12));
         will-change: transform, opacity;
-        user-select: none;
+        user-select:none;
       }
       @keyframes puFloat{
         0%   { transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity: 0; }
@@ -199,20 +242,13 @@
         100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity: 0; }
       }
 
-      #hearts {
-        position: fixed;
-        inset: 0;
-        overflow: hidden;
-        pointer-events: none;
-        z-index: 3;
-      }
-      .heart {
-        position: absolute;
-        bottom: -40px;
+      .heart{
+        position:absolute;
+        bottom:-40px;
         will-change: transform, opacity;
         animation: floatUp linear forwards;
         filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
-        user-select: none;
+        user-select:none;
       }
       @keyframes floatUp {
         0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
@@ -220,43 +256,53 @@
         100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity: 0; }
       }
 
-      /* Title */
+      .petal{
+        position:absolute;
+        top:-40px;
+        opacity:0;
+        animation: fallDown linear forwards;
+        user-select:none;
+        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.10));
+      }
+      @keyframes fallDown{
+        0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+        10%  { opacity: 0.85; }
+        100% { transform: translateY(120vh) translateX(var(--drift)) rotate(var(--rot)); opacity: 0; }
+      }
+
+      /* =========================
+         TITLE + LETS GOOOO
+         ========================= */
       #bigTitle{
         position: relative;
-        z-index: 4;
+        z-index: 6;
         text-align: center;
-        font-weight: 900;
+        font-weight: 1000;
         letter-spacing: -0.02em;
         line-height: 0.95;
         font-size: clamp(2.2rem, 6vw, 4.6rem);
-        color: #ffffff;
+        color: var(--fg);
         text-shadow:
-          0 4px 0 rgba(0,0,0,0.15),
-          0 10px 28px rgba(0,0,0,0.22);
-        margin-bottom: 1.25rem;
-        user-select: none;
+          0 4px 0 var(--shadow),
+          0 12px 34px rgba(0,0,0,0.22);
+        margin-bottom: 1.15rem;
+        user-select:none;
       }
 
-      /* Pink pill behind title */
       #titlePill{
         position: relative;
         display: inline-block;
-        padding: 0.18em 4.4em 0.18em 0.42em; /* extra right padding creates empty area for LETS GOOOO */
+        padding: 0.18em 4.4em 0.18em 0.42em; /* extra right padding for empty area */
         border-radius: 999px;
-        background: rgba(244, 63, 94, 0.20);
+        background: var(--pill);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(255,255,255,0.35);
         overflow: hidden;
       }
-      body.night #titlePill{
-        background: rgba(59, 130, 246, 0.18);
-        border-color: rgba(255,255,255,0.22);
-      }
 
-      /* ✅ LETS GOOOO: all black, off to the side (right) */
       #letsGo{
-        position: absolute;
+        position:absolute;
         right: 22px;
         top: 50%;
         transform: translateY(-50%) rotate(-12deg) scale(0.7);
@@ -265,11 +311,11 @@
         letter-spacing: 0.12em;
         text-transform: uppercase;
         color: rgba(0,0,0,0.92);
-        text-shadow: 0 10px 18px rgba(0,0,0,0.15);
+        text-shadow: 0 10px 18px rgba(0,0,0,0.12);
         opacity: 0;
-        pointer-events: none;
+        pointer-events:none;
         white-space: nowrap;
-        z-index: 6;
+        z-index: 9;
       }
       #letsGo.show{
         opacity: 1;
@@ -281,7 +327,7 @@
         100% { transform: translateY(-50%) rotate(-12deg) scale(0.92); opacity: 1; }
       }
 
-      /* Sparkle burst on title hover */
+      /* sparkles */
       .sparkle{
         position: absolute;
         width: 10px;
@@ -300,21 +346,24 @@
         100%{ opacity:0; transform: translate(calc(-50% + var(--sx)), calc(-50% + var(--sy))) scale(0.2); }
       }
 
-      /* Card */
+      /* =========================
+         UI PANELS
+         ========================= */
       .card {
         position: relative;
-        z-index: 4;
-        background: rgba(255, 255, 255, 0.78);
+        z-index: 7;
+        background: var(--card);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
-        border: 1px solid rgba(255, 255, 255, 0.65);
+        border: 1px solid var(--cardBorder);
         box-shadow: 0 22px 70px rgba(0,0,0,0.14);
       }
 
-      /* Screen shake */
-      .shake{
-        animation: shake 250ms ease-in-out;
+      #valImage{
+        background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));
       }
+
+      .shake{ animation: shake 250ms ease-in-out; }
       @keyframes shake{
         0%{ transform: translateX(0); }
         20%{ transform: translateX(-8px); }
@@ -324,11 +373,7 @@
         100%{ transform: translateX(0); }
       }
 
-      #valImage {
-        background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));
-      }
-
-      /* Heart buttons (SVG) */
+      /* heart buttons */
       .svg-heart{
         width: 56px;
         height: 50px;
@@ -352,58 +397,78 @@
         justify-content: center;
         transform: translateY(-4px);
         color: white;
-        font-weight: 900;
+        font-weight: 1000;
         font-size: 11px;
-        letter-spacing: .7px;
+        letter-spacing: .9px;
         text-shadow: 0 1px 2px rgba(0,0,0,.25);
         user-select: none;
         pointer-events: none;
       }
-      .svg-heart:hover{
-        transform: scale(1.06);
-        filter: drop-shadow(0 12px 18px rgba(0,0,0,.18));
-      }
+      .svg-heart:hover{ transform: scale(1.06); filter: drop-shadow(0 12px 18px rgba(0,0,0,.18)); }
       .svg-heart:active{ transform: scale(.96); }
-      .svg-heart:focus-visible{
-        outline: 3px solid rgba(239, 68, 68, .35);
-        outline-offset: 6px;
+
+      /* =========================
+         TOP RIGHT CONTROLS
+         ========================= */
+      .pillBtn{
+        border: 0;
+        cursor: pointer;
+        padding: 10px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.60);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 16px 42px rgba(0,0,0,0.14);
+        font-weight: 1000;
+        letter-spacing: .02em;
+        user-select:none;
+      }
+      body.night .pillBtn{
+        background: rgba(255,255,255,0.14);
+        color: rgba(255,255,255,0.92);
+        border: 1px solid rgba(255,255,255,0.18);
       }
 
-      /* Nintendo-ish polish */
-      .pixel-vibe { text-shadow: 0 2px 0 rgba(0,0,0,0.08); }
-      .mascot-bounce { animation: mascotBounce 1.8s ease-in-out infinite; }
-      @keyframes mascotBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
+      #controls{
+        position: fixed;
+        right: 14px;
+        top: 14px;
+        z-index: 60;
+        display:flex;
+        gap:10px;
+        flex-wrap: wrap;
+        justify-content:flex-end;
+      }
 
-      /* Boss health bar */
+      /* =========================
+         BOSS HUD
+         ========================= */
       #bossHud{
         position: fixed;
         top: 14px;
         left: 50%;
         transform: translateX(-50%);
         width: min(720px, calc(100vw - 28px));
-        z-index: 20;
+        z-index: 55;
         display: none;
       }
       #bossHud.show{ display: block; }
       #bossCard{
-        background: rgba(255,255,255,0.55);
+        background: var(--hud);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(255,255,255,0.55);
         border-radius: 16px;
         padding: 10px 12px;
         box-shadow: 0 16px 46px rgba(0,0,0,0.14);
+        color: var(--muted);
       }
-      body.night #bossCard{
-        background: rgba(255,255,255,0.12);
-        border-color: rgba(255,255,255,0.18);
-        color: rgba(255,255,255,0.9);
-      }
+      body.night #bossCard{ border-color: rgba(255,255,255,0.18); }
       #bossTop{
         display:flex;
         align-items:center;
         justify-content:space-between;
-        font-weight: 900;
+        font-weight: 1000;
         letter-spacing: .04em;
         font-size: 12px;
         text-transform: uppercase;
@@ -421,11 +486,21 @@
         width: 100%;
         border-radius: 999px;
         background: linear-gradient(90deg, rgba(239,68,68,0.95), rgba(244,63,94,0.75));
-        transform-origin: left;
         transition: width 180ms ease;
       }
+      /* critical pulse */
+      #bossHud.critical #bossBar{
+        animation: criticalPulse 520ms ease-in-out infinite;
+      }
+      @keyframes criticalPulse{
+        0%{ filter: brightness(1); }
+        50%{ filter: brightness(1.25); }
+        100%{ filter: brightness(1); }
+      }
 
-      /* Quest complete overlay */
+      /* =========================
+         VICTORY + TOASTS + DIALOGUE
+         ========================= */
       #victory{
         position: fixed;
         inset: 0;
@@ -445,7 +520,7 @@
         border: 1px solid rgba(255,255,255,0.75);
         box-shadow: 0 26px 80px rgba(0,0,0,0.22);
         font-weight: 1000;
-        letter-spacing: .06em;
+        letter-spacing: .08em;
         text-transform: uppercase;
         font-size: clamp(1.4rem, 4vw, 2.6rem);
         color: rgba(15,23,42,0.95);
@@ -460,34 +535,320 @@
         100%{ opacity: 1; transform: rotate(-2deg) scale(1.0); }
       }
 
-      /* Toggle button */
-      #toggleTheme{
+      #toasts{
         position: fixed;
-        right: 14px;
+        left: 14px;
         top: 14px;
-        z-index: 50;
-        border: 0;
-        cursor: pointer;
+        z-index: 80;
+        display:flex;
+        flex-direction: column;
+        gap:10px;
+        pointer-events:none;
+      }
+      .toast{
+        pointer-events:none;
         padding: 10px 12px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.60);
+        border-radius: 16px;
+        background: rgba(255,255,255,0.65);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        box-shadow: 0 16px 42px rgba(0,0,0,0.14);
+        border: 1px solid rgba(255,255,255,0.72);
+        box-shadow: 0 18px 52px rgba(0,0,0,0.16);
         font-weight: 900;
         letter-spacing: .02em;
+        color: rgba(15,23,42,0.92);
+        opacity: 0;
+        transform: translateY(-10px);
+        animation: toastInOut 3200ms ease-in-out forwards;
       }
-      body.night #toggleTheme{
+      body.night .toast{
+        background: rgba(255,255,255,0.14);
+        border-color: rgba(255,255,255,0.18);
+        color: rgba(255,255,255,0.92);
+      }
+      @keyframes toastInOut{
+        0%{ opacity:0; transform: translateY(-10px); }
+        15%{ opacity:1; transform: translateY(0px); }
+        85%{ opacity:1; transform: translateY(0px); }
+        100%{ opacity:0; transform: translateY(-10px); }
+      }
+
+      /* Dialogue box (RPG style typing) */
+      #dialogue{
+        position: fixed;
+        left: 50%;
+        bottom: 14px;
+        transform: translateX(-50%);
+        width: min(900px, calc(100vw - 28px));
+        z-index: 85;
+        display:none;
+      }
+      #dialogue.show{ display:block; }
+      #dialogueBox{
+        background: rgba(255,255,255,0.65);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.72);
+        border-radius: 18px;
+        padding: 14px 14px;
+        box-shadow: 0 22px 80px rgba(0,0,0,0.18);
+        color: rgba(15,23,42,0.92);
+        font-weight: 800;
+        letter-spacing: .01em;
+        display:flex;
+        gap: 12px;
+        align-items:flex-start;
+      }
+      body.night #dialogueBox{
+        background: rgba(255,255,255,0.12);
+        border-color: rgba(255,255,255,0.18);
+        color: rgba(255,255,255,0.92);
+      }
+      #dialoguePortrait{
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(244,63,94,0.20);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size: 22px;
+        flex: 0 0 auto;
+      }
+      #dialogueText{
+        flex: 1 1 auto;
+        line-height: 1.3;
+        font-size: 14px;
+      }
+      #dialogueHint{
+        font-size: 12px;
+        opacity: 0.85;
+        margin-top: 6px;
+      }
+
+      /* =========================
+         MODALS (Inventory / Catch / Platformer)
+         ========================= */
+      .modal{
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding: 18px;
+      }
+      .modal.show{ display:flex; }
+      .modal::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        background: rgba(2,6,23,0.38);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+      .modalCard{
+        position: relative;
+        z-index: 1;
+        width: min(980px, 100%);
+        background: rgba(255,255,255,0.70);
+        border: 1px solid rgba(255,255,255,0.72);
+        border-radius: 22px;
+        box-shadow: 0 30px 120px rgba(0,0,0,0.28);
+        overflow:hidden;
+      }
+      body.night .modalCard{
+        background: rgba(255,255,255,0.10);
+        border-color: rgba(255,255,255,0.18);
+      }
+      .modalHeader{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding: 12px 14px;
+        font-weight: 1000;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+      }
+      .modalBody{ padding: 14px; }
+      .xBtn{
+        border:0;
+        cursor:pointer;
+        border-radius: 12px;
+        padding: 8px 10px;
+        background: rgba(255,255,255,0.55);
+        font-weight: 1000;
+      }
+      body.night .xBtn{
         background: rgba(255,255,255,0.14);
         color: rgba(255,255,255,0.92);
         border: 1px solid rgba(255,255,255,0.18);
+      }
+
+      /* Catch game area */
+      #catchArea{
+        position: relative;
+        height: 420px;
+        border-radius: 18px;
+        overflow:hidden;
+        border: 1px solid rgba(255,255,255,0.55);
+        background:
+          radial-gradient(700px 320px at 20% 20%, rgba(244,63,94,0.22), transparent 60%),
+          radial-gradient(700px 320px at 80% 40%, rgba(59,130,246,0.18), transparent 60%),
+          linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.10));
+      }
+      body.night #catchArea{
+        background:
+          radial-gradient(700px 320px at 20% 20%, rgba(59,130,246,0.20), transparent 60%),
+          radial-gradient(700px 320px at 80% 40%, rgba(244,63,94,0.14), transparent 60%),
+          linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      }
+      .falling{
+        position:absolute;
+        font-size: 26px;
+        will-change: transform;
+        filter: drop-shadow(0 8px 10px rgba(0,0,0,0.14));
+        user-select:none;
+      }
+      #basket{
+        position:absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        height: 34px;
+        border-radius: 14px;
+        background: rgba(15,23,42,0.12);
+        border: 1px solid rgba(255,255,255,0.55);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight: 1000;
+        letter-spacing: .06em;
+        color: rgba(15,23,42,0.75);
+      }
+      body.night #basket{
+        background: rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.88);
+        border-color: rgba(255,255,255,0.18);
+      }
+
+      /* Platformer canvas wrap */
+      #platformWrap{
+        position: relative;
+        border-radius: 18px;
+        overflow:hidden;
+        border: 1px solid rgba(255,255,255,0.55);
+      }
+      #platformCanvas{
+        width: 100%;
+        height: 520px;
+        display:block;
+        background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.08));
+      }
+      body.night #platformCanvas{
+        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      }
+
+      /* Warning overlay for boss attacks */
+      #warning{
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        display:none;
+        pointer-events:none;
+      }
+      #warning.show{ display:block; }
+      #warning::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        background: rgba(239,68,68,0.12);
+        animation: warnFlash 420ms ease-in-out infinite;
+      }
+      #warningText{
+        position:absolute;
+        top: 42%;
+        left: 50%;
+        transform: translate(-50%,-50%) rotate(-6deg);
+        font-weight: 1000;
+        letter-spacing: .10em;
+        text-transform: uppercase;
+        font-size: clamp(2rem, 6vw, 5rem);
+        color: rgba(255,255,255,0.92);
+        text-shadow: 0 6px 0 rgba(0,0,0,0.22), 0 22px 80px rgba(0,0,0,0.35);
+        opacity: 0.92;
+      }
+      @keyframes warnFlash{
+        0%{ opacity: 0.05; }
+        50%{ opacity: 0.18; }
+        100%{ opacity: 0.05; }
+      }
+
+      /* Smoke puff */
+      .smoke{
+        position: fixed;
+        width: 14px;
+        height: 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.75);
+        filter: blur(0.3px) drop-shadow(0 10px 16px rgba(0,0,0,0.18));
+        opacity: 0;
+        pointer-events:none;
+        animation: smokePop 520ms ease-out forwards;
+        z-index: 120;
+      }
+      body.night .smoke{ background: rgba(255,255,255,0.55); }
+      @keyframes smokePop{
+        0%{ opacity:0; transform: translate(-50%,-50%) scale(0.6); }
+        25%{ opacity:0.9; transform: translate(-50%,-50%) scale(1.1); }
+        100%{ opacity:0; transform: translate(calc(-50% + var(--sx)), calc(-50% + var(--sy))) scale(0.2); }
+      }
+
+      /* Hidden scavenger item */
+      #hiddenLoot{
+        position: fixed;
+        left: 14px;
+        bottom: 86px;
+        z-index: 10;
+        font-size: 20px;
+        opacity: 0.22;
+        transform: rotate(-10deg);
+        cursor: pointer;
+        user-select:none;
+        filter: drop-shadow(0 10px 18px rgba(0,0,0,0.14));
+      }
+      #hiddenLoot.found{
+        opacity: 1;
+        transform: rotate(0deg) scale(1.05);
+      }
+
+      /* Make text feel more "game UI" without importing a font */
+      .gameText{
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        letter-spacing: 0.02em;
       }
     </style>
   </head>
 
   <body class="min-h-screen flex flex-col items-center justify-center p-6">
-    <!-- Theme toggle -->
-    <button id="toggleTheme" type="button" aria-label="Toggle day/night">🌙 / ☀️</button>
+    <!-- Toasts -->
+    <div id="toasts" aria-live="polite"></div>
+
+    <!-- Warning overlay -->
+    <div id="warning" aria-hidden="true">
+      <div id="warningText">WARNING!</div>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+      <button id="toggleTheme" class="pillBtn" type="button" aria-label="Toggle day/night">🌙 / ☀️</button>
+      <button id="openInventory" class="pillBtn" type="button" aria-label="Open inventory">🎒 Inventory</button>
+      <button id="openCatch" class="pillBtn" type="button" aria-label="Open catch game">💗 Catch</button>
+      <button id="openPlatformer" class="pillBtn" type="button" aria-label="Open platformer">🧗 Platformer</button>
+    </div>
 
     <!-- Boss HUD -->
     <div id="bossHud" aria-live="polite">
@@ -507,6 +868,18 @@
       <div id="victoryBanner">QUEST COMPLETE!</div>
     </div>
 
+    <!-- Dialogue -->
+    <div id="dialogue" aria-live="polite">
+      <div id="dialogueBox" class="gameText">
+        <div id="dialoguePortrait">💬</div>
+        <div style="flex:1;">
+          <div id="dialogueText"></div>
+          <div id="dialogueHint">Tip: press buttons… or play mini-games.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Background layers -->
     <div id="stage">
       <div id="bg" aria-hidden="true">
         <div class="blob a"></div>
@@ -516,16 +889,24 @@
         <div class="pixel-grid"></div>
       </div>
 
-      <div id="clouds" aria-hidden="true">
-        <div class="cloud" style="--top: 12%; --w: 320px; --dur: 58s;"></div>
-        <div class="cloud" style="--top: 22%; --w: 420px; --dur: 76s; opacity: .42;"></div>
-        <div class="cloud" style="--top: 34%; --w: 280px; --dur: 64s; opacity: .38;"></div>
-        <div class="cloud" style="--top: 18%; --w: 520px; --dur: 92s; opacity: .30;"></div>
+      <div id="twinkles" aria-hidden="true"></div>
+
+      <!-- Celeste-ish clouds -->
+      <div id="celesteClouds" aria-hidden="true">
+        <div class="ccloud" style="--top: 10%; --w: 420px; --dur: 78s; --op: 0.55;"><div class="streak"></div></div>
+        <div class="ccloud" style="--top: 18%; --w: 520px; --dur: 96s; --op: 0.35;"><div class="streak"></div></div>
+        <div class="ccloud" style="--top: 28%; --w: 360px; --dur: 68s; --op: 0.42;"><div class="streak"></div></div>
+        <div class="ccloud" style="--top: 34%; --w: 620px; --dur: 118s; --op: 0.28;"><div class="streak"></div></div>
       </div>
 
+      <div id="petals" aria-hidden="true"></div>
       <div id="powerups" aria-hidden="true"></div>
       <div id="hearts" aria-hidden="true"></div>
 
+      <!-- Hidden scavenger loot -->
+      <div id="hiddenLoot" title="what is that… 👀" aria-label="Hidden loot">💎</div>
+
+      <!-- Title -->
       <h1 id="bigTitle" class="w-full px-4">
         <span id="titlePill">
           Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘
@@ -533,10 +914,12 @@
         </span>
       </h1>
 
+      <!-- Main Card -->
       <div id="mainCard" class="card rounded-3xl p-7 max-w-md w-full text-center">
-        <!-- Mascot (click 5x = secret) -->
-        <button id="mascotBtn" class="mx-auto mb-3 w-28 mascot-bounce" type="button" aria-label="Mascot secret button" style="border:0;background:transparent;padding:0;cursor:pointer;">
-          <div class="w-24 h-24 mx-auto">
+        <!-- Mascot secret button -->
+        <button id="mascotBtn" class="mx-auto mb-3 w-28" type="button" aria-label="Mascot secret button"
+          style="border:0;background:transparent;padding:0;cursor:pointer;">
+          <div class="w-24 h-24 mx-auto" style="animation: mascotBounce 1.8s ease-in-out infinite;">
             <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
               <path d="M40 24 L64 10 L88 24 L82 44 H46 Z" fill="#fbbf24"/>
               <circle cx="64" cy="22" r="6" fill="#f59e0b"/>
@@ -557,21 +940,35 @@
               <circle cx="84" cy="67" r="6" fill="#475569"/>
             </svg>
           </div>
-
-          <div class="mt-1 text-center font-extrabold text-sm tracking-wide text-slate-800/80 pixel-vibe">
+          <div class="mt-1 text-center font-extrabold text-sm tracking-wide pixel-vibe gameText" style="color: var(--muted);">
             2/14/26
           </div>
         </button>
 
         <img id="valImage" class="w-full h-64 object-cover rounded-xl mb-4" alt="Valentine gif" />
 
-        <!-- Quest log -->
-        <div class="rounded-2xl p-4 text-left mb-4" style="background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.65);">
-          <div class="font-extrabold tracking-wide text-slate-800/90 text-sm uppercase">Quest Log</div>
-          <div class="mt-2 text-slate-800/80 text-sm">
+        <!-- Quest log + Love meter (button mash) -->
+        <div class="rounded-2xl p-4 text-left mb-4 gameText"
+             style="background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.65);">
+          <div class="font-extrabold tracking-wide text-sm uppercase" style="color: var(--muted);">Quest Log</div>
+          <div class="mt-2 text-sm" style="color: var(--muted);">
             <div>🎯 Objective: <span class="font-semibold">Get Andrew to say YES</span></div>
             <div class="mt-1">💖 Love Combo: <span id="loveCount" class="font-extrabold">x0</span></div>
             <div class="mt-1">📌 Status: <span id="questStatus" class="font-semibold">Awaiting decision…</span></div>
+          </div>
+
+          <div class="mt-3">
+            <div class="flex items-center justify-between text-xs font-extrabold uppercase tracking-wider" style="color: var(--muted);">
+              <span>Love Meter</span>
+              <span id="meterPct">0%</span>
+            </div>
+            <div class="mt-1 h-3 rounded-full overflow-hidden" style="background: rgba(15,23,42,0.10);">
+              <div id="meterBar" class="h-full rounded-full" style="width:0%; background: linear-gradient(90deg, rgba(244,63,94,0.85), rgba(59,130,246,0.65));"></div>
+            </div>
+            <div class="mt-2 flex gap-2">
+              <button id="mashLove" class="pillBtn gameText" type="button" style="padding:10px 12px;">🕹️ Mash for LOVE</button>
+              <button id="talkBtn" class="pillBtn gameText" type="button" style="padding:10px 12px;">💬 Talk</button>
+            </div>
           </div>
         </div>
 
@@ -593,14 +990,101 @@
           </button>
         </div>
 
-        <p id="hint" class="text-sm text-gray-600 mt-4">
-          Tip: click a button. If a GIF host blocks embeds, it’ll auto-try another link.
+        <p id="hint" class="text-sm mt-4 gameText" style="color: var(--muted);">
+          Tip: click a button… or try the mini-games for chaos.
         </p>
       </div>
     </div>
 
+    <!-- Inventory Modal -->
+    <div id="inventoryModal" class="modal" role="dialog" aria-modal="true" aria-label="Inventory">
+      <div class="modalCard">
+        <div class="modalHeader gameText" style="color: var(--muted);">
+          <div>Inventory</div>
+          <button class="xBtn gameText" id="closeInventory" type="button">✕</button>
+        </div>
+        <div class="modalBody gameText" style="color: var(--muted);">
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
+              <div class="font-extrabold uppercase text-xs tracking-wider">Items</div>
+              <div class="mt-2 text-lg">💍 ⭐ 🪙 🍄 💎 ❤️ 🎮</div>
+              <div class="mt-2 text-sm opacity-80">Click the hidden 💎 on the page for a surprise.</div>
+            </div>
+            <div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
+              <div class="font-extrabold uppercase text-xs tracking-wider">Stats</div>
+              <div class="mt-2 text-sm">💖 Love Combo: <span id="invCombo" class="font-extrabold">x0</span></div>
+              <div class="mt-1 text-sm">😈 Boss Mode: <span id="invBoss" class="font-extrabold">OFF</span></div>
+              <div class="mt-1 text-sm">🏆 Achievements: <span id="invAch" class="font-extrabold">0</span></div>
+            </div>
+          </div>
+          <div class="mt-4 rounded-2xl p-4" style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.55);">
+            <div class="font-extrabold uppercase text-xs tracking-wider">How to play</div>
+            <div class="mt-2 text-sm opacity-80">
+              • Catch mini-game: move basket with mouse. <br/>
+              • Platformer: ← → move, Space jump, Shift dash. Collect 💗. <br/>
+              • NO gets bigger and runs… and starts “boss attacks” after enough clicks.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Catch Game Modal -->
+    <div id="catchModal" class="modal" role="dialog" aria-modal="true" aria-label="Catch the hearts game">
+      <div class="modalCard">
+        <div class="modalHeader gameText" style="color: var(--muted);">
+          <div>Catch the Hearts</div>
+          <button class="xBtn gameText" id="closeCatch" type="button">✕</button>
+        </div>
+        <div class="modalBody gameText" style="color: var(--muted);">
+          <div class="flex items-center justify-between mb-3">
+            <div class="font-extrabold uppercase text-xs tracking-wider">Score: <span id="catchScore">0</span></div>
+            <div class="font-extrabold uppercase text-xs tracking-wider">Best: <span id="catchBest">0</span></div>
+          </div>
+
+          <div id="catchArea">
+            <div id="basket">CATCH</div>
+          </div>
+
+          <div class="mt-3 text-sm opacity-80">
+            Move your mouse inside the box to move the basket. Catch 💗, ⭐, 🪙 for points!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platformer Modal -->
+    <div id="platformerModal" class="modal" role="dialog" aria-modal="true" aria-label="Platformer">
+      <div class="modalCard">
+        <div class="modalHeader gameText" style="color: var(--muted);">
+          <div>Platformer (Celeste-ish Clouds)</div>
+          <button class="xBtn gameText" id="closePlatformer" type="button">✕</button>
+        </div>
+        <div class="modalBody gameText" style="color: var(--muted);">
+          <div class="flex flex-wrap gap-2 items-center justify-between mb-3">
+            <div class="font-extrabold uppercase text-xs tracking-wider">
+              Controls: ← → move · Space jump · Shift dash · R restart
+            </div>
+            <div class="font-extrabold uppercase text-xs tracking-wider">
+              Hearts: <span id="platHearts">0</span>
+            </div>
+          </div>
+
+          <div id="platformWrap">
+            <canvas id="platformCanvas" width="960" height="520"></canvas>
+          </div>
+
+          <div class="mt-3 text-sm opacity-80">
+            Collect 💗 and reach the flag 🚩. Dash cooldown is short. Be dramatic.
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
-      // ------------------ Helpers: tiny audio blip (hover sparkle sound) ------------------
+      /* =========================================================
+         SMALL AUDIO UTILS (hover blips, etc.)
+         ========================================================= */
       let uiCtx = null;
       function getUiCtx(){
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -609,7 +1093,7 @@
         if (uiCtx.state === "suspended") uiCtx.resume().catch(()=>{});
         return uiCtx;
       }
-      function playBlip(freq = 880, dur = 0.06, type="sine"){
+      function playBlip(freq = 880, dur = 0.06, type="sine", vol=0.10){
         try{
           const ctx = getUiCtx();
           if (!ctx) return;
@@ -619,7 +1103,7 @@
           osc.type = type;
           osc.frequency.setValueAtTime(freq, t);
           gain.gain.setValueAtTime(0, t);
-          gain.gain.linearRampToValueAtTime(0.10, t + 0.01);
+          gain.gain.linearRampToValueAtTime(vol, t + 0.01);
           gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
           osc.connect(gain).connect(ctx.destination);
           osc.start(t);
@@ -627,19 +1111,40 @@
         }catch{}
       }
 
-      // ------------------ Parallax mouse move ------------------
+      /* =========================================================
+         PARALLAX
+         ========================================================= */
       const stage = document.getElementById("stage");
       window.addEventListener("mousemove", (e) => {
         const x = (e.clientX / window.innerWidth) - 0.5;
         const y = (e.clientY / window.innerHeight) - 0.5;
-        // subtle parallax, clamp
         const px = Math.max(-10, Math.min(10, x * 18));
         const py = Math.max(-10, Math.min(10, y * 18));
         stage.style.setProperty("--px", px + "px");
         stage.style.setProperty("--py", py + "px");
       });
 
-      // ------------------ Sparkle burst on title pill hover ------------------
+      /* =========================================================
+         TWINKLES
+         ========================================================= */
+      const twinkles = document.getElementById("twinkles");
+      function spawnTwinkle(){
+        const el = document.createElement("div");
+        el.className = "tw";
+        el.style.left = Math.random()*100 + "vw";
+        el.style.top = Math.random()*60 + "vh";
+        el.style.animationDelay = (Math.random()*2.5) + "s";
+        el.style.animationDuration = (2.2 + Math.random()*2.8) + "s";
+        el.style.opacity = "0";
+        twinkles.appendChild(el);
+        setTimeout(()=>el.remove(), 9000);
+      }
+      for(let i=0;i<18;i++) spawnTwinkle();
+      setInterval(spawnTwinkle, 450);
+
+      /* =========================================================
+         SPARKLES ON TITLE
+         ========================================================= */
       const titlePill = document.getElementById("titlePill");
       function burstSparkles(target, count = 10){
         const rect = target.getBoundingClientRect();
@@ -648,8 +1153,8 @@
           s.className = "sparkle";
           const x = Math.random() * rect.width;
           const y = Math.random() * rect.height;
-          const sx = (Math.random() * 60 - 30) + "px";
-          const sy = (Math.random() * 40 - 20) + "px";
+          const sx = (Math.random() * 70 - 35) + "px";
+          const sy = (Math.random() * 50 - 25) + "px";
           s.style.left = x + "px";
           s.style.top = y + "px";
           s.style.setProperty("--sx", sx);
@@ -659,12 +1164,17 @@
         }
       }
       titlePill.addEventListener("mouseenter", () => {
-        playBlip(1046, 0.06, "triangle");
-        burstSparkles(titlePill, 12);
+        playBlip(1046, 0.06, "triangle", 0.08);
+        burstSparkles(titlePill, 14);
       });
 
-      // ------------------ Moving hearts ------------------
+      /* =========================================================
+         HEARTS + POWERUPS + PETALS/BALLOONS
+         ========================================================= */
       const heartsLayer = document.getElementById("hearts");
+      const powerupsLayer = document.getElementById("powerups");
+      const petalsLayer = document.getElementById("petals");
+
       function spawnHeart() {
         const el = document.createElement("span");
         el.className = "heart";
@@ -685,14 +1195,12 @@
         setTimeout(() => el.remove(), dur * 1000 + 100);
       }
       for (let i = 0; i < 14; i++) spawnHeart();
-      setInterval(spawnHeart, 220);
+      setInterval(spawnHeart, 240);
 
-      // ------------------ Power-ups particles (more Nintendo-ish variety) ------------------
-      const powerupsLayer = document.getElementById("powerups");
       function spawnPowerup(){
         const el = document.createElement("span");
         el.className = "powerup";
-        const items = ["⭐","🪙","✨","💖","🎮","🍄","💎","💚","❤️","🟢","🔺","🟨"];
+        const items = ["⭐","🪙","✨","💖","🎮","🍄","💎","💚","❤️","🟢","🔺","🟨","💠"];
         el.textContent = items[Math.floor(Math.random() * items.length)];
 
         const left = Math.random() * 100;
@@ -711,35 +1219,116 @@
         setTimeout(() => el.remove(), dur * 1000 + 200);
       }
       for (let i = 0; i < 12; i++) spawnPowerup();
-      setInterval(spawnPowerup, 520);
+      setInterval(spawnPowerup, 560);
 
-      // ------------------ GIF loader ------------------
+      function spawnPetal(){
+        const el = document.createElement("span");
+        el.className = "petal";
+        const items = ["🌸","🎈","🎀","🌷"];
+        el.textContent = items[Math.floor(Math.random()*items.length)];
+        const left = Math.random() * 100;
+        const size = 14 + Math.random() * 18;
+        const dur  = 6 + Math.random() * 8;
+        const drift = (Math.random() * 120 - 60) + "px";
+        const rot = (Math.random() * 220 - 110) + "deg";
+        el.style.left = left + "vw";
+        el.style.fontSize = size + "px";
+        el.style.opacity = (0.28 + Math.random() * 0.60).toFixed(2);
+        el.style.animationDuration = dur + "s";
+        el.style.setProperty("--drift", drift);
+        el.style.setProperty("--rot", rot);
+        petalsLayer.appendChild(el);
+        setTimeout(()=>el.remove(), dur*1000 + 200);
+      }
+      for(let i=0;i<8;i++) spawnPetal();
+      setInterval(spawnPetal, 820);
+
+      /* =========================================================
+         TOASTS
+         ========================================================= */
+      const toasts = document.getElementById("toasts");
+      function showToast(text){
+        const el = document.createElement("div");
+        el.className = "toast gameText";
+        el.textContent = text;
+        toasts.appendChild(el);
+        setTimeout(()=>el.remove(), 3400);
+      }
+
+      /* =========================================================
+         DIALOGUE (typing RPG style)
+         ========================================================= */
+      const dialogue = document.getElementById("dialogue");
+      const dialogueText = document.getElementById("dialogueText");
+      const talkBtn = document.getElementById("talkBtn");
+
+      const dialogueLines = [
+        "A wild Valentine prompt appears…",
+        "Choose wisely. Or play mini-games for extra chaos.",
+        "Legend says the YES button grants legendary loot.",
+        "The NO button… may awaken a boss."
+      ];
+      let dialogueIndex = 0;
+      let typingTimer = null;
+
+      function typeLine(line){
+        if (typingTimer) clearInterval(typingTimer);
+        dialogue.classList.add("show");
+        dialogueText.textContent = "";
+        let i = 0;
+        typingTimer = setInterval(()=>{
+          dialogueText.textContent += line[i] || "";
+          i++;
+          if (i >= line.length){
+            clearInterval(typingTimer);
+            typingTimer = null;
+          }
+        }, 18);
+      }
+
+      function sayNext(){
+        const line = dialogueLines[dialogueIndex % dialogueLines.length];
+        dialogueIndex++;
+        typeLine(line);
+      }
+      // start with one line
+      sayNext();
+      talkBtn.addEventListener("click", ()=>{
+        playBlip(784, 0.06, "sine", 0.08);
+        sayNext();
+      });
+
+      /* =========================================================
+         THEME TOGGLE (persist)
+         ========================================================= */
+      const toggleTheme = document.getElementById("toggleTheme");
+      const saved = localStorage.getItem("val_theme");
+      if (saved === "night") document.body.classList.add("night");
+      toggleTheme.addEventListener("click", ()=>{
+        playBlip(523, 0.07, "triangle", 0.08);
+        document.body.classList.toggle("night");
+        localStorage.setItem("val_theme", document.body.classList.contains("night") ? "night" : "day");
+        burstSparkles(titlePill, 10);
+        showToast(document.body.classList.contains("night") ? "Night mode activated 🌙" : "Day mode activated ☀️");
+      });
+
+      /* =========================================================
+         GIF LOADER
+         ========================================================= */
       const valImage = document.getElementById("valImage");
       const hint = document.getElementById("hint");
-
       function setImageTry(urls, failMessage) {
         let i = 0;
         const tryNext = () => {
           if (i >= urls.length) { hint.textContent = failMessage; return; }
           const url = urls[i++];
-
           const probe = new Image();
-          probe.onload = () => { valImage.src = url; hint.textContent = ""; };
+          probe.onload = () => { valImage.src = url; };
           probe.onerror = () => tryNext();
           probe.src = url;
         };
         tryNext();
       }
-
-      const yesBtn = document.getElementById("yesBtn");
-      const noBtn = document.getElementById("noBtn");
-      const mainCard = document.getElementById("mainCard");
-      const loveCount = document.getElementById("loveCount");
-      const questStatus = document.getElementById("questStatus");
-
-      // Hover blips for buttons
-      yesBtn.addEventListener("mouseenter", ()=>playBlip(988, 0.06, "sine"));
-      noBtn.addEventListener("mouseenter",  ()=>playBlip(262, 0.06, "square"));
 
       const GIFS = {
         start: ["https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif"],
@@ -750,11 +1339,83 @@
         ],
         no: ["https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"]
       };
-
       setImageTry(GIFS.start, "Start GIF failed to load.");
 
-      // ------------------ "Chest opening" style fanfare (original synth) ------------------
-      function playGlueSong() {
+      /* =========================================================
+         YES/NO CORE STATE + QUEST LOG + LOVE METER
+         ========================================================= */
+      const yesBtn = document.getElementById("yesBtn");
+      const noBtn = document.getElementById("noBtn");
+      const mainCard = document.getElementById("mainCard");
+
+      const loveCountEl = document.getElementById("loveCount");
+      const questStatusEl = document.getElementById("questStatus");
+      const meterBar = document.getElementById("meterBar");
+      const meterPct = document.getElementById("meterPct");
+      const mashLove = document.getElementById("mashLove");
+
+      let combo = 0;
+      let meter = 0; // 0..100
+      let meterDecayTimer = null;
+
+      function setMeter(v){
+        meter = Math.max(0, Math.min(100, v));
+        meterBar.style.width = meter + "%";
+        meterPct.textContent = Math.round(meter) + "%";
+      }
+      function startMeterDecay(){
+        if (meterDecayTimer) return;
+        meterDecayTimer = setInterval(()=>{
+          setMeter(meter - 1.15);
+          if (meter <= 0){
+            clearInterval(meterDecayTimer);
+            meterDecayTimer = null;
+          }
+        }, 180);
+      }
+
+      mashLove.addEventListener("click", ()=>{
+        playBlip(988, 0.05, "square", 0.07);
+        setMeter(meter + 8);
+        startMeterDecay();
+        showToast("LOVE +8 💖");
+        if (meter >= 100){
+          showToast("Achievement Unlocked: Button Masher 🏆");
+          achievements++;
+          updateInventoryStats();
+          setMeter(60);
+          burstSparkles(titlePill, 18);
+          confetti({ particleCount: 130, spread: 70, origin: { y: 0.65 } });
+        }
+      });
+
+      /* =========================================================
+         INVENTORY / ACHIEVEMENTS
+         ========================================================= */
+      let achievements = 0;
+      const invCombo = document.getElementById("invCombo");
+      const invBoss = document.getElementById("invBoss");
+      const invAch = document.getElementById("invAch");
+
+      function updateInventoryStats(){
+        invCombo.textContent = "x" + combo;
+        invBoss.textContent = document.body.classList.contains("boss-mode") ? "ON" : "OFF";
+        invAch.textContent = String(achievements);
+      }
+
+      /* =========================================================
+         LETS GOOOO / VICTORY OVERLAY
+         ========================================================= */
+      const victory = document.getElementById("victory");
+      function showVictory(){
+        victory.classList.add("show");
+        setTimeout(()=>victory.classList.remove("show"), 2200);
+      }
+
+      /* =========================================================
+         CHEST FANFARE (synth)
+         ========================================================= */
+      function playChestFanfare() {
         try {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
           const ctx = new AudioCtx();
@@ -848,8 +1509,6 @@
             { note: "B6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "C6", beats: 0.25 },
             { note: "D6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "D7", beats: 0.25 },
             { note: "C7", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "D6", beats: 0.25 },
-            { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "E7", beats: 0.25 },
-            { note: "D7", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 },
           ];
 
           const t1 = schedule(lead,    { type: "triangle", volume: 0.14, offset: 0.00, detune: +4 });
@@ -862,53 +1521,99 @@
         } catch {}
       }
 
-      // ------------------ Boss HUD logic ------------------
+      /* =========================================================
+         NO BOSS SYSTEM: size + run away + attacks + battle music
+         ========================================================= */
       const bossHud = document.getElementById("bossHud");
       const bossBar = document.getElementById("bossBar");
       const bossText = document.getElementById("bossText");
+      const bossTitle = document.getElementById("bossTitle");
+      const warning = document.getElementById("warning");
+
       let courage = 100;
+      let noScale = 1;
+      let noDodges = 0;
+      let attackTimer = null;
 
       function updateBossHud(){
         bossHud.classList.add("show");
         bossBar.style.width = courage + "%";
         bossText.textContent = courage + "%";
+
+        if (courage <= 15) bossHud.classList.add("critical");
+        else bossHud.classList.remove("critical");
+
         if (courage <= 0){
           bossText.textContent = "0%";
-          document.getElementById("bossTitle").textContent = "NO has been defeated!";
+          bossTitle.textContent = "NO has been defeated!";
         }
       }
 
-      // ------------------ NO button: bigger each press + runs away + stereo panning battle music ------------------
-      let noScale = 1;
-      let noDodges = 0;
+      function spawnSmokeAt(x, y){
+        for(let i=0;i<7;i++){
+          const s = document.createElement("div");
+          s.className = "smoke";
+          s.style.left = x + "px";
+          s.style.top = y + "px";
+          s.style.setProperty("--sx", (Math.random()*70 - 35) + "px");
+          s.style.setProperty("--sy", (Math.random()*50 - 25) + "px");
+          document.body.appendChild(s);
+          s.addEventListener("animationend", ()=>s.remove());
+        }
+      }
 
       function applyNoTransform(extra = "") {
         const capped = Math.min(noScale, 4.5);
         noBtn.style.transform = `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) ${extra}`;
       }
 
-      // runs away after it’s been pressed a couple times
-      noBtn.addEventListener("mouseenter", () => {
-        if (noDodges < 2) return;
-
+      function runAwayNo(){
         const rect = noBtn.getBoundingClientRect();
         const pad = 12;
-
         const maxX = window.innerWidth - rect.width - pad;
         const maxY = window.innerHeight - rect.height - pad;
-
         const tx = Math.floor(Math.random() * maxX) - rect.left + pad;
         const ty = Math.floor(Math.random() * maxY) - rect.top + pad;
+
+        // smoke at old spot
+        spawnSmokeAt(rect.left + rect.width/2, rect.top + rect.height/2);
 
         noBtn.dataset.tx = tx;
         noBtn.dataset.ty = ty;
 
         noBtn.style.transition = "transform 0.15s ease";
         applyNoTransform();
-        updateBattlePan(); // keep battle sound following it
-      });
+        updateBattlePan();
+      }
 
-      // ------------------ Battle music (original synth, looped) + stereo pan ------------------
+      // Boss attacks (warning flash + shake + extra particles)
+      function startBossAttacks(){
+        if (attackTimer) return;
+        attackTimer = setInterval(()=>{
+          if (!document.body.classList.contains("boss-mode")) return;
+
+          warning.classList.add("show");
+          mainCard.classList.remove("shake");
+          void mainCard.offsetWidth;
+          mainCard.classList.add("shake");
+
+          // mini sound + particles
+          playBlip(110, 0.12, "sawtooth", 0.06);
+          for(let i=0;i<5;i++) spawnPowerup();
+          confetti({ particleCount: 40, spread: 80, origin: { y: 0.55 } });
+
+          setTimeout(()=>warning.classList.remove("show"), 700);
+        }, 2400);
+      }
+
+      function stopBossAttacks(){
+        if (!attackTimer) return;
+        clearInterval(attackTimer);
+        attackTimer = null;
+        warning.classList.remove("show");
+      }
+
+      // Stereo battle music (synth)
       let battleCtx = null;
       let battleMaster = null;
       let battlePanner = null;
@@ -964,7 +1669,6 @@
         if (battleCtx) return;
 
         battleIntensity = intensity;
-
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         battleCtx = new AudioCtx();
         if (battleCtx.state === "suspended") battleCtx.resume();
@@ -972,7 +1676,6 @@
         battleMaster = battleCtx.createGain();
         battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
 
-        // Stereo panner (if supported)
         if (battleCtx.createStereoPanner) {
           battlePanner = battleCtx.createStereoPanner();
           battleMaster.connect(battlePanner).connect(battleCtx.destination);
@@ -1063,56 +1766,108 @@
         }
       }
 
-      function maybeBossMode() {
-        if (noDodges >= 3) document.body.classList.add("boss-mode");
+      function enableBossMode(){
+        document.body.classList.add("boss-mode");
+        startBossAttacks();
+        showToast("Boss Mode: ON 😈");
+        updateInventoryStats();
+      }
+      function disableBossMode(){
+        document.body.classList.remove("boss-mode");
+        stopBossAttacks();
+        showToast("Boss Mode: OFF ✨");
+        updateInventoryStats();
       }
 
-      // ------------------ Victory overlay ------------------
-      const victory = document.getElementById("victory");
-      function showVictory(){
-        victory.classList.add("show");
-        setTimeout(()=>victory.classList.remove("show"), 2200);
-      }
+      // hover blips
+      yesBtn.addEventListener("mouseenter", ()=>playBlip(988, 0.06, "sine", 0.07));
+      noBtn.addEventListener("mouseenter",  ()=>playBlip(220, 0.06, "square", 0.06));
 
-      // ------------------ YES / NO click handlers ------------------
+      // NO runs away when hovered after a couple presses
+      noBtn.addEventListener("mouseenter", ()=>{
+        if (noDodges < 2 || noBtn.style.display === "none") return;
+        runAwayNo();
+      });
+
+      /* =========================================================
+         HIDDEN LOOT (scavenger hunt)
+         ========================================================= */
+      const hiddenLoot = document.getElementById("hiddenLoot");
+      let lootFound = false;
+
+      hiddenLoot.addEventListener("click", ()=>{
+        if (lootFound) return;
+        lootFound = true;
+        hiddenLoot.classList.add("found");
+        hiddenLoot.textContent = "💎✨";
+        achievements++;
+        updateInventoryStats();
+        showToast("Secret found: Shiny Gem 💎");
+        burstSparkles(titlePill, 18);
+        confetti({ particleCount: 180, spread: 85, origin: { x: 0.15, y: 0.8 } });
+        typeLine("You found hidden loot! Your Valentine stats increased dramatically.");
+      });
+
+      /* =========================================================
+         YES CLICK
+         ========================================================= */
       let yesFinalTimer = null;
-      let combo = 0;
 
       yesBtn.addEventListener("click", () => {
-        // LETS GOOOO
+        // LETS GOOOO on title pill (right side)
         document.getElementById("letsGo")?.classList.add("show");
-        burstSparkles(titlePill, 16);
-        playBlip(1318, 0.08, "triangle");
+        burstSparkles(titlePill, 18);
 
-        // update quest log
+        // update quest + combo
         combo += 1;
-        loveCount.textContent = "x" + combo;
-        questStatus.textContent = "Accepted! 💘 QUEST COMPLETE!";
+        loveCountEl.textContent = "x" + combo;
+        questStatusEl.textContent = "Accepted! 💘 QUEST COMPLETE!";
+        updateInventoryStats();
+
+        // victory + toasts + achievements
         showVictory();
+        showToast("Achievement Unlocked: Valentine Secured 🏆");
+        achievements++;
+        updateInventoryStats();
 
+        // stop boss stuff
         stopBattleMusic();
-        document.body.classList.remove("boss-mode");
+        disableBossMode();
+        bossHud.classList.remove("show");
 
+        // image + hint
         setImageTry(GIFS.yesMain, "YES GIF failed to load.");
         hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
 
-        // optional: hide NO
+        // confetti fireworks (big moment)
+        confetti({ particleCount: 260, spread: 90, origin: { y: 0.6 } });
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.2 } });
+        confetti({ particleCount: 120, spread: 120, origin: { x: 0.2, y: 0.55 } });
+        confetti({ particleCount: 120, spread: 120, origin: { x: 0.8, y: 0.55 } });
+
+        // fanfare
+        playChestFanfare();
+
+        // dialogue
+        typeLine("QUEST COMPLETE! Reward obtained: 💍 Legendary Valentine Ring.");
+
+        // hide NO after YES
         noBtn.style.display = "none";
 
-        playGlueSong();
-        confetti({ particleCount: 260, spread: 85, origin: { y: 0.6 } });
-        confetti({ particleCount: 120, spread: 55, origin: { y: 0.2 } });
-
+        // swap gif later
         if (yesFinalTimer) clearTimeout(yesFinalTimer);
         yesFinalTimer = setTimeout(() => {
           setImageTry(GIFS.yesFinal, "Final Eevee GIF failed to load.");
         }, 2000);
       });
 
+      /* =========================================================
+         NO CLICK
+         ========================================================= */
       noBtn.addEventListener("click", () => {
         setImageTry(GIFS.no, "NO GIF failed to load.");
 
-        // comically bigger each press
+        // comically bigger
         noScale *= 1.35;
         noDodges += 1;
 
@@ -1120,22 +1875,28 @@
         courage = Math.max(0, courage - 15);
         updateBossHud();
 
-        // update quest log
-        questStatus.textContent = (courage <= 0)
+        // quest text
+        questStatusEl.textContent = (courage <= 0)
           ? "NO has been defeated… the path to YES is clear 😈"
           : "NO is resisting… it’s getting nervous 😳";
 
-        // shake screen + boss mode
+        // shake + boss-mode after a bit
         mainCard.classList.remove("shake");
-        void mainCard.offsetWidth; // restart animation
+        void mainCard.offsetWidth;
         mainCard.classList.add("shake");
 
+        // battle
         startBattleMusic(noDodges);
         updateBattleIntensity(noDodges);
-        maybeBossMode();
+        updateBattlePan();
 
+        if (noDodges >= 3) enableBossMode();
+
+        // run away sometimes
+        if (noDodges >= 2) runAwayNo();
+
+        // animate wobble
         const capped = Math.min(noScale, 4.5);
-
         noBtn.animate(
           [
             { transform: `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) rotate(0deg)` },
@@ -1147,50 +1908,495 @@
         );
 
         applyNoTransform();
-        updateBattlePan();
+        hint.textContent = "No (Are you sure about that?) 😳";
 
-        // If boss defeated: stop battle, make NO give up
+        // critical
+        if (courage <= 15 && courage > 0){
+          showToast("Boss is CRITICAL! ⚠️");
+          typeLine("NO is on 1 HP energy… finish it!");
+        }
+
+        // defeated
         if (courage <= 0){
           stopBattleMusic();
-          document.body.classList.remove("boss-mode");
+          disableBossMode();
+          showToast("Boss defeated! ✅");
+          achievements++;
+          updateInventoryStats();
+
           hint.textContent = "NO has been defeated… okay okay, press YES already 😌";
           noBtn.style.display = "none";
-          confetti({ particleCount: 140, spread: 70, origin: { y: 0.6 } });
-        } else {
-          hint.textContent = "No (Are you sure about that?) 😳";
+          confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } });
+          typeLine("NO has been defeated. The universe gently encourages YES.");
         }
       });
 
-      // ------------------ Secret Easter Egg: click mascot 5 times ------------------
+      /* =========================================================
+         MODALS (open/close)
+         ========================================================= */
+      const inventoryModal = document.getElementById("inventoryModal");
+      const catchModal = document.getElementById("catchModal");
+      const platformerModal = document.getElementById("platformerModal");
+
+      const openInventory = document.getElementById("openInventory");
+      const openCatch = document.getElementById("openCatch");
+      const openPlatformer = document.getElementById("openPlatformer");
+      const closeInventory = document.getElementById("closeInventory");
+      const closeCatch = document.getElementById("closeCatch");
+      const closePlatformer = document.getElementById("closePlatformer");
+
+      function openModal(m){
+        m.classList.add("show");
+        playBlip(659, 0.06, "triangle", 0.07);
+        updateInventoryStats();
+      }
+      function closeModal(m){
+        m.classList.remove("show");
+        playBlip(440, 0.06, "triangle", 0.07);
+      }
+
+      openInventory.addEventListener("click", ()=>openModal(inventoryModal));
+      closeInventory.addEventListener("click", ()=>closeModal(inventoryModal));
+      openCatch.addEventListener("click", ()=>{
+        openModal(catchModal);
+        startCatchGame();
+      });
+      closeCatch.addEventListener("click", ()=>{
+        closeModal(catchModal);
+        stopCatchGame();
+      });
+      openPlatformer.addEventListener("click", ()=>{
+        openModal(platformerModal);
+        startPlatformer();
+      });
+      closePlatformer.addEventListener("click", ()=>{
+        closeModal(platformerModal);
+        stopPlatformer();
+      });
+
+      // click outside to close
+      [inventoryModal, catchModal, platformerModal].forEach(m=>{
+        m.addEventListener("click", (e)=>{
+          if (e.target === m) closeModal(m);
+        });
+      });
+
+      /* =========================================================
+         MASCOT EASTER EGG (click 5 times)
+         ========================================================= */
       const mascotBtn = document.getElementById("mascotBtn");
       let mascotClicks = 0;
       mascotBtn.addEventListener("click", () => {
         mascotClicks += 1;
-        playBlip(784, 0.06, "sine");
+        playBlip(784, 0.06, "sine", 0.08);
         if (mascotClicks >= 5){
           mascotClicks = 0;
           hint.textContent = "SECRET UNLOCKED: BONUS LOOT DROP!! 🪙⭐";
-          questStatus.textContent = "Secret found! Bonus loot dropped!";
-          for (let i=0;i<10;i++) spawnPowerup();
+          questStatusEl.textContent = "Secret found! Bonus loot dropped!";
+          for (let i=0;i<12;i++) spawnPowerup();
           confetti({ particleCount: 220, spread: 95, origin: { y: 0.45 } });
           burstSparkles(titlePill, 22);
+          showToast("Achievement Unlocked: Mascot Whisperer 🏆");
+          achievements++;
+          updateInventoryStats();
+          typeLine("A secret was found by repeatedly booping the mascot. Respect.");
         }
       });
 
-      // ------------------ Theme toggle (persists) ------------------
-      const toggleTheme = document.getElementById("toggleTheme");
-      const saved = localStorage.getItem("val_theme");
-      if (saved === "night") document.body.classList.add("night");
+      /* =========================================================
+         CATCH THE HEARTS MINI-GAME
+         ========================================================= */
+      const catchArea = document.getElementById("catchArea");
+      const basket = document.getElementById("basket");
+      const catchScoreEl = document.getElementById("catchScore");
+      const catchBestEl = document.getElementById("catchBest");
 
-      toggleTheme.addEventListener("click", () => {
-        playBlip(523, 0.07, "triangle");
-        document.body.classList.toggle("night");
-        localStorage.setItem("val_theme", document.body.classList.contains("night") ? "night" : "day");
-        burstSparkles(titlePill, 10);
+      let catchRunning = false;
+      let catchScore = 0;
+      let catchBest = Number(localStorage.getItem("catch_best") || "0");
+      catchBestEl.textContent = String(catchBest);
+      let catchSpawnTimer = null;
+      let catchFallTimer = null;
+      let catchItems = [];
+
+      function setCatchScore(v){
+        catchScore = v;
+        catchScoreEl.textContent = String(catchScore);
+        if (catchScore > catchBest){
+          catchBest = catchScore;
+          catchBestEl.textContent = String(catchBest);
+          localStorage.setItem("catch_best", String(catchBest));
+        }
+      }
+
+      function startCatchGame(){
+        if (catchRunning) return;
+        catchRunning = true;
+        setCatchScore(0);
+        catchItems.forEach(i=>i.el.remove());
+        catchItems = [];
+
+        function spawn(){
+          const el = document.createElement("div");
+          el.className = "falling";
+          const pool = [
+            {t:"💗", p:2},
+            {t:"⭐", p:3},
+            {t:"🪙", p:4},
+            {t:"💔", p:-3},
+          ];
+          const item = pool[Math.floor(Math.random()*pool.length)];
+          el.textContent = item.t;
+          const x = Math.random() * (catchArea.clientWidth - 30) + 10;
+          el.style.left = x + "px";
+          el.style.top = "-28px";
+          catchArea.appendChild(el);
+          catchItems.push({ el, x, y: -28, vy: 2.0 + Math.random()*2.2, points: item.p });
+        }
+
+        catchSpawnTimer = setInterval(spawn, 450);
+
+        // move basket with mouse
+        const onMove = (e)=>{
+          const r = catchArea.getBoundingClientRect();
+          const x = Math.max(0, Math.min(r.width, e.clientX - r.left));
+          basket.style.left = x + "px";
+          basket.style.transform = "translateX(-50%)";
+        };
+        catchArea.addEventListener("mousemove", onMove);
+
+        catchFallTimer = setInterval(()=>{
+          const br = basket.getBoundingClientRect();
+          const ar = catchArea.getBoundingClientRect();
+
+          catchItems.forEach(obj=>{
+            obj.y += obj.vy;
+            obj.el.style.transform = `translateY(${obj.y}px)`;
+          });
+
+          // collision + cleanup
+          catchItems = catchItems.filter(obj=>{
+            const er = obj.el.getBoundingClientRect();
+            const hit =
+              er.bottom >= br.top &&
+              er.left <= br.right &&
+              er.right >= br.left &&
+              er.top <= br.bottom;
+
+            if (hit){
+              setCatchScore(catchScore + obj.points);
+              playBlip(obj.points > 0 ? 988 : 196, 0.05, obj.points > 0 ? "triangle" : "square", 0.07);
+              if (obj.points > 0) burstSparkles(titlePill, 6);
+              obj.el.remove();
+              return false;
+            }
+
+            // fell out
+            if (er.top > ar.bottom + 40){
+              obj.el.remove();
+              return false;
+            }
+            return true;
+          });
+        }, 16);
+
+        showToast("Catch game started! 💗");
+      }
+
+      function stopCatchGame(){
+        catchRunning = false;
+        if (catchSpawnTimer) clearInterval(catchSpawnTimer);
+        if (catchFallTimer) clearInterval(catchFallTimer);
+        catchSpawnTimer = null;
+        catchFallTimer = null;
+        catchItems.forEach(i=>i.el.remove());
+        catchItems = [];
+      }
+
+      /* =========================================================
+         PLATFORMER MINI-GAME (Canvas) — “Celeste-ish” clouds + dash
+         ========================================================= */
+      const canvas = document.getElementById("platformCanvas");
+      const ctx = canvas.getContext("2d");
+      const platHeartsEl = document.getElementById("platHearts");
+
+      let platRunning = false;
+      let platRAF = null;
+      let keys = {};
+      let platHearts = 0;
+
+      // world
+      const world = {
+        gravity: 0.55,
+        friction: 0.82,
+        platforms: [],
+        hearts: [],
+        flag: { x: 880, y: 120, w: 18, h: 80 },
+        clouds: [],
+      };
+
+      const player = {
+        x: 60, y: 360, w: 20, h: 26,
+        vx: 0, vy: 0,
+        onGround: false,
+        dash: { ready: true, cd: 0, dir: 1 }
+      };
+
+      function resetPlatformer(){
+        player.x = 60; player.y = 360; player.vx = 0; player.vy = 0;
+        player.onGround = false;
+        player.dash.ready = true; player.dash.cd = 0;
+        platHearts = 0;
+        platHeartsEl.textContent = "0";
+
+        // platforms
+        world.platforms = [
+          {x: 0,   y: 470, w: 960, h: 50},
+          {x: 120, y: 400, w: 140, h: 16},
+          {x: 300, y: 350, w: 130, h: 16},
+          {x: 470, y: 310, w: 130, h: 16},
+          {x: 650, y: 270, w: 130, h: 16},
+          {x: 820, y: 210, w: 120, h: 16},
+          {x: 720, y: 410, w: 120, h: 16},
+        ];
+
+        // hearts to collect
+        world.hearts = [
+          {x: 170, y: 360, r: 9, got:false},
+          {x: 360, y: 310, r: 9, got:false},
+          {x: 530, y: 270, r: 9, got:false},
+          {x: 705, y: 370, r: 9, got:false},
+          {x: 870, y: 160, r: 9, got:false},
+        ];
+
+        // clouds (celeste-ish)
+        world.clouds = Array.from({length: 8}).map((_,i)=>({
+          x: Math.random()*960,
+          y: 40 + Math.random()*200,
+          s: 0.4 + Math.random()*0.9,
+          v: 0.2 + Math.random()*0.6,
+          op: 0.18 + Math.random()*0.25
+        }));
+      }
+
+      function rectIntersect(a,b){
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      }
+
+      function drawCloud(cx, cy, scale, op){
+        ctx.save();
+        ctx.globalAlpha = op;
+        ctx.fillStyle = "rgba(255,255,255,0.95)";
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 64*scale, 18*scale, 0, 0, Math.PI*2);
+        ctx.ellipse(cx-30*scale, cy-10*scale, 28*scale, 18*scale, 0, 0, Math.PI*2);
+        ctx.ellipse(cx+26*scale, cy-14*scale, 34*scale, 22*scale, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        // streak highlight
+        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        ctx.beginPath();
+        ctx.roundRect(cx+10*scale, cy-2*scale, 30*scale, 5*scale, 999);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawPlatformer(){
+        // bg gradient
+        const g = ctx.createLinearGradient(0,0,0,canvas.height);
+        if (document.body.classList.contains("night")){
+          g.addColorStop(0, "rgba(30,41,59,0.65)");
+          g.addColorStop(1, "rgba(2,6,23,0.65)");
+        } else {
+          g.addColorStop(0, "rgba(255,255,255,0.55)");
+          g.addColorStop(1, "rgba(255,255,255,0.12)");
+        }
+        ctx.fillStyle = g;
+        ctx.fillRect(0,0,canvas.width, canvas.height);
+
+        // clouds
+        for(const c of world.clouds){
+          drawCloud(c.x, c.y, c.s, c.op);
+        }
+
+        // platforms
+        ctx.fillStyle = document.body.classList.contains("night") ? "rgba(255,255,255,0.18)" : "rgba(15,23,42,0.12)";
+        for(const p of world.platforms){
+          ctx.fillRect(p.x, p.y, p.w, p.h);
+        }
+
+        // hearts
+        for(const h of world.hearts){
+          if (h.got) continue;
+          ctx.font = "20px ui-monospace, monospace";
+          ctx.fillText("💗", h.x - 10, h.y + 8);
+        }
+
+        // flag
+        ctx.font = "22px ui-monospace, monospace";
+        ctx.fillText("🚩", world.flag.x - 4, world.flag.y + 18);
+
+        // player
+        ctx.fillStyle = "rgba(244,63,94,0.85)";
+        ctx.fillRect(player.x, player.y, player.w, player.h);
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.fillRect(player.x+5, player.y+7, 4, 4); // eye
+      }
+
+      function stepPlatformer(){
+        if (!platRunning) return;
+
+        // clouds drift
+        for(const c of world.clouds){
+          c.x += c.v;
+          if (c.x > 1020) c.x = -60;
+        }
+
+        // input
+        const left = keys["ArrowLeft"];
+        const right = keys["ArrowRight"];
+        const jump = keys["Space"];
+        const dash = keys["ShiftLeft"] || keys["ShiftRight"];
+
+        if (left)  { player.vx -= 0.45; player.dash.dir = -1; }
+        if (right) { player.vx += 0.45; player.dash.dir =  1; }
+
+        // dash
+        if (dash && player.dash.ready){
+          player.dash.ready = false;
+          player.dash.cd = 26; // frames
+          player.vx = 9.5 * player.dash.dir;
+          player.vy = -1.2;
+          // little dash burst
+          playBlip(880, 0.07, "triangle", 0.07);
+        }
+        if (player.dash.cd > 0) player.dash.cd--;
+        if (player.dash.cd === 0 && !player.dash.ready && player.onGround){
+          player.dash.ready = true;
+        }
+
+        // jump
+        if (jump && player.onGround){
+          player.vy = -11.2;
+          player.onGround = false;
+          playBlip(659, 0.06, "sine", 0.07);
+        }
+
+        // physics
+        player.vy += world.gravity;
+        player.vx *= world.friction;
+
+        // clamp
+        if (player.vx > 8) player.vx = 8;
+        if (player.vx < -8) player.vx = -8;
+
+        // move x
+        player.x += player.vx;
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
+
+        // move y
+        player.y += player.vy;
+
+        // collision
+        player.onGround = false;
+        for(const p of world.platforms){
+          const a = {x: player.x, y: player.y, w: player.w, h: player.h};
+          const b = {x: p.x, y: p.y, w: p.w, h: p.h};
+          if (!rectIntersect(a,b)) continue;
+
+          // resolve from top
+          const prevY = player.y - player.vy;
+          if (prevY + player.h <= p.y + 1){
+            player.y = p.y - player.h;
+            player.vy = 0;
+            player.onGround = true;
+            if (player.dash.cd === 0) player.dash.ready = true;
+          } else {
+            // side/bottom bump
+            if (player.vy < 0){
+              player.y = p.y + p.h;
+              player.vy = 0.2;
+            } else {
+              // side: push out
+              if (player.x + player.w/2 < p.x + p.w/2) player.x = p.x - player.w;
+              else player.x = p.x + p.w;
+              player.vx *= -0.2;
+            }
+          }
+        }
+
+        // fell
+        if (player.y > canvas.height + 80){
+          resetPlatformer();
+          showToast("Platformer: Respawned 💫");
+        }
+
+        // collect hearts
+        for(const h of world.hearts){
+          if (h.got) continue;
+          const dx = (player.x + player.w/2) - h.x;
+          const dy = (player.y + player.h/2) - h.y;
+          if (dx*dx + dy*dy < 28*28){
+            h.got = true;
+            platHearts++;
+            platHeartsEl.textContent = String(platHearts);
+            playBlip(988, 0.06, "triangle", 0.08);
+            showToast("Collected 💗");
+            burstSparkles(titlePill, 8);
+          }
+        }
+
+        // reach flag
+        if (rectIntersect({x: player.x, y: player.y, w: player.w, h: player.h}, world.flag)){
+          showToast("Platformer cleared! 🚩");
+          achievements++;
+          updateInventoryStats();
+          confetti({ particleCount: 140, spread: 80, origin: { y: 0.55 } });
+          typeLine("You reached the flag! Legendary platforming energy detected.");
+          resetPlatformer();
+        }
+
+        drawPlatformer();
+        platRAF = requestAnimationFrame(stepPlatformer);
+      }
+
+      function startPlatformer(){
+        if (platRunning) return;
+        platRunning = true;
+        keys = {};
+        resetPlatformer();
+        drawPlatformer();
+        platRAF = requestAnimationFrame(stepPlatformer);
+      }
+
+      function stopPlatformer(){
+        platRunning = false;
+        if (platRAF) cancelAnimationFrame(platRAF);
+        platRAF = null;
+      }
+
+      window.addEventListener("keydown", (e)=>{
+        keys[e.code] = true;
+        if (e.code === "KeyR" && platformerModal.classList.contains("show")){
+          resetPlatformer();
+          showToast("Restarted (R) 🔁");
+        }
       });
+      window.addEventListener("keyup", (e)=>{ keys[e.code] = false; });
+
+      /* =========================================================
+         FINAL LITTLE POLISH
+         ========================================================= */
+      // Keep inventory stats fresh even if user opens it later
+      setInterval(updateInventoryStats, 700);
+
+      // Make sure dialogue is visible after a bit
+      setTimeout(()=>dialogue.classList.add("show"), 450);
     </script>
   </body>
 </html>
+
 
     </script>
   </body>
