@@ -34,68 +34,57 @@
       /* Keep card above hearts */
       .card { position: relative; z-index: 1; }
 
-      /* Smooth scaling */
-      #yesBtn { transition: transform 0.2s ease; }
-
       /* If a gif fails you won't see a harsh white block */
       #valImage {
         background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));
       }
 
-      /* ---------------- Heart-shaped buttons (SMALLER) ---------------- */
-      .heart-btn{
-        --size: 48px;
-        width: var(--size);
-        height: var(--size);
-        position: relative;
+      /* --------- Neat heart buttons (SVG) --------- */
+      .svg-heart{
+        width: 56px;          /* smaller + tidy */
+        height: 50px;
         border: 0;
+        background: transparent;
+        padding: 0;
         cursor: pointer;
-        background: #ef4444;              /* Tailwind red-500 */
-        transform: rotate(-45deg);
-        border-radius: 10px;
-        box-shadow: 0 8px 14px rgba(0,0,0,.14);
-        transition: transform .15s ease, filter .15s ease;
-        overflow: visible;
+        position: relative;
+        filter: drop-shadow(0 10px 14px rgba(0,0,0,.16));
+        transition: transform .12s ease, filter .12s ease;
       }
 
-      .heart-btn::before,
-      .heart-btn::after{
-        content:"";
-        position:absolute;
-        width: var(--size);
-        height: var(--size);
-        background: inherit;
-        border-radius: 999px;
+      .svg-heart svg{
+        width: 100%;
+        height: 100%;
+        display: block;
       }
 
-      .heart-btn::before{
-        top: calc(-1 * var(--size) / 2);
-        left: 0;
-      }
-      .heart-btn::after{
-        top: 0;
-        left: calc(var(--size) / 2);
-      }
+      .svg-heart.yes path{ fill: #ef4444; } /* red */
+      .svg-heart.no  path{ fill: #f43f5e; } /* rose */
 
-      .heart-btn span{
-        position:absolute;
+      .svg-heart span{
+        position: absolute;
         inset: 0;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        transform: rotate(45deg);
-        color:#fff;
-        font-weight: 800;
-        font-size: 11px;
-        letter-spacing: .3px;
-        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 900;
+        font-size: 12px;      /* readable */
+        letter-spacing: .6px;
+        text-shadow: 0 1px 2px rgba(0,0,0,.25);
         user-select: none;
       }
 
-      .heart-btn:hover{ filter: brightness(1.05); transform: rotate(-45deg) scale(1.05); }
-      .heart-btn:active{ transform: rotate(-45deg) scale(.95); }
+      .svg-heart:hover{
+        transform: scale(1.06);
+        filter: drop-shadow(0 12px 18px rgba(0,0,0,.18));
+      }
+      .svg-heart:active{ transform: scale(.96); }
 
-      .heart-btn.no{ background:#f43f5e; }
+      .svg-heart:focus-visible{
+        outline: 3px solid rgba(239, 68, 68, .35);
+        outline-offset: 6px;
+      }
     </style>
   </head>
 
@@ -111,18 +100,28 @@
         alt="Valentine gif"
       />
 
-      <!-- HEART BUTTONS (smaller) -->
-      <div class="flex gap-8 justify-center">
-        <button id="yesBtn" class="heart-btn yes" type="button" aria-label="Yes">
-          <span>Yes</span>
+      <!-- NEAT HEART BUTTONS -->
+      <div class="flex gap-6 justify-center mt-2">
+        <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
+          <svg viewBox="0 0 32 29" aria-hidden="true">
+            <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
+              c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
+          </svg>
+          <span>YES</span>
         </button>
 
-        <button id="noBtn" class="heart-btn no" type="button" aria-label="No">
-          <span>No</span>
+        <button id="noBtn" class="svg-heart no" type="button" aria-label="No">
+          <svg viewBox="0 0 32 29" aria-hidden="true">
+            <path d="M23.6,0c-3,0-5.2,1.7-6.6,3.6C15.6,1.7,13.4,0,10.4,0C4.9,0,0.8,4.9,1.1,10.4
+              c0.6,9.2,14.9,18.2,15.9,18.6c1-0.4,15.3-9.4,15.9-18.6C33.2,4.9,29.1,0,23.6,0z"/>
+          </svg>
+          <span>NO</span>
         </button>
       </div>
 
-      <p id="hint" class="text-sm text-gray-500 mt-4">Tip: click a button. If a GIF host blocks embeds, it’ll auto-try another link.</p>
+      <p id="hint" class="text-sm text-gray-500 mt-4">
+        Tip: click a button. If a GIF host blocks embeds, it’ll auto-try another link.
+      </p>
     </div>
 
     <script>
@@ -200,7 +199,7 @@
 
       setImageTry(GIFS.start, "Start GIF failed to load.");
 
-      // ------------------ "Chest opening" style fanfare (original) ------------------
+      // ------------------ More complicated chest-fanfare (original) ------------------
       function playGlueSong() {
         try {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -211,6 +210,86 @@
 
           const bpm = 132;
           const beat = 60 / bpm;
+
+          // Small echo to make it feel more "game-y"
+          const delay = ctx.createDelay(1.0);
+          delay.delayTime.value = 0.12;
+
+          const feedback = ctx.createGain();
+          feedback.gain.value = 0.25;
+
+          const wet = ctx.createGain();
+          wet.gain.value = 0.35;
+
+          const dry = ctx.createGain();
+          dry.gain.value = 0.85;
+
+          delay.connect(feedback);
+          feedback.connect(delay);
+
+          delay.connect(wet);
+          wet.connect(ctx.destination);
+          dry.connect(ctx.destination);
+
+          const noteToFreq = (note) => {
+            if (note === "REST") return null;
+            const m = /^([A-G])(#|b)?(\d)$/.exec(note);
+            if (!m) return null;
+
+            const [, letter, accidental, octaveStr] = m;
+            const octave = Number(octaveStr);
+            const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+            let n = SEMI[letter];
+            if (accidental === "#") n += 1;
+            if (accidental === "b") n -= 1;
+
+            const midi = (octave + 1) * 12 + n;
+            return 440 * Math.pow(2, (midi - 69) / 12);
+          };
+
+          function schedule(sequence, {
+            type = "triangle",
+            volume = 0.12,
+            offset = 0,
+            detune = 0,
+            toDelay = true
+          } = {}) {
+            let t = now + offset;
+
+            for (const step of sequence) {
+              const dur = step.beats * beat;
+              const freq = noteToFreq(step.note);
+
+              if (freq) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, t);
+                osc.detune.setValueAtTime(detune, t);
+
+                const attack = Math.min(0.012, dur * 0.25);
+                const release = Math.min(0.09, dur * 0.45);
+
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(volume, t + attack);
+                gain.gain.setValueAtTime(volume, t + Math.max(attack, dur - release));
+                gain.gain.linearRampToValueAtTime(0, t + dur);
+
+                osc.connect(gain);
+                gain.connect(dry);
+                if (toDelay) gain.connect(delay);
+
+                osc.start(t);
+                osc.stop(t + dur);
+              }
+
+              t += dur;
+            }
+
+            return t;
+          }
 
           const lead = [
             { note: "C5", beats: 0.5 }, { note: "E5", beats: 0.5 }, { note: "G5", beats: 0.5 }, { note: "C6", beats: 1.5 },
@@ -230,61 +309,24 @@
             { note: "C3", beats: 2 },
           ];
 
-          const noteToFreq = (note) => {
-            if (note === "REST") return null;
-            const m = /^([A-G])(#|b)?(\d)$/.exec(note);
-            if (!m) return null;
+          const sparkle = [
+            { note: "C6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 },
+            { note: "B6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "C6", beats: 0.25 },
 
-            const [, letter, accidental, octaveStr] = m;
-            const octave = Number(octaveStr);
-            const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+            { note: "D6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "D7", beats: 0.25 },
+            { note: "C7", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "D6", beats: 0.25 },
 
-            let n = SEMI[letter];
-            if (accidental === "#") n += 1;
-            if (accidental === "b") n -= 1;
+            { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "E7", beats: 0.25 },
+            { note: "D7", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 },
+          ];
 
-            const midi = (octave + 1) * 12 + n;
-            return 440 * Math.pow(2, (midi - 69) / 12);
-          };
+          const t1 = schedule(lead,    { type: "triangle", volume: 0.14, offset: 0.00, detune: +4 });
+          const t2 = schedule(harmony, { type: "sine",     volume: 0.10, offset: 0.02, detune: -3 });
+          const t3 = schedule(bass,    { type: "square",   volume: 0.06, offset: 0.00, detune:  0, toDelay: false });
+          const t4 = schedule(sparkle, { type: "sine",     volume: 0.07, offset: 0.10, detune: +6 });
 
-          function schedule(sequence, { type = "triangle", volume = 0.12, offset = 0 } = {}) {
-            let t = now + offset;
-
-            for (const step of sequence) {
-              const dur = step.beats * beat;
-              const freq = noteToFreq(step.note);
-
-              if (freq) {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, t);
-
-                const attack = Math.min(0.015, dur * 0.25);
-                const release = Math.min(0.08, dur * 0.4);
-
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(volume, t + attack);
-                gain.gain.setValueAtTime(volume, t + Math.max(attack, dur - release));
-                gain.gain.linearRampToValueAtTime(0, t + dur);
-
-                osc.connect(gain).connect(ctx.destination);
-                osc.start(t);
-                osc.stop(t + dur);
-              }
-
-              t += dur;
-            }
-
-            return t;
-          }
-
-          const t1 = schedule(lead,    { type: "triangle", volume: 0.14, offset: 0 });
-          const t2 = schedule(harmony, { type: "sine",     volume: 0.10, offset: 0.02 });
-          const t3 = schedule(bass,    { type: "square",   volume: 0.06, offset: 0 });
-
-          const end = Math.max(t1, t2, t3);
-          setTimeout(() => ctx.close().catch(() => {}), Math.ceil((end - now + 0.2) * 1000));
+          const end = Math.max(t1, t2, t3, t4);
+          setTimeout(() => ctx.close().catch(() => {}), Math.ceil((end - now + 0.35) * 1000));
         } catch {}
       }
 
