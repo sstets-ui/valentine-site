@@ -1,467 +1,341 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Will you be my Valentine Andrew Getzow?</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* --------- Dreamy background --------- */
-    body {
-      background:
-        radial-gradient(900px 520px at 20% 15%, rgba(255, 182, 193, 0.55), transparent 60%),
-        radial-gradient(900px 520px at 80% 25%, rgba(255, 105, 180, 0.28), transparent 60%),
-        radial-gradient(900px 520px at 55% 85%, rgba(147, 197, 253, 0.35), transparent 60%),
-        linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
-      overflow-x: hidden;
-    }
-    body.shiny-mode{
-      background:
-        radial-gradient(900px 520px at 20% 15%, rgba(167, 139, 250, 0.50), transparent 60%),
-        radial-gradient(900px 520px at 80% 25%, rgba(34, 211, 238, 0.22), transparent 60%),
-        radial-gradient(900px 520px at 55% 85%, rgba(250, 204, 21, 0.24), transparent 60%),
-        linear-gradient(180deg, #f5f3ff 0%, #e0f2fe 50%, #fff7ed 100%);
+    :root{
+      --bgA: rgba(255, 182, 193, 0.55);
+      --bgB: rgba(255, 105, 180, 0.28);
+      --bgC: rgba(147, 197, 253, 0.35);
+
+      --grad0: #fff1f2;
+      --grad1: #ffe4e6;
+      --grad2: #fdf2f8;
+      --grad3: #eff6ff;
+
+      --card: rgba(255,255,255,0.78);
+      --cardBorder: rgba(255,255,255,0.65);
+
+      --textHi: rgba(15,23,42,0.86);
+      --textLo: rgba(15,23,42,0.70);
+
+      --sprinkleOpacity: 0.22;
+      --shadow: 0 22px 70px rgba(0,0,0,0.14);
     }
 
-    /* Boss mode tint */
-    body.boss-mode::before{
-      content:"";
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(900px 520px at 55% 55%, rgba(15, 23, 42, 0.55), transparent 65%),
-        linear-gradient(180deg, rgba(15,23,42,0.25), rgba(0,0,0,0.10));
-      opacity: 0.85;
-      mix-blend-mode: multiply;
+    body.night-mode{
+      --bgA: rgba(147, 51, 234, 0.30);
+      --bgB: rgba(59, 130, 246, 0.22);
+      --bgC: rgba(244, 63, 94, 0.20);
+
+      --grad0: #070A16;
+      --grad1: #0B1022;
+      --grad2: #14164A;
+      --grad3: #081B2E;
+
+      --card: rgba(14, 18, 40, 0.62);
+      --cardBorder: rgba(255,255,255,0.16);
+
+      --textHi: rgba(255,255,255,0.90);
+      --textLo: rgba(255,255,255,0.72);
+
+      --sprinkleOpacity: 0.16;
+      --shadow: 0 26px 90px rgba(0,0,0,0.35);
     }
 
-    /* Background layers */
-    #bg {
+    body{
+      background:
+        radial-gradient(900px 520px at 20% 15%, var(--bgA), transparent 60%),
+        radial-gradient(900px 520px at 80% 25%, var(--bgB), transparent 60%),
+        radial-gradient(900px 520px at 55% 85%, var(--bgC), transparent 60%),
+        linear-gradient(180deg, var(--grad0) 0%, var(--grad1) 40%, var(--grad2) 70%, var(--grad3) 100%);
+      overflow-x:hidden;
+      color: var(--textHi);
+    }
+
+    .glass{
+      background: var(--card);
+      border: 1px solid var(--cardBorder);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    #bg{
       position: fixed;
       inset: 0;
-      pointer-events: none;
+      pointer-events:none;
       z-index: 0;
-      overflow: hidden;
+      overflow:hidden;
     }
-    .blob {
-      position: absolute;
+    .blob{
+      position:absolute;
       width: 520px;
       height: 520px;
       border-radius: 999px;
       filter: blur(55px);
       opacity: 0.55;
-      transform: translate3d(0,0,0);
       mix-blend-mode: multiply;
       will-change: transform;
+      transform: translateZ(0);
     }
-    .blob.a {
-      left: -140px;
-      top: -160px;
-      background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.55), rgba(255, 182, 193, 0.25) 55%, transparent 70%);
-      animation: floatA 14s ease-in-out infinite;
+    .blob.a{
+      left:-140px; top:-160px;
+      background: radial-gradient(circle at 30% 30%, rgba(244,63,94,.55), rgba(255,182,193,.25) 55%, transparent 70%);
+      animation: floatA 16s ease-in-out infinite;
     }
-    .blob.b {
-      right: -160px;
-      top: -120px;
-      background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.45), rgba(147, 197, 253, 0.22) 55%, transparent 70%);
-      animation: floatB 16s ease-in-out infinite;
+    .blob.b{
+      right:-160px; top:-120px;
+      background: radial-gradient(circle at 30% 30%, rgba(236,72,153,.45), rgba(147,197,253,.22) 55%, transparent 70%);
+      animation: floatB 18s ease-in-out infinite;
     }
-    .blob.c {
-      left: 10%;
-      bottom: -210px;
-      background: radial-gradient(circle at 30% 30%, rgba(147, 197, 253, 0.45), rgba(244, 63, 94, 0.18) 55%, transparent 70%);
-      animation: floatC 18s ease-in-out infinite;
+    .blob.c{
+      left:10%; bottom:-210px;
+      background: radial-gradient(circle at 30% 30%, rgba(147,197,253,.45), rgba(244,63,94,.18) 55%, transparent 70%);
+      animation: floatC 20s ease-in-out infinite;
     }
-    @keyframes floatA { 0%,100% { transform: translate(0,0) scale(1);} 50%{ transform: translate(80px,60px) scale(1.08);} }
-    @keyframes floatB { 0%,100% { transform: translate(0,0) scale(1);} 50%{ transform: translate(-90px,70px) scale(1.06);} }
-    @keyframes floatC { 0%,100% { transform: translate(0,0) scale(1);} 50%{ transform: translate(120px,-60px) scale(1.1);} }
-    body.boss-mode .blob.a{ animation-duration: 9s; }
-    body.boss-mode .blob.b{ animation-duration: 10s; }
-    body.boss-mode .blob.c{ animation-duration: 11s; }
+    @keyframes floatA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(80px,60px) scale(1.08);}}
+    @keyframes floatB{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-90px,70px) scale(1.06);}}
+    @keyframes floatC{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(120px,-60px) scale(1.10);}}
 
-    .noise {
-      position: absolute;
-      inset: 0;
-      opacity: 0.10;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+    .noise{
+      position:absolute; inset:0; opacity:0.10;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
       background-size: 180px 180px;
     }
 
-    /* ✅ Grid background replaced with your black hole GIF */
-    .pixel-grid{
-      position:absolute;
-      inset:0;
-      opacity:.22;
-      background-image: url("https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif");
-      background-size: cover;
-      background-position: center;
+    /* sprinkle overlay */
+    .sprinkle-grid{
+      position:absolute; inset:0;
+      opacity: var(--sprinkleOpacity);
+      background-image:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,.65) 0 2px, transparent 3px),
+        radial-gradient(circle at 30% 20%, rgba(251,113,133,.7) 0 2px, transparent 3px),
+        radial-gradient(circle at 60% 12%, rgba(96,165,250,.7) 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 26%, rgba(34,197,94,.7) 0 2px, transparent 3px),
+        radial-gradient(circle at 15% 60%, rgba(245,158,11,.75) 0 2px, transparent 3px),
+        radial-gradient(circle at 50% 70%, rgba(168,85,247,.7) 0 2px, transparent 3px),
+        radial-gradient(circle at 72% 78%, rgba(244,63,94,.75) 0 2px, transparent 3px);
+      background-size: 220px 220px;
       mix-blend-mode: overlay;
-      filter: saturate(0.95) contrast(1.05);
+      filter: saturate(1.1);
     }
 
-    /* Floating particles */
-    #powerups, #hearts{
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 2;
-      overflow: hidden;
-    }
-    #powerups{ z-index: 1; }
-    .heart, .powerup{
-      position: absolute;
-      bottom: -40px;
-      will-change: transform, opacity;
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
-      user-select: none;
-      opacity: 0;
-    }
-    .heart{ animation: floatUp linear forwards; }
-    .powerup{ animation: puFloat linear forwards; }
-    @keyframes floatUp {
-      0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
-      10%  { opacity: 0.85; }
-      100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity: 0; }
-    }
-    @keyframes puFloat{
-      0%   { transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity: 0; }
-      12%  { opacity: .9; }
-      100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity: 0; }
-    }
-
-    /* ✅ Pixel clouds layer (pixel-art SVG) */
-    #pixelClouds{
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 2;
-      overflow: hidden;
-    }
-    .pixel-cloud{
-      position: absolute;
-      left: -260px;
-      top: var(--top);
-      width: 240px;
-      height: 120px;
-      opacity: 0.30;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.08));
-      image-rendering: pixelated;
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
-      animation: cloudDrift linear forwards;
-      transform: translateZ(0);
-    }
-    body.boss-mode .pixel-cloud{ opacity: 0.18; }
-    @keyframes cloudDrift{
-      from { transform: translateX(0) scale(var(--s)); }
-      to   { transform: translateX(calc(100vw + 520px)) scale(var(--s)); }
-    }
-
-    /* Big title */
     #bigTitle{
       position: relative;
-      z-index: 3;
-      text-align: center;
+      z-index:3;
+      text-align:center;
       font-weight: 900;
-      letter-spacing: -0.02em;
-      line-height: 0.95;
-      font-size: clamp(2.0rem, 5vw, 3.8rem);
-      color: #ffffff;
-      text-shadow: 0 4px 0 rgba(0,0,0,0.15), 0 10px 28px rgba(0,0,0,0.22);
+      letter-spacing:-0.02em;
+      line-height:0.95;
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      color:#fff;
+      text-shadow: 0 4px 0 rgba(0,0,0,0.15), 0 14px 40px rgba(0,0,0,0.25);
       margin-bottom: 0.9rem;
     }
     #bigTitle span{
-      display: inline-block;
-      padding: 0.18em 0.42em;
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: .18em .42em;
       border-radius: 999px;
-      background: rgba(244, 63, 94, 0.20);
+      background: rgba(244,63,94,0.20);
       backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.35);
     }
 
-    /* card */
-    .glass {
-      background: rgba(255, 255, 255, 0.78);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.65);
-      box-shadow: 0 22px 70px rgba(0,0,0,0.14);
-    }
-
-    /* Mascot bounce */
-    .pixel-vibe { text-shadow: 0 2px 0 rgba(0,0,0,0.08); }
-    .mascot-bounce { animation: mascotBounce 1.8s ease-in-out infinite; }
-    @keyframes mascotBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
-
-    /* Heart buttons */
-    .svg-heart{
-      width: 56px;
-      height: 50px;
-      border: 0;
-      background: transparent;
-      padding: 0;
-      cursor: pointer;
-      position: relative;
-      filter: drop-shadow(0 10px 14px rgba(0,0,0,.16));
-      transition: transform .12s ease, filter .12s ease, opacity .12s ease;
-      will-change: transform;
-    }
-    .svg-heart svg{ width: 100%; height: 100%; display: block; }
-    .svg-heart.yes path{ fill: #ef4444; }
-    .svg-heart.no  path{ fill: #f43f5e; }
-    .svg-heart span{
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      transform: translateY(-4px);
-      color: white; font-weight: 900; font-size: 11px;
-      letter-spacing: .7px;
-      text-shadow: 0 1px 2px rgba(0,0,0,.25);
-      user-select: none; pointer-events: none;
-    }
-    .svg-heart:hover{ transform: scale(1.06); filter: drop-shadow(0 12px 18px rgba(0,0,0,.18)); }
-    .svg-heart:active{ transform: scale(.96); }
-
-    /* Mana bar */
+    /* Mana wrap */
     #manaWrap{
       position: sticky;
       top: 0;
       z-index: 50;
       backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
     }
     #manaBarInner{
-      width: 0%;
+      width:0%;
       transition: width 160ms ease;
     }
 
-    /* MTG-ish card frame */
-    .tcg-card{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.65);
-      background: linear-gradient(180deg, rgba(255,255,255,0.90), rgba(255,255,255,0.70));
-      box-shadow: 0 18px 60px rgba(0,0,0,0.14);
-      overflow: hidden;
-      position: relative;
+    /* Button hearts */
+    .svg-heart{
+      width: 56px; height: 50px;
+      border:0; background:transparent; padding:0;
+      cursor:pointer;
+      position:relative;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.16));
+      transition: transform .12s ease, filter .12s ease, opacity .12s ease;
     }
-    .tcg-frame{
-      border: 2px solid rgba(15,23,42,0.18);
-      border-radius: 14px;
-      padding: 12px;
-      background:
-        radial-gradient(600px 220px at 20% 10%, rgba(251, 113, 133, 0.22), transparent 60%),
-        radial-gradient(600px 220px at 80% 30%, rgba(99, 102, 241, 0.18), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
+    .svg-heart svg{width:100%;height:100%;display:block;}
+    .svg-heart.yes path{fill:#ef4444;}
+    .svg-heart.no path{fill:#f43f5e;}
+    .svg-heart span{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      transform: translateY(-4px);
+      color:#fff; font-weight:900; font-size:11px;
+      letter-spacing:.7px;
+      text-shadow: 0 1px 2px rgba(0,0,0,.25);
+      pointer-events:none;
     }
-    .tcg-titlebar{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(15,23,42,0.06);
-      border: 1px solid rgba(15,23,42,0.10);
-      font-weight: 900;
-    }
-    .tcg-subbar{
-      margin-top: 10px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap:10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.65);
-      border: 1px solid rgba(15,23,42,0.10);
-    }
-    .tcg-rules{
-      background: rgba(255,255,255,0.70);
-      border: 1px solid rgba(15,23,42,0.10);
-      border-radius: 12px;
-      padding: 12px;
-    }
-    .mana-pip{
-      display:inline-flex;
+
+    /* Big event popup */
+    #eventPop{
+      position:fixed; inset:0;
+      z-index: 80;
+      display:none;
       align-items:center;
       justify-content:center;
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.08);
-      border: 1px solid rgba(15,23,42,0.12);
-      font-weight: 900;
-      font-size: 12px;
-      margin-left: 6px;
+      pointer-events:none;
+    }
+    #eventPop.show{display:flex;}
+    #eventPop .card{
+      width:min(720px, 92vw);
+      padding: 28px 26px;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: linear-gradient(135deg, rgba(251,113,133,0.95), rgba(236,72,153,0.95), rgba(96,165,250,0.95));
+      box-shadow: 0 30px 120px rgba(0,0,0,0.35);
+      text-align:center;
+      transform: scale(0.92);
+      opacity:0;
+    }
+    #eventPop.show .card{
+      animation: popBoom 820ms cubic-bezier(.2,.9,.2,1) forwards;
+    }
+    @keyframes popBoom{
+      0%{ transform: scale(0.92) translateY(16px); opacity:0;}
+      35%{ transform: scale(1.03) translateY(0px); opacity:1;}
+      70%{ transform: scale(1.0); opacity:1;}
+      100%{ transform: scale(0.985); opacity:0;}
     }
 
-    /* Encounter (more detailed Pokémon UI) */
-    .encounter{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.65);
-      background: rgba(255,255,255,0.72);
-      box-shadow: 0 18px 60px rgba(0,0,0,0.12);
-      overflow: hidden;
-    }
-    .encounter-screen{
-      background: linear-gradient(180deg, rgba(34,197,94,0.16), rgba(59,130,246,0.14));
-      border-bottom: 1px solid rgba(15,23,42,0.10);
-      padding: 16px;
-      position: relative;
-      overflow:hidden;
-    }
-    .text-box{
-      background: rgba(255,255,255,0.92);
-      border: 2px solid rgba(15,23,42,0.18);
+    /* Rick icon */
+    #rickIcon{
+      width: 36px;
+      height: 36px;
       border-radius: 14px;
-      padding: 12px;
-      font-weight: 800;
-      min-height: 58px;
-    }
-    .hpbar{
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.75);
-      border: 1px solid rgba(255,255,255,0.65);
       overflow:hidden;
-    }
-    .hpbar > div{
-      height: 100%;
-      width: 100%;
-      transition: width 220ms ease;
-      background: linear-gradient(90deg, rgba(34,197,94,0.9), rgba(250,204,21,0.9), rgba(239,68,68,0.9));
-    }
-
-    /* Modal */
-    .modal-backdrop{
-      position: fixed; inset: 0;
-      background: rgba(15,23,42,0.45);
-      z-index: 60;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-    }
-    .modal-backdrop.show{ display: flex; }
-
-    /* Boss blackhole gif overlay (phase 2 pull) */
-    #blackholeGif{
-      position: absolute;
-      left: 50%;
-      top: 44%;
-      transform: translate(-50%, -50%);
-      width: 170px;
-      height: 170px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 160ms ease;
-      filter: drop-shadow(0 12px 24px rgba(0,0,0,0.22));
-      mix-blend-mode: screen;
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+      cursor:pointer;
+      pointer-events:auto;
+      user-select:none;
+      background: rgba(255,255,255,0.15);
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
-    /* ✅ Pixel crisp platformer */
-    #platCanvas { image-rendering: pixelated; }
+    /* Canvas sizing */
+    canvas{ touch-action:none; }
 
-    /* ✅ NO runaway mode */
-    .no-runaway {
-      position: fixed !important;
-      z-index: 80 !important;
+    /* TCG art */
+    .artBox{
+      height: 176px;
+      border-radius: 12px;
+      overflow:hidden;
+      border: 1px solid rgba(15,23,42,0.12);
+      background: rgba(255,255,255,0.30);
+    }
+    body.night-mode .artBox{
+      border-color: rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
     }
   </style>
 </head>
 
 <body class="min-h-screen">
-  <!-- BG -->
   <div id="bg" aria-hidden="true">
     <div class="blob a"></div>
     <div class="blob b"></div>
     <div class="blob c"></div>
     <div class="noise"></div>
-    <div class="pixel-grid"></div>
+    <div class="sprinkle-grid"></div>
   </div>
 
-  <div id="powerups" aria-hidden="true"></div>
-  <div id="pixelClouds" aria-hidden="true"></div>
-  <div id="hearts" aria-hidden="true"></div>
+  <div id="eventPop" aria-hidden="true">
+    <div class="card">
+      <div class="text-white font-black text-4xl sm:text-5xl drop-shadow-lg">💖 EVENT STARTED 💖</div>
+      <div class="text-white/95 font-extrabold mt-3 text-base sm:text-lg">Defeat the boss. Survive the platformer. Unlock the ultimate YES.</div>
+      <div class="text-white/90 font-black mt-4 text-sm">Bonus: click the little face for a surprise 😈</div>
+    </div>
+  </div>
 
   <!-- Title -->
   <div class="relative z-[3] px-4 pt-6">
     <div class="max-w-7xl mx-auto">
       <h1 id="bigTitle" class="w-full">
-        <span>Love Beyond the Multiverse 💘</span>
+        <span>
+          Love Beyond the Multiverse 💘
+          <span id="rickIcon" title="click me">
+            <!-- simple “image 2” style icon recreated -->
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+              <rect x="3" y="7" width="22" height="18" rx="7" fill="#93c5fd"/>
+              <rect x="8" y="4" width="12" height="7" rx="3.5" fill="#fda4af"/>
+              <circle cx="11" cy="16" r="2" fill="#0f172a"/>
+              <circle cx="17" cy="16" r="2" fill="#0f172a"/>
+              <path d="M10 20 C12 22, 16 22, 18 20" stroke="#0f172a" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </span>
+        </span>
       </h1>
 
-      <!-- Mana / shiny -->
+      <!-- Mana / toggles -->
       <div id="manaWrap" class="rounded-2xl glass px-4 py-3 mb-4">
-        <div class="flex items-center justify-between gap-3">
-          <div class="text-sm font-extrabold text-slate-800/80">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="text-sm font-extrabold" style="color: var(--textLo);">
             Affection Mana: <span id="manaPct">0</span>%
           </div>
 
-          <button id="shinyStar"
-            class="text-sm font-black text-slate-700/80 hover:text-slate-900 transition"
-            title="psst… click me 3x">
-            ⭐ Shiny Chance
-          </button>
+          <div class="flex items-center gap-2">
+            <button id="toggleTheme"
+              class="rounded-full px-4 py-2 text-sm font-black text-white shadow active:scale-95 transition"
+              style="background: linear-gradient(135deg,#fb7185,#60a5fa);">
+              Toggle Day/Night
+            </button>
+
+            <button id="shinyStar"
+              class="rounded-full px-4 py-2 text-sm font-black text-white shadow active:scale-95 transition"
+              style="background: linear-gradient(135deg,#f59e0b,#ec4899);"
+              title="click 3x">
+              ⭐ Shiny Chance
+            </button>
+          </div>
         </div>
+
         <div class="mt-2 h-3 rounded-full bg-white/70 border border-white/60 overflow-hidden">
           <div id="manaBarInner" class="h-full bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300"></div>
         </div>
       </div>
 
-      <div class="text-center text-white/90 font-extrabold tracking-wide drop-shadow-sm mb-5">
+      <div class="text-center font-extrabold tracking-wide drop-shadow-sm mb-5"
+           style="color: rgba(255,255,255,0.92);">
         Two universes. One question.
-        <span class="block text-sm font-semibold text-white/80 mt-1">A limited-time crossover has appeared…</span>
+        <span class="block text-sm font-semibold mt-1" style="color: rgba(255,255,255,0.82);">A limited-time crossover has appeared…</span>
       </div>
     </div>
   </div>
 
-  <!-- MAIN LAYOUT -->
   <div class="relative z-[3] max-w-7xl mx-auto px-4 pb-10">
     <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-5 items-start">
 
       <!-- LEFT: Valentine card -->
       <aside class="lg:sticky lg:top-24">
         <div class="glass rounded-3xl p-6 text-center">
-          <div class="mx-auto mb-3 w-28 mascot-bounce">
-            <div class="w-24 h-24 mx-auto">
-              <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
-                <path d="M40 24 L64 10 L88 24 L82 44 H46 Z" fill="#fbbf24"/>
-                <circle cx="64" cy="22" r="6" fill="#f59e0b"/>
-                <ellipse cx="64" cy="62" rx="34" ry="28" fill="#60a5fa"/>
-                <ellipse cx="64" cy="70" rx="26" ry="18" fill="#93c5fd" opacity="0.9"/>
-                <ellipse cx="52" cy="58" rx="7" ry="10" fill="#0f172a"/>
-                <ellipse cx="76" cy="58" rx="7" ry="10" fill="#0f172a"/>
-                <circle cx="50" cy="55" r="2" fill="#fff"/>
-                <circle cx="74" cy="55" r="2" fill="#fff"/>
-                <path d="M64 64 C56 62 56 74 64 76 C72 74 72 62 64 64 Z" fill="#f59e0b"/>
-                <path d="M30 92 C34 78 48 72 64 72 C80 72 94 78 98 92
-                         C90 108 78 118 64 118 C50 118 38 108 30 92 Z"
-                      fill="#ef4444"/>
-                <path d="M38 94 C44 104 54 110 64 110 C74 110 84 104 90 94"
-                      stroke="#fff" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
-                <rect x="92" y="70" width="8" height="30" rx="3" fill="#334155"/>
-                <rect x="84" y="60" width="26" height="14" rx="6" fill="#475569"/>
-                <circle cx="84" cy="67" r="6" fill="#475569"/>
-              </svg>
-            </div>
-            <div class="mt-1 text-center font-extrabold text-sm tracking-wide text-slate-800/80 pixel-vibe">
-              2/14/26
-            </div>
-          </div>
-
-          <div class="font-black text-slate-800/80 mb-3">
+          <div class="font-black mb-3" style="color: var(--textLo);">
             Will you be my Valentine Andrew Getzow?
           </div>
 
-          <img id="valImage" class="w-full h-64 object-cover rounded-xl mb-4"
-               style="background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));"
-               alt="Valentine gif" />
+          <div class="w-full h-64 rounded-xl mb-4 flex items-center justify-center"
+               style="background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));">
+            <div class="text-6xl">💝</div>
+          </div>
 
           <div class="flex gap-6 justify-center mt-2">
             <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
@@ -481,22 +355,22 @@
             </button>
           </div>
 
-          <p id="hint" class="text-sm text-gray-600 mt-4 font-semibold">
+          <p id="hint" class="text-sm mt-4 font-semibold" style="color: var(--textLo);">
             Both buttons are locked 😈 Beat the boss first.
           </p>
         </div>
       </aside>
 
-      <!-- RIGHT: BIG open space for games + crossover -->
+      <!-- RIGHT -->
       <main class="space-y-5">
 
         <!-- EVENT START -->
         <section class="glass rounded-3xl p-6">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <div class="text-2xl font-black text-slate-800/80">Begin the Event</div>
-              <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                A limited-time crossover has appeared… defeat the boss to unlock the ultimate question.
+              <div class="text-2xl font-black" style="color: var(--textHi);">Begin the Event</div>
+              <div class="text-sm font-semibold mt-1" style="color: var(--textLo);">
+                Defeat the boss to unlock YES + NO. Survive the platformer for extra glory.
               </div>
             </div>
             <button id="beginEvent"
@@ -510,26 +384,26 @@
         <!-- BOSS FIGHT -->
         <section class="glass rounded-3xl overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-            <div class="font-black text-slate-800/80">👾 Boss Fight (Love Edition)</div>
-            <div class="text-xs font-black text-slate-700/70">Move: WASD/Arrows • Attack: Space / Tap</div>
+            <div class="font-black" style="color: var(--textLo);">👾 Boss Fight (Love Edition)</div>
+            <div class="text-xs font-black" style="color: var(--textLo);">Move: WASD/Arrows • Shoot: Space/Tap</div>
           </div>
 
           <div class="px-6 py-5">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
               <div>
-                <div class="text-xs font-black text-slate-700/80 mb-1">YOU 💖</div>
+                <div class="text-xs font-black mb-1" style="color: var(--textLo);">YOU 💖</div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="playerHPBar" class="h-full w-full bg-gradient-to-r from-rose-500 to-pink-500"></div>
                 </div>
               </div>
               <div>
-                <div class="text-xs font-black text-slate-700/80 mb-1">BOSS ☄️</div>
+                <div class="text-xs font-black mb-1" style="color: var(--textLo);">BOSS ☄️</div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="bossHPBar" class="h-full w-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"></div>
                 </div>
               </div>
               <div>
-                <div class="text-xs font-black text-slate-700/80 mb-1">LOVE METER 💘</div>
+                <div class="text-xs font-black mb-1" style="color: var(--textLo);">LOVE METER 💘</div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="loveBar" class="h-full w-0 bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300"></div>
                 </div>
@@ -539,18 +413,10 @@
             <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
               <canvas id="bossCanvas" class="w-full block h-[420px]"></canvas>
 
-              <!-- ✅ blackhole GIF overlay -->
-              <img id="blackholeGif" alt="Black hole gif" />
-
-              <div id="laughFlash"
-                  class="absolute top-6 left-1/2 -translate-x-1/2 text-3xl sm:text-5xl font-black tracking-widest text-white drop-shadow-lg opacity-0 pointer-events-none">
-                MAGALOR LAUGH
-              </div>
-
               <div id="bossOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
-                <div class="text-slate-800/80">
+                <div style="color: var(--textHi);">
                   <div class="text-3xl font-extrabold">A wild boss appeared!</div>
-                  <div class="text-sm font-semibold mt-2">Dodge cursed hearts. Shoot love beams.</div>
+                  <div class="text-sm font-semibold mt-2" style="color: var(--textLo);">This one is harder now 😈</div>
                 </div>
               </div>
 
@@ -561,7 +427,7 @@
               </button>
             </div>
 
-            <div id="bossMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
+            <div id="bossMsg" class="mt-3 text-sm font-semibold" style="color: var(--textLo);">
               Beat the boss to unlock YES + NO.
             </div>
           </div>
@@ -570,17 +436,19 @@
         <!-- PLATFORMER -->
         <section class="glass rounded-3xl overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-            <div class="font-black text-slate-800/80">🕹️ Platformer: Collect the Hearts</div>
-            <div class="text-xs font-black text-slate-700/70">Move: A/D or ←/→ • Jump: W/↑/Space</div>
+            <div class="font-black" style="color: var(--textLo);">🕹️ Platformer: Chocolate Strawberry Gauntlet</div>
+            <div class="text-xs font-black" style="color: var(--textLo);">
+              Move: A/D or ←/→ • Jump: W/↑/Space • Dash: Shift/X • Walljump: Jump on wall
+            </div>
           </div>
 
           <div class="px-6 py-5">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 items-center">
-              <div class="sm:col-span-2 text-sm font-semibold text-slate-700/80" id="platMsg">
-                Collect <b>7</b> hearts 💖 and touch the <b>love letter</b> 💌.
+              <div class="sm:col-span-2 text-sm font-semibold" style="color: var(--textLo);" id="platMsg">
+                Collect <b>12</b> chocolate strawberries 🍓🍫 and reach the <b>love letter</b> 💌.
               </div>
-              <div class="text-xs font-black text-slate-700/80 text-right">
-                Hearts: <span id="platCount">0</span>/7
+              <div class="text-xs font-black text-right" style="color: var(--textLo);">
+                Strawberries: <span id="platCount">0</span>/12
               </div>
             </div>
 
@@ -588,9 +456,11 @@
               <canvas id="platCanvas" class="w-full block h-[360px]"></canvas>
 
               <div id="platOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
-                <div class="text-slate-800/80">
-                  <div class="text-3xl font-extrabold">Tiny Love Quest 💌</div>
-                  <div class="text-sm font-semibold mt-2">Jump on platforms, grab hearts, reach the letter.</div>
+                <div style="color: var(--textHi);">
+                  <div class="text-3xl font-extrabold">Celeste Mode: ON</div>
+                  <div class="text-sm font-semibold mt-2" style="color: var(--textLo);">
+                    Spikes + moving platforms + dash + walljump. Good luck 😈
+                  </div>
                 </div>
               </div>
 
@@ -603,283 +473,38 @@
           </div>
         </section>
 
-        <!-- MTG-STYLE -->
-        <section class="tcg-card">
-          <div class="p-6">
-            <div class="flex items-center justify-between gap-3 mb-4">
-              <div>
-                <div class="text-2xl font-black text-slate-800/80">1) Custom TCG Card: “Be My Valentine”</div>
-                <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                  Hover/click to reveal “alt art” 👀
-                </div>
-              </div>
-              <button id="altArtBtn"
-                class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
-                style="background: linear-gradient(135deg, #fb7185, #6366f1);">
-                Reveal Alt Art
-              </button>
-            </div>
-
-            <div id="tcgCard" class="tcg-frame">
-              <div class="tcg-titlebar">
-                <div id="cardName">Andrew Getzow, Keeper of My Heart</div>
-                <div class="text-xs font-black text-slate-700/70">
-                  Cost:
-                  <span class="mana-pip">🍫</span>
-                  <span class="mana-pip">❤️</span>
-                  <span class="mana-pip">🍿</span>
-                </div>
-              </div>
-
-              <div class="tcg-subbar">
-                <div class="text-xs font-black text-slate-700/70">Legendary Creature — Human Nerd</div>
-                <div class="text-xs font-black text-slate-700/70">
-                  P/T: <span class="mana-pip">7</span>/<span class="mana-pip">14</span>
-                </div>
-              </div>
-
-              <div class="mt-3 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-3">
-                <div class="rounded-xl overflow-hidden border border-slate-900/10 bg-white/70">
-                  <div id="cardArt" class="h-44 flex items-center justify-center font-black text-slate-700/70">
-                    (Put a cute photo here later)
-                  </div>
-                </div>
-
-                <div class="tcg-rules">
-                  <div class="text-sm font-semibold text-slate-800/80 leading-relaxed">
-                    <div><b>Whenever you smile</b>, create a <b>Heart token</b>.</div>
-                    <div class="mt-1"><b>{T}:</b> Go on a date. If it’s Valentine’s Day, you may also get dessert.</div>
-                    <div class="mt-1"><b>Partner</b> with <b>You, Hopeless Romantic</b>.</div>
-                    <div class="mt-2 text-xs font-black text-slate-700/70">
-                      Reminder text: Heart tokens have “{1}: Make me blush. Scry 1.”
-                    </div>
-                  </div>
-                  <div class="mt-3 text-xs italic font-bold text-slate-700/70">
-                    “I’d tap all my mana for you.”
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black text-slate-700/70">Flavor</div>
-                  <div class="text-sm font-semibold text-slate-800/80 mt-1">“Turn 1: I fell. Turn 2: I stayed.”</div>
-                </div>
-                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black text-slate-700/70">Synergy</div>
-                  <div class="text-sm font-semibold text-slate-800/80 mt-1">If love is a stack, my feelings have split second.</div>
-                </div>
-                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black text-slate-700/70">Inside Joke Slot</div>
-                  <div class="text-sm font-semibold text-slate-800/80 mt-1">“Our first date was basically a turn 1 love play.”</div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        <!-- Choose a Date -->
+        <!-- TCG CARD -->
         <section class="glass rounded-3xl p-6">
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center justify-between gap-3 mb-4">
             <div>
-              <div class="text-2xl font-black text-slate-800/80">2) Choose a Date (Cast a Spell)</div>
-              <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                Pick a spell — it goes on <b>the stack</b> ✨
-              </div>
+              <div class="text-2xl font-black" style="color: var(--textHi);">Custom TCG Card: “Be My Valentine”</div>
+              <div class="text-sm font-semibold mt-1" style="color: var(--textLo);">Click reveal to toggle alt art 👀</div>
             </div>
-            <button id="openDateModal"
-              class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, #ec4899, #60a5fa);">
-              Open Spellbook
+            <button id="altArtBtn"
+              class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
+              style="background: linear-gradient(135deg, #fb7185, #6366f1);">
+              Reveal Alt Art
             </button>
           </div>
 
-          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div id="chosenDate" class="text-sm font-semibold text-slate-700/80 rounded-2xl bg-white/70 border border-white/60 p-4">
-              Selected spell: <b>None yet</b>
-              <div class="mt-2 text-xs font-black text-slate-700/70">Mana spent: <span id="manaSpent">0</span></div>
+          <div class="rounded-2xl border border-white/60 bg-white/60 p-4">
+            <div class="flex items-center justify-between gap-2 font-black" style="color: var(--textLo);">
+              <div>Andrew Getzow, Keeper of My Heart</div>
+              <div class="text-xs">Cost: 🍫 ❤️ 🍓</div>
             </div>
 
-            <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
-              <div class="text-xs font-black text-slate-700/70 mb-2">THE STACK</div>
-              <div id="spellStack" class="space-y-2 text-sm font-semibold text-slate-800/80">
-                <div class="opacity-70">— empty —</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Token generator -->
-        <section class="glass rounded-3xl p-6">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <div class="text-2xl font-black text-slate-800/80">3) Heart Token Generator</div>
-              <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                Generate love mana. Unlock messages at 5/10/20.
-              </div>
-            </div>
-            <button id="tokenBtn"
-              class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
-              Create a Heart Token
-            </button>
-          </div>
-
-          <div class="mt-4 grid grid-cols-6 sm:grid-cols-10 gap-2" id="tokenGrid"></div>
-          <div class="mt-4 text-sm font-semibold text-slate-700/80" id="tokenMsg">Tokens: <b id="tokenCount">0</b></div>
-        </section>
-
-        <!-- Pokémon battle -->
-        <section class="encounter">
-          <div class="p-6">
-            <div class="text-2xl font-black text-slate-800/80 mb-3">4) Wild Valentine Appeared!</div>
-
-            <div class="encounter-screen rounded-2xl">
-              <div class="grid grid-cols-2 gap-3 items-start">
-                <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="font-black text-slate-800/80">Valentine (???)
-                      <span class="text-xs font-black text-slate-700/70 ml-2">Lv. 14</span>
-                    </div>
-                    <div class="text-xs font-black text-slate-700/70">Type: 💖/✨</div>
-                  </div>
-                  <div class="mt-2 hpbar"><div id="enemyHPBar"></div></div>
-                  <div class="mt-2 text-4xl text-center select-none" id="enemySprite">💘</div>
+            <div class="mt-3 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-3">
+              <div class="artBox" id="tcgArtBox"></div>
+              <div class="rounded-xl bg-white/70 border border-white/60 p-4">
+                <div class="text-sm font-semibold leading-relaxed" style="color: var(--textHi);">
+                  <div><b>Whenever you smile</b>, create a <b>Chocolate Strawberry token</b>.</div>
+                  <div class="mt-1"><b>{T}:</b> Go on a date. If it’s Valentine’s Day, also get dessert.</div>
+                  <div class="mt-1"><b>Partner</b> with <b>You, Hopeless Romantic</b>.</div>
                 </div>
-
-                <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="font-black text-slate-800/80">You
-                      <span class="text-xs font-black text-slate-700/70 ml-2">Trainer</span>
-                    </div>
-                    <div class="text-xs font-black text-slate-700/70">Ability: 💬 Charm</div>
-                  </div>
-                  <div class="mt-2 hpbar"><div id="youHPBar"></div></div>
-                  <div class="mt-2 text-4xl text-center select-none">🫶</div>
+                <div class="mt-3 text-xs italic font-bold" style="color: var(--textLo);">
+                  “I’d dash through spikes for you.”
                 </div>
               </div>
-
-              <div class="mt-3 text-box" id="battleText">A wild Valentine appeared!</div>
-            </div>
-
-            <div class="mt-4">
-              <div id="battleMenuMain" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                  id="btnFight">FIGHT</button>
-                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                  id="btnBag">BAG</button>
-                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                  id="btnTeam">TEAM</button>
-                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                  id="btnRun">RUN</button>
-              </div>
-
-              <div id="battleMenuFight" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #fb7185, #ec4899);" data-move="Compliment Beam">Compliment Beam</button>
-                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #60a5fa, #22c55e);" data-move="Snack Shield">Snack Shield</button>
-                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #f59e0b, #fb7185);" data-move="Laugh Attack">Laugh Attack</button>
-                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy Aura</button>
-
-                <button class="sm:col-span-2 rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/85 border border-white/60 shadow active:scale-95 transition"
-                  id="btnBack">BACK</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Pokedex -->
-        <section class="glass rounded-3xl p-6">
-          <div class="text-2xl font-black text-slate-800/80">5) Pokédex Entry: Boyfriendmon</div>
-          <div class="mt-4 rounded-2xl border border-white/60 bg-white/70 p-4">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="font-black text-slate-800/80 text-lg">Boyfriendmon</div>
-                <div class="text-sm font-semibold text-slate-700/80 mt-1">Type: <b>Electric / Fairy</b></div>
-                <div class="text-sm font-semibold text-slate-700/80">Ability: <b>Makes Me Smile</b></div>
-                <div class="text-sm font-semibold text-slate-700/80">Habitat: <b>My heart (permanent residence)</b></div>
-              </div>
-              <div class="text-4xl">⚡💖</div>
-            </div>
-            <div class="mt-3 text-sm font-semibold text-slate-800/80">
-              Pokédex: “Known to boost happiness instantly. If spotted, expect uncontrollable laughter and sudden date plans.”
-            </div>
-          </div>
-        </section>
-
-        <!-- Fusion Finale -->
-        <section class="glass rounded-3xl p-6">
-          <div class="text-2xl font-black text-slate-800/80">6) Fusion Finale: Saga → Capture Screen</div>
-          <div class="text-sm font-semibold text-slate-700/80 mt-1">
-            Advance the saga… then the “capture” appears.
-          </div>
-
-          <div class="mt-4 rounded-2xl border border-white/60 bg-white/70 p-5">
-            <div id="sagaView">
-              <div class="flex items-center justify-between gap-3">
-                <div class="font-black text-slate-800/80">Saga: <span id="sagaTitle">Love Beyond the Multiverse</span></div>
-                <div class="text-xs font-black text-slate-700/70">Chapter <span id="sagaChapter">I</span>/III</div>
-              </div>
-
-              <div class="mt-3 text-sm font-semibold text-slate-800/80" id="sagaText">
-                I — “We met and my life got better.”
-              </div>
-
-              <button id="advanceSaga"
-                class="mt-4 rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-                style="background: linear-gradient(135deg, #6366f1, #ec4899);">
-                Advance Saga
-              </button>
-            </div>
-
-            <div id="captureView" class="hidden">
-              <div class="font-black text-slate-800/80 text-lg">Throw the Love Ball?</div>
-              <div class="text-sm font-semibold text-slate-700/80 mt-1">Two options. Both are yes-coded.</div>
-
-              <div class="mt-4 flex flex-wrap gap-3">
-                <button id="throwLoveBall"
-                  class="rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
-                  YES
-                </button>
-                <button id="throwShinyBall"
-                  class="rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #22c55e, #60a5fa);">
-                  YES (shiny)
-                </button>
-              </div>
-
-              <div class="mt-3 text-sm font-semibold text-slate-700/80" id="captureMsg">
-                (Still locked until the boss is defeated 😈)
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Booster pack -->
-        <section class="glass rounded-3xl p-6">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <div class="text-2xl font-black text-slate-800/80">Bonus: Open a Booster Pack</div>
-              <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                It reveals the final question card.
-              </div>
-            </div>
-            <button id="openBooster"
-              class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, #f59e0b, #ec4899);">
-              Open Booster
-            </button>
-          </div>
-
-          <div id="boosterResult" class="mt-4 hidden rounded-2xl border border-white/60 bg-white/70 p-5">
-            <div class="font-black text-slate-800/80 text-xl">✨ You pulled: “Will You Be My Valentine?”</div>
-            <div class="text-sm font-semibold text-slate-700/80 mt-2">
-              Congratulations. This is the rarest pull. (And also mandatory.) 💘
             </div>
           </div>
         </section>
@@ -888,1937 +513,1655 @@
     </div>
   </div>
 
-  <!-- DATE MODAL -->
-  <div id="dateModal" class="modal-backdrop">
-    <div class="glass rounded-3xl w-full max-w-3xl p-6">
-      <div class="flex items-center justify-between gap-3">
-        <div class="text-2xl font-black text-slate-800/80">Choose a Date (Spell Cards)</div>
-        <button id="closeDateModal" class="rounded-full px-4 py-2 font-extrabold bg-white/80 border border-white/60 shadow active:scale-95 transition">
-          Close
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
-        <div class="tcg-card p-4">
-          <div class="font-black text-slate-800/80">Cozy Date — Sorcery</div>
-          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: ☕ <span class="mana-pip">1</span> ❤️ <span class="mana-pip">1</span> 🧸</div>
-          <div class="text-sm font-semibold text-slate-700/80 mt-3">
-            “Create 2 Cuddle tokens. Draw a movie.”
-          </div>
-          <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
-            style="background: linear-gradient(135deg, #fb7185, #60a5fa);"
-            data-spell="Cozy Date" data-cost="2">
-            Cast this
-          </button>
-        </div>
-
-        <div class="tcg-card p-4">
-          <div class="font-black text-slate-800/80">Fancy Date — Instant</div>
-          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: 🌹 <span class="mana-pip">2</span> ❤️ <span class="mana-pip">1</span> ✨</div>
-          <div class="text-sm font-semibold text-slate-700/80 mt-3">
-            “Go somewhere cute. Add dessert. Gain +10 happiness.”
-          </div>
-          <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
-            style="background: linear-gradient(135deg, #ec4899, #f59e0b);"
-            data-spell="Fancy Date" data-cost="3">
-            Cast this
-          </button>
-        </div>
-
-        <div class="tcg-card p-4">
-          <div class="font-black text-slate-800/80">Chaos Date — Enchantment</div>
-          <div class="text-xs font-black text-slate-700/70 mt-1">Cost: 🎮 <span class="mana-pip">2</span> ❤️ <span class="mana-pip">2</span> 🍟</div>
-          <div class="text-sm font-semibold text-slate-700/80 mt-3">
-            “Roll a d20. Whatever happens, it becomes a core memory.”
-          </div>
-          <button class="mt-4 w-full rounded-full px-4 py-3 font-extrabold text-white shadow active:scale-95 transition"
-            style="background: linear-gradient(135deg, #6366f1, #22c55e);"
-            data-spell="Chaos Date" data-cost="4">
-            Cast this
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 <script>
-  // =======================
-  // PERF / LAG FIXES (NEW)
-  // =======================
-  const PERF = (() => {
-    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const cores = navigator.hardwareConcurrency || 4;
-    const mem = navigator.deviceMemory || 4;
-    const lowEnd = cores <= 4 || mem <= 4;
-    return {
-      reduceMotion,
-      lowEnd,
-      heartInterval: reduceMotion ? 900 : (lowEnd ? 420 : 260),
-      powerInterval: reduceMotion ? 1500 : (lowEnd ? 1100 : 750),
-      cloudInterval: reduceMotion ? 2600 : (lowEnd ? 2100 : 1700),
-      maxHearts: lowEnd ? 40 : 80,
-      maxPowerups: lowEnd ? 18 : 36,
-      maxClouds: lowEnd ? 6 : 10
-    };
-  })();
+/* ============================================================
+   PERFORMANCE + UTIL
+============================================================ */
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const rand = (a,b)=>a+Math.random()*(b-a);
 
-  // ========== Floating hearts & powerups ==========
-  const heartsLayer = document.getElementById("hearts");
-  const powerupsLayer = document.getElementById("powerups");
+function fitCanvasToCSS(canvas, ctx){
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const r = canvas.getBoundingClientRect();
+  canvas.width = Math.floor(r.width * dpr);
+  canvas.height = Math.floor(r.height * dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
 
-  function capChildren(el, max){
-    while (el.childElementCount > max) {
-      el.removeChild(el.firstElementChild);
-    }
+/* ============================================================
+   THEME (DAY/NIGHT)
+============================================================ */
+const toggleThemeBtn = document.getElementById("toggleTheme");
+function setTheme(mode){
+  document.body.classList.toggle("night-mode", mode === "night");
+  localStorage.setItem("vday_theme", mode);
+  themeMode = mode;
+}
+let themeMode = localStorage.getItem("vday_theme");
+if (!themeMode){
+  const hr = new Date().getHours();
+  themeMode = (hr >= 19 || hr < 7) ? "night" : "day";
+}
+setTheme(themeMode);
+
+toggleThemeBtn.addEventListener("click", ()=>{
+  setTheme(document.body.classList.contains("night-mode") ? "day" : "night");
+});
+
+/* ============================================================
+   RICKROLL ICON
+============================================================ */
+document.getElementById("rickIcon").addEventListener("click", ()=>{
+  window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank", "noopener,noreferrer");
+});
+
+/* ============================================================
+   MANA BAR
+============================================================ */
+const manaBarInner = document.getElementById("manaBarInner");
+const manaPctEl = document.getElementById("manaPct");
+function updateMana(){
+  const doc = document.documentElement;
+  const scrollTop = doc.scrollTop || document.body.scrollTop;
+  const max = (doc.scrollHeight - doc.clientHeight) || 1;
+  const pct = clamp((scrollTop / max)*100, 0, 100);
+  manaBarInner.style.width = pct.toFixed(1) + "%";
+  manaPctEl.textContent = String(Math.round(pct));
+}
+window.addEventListener("scroll", updateMana, {passive:true});
+updateMana();
+
+/* ============================================================
+   SHINY STAR
+============================================================ */
+const shinyStar = document.getElementById("shinyStar");
+let shinyClicks = 0;
+shinyStar.addEventListener("click", ()=>{
+  shinyClicks++;
+  if (shinyClicks >= 3){
+    shinyClicks = 0;
+    try{ confetti({particleCount: 120, spread: 80, origin:{y:0.2}}); }catch{}
+  } else {
+    shinyStar.animate([{transform:"scale(1)"},{transform:"scale(1.15)"},{transform:"scale(1)"}], {duration:240});
+  }
+});
+
+/* ============================================================
+   LOCK YES/NO UNTIL BOSS BEATEN
+============================================================ */
+const yesBtn = document.getElementById("yesBtn");
+const noBtn  = document.getElementById("noBtn");
+const hint = document.getElementById("hint");
+let yesLocked = true, noLocked = true;
+
+function lockBtn(btn, label){
+  btn.disabled = true;
+  btn.style.opacity = "0.55";
+  btn.style.cursor = "not-allowed";
+  const span = btn.querySelector("span");
+  if (span) span.textContent = label;
+}
+function unlockBtn(btn, label){
+  btn.disabled = false;
+  btn.style.opacity = "1";
+  btn.style.cursor = "pointer";
+  const span = btn.querySelector("span");
+  if (span) span.textContent = label;
+}
+function lockYesNo(){
+  yesLocked = true; noLocked = true;
+  lockBtn(yesBtn, "LOCKED");
+  lockBtn(noBtn, "LOCKED");
+}
+function unlockYesNo(){
+  yesLocked = false; noLocked = false;
+  unlockBtn(yesBtn, "YES");
+  unlockBtn(noBtn, "NO");
+  hint.textContent = "Unlocked! 😳 Now choose wisely...";
+}
+lockYesNo();
+
+/* ============================================================
+   NO HEART "FIGHT" (JUMPS AROUND THE SCREEN)
+============================================================ */
+let noFight = {
+  active: false,
+  raf: null,
+  x: 0,
+  y: 0,
+  vx: 0,
+  vx: 6,
+  vy: 5,
+  speedMul: 1,
+  anger: 0,
+  w: 56,
+  h: 50,
+  px: window.innerWidth / 2,
+  py: window.innerHeight / 2
+};
+
+function measureNoBtn(){
+  const r = noBtn.getBoundingClientRect();
+  noFight.w = r.width || 56;
+  noFight.h = r.height || 50;
+}
+
+window.addEventListener("pointermove", (e)=>{
+  noFight.px = e.clientX;
+  noFight.py = e.clientY;
+}, {passive:true});
+
+window.addEventListener("resize", ()=>{
+  if (!noFight.active) return;
+  measureNoBtn();
+  noFight.x = clamp(noFight.x, 8, window.innerWidth - noFight.w - 8);
+  noFight.y = clamp(noFight.y, 8, window.innerHeight - noFight.h - 8);
+}, {passive:true});
+
+window.addEventListener("keydown", (e)=>{
+  if (e.key === "Escape") stopNoHeartFight();
+});
+
+function startNoHeartFight(){
+  if (noFight.active){
+    // each click makes it nastier
+    noFight.anger = Math.min(12, noFight.anger + 1);
+    noFight.speedMul = 1 + noFight.anger * 0.12;
+
+    // dash away from pointer
+    const dx = (noFight.x + noFight.w/2) - noFight.px;
+    const dy = (noFight.y + noFight.h/2) - noFight.py;
+    const d = Math.max(1, Math.hypot(dx, dy));
+    noFight.vx += (dx/d) * 10;
+    noFight.vy += (dy/d) * 10;
+
+    hint.textContent = `NO is fighting back 😈 (anger: ${noFight.anger})`;
+    try{ confetti({particleCount: 60, spread: 70, origin:{y:0.6}}); }catch{}
+    return;
   }
 
-  function spawnHeart() {
-    capChildren(heartsLayer, PERF.maxHearts);
-    const el = document.createElement("span");
-    el.className = "heart";
-    el.textContent = Math.random() > 0.25 ? "💗" : "💖";
-    const left = Math.random() * 100;
-    const size = 14 + Math.random() * 24;
-    const dur  = PERF.lowEnd ? (4.5 + Math.random() * 5) : (5 + Math.random() * 7);
-    const drift = (Math.random() * 60 - 30) + "px";
-    el.style.left = left + "vw";
-    el.style.fontSize = size + "px";
-    el.style.opacity = (0.28 + Math.random() * 0.50).toFixed(2);
-    el.style.animationDuration = dur + "s";
-    el.style.setProperty("--drift", drift);
-    heartsLayer.appendChild(el);
-    setTimeout(() => el.remove(), dur * 1000 + 120);
-  }
+  noFight.active = true;
+  noFight.anger = 1;
+  noFight.speedMul = 1.12;
 
-  function spawnPowerup(){
-    capChildren(powerupsLayer, PERF.maxPowerups);
-    const el = document.createElement("span");
-    el.className = "powerup";
-    const items = ["⭐","🪙","✨","💖","🎮","💌","🌹"];
-    el.textContent = items[Math.floor(Math.random() * items.length)];
-    const left = Math.random() * 100;
-    const size = 14 + Math.random() * 18;
-    const dur  = PERF.lowEnd ? (5.5 + Math.random() * 5) : (6 + Math.random() * 8);
-    const drift = (Math.random() * 80 - 40) + "px";
-    const rot = (Math.random() * 160 - 80) + "deg";
-    el.style.left = left + "vw";
-    el.style.fontSize = size + "px";
-    el.style.animationDuration = dur + "s";
-    el.style.setProperty("--drift", drift);
-    el.style.setProperty("--rot", rot);
-    powerupsLayer.appendChild(el);
-    setTimeout(() => el.remove(), dur * 1000 + 220);
-  }
+  // detach from layout and roam the screen
+  noBtn.style.position = "fixed";
+  noBtn.style.left = "0px";
+  noBtn.style.top = "0px";
+  noBtn.style.zIndex = "9999";
+  noBtn.style.willChange = "transform";
+  noBtn.style.transition = "filter 120ms ease";
+  noBtn.style.filter = "drop-shadow(0 18px 22px rgba(0,0,0,.22))";
 
-  // ========== ✅ Pixel clouds ==========
-  const pixelCloudsLayer = document.getElementById("pixelClouds");
+  measureNoBtn();
+  const r = noBtn.getBoundingClientRect();
+  noFight.x = clamp(r.left, 8, window.innerWidth - noFight.w - 8);
+  noFight.y = clamp(r.top, 8, window.innerHeight - noFight.h - 8);
 
-  const pixelCloudSvg = encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="32" viewBox="0 0 64 32">
-      <rect width="64" height="32" fill="none"/>
-      <g fill="#ffffff">
-        <rect x="10" y="14" width="8" height="6"/>
-        <rect x="18" y="12" width="10" height="8"/>
-        <rect x="28" y="10" width="12" height="10"/>
-        <rect x="40" y="12" width="10" height="8"/>
-        <rect x="50" y="14" width="6" height="6"/>
-        <rect x="14" y="18" width="40" height="8"/>
-      </g>
-      <g fill="#e2e8f0" opacity="0.85">
-        <rect x="18" y="18" width="10" height="8"/>
-        <rect x="32" y="18" width="10" height="8"/>
-      </g>
-    </svg>
-  `);
+  noFight.vx = (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random()*2);
+  noFight.vy = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random()*2);
 
-  function spawnPixelCloud(){
-    capChildren(pixelCloudsLayer, PERF.maxClouds);
-    const el = document.createElement("div");
-    el.className = "pixel-cloud";
-    const top = (Math.random() * 55) + "vh";
-    const dur = (PERF.lowEnd ? (16 + Math.random() * 16) : (18 + Math.random() * 18)) + "s";
-    const scale = (0.55 + Math.random() * 0.65).toFixed(2);
-    el.style.setProperty("--top", top);
-    el.style.setProperty("--s", scale);
-    el.style.animationDuration = dur;
-    el.style.backgroundImage = `url("data:image/svg+xml,${pixelCloudSvg}")`;
-    pixelCloudsLayer.appendChild(el);
-    setTimeout(() => el.remove(), parseFloat(dur) * 1000 + 300);
-  }
+  hint.textContent = "YOU PRESSED NO 😳 …now catch it if you can.";
+  try{ confetti({particleCount: 120, spread: 90, origin:{y:0.6}}); }catch{}
 
-  // Start/stop ambient effects to avoid lag in background tabs
-  let ambientTimers = [];
-  function startAmbientFX(){
-    stopAmbientFX();
-    // initial burst (smaller on low end)
-    for (let i = 0; i < (PERF.lowEnd ? 8 : 14); i++) spawnHeart();
-    for (let i = 0; i < (PERF.lowEnd ? 6 : 10); i++) spawnPowerup();
-    for (let i = 0; i < (PERF.lowEnd ? 4 : 6); i++) spawnPixelCloud();
+  const loop = ()=>{
+    if (!noFight.active) return;
 
-    ambientTimers.push(setInterval(spawnHeart, PERF.heartInterval));
-    ambientTimers.push(setInterval(spawnPowerup, PERF.powerInterval));
-    ambientTimers.push(setInterval(spawnPixelCloud, PERF.cloudInterval));
-  }
-  function stopAmbientFX(){
-    ambientTimers.forEach(t => clearInterval(t));
-    ambientTimers = [];
-  }
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopAmbientFX();
-    else startAmbientFX();
-  });
-  startAmbientFX();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
 
-  // ========== Mana bar ==========
-  const manaBarInner = document.getElementById("manaBarInner");
-  const manaPctEl = document.getElementById("manaPct");
+    // dodge cursor/finger
+    const cx = noFight.x + noFight.w/2;
+    const cy = noFight.y + noFight.h/2;
+    const dx = cx - noFight.px;
+    const dy = cy - noFight.py;
+    const dist = Math.max(1, Math.hypot(dx, dy));
 
-  function updateMana(){
-    const doc = document.documentElement;
-    const scrollTop = doc.scrollTop || document.body.scrollTop;
-    const max = (doc.scrollHeight - doc.clientHeight) || 1;
-    const pct = Math.max(0, Math.min(100, (scrollTop / max) * 100));
-    manaBarInner.style.width = pct.toFixed(1) + "%";
-    manaPctEl.textContent = String(Math.round(pct));
-  }
-  window.addEventListener("scroll", updateMana, { passive: true });
-  updateMana();
-
-  // ========== Shiny mode easter egg ==========
-  const shinyStar = document.getElementById("shinyStar");
-  let shinyClicks = 0;
-  shinyStar.addEventListener("click", () => {
-    shinyClicks++;
-    if (shinyClicks >= 3){
-      document.body.classList.toggle("shiny-mode");
-      shinyClicks = 0;
-      try { confetti({ particleCount: PERF.lowEnd ? 70 : 120, spread: 80, origin: { y: 0.2 } }); } catch {}
+    const fear = 170;
+    if (dist < fear){
+      const push = (1 - dist/fear) * (1.8 + noFight.anger*0.22);
+      noFight.vx += (dx/dist) * push * 2.6;
+      noFight.vy += (dy/dist) * push * 2.6;
     } else {
-      shinyStar.animate([{transform:"scale(1)"},{transform:"scale(1.2)"},{transform:"scale(1)"}], {duration:260});
-    }
-  });
-
-  // ========== GIF loader (generic) ==========
-  function setImageTryFor(imgEl, urls) {
-    let i = 0;
-    const tryNext = () => {
-      if (i >= urls.length) { return; }
-      const url = urls[i++];
-      const probe = new Image();
-      probe.onload = () => { imgEl.src = url; };
-      probe.onerror = () => tryNext();
-      probe.src = url;
-    };
-    tryNext();
-  }
-
-  // ========== Valentine GIF loader ==========
-  const valImage = document.getElementById("valImage");
-  const hint = document.getElementById("hint");
-
-  const GIFS = {
-    start: ["https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif"],
-    yesMain: ["https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"],
-    yesFinal: [
-      "https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif",
-      "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnd5OW94bW81Zzg5MXpyMHB6eTE0azRiMGU5OHhlYTl4MmNiMHh6biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TqK5V0YnrWaR2/200.gif"
-    ],
-    no: ["https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"]
-  };
-  setImageTryFor(valImage, GIFS.start);
-
-  // ✅ Blackhole GIF (shows during phase2 pull) - uses YOUR gif first
-  const blackholeGif = document.getElementById("blackholeGif");
-  const BLACKHOLE_GIFS = [
-    "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif"
-  ];
-  setImageTryFor(blackholeGif, BLACKHOLE_GIFS);
-
-  // ========== ✅ MUSIC (YES + NO + Boss fight) ==========
-  function playGlueSong() {
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      const ctx = new AudioCtx();
-      if (ctx.state === "suspended") ctx.resume();
-
-      const now = ctx.currentTime;
-      const bpm = 132;
-      const beat = 60 / bpm;
-
-      const delay = ctx.createDelay(1.0);
-      delay.delayTime.value = 0.12;
-
-      const feedback = ctx.createGain();
-      feedback.gain.value = 0.25;
-
-      const wet = ctx.createGain();
-      wet.gain.value = 0.35;
-
-      const dry = ctx.createGain();
-      dry.gain.value = 0.85;
-
-      delay.connect(feedback);
-      feedback.connect(delay);
-      delay.connect(wet);
-      wet.connect(ctx.destination);
-      dry.connect(ctx.destination);
-
-      const noteToFreq = (note) => {
-        if (note === "REST") return null;
-        const m = /^([A-G])(#|b)?(\d)$/.exec(note);
-        if (!m) return null;
-
-        const [, letter, accidental, octaveStr] = m;
-        const octave = Number(octaveStr);
-        const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-
-        let n = SEMI[letter];
-        if (accidental === "#") n += 1;
-        if (accidental === "b") n -= 1;
-
-        const midi = (octave + 1) * 12 + n;
-        return 440 * Math.pow(2, (midi - 69) / 12);
-      };
-
-      function schedule(sequence, {
-        type = "triangle",
-        volume = 0.12,
-        offset = 0,
-        detune = 0,
-        toDelay = true
-      } = {}) {
-        let t = now + offset;
-        for (const step of sequence) {
-          const dur = step.beats * beat;
-          const freq = noteToFreq(step.note);
-          if (freq) {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, t);
-            osc.detune.setValueAtTime(detune, t);
-
-            const attack = Math.min(0.012, dur * 0.25);
-            const release = Math.min(0.09, dur * 0.45);
-
-            gain.gain.setValueAtTime(0, t);
-            gain.gain.linearRampToValueAtTime(volume, t + attack);
-            gain.gain.setValueAtTime(volume, t + Math.max(attack, dur - release));
-            gain.gain.linearRampToValueAtTime(0, t + dur);
-
-            osc.connect(gain);
-            gain.connect(dry);
-            if (toDelay) gain.connect(delay);
-
-            osc.start(t);
-            osc.stop(t + dur);
-          }
-          t += dur;
-        }
-        return t;
-      }
-
-      const lead = [
-        { note: "C5", beats: 0.5 }, { note: "E5", beats: 0.5 }, { note: "G5", beats: 0.5 }, { note: "C6", beats: 1.5 },
-        { note: "B5", beats: 0.5 }, { note: "C6", beats: 2 },
-        { note: "G5", beats: 0.5 }, { note: "C6", beats: 2.5 }
-      ];
-      const harmony = [
-        { note: "E4", beats: 0.5 }, { note: "G4", beats: 0.5 }, { note: "C5", beats: 0.5 }, { note: "E5", beats: 1.5 },
-        { note: "D5", beats: 0.5 }, { note: "E5", beats: 2 },
-        { note: "C5", beats: 0.5 }, { note: "E5", beats: 2.5 }
-      ];
-      const bass = [
-        { note: "C3", beats: 1 }, { note: "REST", beats: 1 },
-        { note: "G3", beats: 1 }, { note: "REST", beats: 1 },
-        { note: "C3", beats: 2 },
-      ];
-      const sparkle = [
-        { note: "C6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 },
-        { note: "B6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "C6", beats: 0.25 },
-        { note: "D6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "D7", beats: 0.25 },
-        { note: "C7", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "D6", beats: 0.25 },
-        { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "E7", beats: 0.25 },
-        { note: "D7", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 },
-      ];
-
-      schedule(lead,    { type: "triangle", volume: 0.14, offset: 0.00, detune: +4 });
-      schedule(harmony, { type: "sine",     volume: 0.10, offset: 0.02, detune: -3 });
-      schedule(bass,    { type: "square",   volume: 0.06, offset: 0.00, detune:  0, toDelay: false });
-      const end = schedule(sparkle, { type: "sine", volume: 0.07, offset: 0.10, detune: +6 });
-
-      setTimeout(() => ctx.close().catch(() => {}), Math.ceil((end - now + 0.35) * 1000));
-    } catch {}
-  }
-
-  // Battle loop music (used for boss fight + NO sting)
-  let battleCtx = null;
-  let battleMaster = null;
-  let battleInterval = null;
-  let battleStep = 0;
-  let battleIntensity = 1;
-
-  function noiseHit(ctx, time, duration, volume, cutoffHz) {
-    const bufferSize = Math.floor(ctx.sampleRate * duration);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
-
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(cutoffHz, time);
-
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, time);
-    gain.gain.linearRampToValueAtTime(volume, time + 0.005);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
-
-    src.connect(filter).connect(gain).connect(battleMaster);
-    src.start(time);
-    src.stop(time + duration);
-  }
-
-  function noteToFreqBattle(note) {
-    const m = /^([A-G])(#|b)?(\d)$/.exec(note);
-    if (!m) return null;
-    const [, letter, accidental, octaveStr] = m;
-    const octave = Number(octaveStr);
-    const SEMI = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
-    let n = SEMI[letter];
-    if (accidental === "#") n += 1;
-    if (accidental === "b") n -= 1;
-    const midi = (octave + 1) * 12 + n;
-    return 440 * Math.pow(2, (midi - 69) / 12);
-  }
-
-  function startBattleMusic(intensity = 1) {
-    if (battleCtx) return;
-
-    battleIntensity = intensity;
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    battleCtx = new AudioCtx();
-    if (battleCtx.state === "suspended") battleCtx.resume();
-
-    battleMaster = battleCtx.createGain();
-    battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
-    battleMaster.connect(battleCtx.destination);
-
-    battleStep = 0;
-
-    const tick = () => {
-      if (!battleCtx) return;
-
-      const capped = Math.max(1, Math.min(battleIntensity, 6));
-      const bpm = 120 + capped * 10;
-      const stepDur = 60 / bpm / 2;
-      const t = battleCtx.currentTime + 0.02;
-
-      const riff = ["E3","G3","A3","G3","E3","D3","E3","B2"];
-      const lead = ["E4","G4","A4","B4","A4","G4","E4","D4"];
-
-      const bassNote = riff[battleStep % riff.length];
-      const bassOsc = battleCtx.createOscillator();
-      bassOsc.type = "sawtooth";
-      bassOsc.frequency.setValueAtTime(noteToFreqBattle(bassNote), t);
-
-      const bassGain = battleCtx.createGain();
-      bassGain.gain.setValueAtTime(0, t);
-      bassGain.gain.linearRampToValueAtTime(0.12 + capped * 0.01, t + 0.01);
-      bassGain.gain.exponentialRampToValueAtTime(0.0001, t + stepDur);
-
-      const bassFilter = battleCtx.createBiquadFilter();
-      bassFilter.type = "lowpass";
-      bassFilter.frequency.setValueAtTime(600 + capped * 180, t);
-
-      bassOsc.connect(bassFilter).connect(bassGain).connect(battleMaster);
-      bassOsc.start(t);
-      bassOsc.stop(t + stepDur);
-
-      if (battleStep % 2 === 0) {
-        const leadNote = lead[(battleStep / 2) % lead.length];
-        const leadOsc = battleCtx.createOscillator();
-        leadOsc.type = "square";
-        leadOsc.frequency.setValueAtTime(noteToFreqBattle(leadNote), t);
-
-        const leadGain = battleCtx.createGain();
-        leadGain.gain.setValueAtTime(0, t);
-        leadGain.gain.linearRampToValueAtTime(0.07 + capped * 0.008, t + 0.008);
-        leadGain.gain.exponentialRampToValueAtTime(0.0001, t + stepDur * 0.9);
-
-        leadOsc.connect(leadGain).connect(battleMaster);
-        leadOsc.start(t);
-        leadOsc.stop(t + stepDur * 0.9);
-      }
-
-      const isKick = battleStep % 4 === 0 || battleStep % 4 === 2;
-      const isSnare = battleStep % 4 === 1 || battleStep % 4 === 3;
-
-      if (isKick)  noiseHit(battleCtx, t, 0.06, 0.10 + capped * 0.01, 220 + capped * 20);
-      if (isSnare) noiseHit(battleCtx, t, 0.05, 0.06 + capped * 0.008, 1200 + capped * 120);
-      noiseHit(battleCtx, t, 0.02, 0.03 + capped * 0.004, 6000 + capped * 300);
-
-      battleStep++;
-    };
-
-    battleInterval = setInterval(tick, 90);
-    tick();
-  }
-
-  function updateBattleIntensity(intensity) {
-    battleIntensity = intensity;
-    if (!battleCtx || !battleMaster) return;
-    battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
-  }
-
-  function stopBattleMusic() {
-    if (battleInterval) clearInterval(battleInterval);
-    battleInterval = null;
-
-    if (battleCtx) {
-      const ctx = battleCtx;
-      battleCtx = null;
-      battleMaster = null;
-      setTimeout(() => ctx.close().catch(() => {}), 50);
-    }
-  }
-
-  // ========== Lock YES/NO until boss beaten ==========
-  const yesBtn = document.getElementById("yesBtn");
-  const noBtn = document.getElementById("noBtn");
-  let yesLocked = true;
-  let noLocked = true;
-
-  function lockBtn(btn, label){
-    btn.disabled = true;
-    btn.style.opacity = "0.55";
-    btn.style.cursor = "not-allowed";
-    const span = btn.querySelector("span");
-    if (span) span.textContent = label;
-  }
-  function unlockBtn(btn, label){
-    btn.disabled = false;
-    btn.style.opacity = "1";
-    btn.style.cursor = "pointer";
-    const span = btn.querySelector("span");
-    if (span) span.textContent = label;
-  }
-  function lockYesNo(){
-    yesLocked = true; noLocked = true;
-    lockBtn(yesBtn, "LOCKED");
-    lockBtn(noBtn, "LOCKED");
-  }
-  function unlockYesNo(){
-    yesLocked = false; noLocked = false;
-    unlockBtn(yesBtn, "YES");
-    unlockBtn(noBtn, "NO");
-    hint.textContent = "Unlocked! 😳 Now choose wisely...";
-  }
-  lockYesNo();
-
-  // ========== Begin Event ==========
-  const beginEvent = document.getElementById("beginEvent");
-  const bossStartBtn = document.getElementById("bossStart");
-  beginEvent.addEventListener("click", () => {
-    bossStartBtn.scrollIntoView({ behavior: "smooth", block: "center" });
-    bossStartBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:520});
-  });
-
-  // ================================
-  // ✅ NO runaway mode (NEW)
-  // ================================
-  let noRunActive = false;
-  let noRunTimer = null;
-  let noPlaceholder = null;
-
-  function activateNoRunaway() {
-    if (noRunActive) return;
-    noRunActive = true;
-
-    const rect = noBtn.getBoundingClientRect();
-    noPlaceholder = document.createElement("div");
-    noPlaceholder.style.width = rect.width + "px";
-    noPlaceholder.style.height = rect.height + "px";
-    noPlaceholder.style.flex = "0 0 auto";
-    noBtn.parentNode.insertBefore(noPlaceholder, noBtn);
-
-    document.body.appendChild(noBtn);
-    noBtn.classList.add("no-runaway");
-    noBtn.style.left = rect.left + "px";
-    noBtn.style.top  = rect.top  + "px";
-
-    noBtn.style.transform = "scale(1.35)";
-    noBtn.style.opacity = "1";
-    noBtn.style.cursor = "pointer";
-
-    jumpNoBtn(true);
-    noRunTimer = setInterval(() => jumpNoBtn(false), PERF.lowEnd ? 800 : 650);
-
-    noBtn.addEventListener("pointerenter", onNoHoverJump);
-    noBtn.addEventListener("pointerdown", onNoHoverJump);
-  }
-
-  function onNoHoverJump() {
-    if (!noRunActive) return;
-    jumpNoBtn(true);
-  }
-
-  function jumpNoBtn(instant) {
-    if (!noRunActive) return;
-
-    const margin = 12;
-    const r = noBtn.getBoundingClientRect();
-    const maxX = Math.max(margin, window.innerWidth  - r.width  - margin);
-    const maxY = Math.max(margin, window.innerHeight - r.height - margin);
-
-    const x = margin + Math.random() * (maxX - margin);
-    const y = margin + Math.random() * (maxY - margin);
-
-    const curLeft = parseFloat(noBtn.style.left || r.left);
-    const curTop  = parseFloat(noBtn.style.top  || r.top);
-
-    try {
-      noBtn.animate(
-        [
-          { left: curLeft + "px", top: curTop + "px", transform: "scale(1.35) rotate(0deg)" },
-          { left: x + "px",      top: y + "px",      transform: "scale(1.35) rotate(" + (Math.random()*16 - 8).toFixed(1) + "deg)" }
-        ],
-        { duration: instant ? 220 : 360, easing: "cubic-bezier(.2,.9,.2,1)", fill: "forwards" }
-      );
-    } catch {
-      noBtn.style.left = x + "px";
-      noBtn.style.top  = y + "px";
+      // tiny drift
+      noFight.vx += Math.sin(performance.now()/550) * 0.02;
+      noFight.vy += Math.cos(performance.now()/620) * 0.02;
     }
 
-    noBtn.style.left = x + "px";
-    noBtn.style.top  = y + "px";
-  }
-
-  function deactivateNoRunaway() {
-    if (!noRunActive) return;
-    noRunActive = false;
-
-    if (noRunTimer) clearInterval(noRunTimer);
-    noRunTimer = null;
-
-    noBtn.removeEventListener("pointerenter", onNoHoverJump);
-    noBtn.removeEventListener("pointerdown", onNoHoverJump);
-
-    noBtn.classList.remove("no-runaway");
-    noBtn.style.position = "";
-    noBtn.style.left = "";
-    noBtn.style.top = "";
-    noBtn.style.zIndex = "";
-    noBtn.style.transform = "";
-
-    if (noPlaceholder && noPlaceholder.parentNode) {
-      noPlaceholder.parentNode.insertBefore(noBtn, noPlaceholder);
-      noPlaceholder.remove();
-    }
-    noPlaceholder = null;
-  }
-
-  // ========== YES/NO handlers ==========
-  let yesFinalTimer = null;
-
-  yesBtn.addEventListener("click", () => {
-    // ✅ stop NO from running around if YES is pressed
-    deactivateNoRunaway();
-
-    if (yesLocked){
-      hint.textContent = "YES is locked 😈 Beat the boss first!";
-      yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
-      return;
+    // clamp velocity
+    const maxV = 10 + noFight.anger * 0.8;
+    const sp = Math.hypot(noFight.vx, noFight.vy) || 1;
+    if (sp > maxV){
+      noFight.vx = (noFight.vx/sp) * maxV;
+      noFight.vy = (noFight.vy/sp) * maxV;
     }
 
-    stopBattleMusic();
-    playGlueSong();
+    // move
+    noFight.x += noFight.vx * noFight.speedMul;
+    noFight.y += noFight.vy * noFight.speedMul;
 
-    setImageTryFor(valImage, GIFS.yesMain);
-    hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
-    noBtn.style.display = "none";
-    try { confetti({ particleCount: PERF.lowEnd ? 120 : 250, spread: 80, origin: { y: 0.6 } }); } catch {}
-    if (yesFinalTimer) clearTimeout(yesFinalTimer);
-    yesFinalTimer = setTimeout(() => setImageTryFor(valImage, GIFS.yesFinal), 2000);
-  });
+    // bounce edges
+    const pad = 8;
+    const maxX = vw - noFight.w - pad;
+    const maxY = vh - noFight.h - pad;
 
-  noBtn.addEventListener("click", () => {
-    if (noLocked){
-      hint.textContent = "NO is locked 😈 Beat the boss first!";
-      noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
-      return;
-    }
+    if (noFight.x < pad){ noFight.x = pad; noFight.vx *= -1; }
+    if (noFight.x > maxX){ noFight.x = maxX; noFight.vx *= -1; }
+    if (noFight.y < pad){ noFight.y = pad; noFight.vy *= -1; }
+    if (noFight.y > maxY){ noFight.y = maxY; noFight.vy *= -1; }
 
-    // keep a little "battle vibe" on NO too
-    startBattleMusic(3);
-    updateBattleIntensity(3);
-    setTimeout(() => { if (!bossGame?.running) stopBattleMusic(); }, 2200);
+    // bigger with anger (capped)
+    const scale = 1 + Math.min(0.9, noFight.anger * 0.06);
 
-    setImageTryFor(valImage, GIFS.no);
-    hint.textContent = "No? 😳 okay then CATCH ME.";
+    // transform only (fast)
+    noBtn.style.transform = `translate3d(${noFight.x}px, ${noFight.y}px, 0) scale(${scale})`;
 
-    // ✅ runaway jump mode
-    activateNoRunaway();
-  });
-
-  // ========== Alt art toggle ==========
-  const altArtBtn = document.getElementById("altArtBtn");
-  const cardArt = document.getElementById("cardArt");
-  let altArt = false;
-  altArtBtn.addEventListener("click", () => {
-    altArt = !altArt;
-    cardArt.textContent = altArt ? "(ALT ART: put another photo here)" : "(Put a cute photo here later)";
-    try { confetti({ particleCount: PERF.lowEnd ? 45 : 80, spread: 60, origin: { y: 0.25 } }); } catch {}
-  });
-
-  // ========== Date modal + stack ==========
-  const dateModal = document.getElementById("dateModal");
-  const openDateModal = document.getElementById("openDateModal");
-  const closeDateModal = document.getElementById("closeDateModal");
-  const chosenDate = document.getElementById("chosenDate");
-  const spellStack = document.getElementById("spellStack");
-  const manaSpentEl = document.getElementById("manaSpent");
-  let manaSpent = 0;
-
-  function pushToStack(name){
-    if (spellStack.textContent.includes("empty")) spellStack.innerHTML = "";
-    const row = document.createElement("div");
-    row.className = "rounded-xl bg-white/75 border border-white/60 px-3 py-2 shadow-sm";
-    row.textContent = name + " (on the stack)";
-    spellStack.prepend(row);
-    row.animate([{transform:"translateY(-6px)", opacity:0},{transform:"translateY(0px)", opacity:1}], {duration:320, easing:"cubic-bezier(.2,.9,.2,1)"});
-  }
-
-  openDateModal.addEventListener("click", () => dateModal.classList.add("show"));
-  closeDateModal.addEventListener("click", () => dateModal.classList.remove("show"));
-  dateModal.addEventListener("click", (e) => { if (e.target === dateModal) dateModal.classList.remove("show"); });
-
-  dateModal.querySelectorAll("button[data-spell]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const s = btn.getAttribute("data-spell");
-      const cost = Number(btn.getAttribute("data-cost") || "0");
-      manaSpent += cost;
-      manaSpentEl.textContent = String(manaSpent);
-
-      chosenDate.innerHTML = `Selected spell: <b>${s}</b><div class="mt-2 text-xs font-black text-slate-700/70">Mana spent: <span>${manaSpent}</span></div>`;
-      pushToStack(s);
-
-      dateModal.classList.remove("show");
-      try { confetti({ particleCount: PERF.lowEnd ? 55 : 90, spread: 70, origin: { y: 0.7 } }); } catch {}
-    });
-  });
-
-  // ========== Token generator ==========
-  const tokenBtn = document.getElementById("tokenBtn");
-  const tokenGrid = document.getElementById("tokenGrid");
-  const tokenCountEl = document.getElementById("tokenCount");
-  const tokenMsg = document.getElementById("tokenMsg");
-  let tokens = 0;
-
-  function tokenUnlockMessage(n){
-    if (n === 5)  return "You’ve generated enough love mana.";
-    if (n === 10) return "Warning: lethal affection incoming.";
-    if (n === 20) return "Ultimate achieved: Ask unlocked. (…if the boss is defeated 😈)";
-    return null;
-  }
-
-  tokenBtn.addEventListener("click", () => {
-    tokens++;
-    tokenCountEl.textContent = String(tokens);
-    const tile = document.createElement("div");
-    tile.className = "h-9 w-9 rounded-xl bg-white/75 border border-white/60 flex items-center justify-center shadow-sm";
-    tile.textContent = "💖";
-    tokenGrid.appendChild(tile);
-    const msg = tokenUnlockMessage(tokens);
-    if (msg){
-      tokenMsg.innerHTML = `Tokens: <b>${tokens}</b> — <span class="font-black">${msg}</span>`;
-      try { confetti({ particleCount: PERF.lowEnd ? 80 : 120, spread: 80, origin: { y: 0.6 } }); } catch {}
-    }
-  });
-
-  // ========== Pokémon battle logic ==========
-  const battleText = document.getElementById("battleText");
-  const enemyHPBar = document.getElementById("enemyHPBar");
-  const youHPBar = document.getElementById("youHPBar");
-  const enemySprite = document.getElementById("enemySprite");
-
-  const battleMenuMain = document.getElementById("battleMenuMain");
-  const battleMenuFight = document.getElementById("battleMenuFight");
-  const btnFight = document.getElementById("btnFight");
-  const btnBag = document.getElementById("btnBag");
-  const btnTeam = document.getElementById("btnTeam");
-  const btnRun = document.getElementById("btnRun");
-  const btnBack = document.getElementById("btnBack");
-
-  const poke = {
-    enemyHP: 100,
-    youHP: 100,
-    stunned: false,
-    teamPage: 0,
-    inBattle: true
-  };
-
-  const moveData = {
-    "Compliment Beam": { dmg: 18, text: "You fire a Compliment Beam! “You make everything better.” It’s super effective 💥💖" },
-    "Snack Shield":    { dmg: 6,  heal: 12, text: "Snack Shield! You block negativity with snacks. You feel safer (+HP) 🍪🛡️" },
-    "Laugh Attack":    { dmg: 14, stun: 0.35, text: "Laugh Attack! He can’t stop smiling… there’s a chance he loses a turn 😂" },
-    "Cozy Aura":       { dmg: 10, heal: 6, text: "Cozy Aura surrounds you. Warmth fills the arena (+HP) 🧸✨" }
-  };
-
-  const bagItems = [
-    { name: "Love Ball 💘", effect: "capture", text: "You toss a Love Ball… it wobbles… 👀" },
-    { name: "Date Coupon 🍽️", effect: "buff", text: "Date Coupon activated. Future happiness increased." },
-    { name: "Chocolate Potion 🍫", effect: "heal", amt: 18, text: "Chocolate Potion! Sweet healing (+HP)." },
-    { name: "Shiny Charm ⭐", effect: "shiny", text: "Shiny Charm sparkles… the vibes improve ✨" }
-  ];
-
-  const teamRoster = [
-    "Slot 1: Inside joke #1",
-    "Slot 2: The photo where you both look cute",
-    "Slot 3: The funniest moment ever",
-    "Slot 4: The “we’re a team” one",
-    "Slot 5: Your shared favorite thing"
-  ];
-
-  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
-
-  function setHPBars(){
-    enemyHPBar.style.width = clamp(poke.enemyHP, 0, 100) + "%";
-    youHPBar.style.width   = clamp(poke.youHP, 0, 100) + "%";
-  }
-  setHPBars();
-
-  function showMainMenu(){
-    battleMenuFight.classList.add("hidden");
-    battleMenuMain.classList.remove("hidden");
-  }
-  function showFightMenu(){
-    battleMenuMain.classList.add("hidden");
-    battleMenuFight.classList.remove("hidden");
-  }
-
-  function enemyTurn(){
-    if (!poke.inBattle) return;
-
-    if (poke.stunned && Math.random() < 0.6){
-      poke.stunned = false;
-      battleText.textContent = "Valentine is too flustered to move… 😳";
-      return;
-    }
-    poke.stunned = false;
-
-    const attacks = [
-      { dmg: 12, text: "Valentine used Fluster Pulse! Your heart races 💓 (-HP)" },
-      { dmg: 10, text: "Valentine used Heart Spark! It’s adorable but dangerous ✨ (-HP)" },
-      { dmg: 14, text: "Valentine used Blush Blitz! Critical cuteness 😵 (-HP)" }
-    ];
-    const a = attacks[Math.floor(Math.random() * attacks.length)];
-    poke.youHP = clamp(poke.youHP - a.dmg, 0, 100);
-    setHPBars();
-    battleText.textContent = a.text;
-
-    if (poke.youHP <= 0){
-      poke.inBattle = false;
-      battleText.textContent = "You fainted… but LOVE revives you instantly. (Try again 😤💖)";
-      poke.youHP = 100;
-      poke.enemyHP = 100;
-      poke.inBattle = true;
-      setHPBars();
-      enemySprite.textContent = "💘";
-    }
-  }
-
-  function winPokemon(){
-    poke.inBattle = false;
-    enemySprite.textContent = "💞";
-    battleText.textContent = "Valentine was defeated… and wants to join you. Aww. 💖";
-    try { confetti({ particleCount: PERF.lowEnd ? 90 : 140, spread: 85, origin: { y: 0.55 } }); } catch {}
-    setTimeout(() => {
-      poke.enemyHP = 100;
-      poke.youHP = 100;
-      poke.inBattle = true;
-      enemySprite.textContent = "💘";
-      setHPBars();
-      battleText.textContent = "A wild Valentine appeared! (Again… because it loves you.)";
-    }, 1800);
-  }
-
-  btnFight.addEventListener("click", () => {
-    if (!poke.inBattle) return;
-    showFightMenu();
-    battleText.textContent = "Choose a move!";
-  });
-
-  btnBack.addEventListener("click", () => {
-    showMainMenu();
-    battleText.textContent = "What will you do?";
-  });
-
-  battleMenuFight.querySelectorAll("button[data-move]").forEach(b => {
-    b.addEventListener("click", () => {
-      if (!poke.inBattle) return;
-      const name = b.getAttribute("data-move");
-      const m = moveData[name];
-
-      poke.enemyHP = clamp(poke.enemyHP - m.dmg, 0, 100);
-      if (m.heal) poke.youHP = clamp(poke.youHP + m.heal, 0, 100);
-      if (m.stun && Math.random() < m.stun) poke.stunned = true;
-
-      setHPBars();
-      battleText.textContent = m.text;
-
-      if (poke.enemyHP <= 0){
-        winPokemon();
-        showMainMenu();
-        return;
-      }
-
-      setTimeout(() => enemyTurn(), 700);
-      showMainMenu();
-    });
-  });
-
-  btnBag.addEventListener("click", () => {
-    if (!poke.inBattle) return;
-    const it = bagItems[Math.floor(Math.random() * bagItems.length)];
-    battleText.textContent = "BAG → " + it.text;
-
-    if (it.effect === "heal"){
-      poke.youHP = clamp(poke.youHP + it.amt, 0, 100);
-      setHPBars();
-    }
-    if (it.effect === "capture"){
-      const roll = Math.random();
-      if (roll > 0.72){
-        battleText.textContent = "The Love Ball clicked! Valentine is captured 💘 (it’s basically YES.)";
-        try { confetti({ particleCount: PERF.lowEnd ? 70 : 110, spread: 75, origin: { y: 0.6 } }); } catch {}
-      } else {
-        setTimeout(() => enemyTurn(), 650);
-      }
+    // little “glow pulse”
+    if ((performance.now()/280|0) % 12 === 0){
+      noBtn.style.filter = "drop-shadow(0 22px 30px rgba(244,63,94,.35))";
     } else {
-      setTimeout(() => enemyTurn(), 650);
+      noBtn.style.filter = "drop-shadow(0 18px 22px rgba(0,0,0,.22))";
     }
-  });
 
-  btnTeam.addEventListener("click", () => {
-    if (!poke.inBattle) return;
-    poke.teamPage = (poke.teamPage + 1) % 3;
-    if (poke.teamPage === 0){
-      battleText.textContent = "TEAM → " + teamRoster.slice(0,2).join(" | ");
-    } else if (poke.teamPage === 1){
-      battleText.textContent = "TEAM → " + teamRoster.slice(2,4).join(" | ");
-    } else {
-      battleText.textContent = "TEAM → " + teamRoster.slice(4).join(" | ");
-    }
-    setTimeout(() => enemyTurn(), 650);
-  });
-
-  btnRun.addEventListener("click", () => {
-    if (!poke.inBattle) return;
-    battleText.textContent = "You can’t run from love.";
-    btnRun.animate([{transform:"translateX(0px)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0px)"}], {duration:360});
-    setTimeout(() => enemyTurn(), 650);
-  });
-
-  // ========== Saga -> Capture ==========
-  const sagaChapterEl = document.getElementById("sagaChapter");
-  const sagaText = document.getElementById("sagaText");
-  const advanceSaga = document.getElementById("advanceSaga");
-  const sagaView = document.getElementById("sagaView");
-  const captureView = document.getElementById("captureView");
-  const throwLoveBall = document.getElementById("throwLoveBall");
-  const throwShinyBall = document.getElementById("throwShinyBall");
-  const captureMsg = document.getElementById("captureMsg");
-
-  let sagaStep = 1;
-  const sagaLines = {
-    1: `I — “We met and my life got better.”`,
-    2: `II — “We became my favorite team.”`,
-    3: `III — “Will you be my Valentine?”`
-  };
-  function toRoman(n){ return n === 1 ? "I" : n === 2 ? "II" : "III"; }
-
-  advanceSaga.addEventListener("click", () => {
-    sagaStep = Math.min(3, sagaStep + 1);
-    sagaChapterEl.textContent = toRoman(sagaStep);
-    sagaText.textContent = sagaLines[sagaStep];
-    if (sagaStep === 3){
-      sagaView.classList.add("hidden");
-      captureView.classList.remove("hidden");
-      try { confetti({ particleCount: PERF.lowEnd ? 90 : 140, spread: 90, origin: { y: 0.55 } }); } catch {}
-    }
-  });
-
-  function captureAttempt(shiny=false){
-    if (yesLocked || noLocked){
-      captureMsg.textContent = "LOCKED 😈 Defeat the boss first!";
-      return;
-    }
-    captureMsg.textContent = shiny ? "Shiny captured!! 💚✨ Valentine accepted!!" : "Captured!! 💘 Valentine accepted!!";
-    try { confetti({ particleCount: PERF.lowEnd ? 130 : 220, spread: 95, origin: { y: 0.6 } }); } catch {}
-    hint.textContent = "Okay now go click YES 😤💞";
-    yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.12)"},{transform:"scale(1)"}], {duration:700, iterations:2});
-  }
-  throwLoveBall.addEventListener("click", () => captureAttempt(false));
-  throwShinyBall.addEventListener("click", () => captureAttempt(true));
-
-  // ========== Booster ==========
-  const openBooster = document.getElementById("openBooster");
-  const boosterResult = document.getElementById("boosterResult");
-  openBooster.addEventListener("click", () => {
-    boosterResult.classList.remove("hidden");
-    boosterResult.animate([{transform:"scale(0.98)", opacity:0},{transform:"scale(1)", opacity:1}], {duration:420, easing:"cubic-bezier(.2,.9,.2,1)"});
-    try { confetti({ particleCount: PERF.lowEnd ? 95 : 160, spread: 85, origin: { y: 0.55 } }); } catch {}
-  });
-
-  // ========== Boss arena background image (PUT YOUR FILE NEXT TO THIS HTML) ==========
-  const BOSS_BG_URL = "boss-bg.png";
-  const bossBgImg = new Image();
-  bossBgImg.src = BOSS_BG_URL;
-  let bossBgReady = false;
-  bossBgImg.onload = () => (bossBgReady = true);
-
-  function drawCoverImage(ctx, img, w, h) {
-    const iw = img.naturalWidth || img.width;
-    const ih = img.naturalHeight || img.height;
-    if (!iw || !ih) return;
-    const scale = Math.max(w / iw, h / ih);
-    const nw = iw * scale;
-    const nh = ih * scale;
-    const x = (w - nw) / 2;
-    const y = (h - nh) / 2;
-    ctx.drawImage(img, x, y, nw, nh);
-  }
-
-  // ========== Boss fight + platformer ==========
-  const bossCanvas = document.getElementById("bossCanvas");
-  const bossOverlay = document.getElementById("bossOverlay");
-  const bossMsg = document.getElementById("bossMsg");
-  const playerHPBar = document.getElementById("playerHPBar");
-  const bossHPBar = document.getElementById("bossHPBar");
-  const loveBar = document.getElementById("loveBar");
-  const laughFlash = document.getElementById("laughFlash");
-
-  const defaultBossOverlayHTML = bossOverlay.innerHTML;
-  const bossCtx2 = bossCanvas.getContext("2d");
-  let bossRaf = null;
-
-  function fitCanvasToCSS(canvas, ctx) {
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.floor(rect.width * dpr);
-    canvas.height = Math.floor(rect.height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  fitCanvasToCSS(bossCanvas, bossCtx2);
-
-  // Shared keys
-  const keys = new Set();
-  window.addEventListener("keydown", (e) => {
-    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"," "].includes(e.key)) {
-      keys.add(e.key);
-      if (e.key === " ") e.preventDefault();
-    }
-  });
-  window.addEventListener("keyup", (e) => keys.delete(e.key));
-
-  // Boss touch controls
-  let bossTouchActive = false, bossTouchX = 0, bossTouchY = 0;
-  bossCanvas.addEventListener("pointerdown", (e) => {
-    bossTouchActive = true;
-    const r = bossCanvas.getBoundingClientRect();
-    bossTouchX = e.clientX - r.left;
-    bossTouchY = e.clientY - r.top;
-    if (bossGame.running) bossShoot();
-  });
-  bossCanvas.addEventListener("pointermove", (e) => {
-    if (!bossTouchActive) return;
-    const r = bossCanvas.getBoundingClientRect();
-    bossTouchX = e.clientX - r.left;
-    bossTouchY = e.clientY - r.top;
-  });
-  window.addEventListener("pointerup", () => (bossTouchActive = false));
-
-  const bossGame = {
-    running: false,
-    t: 0,
-    lastShot: 0,
-    phaseTimer: 0,
-    pattern: "spray",
-    phase2: false,
-    blackHole: { active: false, timer: 0, cool: 2.0 },
-    bullets: [],
-    beams: [],
-    particles: [],
-    player: { x: 120, y: 260, r: 10, hp: 5, maxHp: 5, inv: 0 },
-    boss:   { x: 0, y: 0, r: 28, hp: 100, maxHp: 100, wob: 0 }
+    noFight.raf = requestAnimationFrame(loop);
   };
 
-  function clamp2(v, a, b){ return Math.max(a, Math.min(b, v)); }
-  function dist2(ax, ay, bx, by){ const dx=ax-bx, dy=ay-by; return dx*dx + dy*dy; }
+  noFight.raf = requestAnimationFrame(loop);
+}
 
-  function setBossBars(){
-    playerHPBar.style.width = (bossGame.player.hp / bossGame.player.maxHp * 100) + "%";
-    bossHPBar.style.width = (bossGame.boss.hp / bossGame.boss.maxHp * 100) + "%";
-    const lovePct = (1 - bossGame.boss.hp / bossGame.boss.maxHp) * 100;
-    loveBar.style.width = lovePct.toFixed(1) + "%";
+function stopNoHeartFight(){
+  if (!noFight.active) return;
+  noFight.active = false;
+  if (noFight.raf) cancelAnimationFrame(noFight.raf);
+  noFight.raf = null;
 
-    if (bossGame.running && battleCtx) {
-      const hpPct = bossGame.boss.hp / bossGame.boss.maxHp;
-      const intensity = 1 + Math.floor((1 - hpPct) * 5);
-      updateBattleIntensity(intensity);
+  // restore to normal layout
+  noBtn.style.position = "";
+  noBtn.style.left = "";
+  noBtn.style.top = "";
+  noBtn.style.zIndex = "";
+  noBtn.style.willChange = "";
+  noBtn.style.transform = "";
+  noBtn.style.filter = "";
+  noBtn.style.transition = "";
+
+  hint.textContent = "NO fight stopped. (Press NO again to restart 😈)";
+}
+
+/* ============================================================
+   YES / NO CLICK HANDLERS
+============================================================ */
+yesBtn.addEventListener("click", ()=>{
+  if (yesLocked){
+    hint.textContent = "YES is locked 😈 Beat the boss first!";
+    yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:280});
+    return;
+  }
+
+  stopNoHeartFight(); // important: stop fight before hiding/moving anything
+
+  hint.textContent = "You are now my Valentine 💞";
+  noBtn.style.display = "none";
+  try{ confetti({particleCount: 260, spread: 90, origin:{y:0.6}}); }catch{}
+});
+
+noBtn.addEventListener("click", ()=>{
+  if (noLocked){
+    hint.textContent = "NO is locked 😈 Beat the boss first!";
+    noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:280});
+    return;
+  }
+  startNoHeartFight();
+});
+
+/* ============================================================
+   BIG BEGIN EVENT POPUP
+============================================================ */
+const eventPop = document.getElementById("eventPop");
+const beginEvent = document.getElementById("beginEvent");
+beginEvent.addEventListener("click", ()=>{
+  eventPop.classList.add("show");
+  try{ confetti({particleCount: 140, spread: 80, origin:{y:0.25}}); }catch{}
+  setTimeout(()=>eventPop.classList.remove("show"), 900);
+
+  // scroll to boss start
+  bossStartBtn.scrollIntoView({behavior:"smooth", block:"center"});
+  bossStartBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:520});
+});
+
+/* ============================================================
+   TCG CARD ART (MAIN + ALT)
+============================================================ */
+const altArtBtn = document.getElementById("altArtBtn");
+const tcgArtBox = document.getElementById("tcgArtBox");
+let altArt = false;
+
+// Cute “main art” SVG
+const MAIN_ART = `data:image/svg+xml;utf8,` + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="440" viewBox="0 0 600 440">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fb7185"/>
+      <stop offset="0.5" stop-color="#ec4899"/>
+      <stop offset="1" stop-color="#60a5fa"/>
+    </linearGradient>
+    <pattern id="spr" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="10" r="2.2" fill="#fff" opacity="0.9"/>
+      <circle cx="22" cy="12" r="2.2" fill="#f59e0b" opacity="0.9"/>
+      <circle cx="30" cy="26" r="2.2" fill="#22c55e" opacity="0.9"/>
+      <circle cx="12" cy="30" r="2.2" fill="#a78bfa" opacity="0.9"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="440" rx="28" fill="url(#g)"/>
+  <rect width="600" height="440" rx="28" fill="url(#spr)" opacity="0.25"/>
+  <g transform="translate(110 90)">
+    <path d="M190 260 C80 170 40 110 40 65 C40 25 70 0 105 0 C130 0 152 12 170 35
+             C188 12 210 0 235 0 C270 0 300 25 300 65
+             C300 110 260 170 150 260 Z"
+          fill="rgba(255,255,255,0.92)"/>
+    <text x="150" y="150" text-anchor="middle" font-size="34" font-family="system-ui" font-weight="900" fill="#0f172a">
+      Be My Valentine
+    </text>
+    <text x="150" y="190" text-anchor="middle" font-size="18" font-family="system-ui" font-weight="800" fill="#334155">
+      (rare pull)
+    </text>
+  </g>
+  <text x="300" y="400" text-anchor="middle" font-size="18" font-family="system-ui" font-weight="800" fill="rgba(255,255,255,0.92)">
+    Chocolate • Sprinkles • Strawberries
+  </text>
+</svg>
+`);
+
+// Alt art SVG (Lotad cameo)
+const ALT_ART = `data:image/svg+xml;utf8,` + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="440" viewBox="0 0 600 440">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1022"/>
+      <stop offset="1" stop-color="#14164a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+      <stop offset="0" stop-color="#fb7185" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="440" rx="28" fill="url(#bg)"/>
+  <rect width="600" height="440" rx="28" fill="url(#glow)"/>
+  <g transform="translate(300 250)">
+    <ellipse cx="0" cy="58" rx="120" ry="30" fill="rgba(0,0,0,0.35)"/>
+    <!-- lilypad -->
+    <path d="M-140 0 C-90 -95, 90 -95, 140 0 C110 50, 60 80, 0 85 C-60 80, -110 50, -140 0 Z"
+          fill="#22c55e"/>
+    <path d="M-120 0 C-80 -75, 80 -75, 120 0 C95 38, 50 60, 0 64 C-50 60, -95 38, -120 0 Z"
+          fill="#16a34a" opacity="0.95"/>
+    <!-- body -->
+    <ellipse cx="0" cy="85" rx="70" ry="55" fill="#60a5fa"/>
+    <ellipse cx="0" cy="92" rx="58" ry="42" fill="#93c5fd" opacity="0.95"/>
+    <!-- beak -->
+    <path d="M-78 82 C-110 72, -110 98, -78 92 Z" fill="#f59e0b"/>
+    <!-- eyes -->
+    <circle cx="-18" cy="72" r="10" fill="#0f172a"/>
+    <circle cx="18" cy="72" r="10" fill="#0f172a"/>
+    <circle cx="-21" cy="68" r="3" fill="#fff"/>
+    <circle cx="15" cy="68" r="3" fill="#fff"/>
+    <!-- valentine sparkle -->
+    <text x="0" y="-20" text-anchor="middle" font-size="34">💖</text>
+  </g>
+  <text x="300" y="70" text-anchor="middle" font-size="28" font-family="system-ui" font-weight="900" fill="rgba(255,255,255,0.92)">
+    ALT ART: Lotad of Love
+  </text>
+</svg>
+`);
+
+function renderTCGArt(){
+  tcgArtBox.innerHTML = `
+    <img alt="tcg art" src="${altArt ? ALT_ART : MAIN_ART}" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+  `;
+}
+renderTCGArt();
+
+altArtBtn.addEventListener("click", ()=>{
+  altArt = !altArt;
+  renderTCGArt();
+  try{ confetti({particleCount: 90, spread: 65, origin:{y:0.25}}); }catch{}
+});
+
+/* ============================================================
+   INPUT (shared)
+============================================================ */
+const keys = new Set();
+window.addEventListener("keydown", (e)=>{
+  const k = e.key;
+  if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"," ","Shift","x","X"].includes(k)){
+    keys.add(k);
+    if (k === " " || k === "ArrowUp") e.preventDefault();
+  }
+});
+window.addEventListener("keyup", (e)=> keys.delete(e.key));
+
+document.addEventListener("visibilitychange", ()=>{
+  // stop loops if tab hidden
+  if (document.hidden){
+    stopBossFight(true);
+    stopPlatformer(true);
+  }
+});
+
+/* ============================================================
+   BOSS FIGHT (HARDER)
+============================================================ */
+const bossCanvas = document.getElementById("bossCanvas");
+const bossCtx = bossCanvas.getContext("2d");
+const bossStartBtn = document.getElementById("bossStart");
+const bossOverlay = document.getElementById("bossOverlay");
+const bossMsg = document.getElementById("bossMsg");
+const playerHPBar = document.getElementById("playerHPBar");
+const bossHPBar = document.getElementById("bossHPBar");
+const loveBar = document.getElementById("loveBar");
+
+fitCanvasToCSS(bossCanvas, bossCtx);
+
+let bossRAF = null;
+let bossLast = 0;
+
+const bossGame = {
+  running:false,
+  t:0,
+  player:{x:120,y:300,r:10,hp:5,maxHp:5,inv:0},
+  boss:{x:320,y:90,r:30,hp:140,maxHp:140, wob:0},
+  bullets:[],
+  beams:[],
+  particles:[],
+  phase2:false,
+  pattern:"spray",
+  patTimer:0,
+  lastShot:0
+};
+
+function setBossBars(){
+  playerHPBar.style.width = (bossGame.player.hp/bossGame.player.maxHp*100)+"%";
+  bossHPBar.style.width = (bossGame.boss.hp/bossGame.boss.maxHp*100)+"%";
+  loveBar.style.width = ((1-bossGame.boss.hp/bossGame.boss.maxHp)*100).toFixed(1)+"%";
+}
+
+function resetBossFight(){
+  bossGame.running=false;
+  bossGame.t=0;
+  bossGame.player.x=120; bossGame.player.y=300;
+  bossGame.player.hp=bossGame.player.maxHp=5;
+  bossGame.player.inv=0;
+
+  bossGame.boss.hp=bossGame.boss.maxHp=140;
+  bossGame.boss.wob=0;
+  bossGame.phase2=false;
+  bossGame.pattern="spray";
+  bossGame.patTimer=0;
+  bossGame.lastShot=0;
+
+  bossGame.bullets.length=0;
+  bossGame.beams.length=0;
+  bossGame.particles.length=0;
+
+  bossOverlay.style.opacity="1";
+  bossStartBtn.style.opacity="1";
+  bossStartBtn.style.pointerEvents="auto";
+  bossStartBtn.textContent="Start Boss Fight";
+  bossMsg.textContent="Beat the boss to unlock YES + NO.";
+  setBossBars();
+}
+
+function dist2(ax,ay,bx,by){
+  const dx=ax-bx, dy=ay-by;
+  return dx*dx+dy*dy;
+}
+
+function spawnParticle(x,y,emoji){
+  if (bossGame.particles.length > 140) bossGame.particles.splice(0, 30);
+  bossGame.particles.push({x,y,vx:rand(-1.2,1.2),vy:rand(-2.0,-0.4),life:rand(24,48),emoji});
+}
+
+function bossShoot(){
+  const now = performance.now();
+  if (now - bossGame.lastShot < 95) return; // harder: faster fire
+  bossGame.lastShot = now;
+  bossGame.beams.push({x:bossGame.player.x,y:bossGame.player.y-12,vx:0,vy:-8.6,r:6});
+  spawnParticle(bossGame.player.x, bossGame.player.y-10, "💞");
+}
+
+function fireBossBullet(angle, speed, kind){
+  // cap bullets for performance
+  if (bossGame.bullets.length > 600) bossGame.bullets.splice(0, 120);
+  bossGame.bullets.push({
+    x: bossGame.boss.x,
+    y: bossGame.boss.y,
+    vx: Math.cos(angle)*speed,
+    vy: Math.sin(angle)*speed,
+    r: kind==="orb" ? 8 : kind==="mini" ? 5 : 7,
+    kind
+  });
+}
+
+function chooseBossPattern(){
+  const hpPct = bossGame.boss.hp/bossGame.boss.maxHp;
+  const pool = hpPct > 0.70 ? ["spray","ring","burst"]
+            : hpPct > 0.35 ? ["spray","ring","burst","spiral"]
+            : ["spray","ring","burst","spiral","dash"];
+  bossGame.pattern = pool[(Math.random()*pool.length)|0];
+  bossGame.patTimer = 0;
+}
+
+function updateBoss(dt){
+  bossGame.t += dt;
+  bossGame.patTimer += dt;
+
+  const w = bossCanvas.getBoundingClientRect().width;
+  const h = bossCanvas.getBoundingClientRect().height;
+
+  // boss float
+  bossGame.boss.wob += dt;
+  bossGame.boss.x = w*0.5 + Math.cos(bossGame.boss.wob*0.95)*110;
+  bossGame.boss.y = 88 + Math.sin(bossGame.boss.wob*1.2)*18;
+
+  // player move
+  let mx=0,my=0;
+  if (keys.has("ArrowLeft")||keys.has("a")) mx -= 1;
+  if (keys.has("ArrowRight")||keys.has("d")) mx += 1;
+  if (keys.has("ArrowUp")||keys.has("w")) my -= 1;
+  if (keys.has("ArrowDown")||keys.has("s")) my += 1;
+  const speed = 4.8;
+  bossGame.player.x = clamp(bossGame.player.x + mx*speed, 18, w-18);
+  bossGame.player.y = clamp(bossGame.player.y + my*speed, 120, h-18);
+  if (keys.has(" ")) bossShoot();
+
+  // phase2 trigger
+  if (!bossGame.phase2 && bossGame.boss.hp <= bossGame.boss.maxHp*0.55){
+    bossGame.phase2 = true;
+    bossMsg.textContent = "PHASE 2 😳 Homing hearts unlocked.";
+    spawnParticle(bossGame.boss.x, bossGame.boss.y, "🖤");
+    try{ confetti({particleCount: 120, spread: 70, origin:{y:0.25}}); }catch{}
+  }
+
+  if (bossGame.patTimer > 1.55) chooseBossPattern();
+
+  const intensity = 1 + (1 - bossGame.boss.hp/bossGame.boss.maxHp)*2.2;
+  const aim = Math.atan2(bossGame.player.y - bossGame.boss.y, bossGame.player.x - bossGame.boss.x);
+
+  if (bossGame.pattern === "spray"){
+    if ((bossGame.t*18|0) !== ((bossGame.t-dt)*18|0)){
+      const spread = 0.32 + intensity*0.12;
+      fireBossBullet(aim + rand(-spread,spread), 3.6 + intensity*1.2, "heart");
+      if (Math.random() < 0.35) fireBossBullet(aim + rand(-spread,spread), 4.0 + intensity*1.25, "mini");
+    }
+  } else if (bossGame.pattern === "ring"){
+    if (bossGame.patTimer < dt + 0.02){
+      const n = 14 + Math.floor(intensity*5);
+      for (let i=0;i<n;i++){
+        fireBossBullet((Math.PI*2)*(i/n), 2.7 + intensity*1.0, "orb");
+      }
+      spawnParticle(bossGame.boss.x, bossGame.boss.y, "💗");
+    }
+  } else if (bossGame.pattern === "burst"){
+    if ((bossGame.t*4.2|0) !== ((bossGame.t-dt)*4.2|0)){
+      for (let i=-2;i<=2;i++){
+        fireBossBullet(aim + i*(0.12 + intensity*0.02), 4.2 + intensity*1.0, "heart");
+      }
+      spawnParticle(bossGame.boss.x, bossGame.boss.y, "💥");
+    }
+  } else if (bossGame.pattern === "spiral"){
+    if ((bossGame.t*22|0) !== ((bossGame.t-dt)*22|0)){
+      fireBossBullet(bossGame.boss.wob*2.4, 2.6 + intensity*1.0, "mini");
+    }
+  } else if (bossGame.pattern === "dash"){
+    if ((bossGame.t*6|0) !== ((bossGame.t-dt)*6|0)){
+      const laneY = 140 + Math.random()*(h-190);
+      bossGame.bullets.push({x:-40,y:laneY,vx: 7.0 + intensity*1.9, vy:0, r:9, kind:"dash"});
     }
   }
 
-  function magalorLaugh() {
-    laughFlash.style.opacity = "1";
-    try {
-      laughFlash.animate(
-        [
-          { transform: "translateX(-50%) scale(0.85)", opacity: 0 },
-          { transform: "translateX(-50%) scale(1.05)", opacity: 1, offset: 0.35 },
-          { transform: "translateX(-50%) scale(1.0)", opacity: 1, offset: 0.75 },
-          { transform: "translateX(-50%) scale(0.95)", opacity: 0 }
-        ],
-        { duration: 900, easing: "cubic-bezier(.2,.9,.2,1)" }
-      );
-    } catch {}
-    setTimeout(() => (laughFlash.style.opacity = "0"), 900);
+  if (bossGame.phase2 && (bossGame.t*5|0) !== ((bossGame.t-dt)*5|0)){
+    const a = aim + rand(-0.4,0.4);
+    fireBossBullet(a, 3.2 + intensity*0.8, "homing");
   }
 
-  function resetBossFight(){
-    bossGame.running = false;
-    bossGame.t = 0;
-    bossGame.lastShot = 0;
-    bossGame.phaseTimer = 0;
-    bossGame.pattern = "spray";
-    bossGame.phase2 = false;
-    bossGame.blackHole.active = false;
-    bossGame.blackHole.timer = 0;
-    bossGame.blackHole.cool = 2.0;
-
-    bossGame.bullets.length = 0;
-    bossGame.beams.length = 0;
-    bossGame.particles.length = 0;
-
-    bossGame.player.x = 120;
-    bossGame.player.y = 260;
-    bossGame.player.hp = bossGame.player.maxHp = 5;
-    bossGame.player.inv = 0;
-
-    bossGame.boss.hp = bossGame.boss.maxHp = 100;
-    bossGame.boss.wob = 0;
-
-    blackholeGif.style.opacity = "0";
-
-    setBossBars();
-    bossOverlay.style.opacity = "1";
-    bossOverlay.innerHTML = defaultBossOverlayHTML;
-
-    bossStartBtn.style.opacity = "1";
-    bossStartBtn.style.pointerEvents = "auto";
-    bossStartBtn.textContent = "Start Boss Fight";
-  }
-
-  function spawnBossParticle(x,y,emoji){
-    bossGame.particles.push({
-      x,y,
-      vx:(Math.random()*2-1)*1.2,
-      vy:(Math.random()*2-1)*1.2 - 0.8,
-      life: 40 + Math.random()*20,
-      emoji
-    });
-  }
-
-  function bossShoot(){
-    const now = performance.now();
-    if (now - bossGame.lastShot < 120) return;
-    bossGame.lastShot = now;
-
-    bossGame.beams.push({
-      x: bossGame.player.x,
-      y: bossGame.player.y - 12,
-      vx: 0,
-      vy: -7.6,
-      r: 6
-    });
-    spawnBossParticle(bossGame.player.x, bossGame.player.y-10, "💞");
-  }
-
-  function fireBossBullet(angle, speed, kind="heart"){
-    bossGame.bullets.push({
-      x: bossGame.boss.x,
-      y: bossGame.boss.y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      r: kind === "orb" ? 8 : 7,
-      kind
-    });
-  }
-
-  function chooseBossPattern(){
-    const hpPct = bossGame.boss.hp / bossGame.boss.maxHp;
-    const pool = hpPct > 0.65 ? ["spray","ring"]
-                : hpPct > 0.30 ? ["spray","ring","dash"]
-                : ["spray","ring","dash","spiral"];
-    bossGame.pattern = pool[Math.floor(Math.random()*pool.length)];
-    bossGame.phaseTimer = 0;
-  }
-
-  function roundRectPath(ctx, x, y, w, h, r) {
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.arcTo(x + w, y, x + w, y + h, rr);
-    ctx.arcTo(x + w, y + h, x, y + h, rr);
-    ctx.arcTo(x, y + h, x, y, rr);
-    ctx.arcTo(x, y, x + w, y, rr);
-    ctx.closePath();
-  }
-
-  function drawHeartShape(ctx, x, y, size){
-    ctx.beginPath();
-    ctx.moveTo(x, y + size*0.25);
-    ctx.bezierCurveTo(x - size, y - size*0.35, x - size*0.6, y - size, x, y - size*0.45);
-    ctx.bezierCurveTo(x + size*0.6, y - size, x + size, y - size*0.35, x, y + size*0.25);
-    ctx.closePath();
-  }
-
-  function drawMagolorLikeBoss(ctx, x, y, scale){
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
-
-    ctx.globalAlpha = 0.24;
-    ctx.beginPath();
-    ctx.ellipse(0, 14, 54, 28, 0, 0, Math.PI*2);
-    ctx.fillStyle = "#111827";
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    ctx.beginPath();
-    ctx.moveTo(-52, 10);
-    ctx.quadraticCurveTo(0, 64, 52, 10);
-    ctx.quadraticCurveTo(0, 36, -52, 10);
-    ctx.closePath();
-    ctx.fillStyle = "#0b1224";
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.ellipse(0, -6, 44, 38, 0, 0, Math.PI*2);
-    ctx.fillStyle = "#2563eb";
-    ctx.fill();
-
-    ctx.beginPath(); ctx.moveTo(-24, -30); ctx.lineTo(-52, -58); ctx.lineTo(-28, -60); ctx.closePath();
-    ctx.fillStyle = "#3b82f6"; ctx.fill();
-    ctx.beginPath(); ctx.moveTo(24, -30); ctx.lineTo(52, -58); ctx.lineTo(28, -60); ctx.closePath();
-    ctx.fillStyle = "#3b82f6"; ctx.fill();
-
-    ctx.beginPath();
-    ctx.ellipse(0, -6, 30, 24, 0, 0, Math.PI*2);
-    ctx.fillStyle = "#0b1020";
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.ellipse(-10, -10, 5, 12, 0, 0, Math.PI*2);
-    ctx.ellipse( 10, -10, 5, 12, 0, 0, Math.PI*2);
-    ctx.fillStyle = "#fde047";
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.roundRect(-46, 4, 92, 24, 12);
-    ctx.fillStyle = "#f8fafc";
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.ellipse(-56, 10, 14, 12, 0, 0, Math.PI*2);
-    ctx.ellipse( 56, 10, 14, 12, 0, 0, Math.PI*2);
-    ctx.fillStyle = "#fde68a";
-    ctx.fill();
-
-    ctx.restore();
-  }
-
-  function updateBoss(dt){
-    bossGame.t += dt;
-    const w = bossCanvas.getBoundingClientRect().width;
-    const h = bossCanvas.getBoundingClientRect().height;
-
-    bossGame.boss.wob += dt;
-    bossGame.boss.x = w * 0.5 + Math.cos(bossGame.boss.wob * 0.9) * 95;
-    bossGame.boss.y = 95 + Math.sin(bossGame.boss.wob * 1.1) * 16;
-
-    let mx = 0, my = 0;
-    if (keys.has("ArrowLeft") || keys.has("a")) mx -= 1;
-    if (keys.has("ArrowRight") || keys.has("d")) mx += 1;
-    if (keys.has("ArrowUp") || keys.has("w")) my -= 1;
-    if (keys.has("ArrowDown") || keys.has("s")) my += 1;
-
-    if (bossTouchActive){
-      const dx = bossTouchX - bossGame.player.x;
-      const dy = bossTouchY - bossGame.player.y;
-      mx = clamp2(dx / 30, -1, 1);
-      my = clamp2(dy / 30, -1, 1);
+  for (const b of bossGame.bullets){
+    if (b.kind === "homing"){
+      const dx = bossGame.player.x - b.x;
+      const dy = bossGame.player.y - b.y;
+      const d = Math.max(1, Math.sqrt(dx*dx+dy*dy));
+      b.vx = b.vx*0.94 + (dx/d)*0.55;
+      b.vy = b.vy*0.94 + (dy/d)*0.55;
+      const sp = Math.sqrt(b.vx*b.vx + b.vy*b.vy);
+      const cap = 4.6;
+      if (sp > cap){ b.vx = b.vx/sp*cap; b.vy=b.vy/sp*cap; }
     }
+    b.x += b.vx;
+    b.y += b.vy;
+  }
+  bossGame.bullets = bossGame.bullets.filter(b => b.x > -80 && b.x < w+80 && b.y > -80 && b.y < h+80);
 
-    const speed = 4.25;
-    bossGame.player.x = clamp2(bossGame.player.x + mx * speed, 18, w - 18);
-    bossGame.player.y = clamp2(bossGame.player.y + my * speed, 120, h - 18);
+  for (const p of bossGame.beams){ p.x += p.vx; p.y += p.vy; }
+  bossGame.beams = bossGame.beams.filter(p => p.y > -60);
 
-    if (keys.has(" ")) bossShoot();
+  for (const pt of bossGame.particles){
+    pt.x += pt.vx; pt.y += pt.vy;
+    pt.vy += 0.05;
+    pt.life -= 1;
+  }
+  bossGame.particles = bossGame.particles.filter(pt => pt.life > 0);
 
-    bossGame.phaseTimer += dt;
-    const intensity = 1 + (1 - bossGame.boss.hp / bossGame.boss.maxHp) * 1.7;
-    if (bossGame.phaseTimer > 2.2) chooseBossPattern();
-
-    if (!bossGame.phase2 && bossGame.boss.hp <= bossGame.boss.maxHp * 0.5) {
-      bossGame.phase2 = true;
-      magalorLaugh();
-      bossMsg.textContent = "PHASE 2 😳 BLACK HOLE PULL ACTIVATED!";
-      spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "🖤");
-      spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "💘");
+  for (let i=bossGame.beams.length-1;i>=0;i--){
+    const p = bossGame.beams[i];
+    if (dist2(p.x,p.y, bossGame.boss.x,bossGame.boss.y) < (p.r + bossGame.boss.r)**2){
+      bossGame.beams.splice(i,1);
+      bossGame.boss.hp = Math.max(0, bossGame.boss.hp - 2);
+      spawnParticle(bossGame.boss.x, bossGame.boss.y, "✨");
+      spawnParticle(bossGame.boss.x, bossGame.boss.y, "💘");
+      setBossBars();
+      if (bossGame.boss.hp <= 0) winBossFight();
     }
+  }
 
-    if (bossGame.phase2) {
-      bossGame.blackHole.cool -= dt;
-      if (!bossGame.blackHole.active && bossGame.blackHole.cool <= 0) {
-        bossGame.blackHole.active = true;
-        bossGame.blackHole.timer = 1.6;
-        bossGame.blackHole.cool = 4.2;
-        magalorLaugh();
-        bossMsg.textContent = "BLACK HOLE PULL 🖤💫";
-      }
-
-      if (bossGame.blackHole.active) {
-        blackholeGif.style.opacity = "0.95";
-        bossGame.blackHole.timer -= dt;
-        if (bossGame.blackHole.timer <= 0) {
-          bossGame.blackHole.active = false;
-          blackholeGif.style.opacity = "0";
-          bossMsg.textContent = "Keep going!! Turn chaos into cuddles 😤💞";
-        } else {
-          const dx = bossGame.boss.x - bossGame.player.x;
-          const dy = bossGame.boss.y - bossGame.player.y;
-          const d = Math.sqrt(dx*dx + dy*dy) || 1;
-          const pull = 3.3 * (1 - Math.min(d / 520, 1));
-          bossGame.player.x += (dx / d) * pull;
-          bossGame.player.y += (dy / d) * pull;
-          bossGame.player.x = clamp2(bossGame.player.x, 18, w - 18);
-          bossGame.player.y = clamp2(bossGame.player.y, 120, h - 18);
-          spawnBossParticle(bossGame.player.x, bossGame.player.y, "💔");
-        }
-      } else {
-        blackholeGif.style.opacity = "0";
-      }
-    } else {
-      blackholeGif.style.opacity = "0";
-    }
-
-    if (bossGame.pattern === "spray"){
-      if (Math.floor(bossGame.t * 12) !== Math.floor((bossGame.t - dt) * 12)){
-        const ang = Math.atan2(bossGame.player.y - bossGame.boss.y, bossGame.player.x - bossGame.boss.x);
-        const spread = 0.20 + 0.10 * intensity;
-        fireBossBullet(ang + (Math.random()*2-1)*spread, 3.0 + 0.75*intensity, "heart");
-      }
-    } else if (bossGame.pattern === "ring"){
-      if (bossGame.phaseTimer < dt + 0.02){
-        const n = 10 + Math.floor(intensity*4);
-        for (let i=0;i<n;i++){
-          const a = (Math.PI*2) * (i/n);
-          fireBossBullet(a, 2.35 + 0.7*intensity, "orb");
-        }
-        spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "💗");
-      }
-    } else if (bossGame.pattern === "dash"){
-      if (Math.floor(bossGame.t * 5) !== Math.floor((bossGame.t - dt) * 5)){
-        const laneY = 150 + Math.random() * (h - 190);
-        bossGame.bullets.push({
-          x: -20, y: laneY, vx: 6.2 + 1.25*intensity, vy: 0, r: 9, kind:"dash"
-        });
-      }
-    } else if (bossGame.pattern === "spiral"){
-      if (Math.floor(bossGame.t * 14) !== Math.floor((bossGame.t - dt) * 14)){
-        const base = bossGame.boss.wob * 2.2;
-        fireBossBullet(base, 2.15 + 0.95*intensity, "heart");
-      }
-    }
-
-    for (const b of bossGame.bullets){ b.x += b.vx; b.y += b.vy; }
-    bossGame.bullets = bossGame.bullets.filter(b => b.x > -70 && b.x < w+70 && b.y > -70 && b.y < h+70);
-
-    for (const p of bossGame.beams){ p.x += p.vx; p.y += p.vy; }
-    bossGame.beams = bossGame.beams.filter(p => p.y > -50);
-
-    for (const pt of bossGame.particles){
-      pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.03; pt.life -= 1;
-    }
-    bossGame.particles = bossGame.particles.filter(pt => pt.life > 0);
-
-    for (let i = bossGame.beams.length - 1; i >= 0; i--){
-      const p = bossGame.beams[i];
-      if (dist2(p.x,p.y, bossGame.boss.x,bossGame.boss.y) < (p.r + bossGame.boss.r) ** 2){
-        bossGame.beams.splice(i,1);
-        bossGame.boss.hp = Math.max(0, bossGame.boss.hp - 2);
-        spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "✨");
-        spawnBossParticle(bossGame.boss.x, bossGame.boss.y, "💘");
+  if (bossGame.player.inv > 0) bossGame.player.inv -= dt;
+  for (let i=bossGame.bullets.length-1;i>=0;i--){
+    const b = bossGame.bullets[i];
+    if (dist2(b.x,b.y, bossGame.player.x,bossGame.player.y) < (b.r + bossGame.player.r)**2){
+      bossGame.bullets.splice(i,1);
+      if (bossGame.player.inv <= 0){
+        bossGame.player.hp = Math.max(0, bossGame.player.hp - 1);
+        bossGame.player.inv = 0.85;
+        spawnParticle(bossGame.player.x, bossGame.player.y, "💥");
+        spawnParticle(bossGame.player.x, bossGame.player.y, "💔");
         setBossBars();
-        if (bossGame.boss.hp <= 0) winBossFight();
-      }
-    }
-
-    if (bossGame.player.inv > 0) bossGame.player.inv -= dt;
-    for (let i = bossGame.bullets.length - 1; i >= 0; i--){
-      const b = bossGame.bullets[i];
-      if (dist2(b.x,b.y, bossGame.player.x,bossGame.player.y) < (b.r + bossGame.player.r) ** 2){
-        bossGame.bullets.splice(i,1);
-        if (bossGame.player.inv <= 0){
-          bossGame.player.hp = Math.max(0, bossGame.player.hp - 1);
-          bossGame.player.inv = 0.9;
-          spawnBossParticle(bossGame.player.x, bossGame.player.y, "💥");
-          spawnBossParticle(bossGame.player.x, bossGame.player.y, "💔");
-          setBossBars();
-          if (bossGame.player.hp <= 0) loseBossFight();
-        }
+        if (bossGame.player.hp <= 0) loseBossFight();
       }
     }
   }
+}
 
-  function drawBoss(){
-    const w = bossCanvas.getBoundingClientRect().width;
-    const h = bossCanvas.getBoundingClientRect().height;
+function rrPath(ctx,x,y,w,h,r){
+  const rr = Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr,y);
+  ctx.arcTo(x+w,y, x+w,y+h, rr);
+  ctx.arcTo(x+w,y+h, x,y+h, rr);
+  ctx.arcTo(x,y+h, x,y, rr);
+  ctx.arcTo(x,y, x+w,y, rr);
+  ctx.closePath();
+}
 
-    bossCtx2.clearRect(0,0,w,h);
+function heartShape(ctx, x, y, s){
+  ctx.beginPath();
+  ctx.moveTo(x, y + s*0.25);
+  ctx.bezierCurveTo(x - s, y - s*0.35, x - s*0.6, y - s, x, y - s*0.45);
+  ctx.bezierCurveTo(x + s*0.6, y - s, x + s, y - s*0.35, x, y + s*0.25);
+  ctx.closePath();
+}
 
-    if (bossBgReady) {
-      drawCoverImage(bossCtx2, bossBgImg, w, h);
+function drawBoss(){
+  const w = bossCanvas.getBoundingClientRect().width;
+  const h = bossCanvas.getBoundingClientRect().height;
+  bossCtx.clearRect(0,0,w,h);
+
+  const g = bossCtx.createLinearGradient(0,0,0,h);
+  if (document.body.classList.contains("night-mode")){
+    g.addColorStop(0,"rgba(2,6,23,0.82)");
+    g.addColorStop(1,"rgba(88,28,135,0.42)");
+  } else {
+    g.addColorStop(0,"rgba(255,192,203,0.22)");
+    g.addColorStop(1,"rgba(173,216,230,0.22)");
+  }
+  bossCtx.fillStyle = g;
+  bossCtx.fillRect(0,0,w,h);
+
+  bossCtx.globalAlpha = document.body.classList.contains("night-mode") ? 0.38 : 0.28;
+  bossCtx.fillStyle = "#ffffff";
+  for (let i=0;i<22;i++){
+    const sx = (i*97)%w;
+    const sy = (i*53)%(h*0.6);
+    bossCtx.fillRect(sx,sy,2,2);
+  }
+  bossCtx.globalAlpha = 1;
+
+  bossCtx.save();
+  bossCtx.translate(bossGame.boss.x, bossGame.boss.y);
+
+  bossCtx.globalAlpha = 0.24;
+  bossCtx.beginPath();
+  bossCtx.ellipse(0, 16, 58, 30, 0, 0, Math.PI*2);
+  bossCtx.fillStyle = "#111827";
+  bossCtx.fill();
+  bossCtx.globalAlpha = 1;
+
+  bossCtx.beginPath();
+  bossCtx.ellipse(0, -4, 44, 38, 0, 0, Math.PI*2);
+  bossCtx.fillStyle = "#2563eb";
+  bossCtx.fill();
+
+  bossCtx.beginPath();
+  bossCtx.ellipse(0, -4, 30, 24, 0, 0, Math.PI*2);
+  bossCtx.fillStyle = "#0b1020";
+  bossCtx.fill();
+
+  bossCtx.beginPath();
+  bossCtx.ellipse(-10, -8, 5, 12, 0, 0, Math.PI*2);
+  bossCtx.ellipse( 10, -8, 5, 12, 0, 0, Math.PI*2);
+  bossCtx.fillStyle = "#fde047";
+  bossCtx.fill();
+
+  rrPath(bossCtx, -44, 6, 88, 22, 12);
+  bossCtx.fillStyle = "#f8fafc";
+  bossCtx.fill();
+
+  bossCtx.restore();
+
+  bossCtx.save();
+  bossCtx.translate(bossGame.player.x, bossGame.player.y);
+  const blink = bossGame.player.inv > 0 ? ((performance.now()/90|0)%2 ? 0.35 : 1) : 1;
+  bossCtx.globalAlpha = blink;
+  heartShape(bossCtx,0,0,14);
+  bossCtx.fillStyle = "#ef4444";
+  bossCtx.fill();
+  bossCtx.restore();
+  bossCtx.globalAlpha = 1;
+
+  for (const b of bossGame.bullets){
+    bossCtx.save();
+    bossCtx.translate(b.x,b.y);
+    if (b.kind === "orb"){
+      bossCtx.beginPath();
+      bossCtx.arc(0,0,b.r,0,Math.PI*2);
+      bossCtx.fillStyle = "#a78bfa";
+      bossCtx.fill();
+    } else if (b.kind === "dash"){
+      rrPath(bossCtx, -14, -5, 28, 10, 6);
+      bossCtx.fillStyle = "#fb7185";
+      bossCtx.fill();
+    } else if (b.kind === "homing"){
+      heartShape(bossCtx,0,0,b.r);
+      bossCtx.fillStyle = "#f43f5e";
+      bossCtx.globalAlpha = 0.9;
+      bossCtx.fill();
+      bossCtx.globalAlpha = 1;
+      bossCtx.globalAlpha = 0.22;
+      bossCtx.beginPath();
+      bossCtx.arc(0,0,b.r+10,0,Math.PI*2);
+      bossCtx.fillStyle = "#fb7185";
+      bossCtx.fill();
+      bossCtx.globalAlpha = 1;
     } else {
-      const g = bossCtx2.createLinearGradient(0, 0, 0, h);
-      g.addColorStop(0, "rgba(2, 6, 23, 0.75)");
-      g.addColorStop(1, "rgba(88, 28, 135, 0.45)");
-      bossCtx2.fillStyle = g;
-      bossCtx2.fillRect(0, 0, w, h);
+      heartShape(bossCtx,0,0,b.r);
+      bossCtx.fillStyle = "#f43f5e";
+      bossCtx.fill();
     }
-
-    bossCtx2.fillStyle = "rgba(0,0,0,0.18)";
-    bossCtx2.fillRect(0,0,w,h);
-
-    bossCtx2.globalAlpha = 0.35;
-    bossCtx2.fillStyle = "#ffffff";
-    for (let i = 0; i < 26; i++) {
-      const sx = (i * 97) % w;
-      const sy = (i * 53) % Math.max(1, Math.floor(h * 0.6));
-      bossCtx2.fillRect(sx, sy, 2, 2);
-    }
-    bossCtx2.globalAlpha = 1;
-
-    drawMagolorLikeBoss(bossCtx2, bossGame.boss.x, bossGame.boss.y, 0.75);
-
-    bossCtx2.save();
-    bossCtx2.translate(bossGame.player.x, bossGame.player.y);
-    const blink = bossGame.player.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
-    bossCtx2.globalAlpha = blink;
-    bossCtx2.fillStyle = "#ef4444";
-    bossCtx2.beginPath();
-    bossCtx2.moveTo(0, 9);
-    bossCtx2.bezierCurveTo(-16, -4, -10, -20, 0, -10);
-    bossCtx2.bezierCurveTo(10, -20, 16, -4, 0, 9);
-    bossCtx2.fill();
-    bossCtx2.restore();
-
-    for (const b of bossGame.bullets){
-      bossCtx2.save();
-      bossCtx2.translate(b.x, b.y);
-      if (b.kind === "orb"){
-        bossCtx2.globalAlpha = 0.92;
-        bossCtx2.beginPath(); bossCtx2.arc(0,0,b.r,0,Math.PI*2);
-        bossCtx2.fillStyle = "#a78bfa";
-        bossCtx2.fill();
-      } else if (b.kind === "dash"){
-        bossCtx2.globalAlpha = 0.95;
-        roundRectPath(bossCtx2, -14, -5, 28, 10, 6);
-        bossCtx2.fillStyle = "#fb7185";
-        bossCtx2.fill();
-      } else {
-        bossCtx2.globalAlpha = 0.92;
-        drawHeartShape(bossCtx2, 0, 0, b.r);
-        bossCtx2.fillStyle = "#f43f5e";
-        bossCtx2.fill();
-      }
-      bossCtx2.restore();
-    }
-    bossCtx2.globalAlpha = 1;
-
-    for (const p of bossGame.beams){
-      bossCtx2.save();
-      bossCtx2.translate(p.x, p.y);
-      bossCtx2.globalAlpha = 0.88;
-      roundRectPath(bossCtx2, -3, -12, 6, 24, 6);
-      bossCtx2.fillStyle = "#22c55e";
-      bossCtx2.fill();
-      bossCtx2.restore();
-    }
-
-    for (const pt of bossGame.particles){
-      bossCtx2.globalAlpha = Math.max(0, Math.min(1, pt.life/40));
-      bossCtx2.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-      bossCtx2.fillText(pt.emoji, pt.x, pt.y);
-    }
-    bossCtx2.globalAlpha = 1;
+    bossCtx.restore();
   }
 
-  let bossLast = 0;
-  function bossLoop(ts){
-    if (!bossGame.running) return;
-    if (!bossLast) bossLast = ts;
-    const dt = Math.min(0.033, (ts - bossLast) / 1000);
-    bossLast = ts;
-
-    updateBoss(dt);
-    drawBoss();
-    bossRaf = requestAnimationFrame(bossLoop);
+  for (const p of bossGame.beams){
+    bossCtx.save();
+    bossCtx.translate(p.x,p.y);
+    rrPath(bossCtx, -3, -12, 6, 24, 6);
+    bossCtx.fillStyle = "#22c55e";
+    bossCtx.globalAlpha = 0.88;
+    bossCtx.fill();
+    bossCtx.restore();
   }
+  bossCtx.globalAlpha = 1;
 
-  function startBossFight(){
-    resetBossFight();
-    bossGame.running = true;
-
-    startBattleMusic(1);
-    updateBattleIntensity(1);
-
-    bossOverlay.style.opacity = "0";
-    bossStartBtn.style.opacity = "0";
-    bossStartBtn.style.pointerEvents = "none";
-
-    bossMsg.textContent = "MAGALOR is being dramatic 😳 Hit him with LOVE BEAMS.";
-    document.body.classList.add("boss-mode");
-
-    bossLast = 0;
-    bossRaf = requestAnimationFrame(bossLoop);
+  bossCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  for (const pt of bossGame.particles){
+    bossCtx.globalAlpha = clamp(pt.life/34, 0, 1);
+    bossCtx.fillText(pt.emoji, pt.x, pt.y);
   }
+  bossCtx.globalAlpha = 1;
+}
 
-  function stopBossFight(){
-    bossGame.running = false;
-    if (bossRaf) cancelAnimationFrame(bossRaf);
-    bossRaf = null;
-    document.body.classList.remove("boss-mode");
-    blackholeGif.style.opacity = "0";
-    stopBattleMusic();
-  }
+function bossLoop(ts){
+  if (!bossGame.running) return;
+  if (!bossLast) bossLast = ts;
+  const dt = Math.min(0.033, (ts-bossLast)/1000);
+  bossLast = ts;
 
-  function winBossFight(){
-    stopBossFight();
+  updateBoss(dt);
+  drawBoss();
 
-    bossOverlay.style.opacity = "1";
-    bossOverlay.innerHTML = `
-      <div class="text-white drop-shadow-lg">
-        <div class="text-4xl font-extrabold">BOSS DEFEATED 💘</div>
-        <div class="text-sm font-semibold mt-2">Unlocked! Now click YES 😤💞</div>
-      </div>
-    `;
+  bossRAF = requestAnimationFrame(bossLoop);
+}
 
-    bossStartBtn.style.opacity = "1";
-    bossStartBtn.style.pointerEvents = "auto";
-    bossStartBtn.textContent = "Rematch (optional)";
-
-    bossMsg.textContent = "Unlocked! YES + NO are now available.";
-    unlockYesNo();
-
-    try { confetti({ particleCount: PERF.lowEnd ? 120 : 220, spread: 85, origin: { y: 0.6 } }); } catch {}
-  }
-
-  function loseBossFight(){
-    stopBossFight();
-
-    bossOverlay.style.opacity = "1";
-    bossOverlay.innerHTML = `
-      <div class="text-white drop-shadow-lg">
-        <div class="text-4xl font-extrabold">You got bonked 💥</div>
-        <div class="text-sm font-semibold mt-2">Try again… turn chaos into cuddles 😤</div>
-      </div>
-    `;
-
-    bossStartBtn.style.opacity = "1";
-    bossStartBtn.style.pointerEvents = "auto";
-    bossStartBtn.textContent = "Try Again";
-    bossMsg.textContent = "Tip: Move in circles while shooting!";
-  }
-
-  bossStartBtn.addEventListener("click", startBossFight);
+function startBossFight(){
   resetBossFight();
+  bossGame.running = true;
+  bossOverlay.style.opacity="0";
+  bossStartBtn.style.opacity="0";
+  bossStartBtn.style.pointerEvents="none";
 
-  // ========== Platformer ==========
-  const platCanvas = document.getElementById("platCanvas");
-  const platCtx = platCanvas.getContext("2d");
-  const platStartBtn = document.getElementById("platStart");
-  const platOverlay = document.getElementById("platOverlay");
-  const platMsg = document.getElementById("platMsg");
-  const platCountEl = document.getElementById("platCount");
+  bossMsg.textContent = "Hard mode: faster bullets + phase2 homing 😈";
+  bossLast = 0;
+  bossRAF = requestAnimationFrame(bossLoop);
+}
 
-  let platRaf = null;
-  let platLast = 0;
+function stopBossFight(silent=false){
+  bossGame.running = false;
+  if (bossRAF) cancelAnimationFrame(bossRAF);
+  bossRAF = null;
+  if (!silent){
+    bossOverlay.style.opacity="1";
+    bossStartBtn.style.opacity="1";
+    bossStartBtn.style.pointerEvents="auto";
+  }
+}
 
-  fitCanvasToCSS(platCanvas, platCtx);
+function winBossFight(){
+  stopBossFight(true);
+  bossOverlay.style.opacity="1";
+  bossOverlay.innerHTML = `
+    <div class="text-white drop-shadow-lg">
+      <div class="text-4xl font-extrabold">BOSS DEFEATED 💘</div>
+      <div class="text-sm font-semibold mt-2">Unlocked! Now click YES 😤💞</div>
+    </div>`;
+  bossStartBtn.style.opacity="1";
+  bossStartBtn.style.pointerEvents="auto";
+  bossStartBtn.textContent="Rematch (optional)";
+  bossMsg.textContent="Unlocked! YES + NO are now available.";
+  unlockYesNo();
+  try{ confetti({particleCount: 220, spread: 85, origin:{y:0.6}}); }catch{}
+}
 
-  const platGame = {
-    running: false,
-    heartsTarget: 7,
-    heartsGot: 0,
-    camX: 0,
-    levelW: 1500,
-    gravity: 0.55,
-    player: { x: 60, y: 160, w: 18, h: 22, vx: 0, vy: 0, onGround: false },
-    platforms: [],
-    hearts: [],
-    goal: { x: 1420, y: 140, w: 24, h: 24 }
-  };
+function loseBossFight(){
+  stopBossFight(true);
+  bossOverlay.style.opacity="1";
+  bossOverlay.innerHTML = `
+    <div class="text-white drop-shadow-lg">
+      <div class="text-4xl font-extrabold">You got bonked 💥</div>
+      <div class="text-sm font-semibold mt-2">Try again…</div>
+    </div>`;
+  bossStartBtn.style.opacity="1";
+  bossStartBtn.style.pointerEvents="auto";
+  bossStartBtn.textContent="Try Again";
+  bossMsg.textContent="Tip: strafe + shoot constantly.";
+}
 
-  function rectsOverlap(a, b){
-    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+bossStartBtn.addEventListener("click", startBossFight);
+resetBossFight();
+
+bossCanvas.addEventListener("pointerdown", ()=>{
+  if (bossGame.running) bossShoot();
+});
+
+/* ============================================================
+   PLATFORMER (INSANELY HARD + LOTAD + CHOCOLATE WORLD)
+============================================================ */
+const platCanvas = document.getElementById("platCanvas");
+const platCtx = platCanvas.getContext("2d");
+const platStartBtn = document.getElementById("platStart");
+const platOverlay = document.getElementById("platOverlay");
+const platMsg = document.getElementById("platMsg");
+const platCountEl = document.getElementById("platCount");
+
+fitCanvasToCSS(platCanvas, platCtx);
+
+let platRAF = null;
+let platLast = 0;
+
+const platGame = {
+  running:false,
+  camX:0,
+  levelW: 3400,
+  gravity: 0.62,
+  target: 12,
+  got: 0,
+  deaths: 0,
+
+  coyoteMax: 0.085,
+  jumpBufMax: 0.095,
+  dashTimeMax: 0.14,
+  dashCooldownMax: 0.05,
+  wallSlideMaxVy: 2.1,
+
+  player:{
+    x: 70, y: 120,
+    w: 20, h: 22,
+    vx: 0, vy: 0,
+    onGround:false,
+    coyote:0,
+    jumpBuf:0,
+    face:1,
+    canDash:true,
+    dashTime:0,
+    dashCd:0,
+    dashVx:0,
+    dashVy:0,
+    wallLeft:false,
+    wallRight:false
+  },
+
+  platforms: [],
+  movers: [],
+  spikes: [],
+  berries: [],
+  goal: {x: 3320, y: 112, w: 26, h: 26}
+};
+
+function rectsOverlap(a,b){
+  return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+}
+
+function resetPlatformer(){
+  platGame.running=false;
+  platGame.got=0;
+  platCountEl.textContent="0";
+  platMsg.innerHTML = `Collect <b>${platGame.target}</b> chocolate strawberries 🍓🍫 and reach the <b>love letter</b> 💌. <span class="ml-2 font-black">Deaths: <span id="deathCount">${platGame.deaths}</span></span>`;
+  platOverlay.style.opacity="1";
+  platStartBtn.style.opacity="1";
+  platStartBtn.style.pointerEvents="auto";
+  platStartBtn.textContent="Start Platformer";
+
+  const p = platGame.player;
+  p.x=70; p.y=120; p.vx=0; p.vy=0;
+  p.onGround=false; p.coyote=0; p.jumpBuf=0;
+  p.face=1; p.canDash=true; p.dashTime=0; p.dashCd=0;
+  p.wallLeft=false; p.wallRight=false;
+  platGame.camX=0;
+
+  platGame.platforms = [
+    {x:0,y:300,w:420,h:70},
+    {x:560,y:310,w:260,h:60},
+    {x:980,y:310,w:240,h:60},
+    {x:1350,y:315,w:260,h:55},
+    {x:1820,y:310,w:260,h:60},
+    {x:2300,y:310,w:250,h:60},
+    {x:2720,y:310,w:220,h:60},
+    {x:3050,y:315,w:350,h:55},
+
+    {x:420,y:240,w:120,h:16},
+    {x:565,y:210,w:110,h:14},
+    {x:715,y:180,w:90,h:14},
+    {x:835,y:150,w:80,h:14},
+    {x:930,y:120,w:70,h:14},
+
+    {x:1120,y:250,w:18,h:120},
+    {x:1240,y:210,w:18,h:160},
+
+    {x:1010,y:210,w:80,h:12},
+    {x:1085,y:175,w:60,h:12},
+    {x:1160,y:145,w:70,h:12},
+    {x:1240,y:115,w:60,h:12},
+
+    {x:1400,y:260,w:90,h:12},
+    {x:1520,y:235,w:70,h:12},
+    {x:1620,y:210,w:60,h:12},
+    {x:1710,y:180,w:70,h:12},
+    {x:1795,y:150,w:60,h:12},
+
+    {x:2050,y:250,w:90,h:12},
+    {x:2180,y:225,w:70,h:12},
+    {x:2290,y:200,w:60,h:12},
+    {x:2400,y:170,w:80,h:12},
+    {x:2530,y:150,w:80,h:12},
+
+    {x:2620,y:240,w:90,h:12},
+    {x:2740,y:215,w:70,h:12},
+    {x:2850,y:190,w:60,h:12},
+    {x:2960,y:160,w:80,h:12},
+
+    {x:3120,y:240,w:120,h:12},
+    {x:3260,y:200,w:90,h:12},
+    {x:3340,y:160,w:70,h:12},
+  ];
+
+  platGame.movers = [
+    {x:520,y:265,w:70,h:12, baseX:520, baseY:265, t:0, ax:0, ay:-38, sp:1.1},
+    {x:1880,y:220,w:80,h:12, baseX:1880, baseY:220, t:0, ax:0, ay:-55, sp:1.0},
+    {x:2520,y:240,w:80,h:12, baseX:2520, baseY:240, t:0, ax:95, ay:0, sp:1.15},
+    {x:2920,y:235,w:70,h:12, baseX:2920, baseY:235, t:0, ax:0, ay:-60, sp:1.25}
+  ];
+
+  platGame.spikes = [
+    {x:300,y:288,w:120,h:12, dir:"up"},
+    {x:600,y:298,w:80,h:12, dir:"up"},
+    {x:1040,y:298,w:120,h:12, dir:"up"},
+    {x:1138,y:260,w:12,h:90, dir:"right"},
+    {x:1222,y:240,w:12,h:110, dir:"left"},
+    {x:1650,y:168,w:60,h:12, dir:"up"},
+    {x:2320,y:188,w:60,h:12, dir:"up"},
+    {x:2760,y:298,w:80,h:12, dir:"up"},
+    {x:3110,y:303,w:110,h:12, dir:"up"}
+  ];
+
+  const berries = [
+    {x:150,y:250},{x:410,y:205},{x:580,y:175},{x:735,y:145},
+    {x:920,y:110},{x:1040,y:185},{x:1180,y:120},{x:1460,y:235},
+    {x:1715,y:160},{x:2065,y:225},{x:2535,y:145},{x:2968,y:155},
+  ];
+  platGame.berries = berries.map(p=>({x:p.x,y:p.y,taken:false}));
+}
+
+function killPlayer(reason="oops"){
+  platGame.deaths++;
+  const dc = document.getElementById("deathCount");
+  if (dc) dc.textContent = String(platGame.deaths);
+
+  const p = platGame.player;
+  p.x=70; p.y=120; p.vx=0; p.vy=0;
+  p.onGround=false; p.coyote=0; p.jumpBuf=0;
+  p.canDash=true; p.dashTime=0; p.dashCd=0;
+  p.wallLeft=false; p.wallRight=false;
+
+  platMsg.innerHTML = `💀 ${reason}. Try again. Strawberries: <b>${platGame.got}/${platGame.target}</b> • Deaths: <b>${platGame.deaths}</b>`;
+}
+
+function updatePlatformer(dt){
+  const w = platCanvas.getBoundingClientRect().width;
+  const p = platGame.player;
+
+  for (const m of platGame.movers){
+    m.t += dt*m.sp;
+    m.x = m.baseX + Math.sin(m.t)*m.ax;
+    m.y = m.baseY + Math.sin(m.t)*m.ay;
   }
 
-  function resetPlatformer(){
-    platGame.running = false;
-    platGame.heartsGot = 0;
-    platCountEl.textContent = "0";
-    platMsg.innerHTML = `Collect <b>${platGame.heartsTarget}</b> hearts 💖 and touch the <b>love letter</b> 💌.`;
-    platOverlay.style.opacity = "1";
-    platStartBtn.style.opacity = "1";
-    platStartBtn.style.pointerEvents = "auto";
-    platStartBtn.textContent = "Start Platformer";
+  const left = keys.has("ArrowLeft")||keys.has("a");
+  const right= keys.has("ArrowRight")||keys.has("d");
+  const jump = keys.has("ArrowUp")||keys.has("w")||keys.has(" ");
+  const dash = keys.has("Shift")||keys.has("x")||keys.has("X");
 
-    platGame.player.x = 60; platGame.player.y = 160;
-    platGame.player.vx = 0; platGame.player.vy = 0; platGame.player.onGround = false;
-    platGame.camX = 0;
+  if (jump) p.jumpBuf = platGame.jumpBufMax;
+  else p.jumpBuf = Math.max(0, p.jumpBuf - dt);
 
-    platGame.platforms = [
-      { x: 0,   y: 250, w: 420, h: 22 },
-      { x: 460, y: 220, w: 170, h: 18 },
-      { x: 680, y: 190, w: 160, h: 18 },
-      { x: 890, y: 235, w: 190, h: 18 },
-      { x: 1120,y: 190, w: 200, h: 18 },
-      { x: 1360,y: 245, w: 160, h: 18 },
-      { x: 0,   y: 300, w: 1500, h: 70 },
-    ];
+  p.dashCd = Math.max(0, p.dashCd - dt);
 
-    platGame.hearts = [
-      { x: 140, y: 205, taken: false },
-      { x: 320, y: 195, taken: false },
-      { x: 520, y: 175, taken: false },
-      { x: 730, y: 145, taken: false },
-      { x: 940, y: 185, taken: false },
-      { x: 1180,y: 145, taken: false },
-      { x: 1370,y: 190, taken: false },
-    ];
-  }
+  const accel = 0.62;
+  const maxV = 5.2;
+  const friction = p.onGround ? 0.80 : 0.90;
 
-  function updatePlatformer(){
-    const w = platCanvas.getBoundingClientRect().width;
-    const left = keys.has("ArrowLeft") || keys.has("a");
-    const right = keys.has("ArrowRight") || keys.has("d");
-    const jump = keys.has("ArrowUp") || keys.has("w") || keys.has(" ");
-
-    const p = platGame.player;
-    const accel = 0.55;
-    const maxV = 4.2;
-    const friction = 0.82;
-
-    if (left) p.vx -= accel;
+  if (p.dashTime <= 0){
+    if (left)  p.vx -= accel;
     if (right) p.vx += accel;
     if (!left && !right) p.vx *= friction;
-    p.vx = clamp2(p.vx, -maxV, maxV);
+    p.vx = clamp(p.vx, -maxV, maxV);
+  }
 
-    if (jump && p.onGround){
-      p.vy = -9.3;
-      p.onGround = false;
+  if (left) p.face = -1;
+  if (right) p.face = 1;
+
+  p.wallLeft = false;
+  p.wallRight = false;
+
+  if (dash && p.canDash && p.dashCd <= 0 && p.dashTime <= 0){
+    let dx = (right?1:0) - (left?1:0);
+    let dy = ( (keys.has("ArrowDown")||keys.has("s")) ? 1 : 0 ) - ( (keys.has("ArrowUp")||keys.has("w")) ? 1 : 0 );
+
+    if (dx === 0 && dy === 0) dx = p.face;
+    const mag = Math.hypot(dx,dy) || 1;
+    dx/=mag; dy/=mag;
+
+    p.dashVx = dx * 11.2;
+    p.dashVy = dy * 11.2;
+    p.dashTime = platGame.dashTimeMax;
+    p.canDash = false;
+    p.vx = p.dashVx;
+    p.vy = p.dashVy;
+    try{ confetti({particleCount: 16, spread: 45, origin:{y:0.7}}); }catch{}
+  }
+
+  const oldX = p.x, oldY = p.y;
+
+  if (p.dashTime > 0){
+    p.dashTime = Math.max(0, p.dashTime - dt);
+    p.vx = p.dashVx;
+    p.vy = p.dashVy;
+    if (p.dashTime <= 0){
+      p.dashCd = platGame.dashCooldownMax;
+      p.vx *= 0.65;
+      p.vy *= 0.45;
     }
-
+  } else {
     p.vy += platGame.gravity;
-    p.vy = clamp2(p.vy, -20, 12);
+    p.vy = clamp(p.vy, -18, 14);
+  }
 
-    p.x += p.vx;
-    p.y += p.vy;
+  p.x += p.vx;
+  p.y += p.vy;
 
-    p.x = clamp2(p.x, 0, platGame.levelW - p.w);
-    if (p.y > 440) { p.y = 120; p.vy = 0; }
+  p.x = clamp(p.x, 0, platGame.levelW - p.w);
+  if (p.y > 520) killPlayer("fell into the chocolate abyss");
 
-    p.onGround = false;
-    for (const plat of platGame.platforms){
-      const a = { x: p.x, y: p.y, w: p.w, h: p.h };
-      const b = { x: plat.x, y: plat.y, w: plat.w, h: plat.h };
-      if (rectsOverlap(a,b)){
-        if (p.vy > 0 && (p.y + p.h - p.vy) <= plat.y + 2){
-          p.y = plat.y - p.h;
-          p.vy = 0;
-          p.onGround = true;
-        } else if (p.vy < 0 && (p.y - p.vy) >= plat.y + plat.h - 2){
-          p.y = plat.y + plat.h;
-          p.vy = 0;
-        }
+  const solids = platGame.platforms.concat(platGame.movers);
+
+  p.onGround = false;
+
+  let pb = {x:p.x,y:p.y,w:p.w,h:p.h};
+  for (const s of solids){
+    const sb = {x:s.x,y:s.y,w:s.w,h:s.h};
+    if (rectsOverlap(pb,sb)){
+      if (oldX + p.w <= s.x + 0.5){
+        p.x = s.x - p.w;
+        p.vx = 0;
+        p.wallRight = true;
+      } else if (oldX >= s.x + s.w - 0.5){
+        p.x = s.x + s.w;
+        p.vx = 0;
+        p.wallLeft = true;
       }
+      pb.x = p.x;
     }
+  }
 
-    for (const heart of platGame.hearts){
-      if (heart.taken) continue;
-      const hb = { x: heart.x - 8, y: heart.y - 8, w: 16, h: 16 };
-      const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-      if (rectsOverlap(pb, hb)){
-        heart.taken = true;
-        platGame.heartsGot += 1;
-        platCountEl.textContent = String(platGame.heartsGot);
-        try { confetti({ particleCount: PERF.lowEnd ? 35 : 60, spread: 55, origin: { y: 0.7 } }); } catch {}
-        platMsg.innerHTML = `Aww 💖 ${platGame.heartsGot}/${platGame.heartsTarget} collected!`;
+  pb = {x:p.x,y:p.y,w:p.w,h:p.h};
+  for (const s of solids){
+    const sb = {x:s.x,y:s.y,w:s.w,h:s.h};
+    if (rectsOverlap(pb,sb)){
+      if (oldY + p.h <= s.y + 0.5){
+        p.y = s.y - p.h;
+        p.vy = 0;
+        p.onGround = true;
+        p.coyote = platGame.coyoteMax;
+        p.canDash = true;
+      } else if (oldY >= s.y + s.h - 0.5){
+        p.y = s.y + s.h;
+        p.vy = 0.6;
       }
+      pb.y = p.y;
     }
+  }
 
-    platGame.camX = clamp2(p.x - w*0.35, 0, platGame.levelW - w);
+  if (p.onGround) p.coyote = platGame.coyoteMax;
+  else p.coyote = Math.max(0, p.coyote - dt);
 
-    const goal = platGame.goal;
-    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    const gb = { x: goal.x, y: goal.y, w: goal.w, h: goal.h };
-    if (rectsOverlap(pb, gb) && platGame.heartsGot >= platGame.heartsTarget){
+  if (!p.onGround && p.vy > 0){
+    if (p.wallLeft || p.wallRight){
+      p.vy = Math.min(p.vy, platGame.wallSlideMaxVy);
+    }
+  }
+
+  if (p.jumpBuf > 0){
+    if (p.coyote > 0){
+      p.vy = -10.3;
+      p.onGround = false;
+      p.coyote = 0;
+      p.jumpBuf = 0;
+    } else if (p.wallLeft || p.wallRight){
+      p.vy = -10.5;
+      p.vx = (p.wallLeft ? 1 : -1) * 6.6;
+      p.face = (p.wallLeft ? 1 : -1);
+      p.jumpBuf = 0;
+    }
+  }
+
+  const playerRect = {x:p.x,y:p.y,w:p.w,h:p.h};
+  for (const sp of platGame.spikes){
+    const sb = {x:sp.x, y:sp.y, w:sp.w, h:sp.h};
+    if (rectsOverlap(playerRect, sb)){
+      killPlayer("spiked 💀");
+      break;
+    }
+  }
+
+  // collect berries
+  for (const b of platGame.berries){
+    if (b.taken) continue;
+    const bb = {x:b.x-10, y:b.y-14, w:20, h:22};
+    if (rectsOverlap(playerRect, bb)){
+      b.taken = true;
+      platGame.got++;
+      platCountEl.textContent = String(platGame.got);
+      platMsg.innerHTML = `Awww 🍓🍫 ${platGame.got}/${platGame.target} collected! • Deaths: <b>${platGame.deaths}</b>`;
+      try{ confetti({particleCount: 24, spread: 45, origin:{y:0.75}}); }catch{}
+    }
+  }
+
+  if (platGame.got >= platGame.target){
+    const gb = platGame.goal;
+    if (rectsOverlap(playerRect, gb)){
       winPlatformer();
     }
   }
 
-  // ======================================================
-  // ✅ Pixel/retro platformer rendering (RESTORED GRAPHICS)
-  // ======================================================
-  const platRender = {
-    off: document.createElement("canvas"),
-    offCtx: null,
-    scale: PERF.lowEnd ? 4 : 3, // chunkier pixels on low end = faster
-    lastW: 0,
-    lastH: 0,
-    cacheKey: ""
-  };
-  platRender.offCtx = platRender.off.getContext("2d");
+  platGame.camX = clamp(p.x + p.w/2 - w/2, 0, platGame.levelW - w);
+}
 
-  function ensurePlatOffscreen() {
-    const cssW = platCanvas.getBoundingClientRect().width;
-    const cssH = platCanvas.getBoundingClientRect().height;
+function drawStrawberry(ctx, x, y, scale=1){
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
 
-    const w = Math.max(220, Math.floor(cssW / platRender.scale));
-    const h = Math.max(140, Math.floor(cssH / platRender.scale));
+  ctx.fillStyle = "#5b341f";
+  rrPath(ctx, -9, -8, 18, 12, 6);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-6, 4, 3, 0, Math.PI*2); ctx.arc(0, 5, 3, 0, Math.PI*2); ctx.arc(6, 4, 3, 0, Math.PI*2);
+  ctx.fill();
 
-    if (w !== platRender.lastW || h !== platRender.lastH) {
-      platRender.lastW = w;
-      platRender.lastH = h;
-      platRender.off.width = w;
-      platRender.off.height = h;
-      platRender.cacheKey = ""; // invalidate cache on resize
-    }
+  ctx.fillStyle = "#fb7185";
+  ctx.beginPath();
+  ctx.moveTo(0, 14);
+  ctx.bezierCurveTo(-11, 10, -10, -2, 0, -1);
+  ctx.bezierCurveTo(10, -2, 11, 10, 0, 14);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(255,255,255,0.75)";
+  for (let i=0;i<9;i++){
+    const sx = -6 + (i%3)*6 + (i===4?1:0);
+    const sy = 2 + Math.floor(i/3)*4;
+    ctx.fillRect(sx, sy, 1.5, 1.5);
   }
 
-  function pxRect(ctx, x, y, w, h, fill, stroke = null) {
-    ctx.fillStyle = fill;
-    ctx.fillRect(x, y, w, h);
-    if (stroke) {
-      ctx.strokeStyle = stroke;
-      ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-    }
+  ctx.fillStyle = "#22c55e";
+  ctx.beginPath();
+  ctx.moveTo(0,-6);
+  ctx.lineTo(-7,-1);
+  ctx.lineTo(0,-2);
+  ctx.lineTo(7,-1);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawLotad(ctx, x, y, face=1){
+  ctx.save();
+  ctx.translate(x, y);
+
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = "#0f172a";
+  ctx.beginPath();
+  ctx.ellipse(0, 18, 16, 6, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = "#22c55e";
+  ctx.beginPath();
+  ctx.ellipse(0, -2, 18, 12, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = "#16a34a";
+  ctx.beginPath();
+  ctx.ellipse(0, -2, 13, 8, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = document.body.classList.contains("night-mode") ? "rgba(11,16,34,0.55)" : "rgba(255,255,255,0.55)";
+  ctx.beginPath();
+  ctx.arc(9, -4, 6, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = "#60a5fa";
+  rrPath(ctx, -10, 4, 20, 18, 10);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(255,255,255,0.30)";
+  rrPath(ctx, -7, 7, 14, 12, 8);
+  ctx.fill();
+
+  ctx.fillStyle = "#f59e0b";
+  ctx.beginPath();
+  const bx = face>0 ? -12 : 12;
+  ctx.moveTo(bx, 12);
+  ctx.quadraticCurveTo(bx + (face>0?-8:8), 9, bx, 7);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = "#0f172a";
+  ctx.beginPath();
+  ctx.arc(-4, 10, 2.3, 0, Math.PI*2);
+  ctx.arc( 4, 10, 2.3, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.fillRect(-5.1, 9.2, 1, 1);
+  ctx.fillRect( 2.9, 9.2, 1, 1);
+
+  ctx.restore();
+}
+
+function drawPlatformer(){
+  const w = platCanvas.getBoundingClientRect().width;
+  const h = platCanvas.getBoundingClientRect().height;
+  platCtx.clearRect(0,0,w,h);
+
+  const night = document.body.classList.contains("night-mode");
+
+  const g = platCtx.createLinearGradient(0,0,0,h);
+  if (night){
+    g.addColorStop(0,"rgba(2,6,23,0.90)");
+    g.addColorStop(1,"rgba(30,41,59,0.55)");
+  } else {
+    g.addColorStop(0,"rgba(186,230,253,0.90)");
+    g.addColorStop(1,"rgba(255,228,230,0.55)");
   }
+  platCtx.fillStyle = g;
+  platCtx.fillRect(0,0,w,h);
 
-  function drawPixelHeart(ctx, x, y, c1, c2) {
-    const H = [
-      "0110010",
-      "1111111",
-      "1111111",
-      "1111111",
-      "0111110",
-      "0011100",
-      "0001000",
-    ];
-    for (let r = 0; r < H.length; r++) {
-      for (let c = 0; c < H[r].length; c++) {
-        if (H[r][c] === "1") {
-          const shade = (r <= 2 && (c === 1 || c === 5)) ? c2 : c1;
-          ctx.fillStyle = shade;
-          ctx.fillRect(x + c, y + r, 1, 1);
-        }
-      }
-    }
-  }
-
-  function drawPixelCloud(ctx, x, y, col) {
-    ctx.fillStyle = col;
-    ctx.fillRect(x + 2, y + 2, 10, 4);
-    ctx.fillRect(x + 0, y + 4, 14, 4);
-    ctx.fillRect(x + 2, y + 6, 18, 4);
-    ctx.fillRect(x + 6, y + 8, 10, 3);
-  }
-
-  function worldToPx(v) {
-    return v / platRender.scale;
-  }
-
-  function drawPlatformer(){
-    ensurePlatOffscreen();
-
-    const ctx = platCtx;
-    const px = platRender.offCtx;
-    const W = platRender.off.width;
-    const H = platRender.off.height;
-
-    // Clear offscreen
-    px.clearRect(0, 0, W, H);
-
-    // (Optional) night palette if you later add night-mode class
-    const night = document.body.classList.contains("night-mode");
-    const skyTop = night ? "#0b1020" : "#8fd3ff";
-    const skyBot = night ? "#111827" : "#dff7ff";
-    const dirt   = night ? "#1f2937" : "#7c5a3a";
-    const grass  = night ? "#334155" : "#a3e635";
-    const outline = night ? "rgba(255,255,255,0.18)" : "rgba(15,23,42,0.18)";
-
-    // Sky gradient (cached-ish)
-    const k = `${W}x${H}:${night ? "n" : "d"}`;
-    if (platRender.cacheKey !== k) {
-      platRender.cacheKey = k;
-      // nothing else to cache; gradient created below is cheap at low res
-    }
-    const g = px.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, skyTop);
-    g.addColorStop(1, skyBot);
-    px.fillStyle = g;
-    px.fillRect(0, 0, W, H);
-
-    // Pixel stars at night / clouds at day
-    if (night) {
-      px.fillStyle = "rgba(255,255,255,0.75)";
-      for (let i = 0; i < (PERF.lowEnd ? 28 : 48); i++) {
-        const sx = (i * 37 + Math.floor(platGame.player.x * 0.12)) % W;
-        const sy = (i * 23) % Math.floor(H * 0.65);
-        px.fillRect(sx, sy, 1, 1);
-      }
+  platCtx.globalAlpha = night ? 0.45 : 0.40;
+  platCtx.fillStyle = "#ffffff";
+  for (let i=0;i<10;i++){
+    const sx = ((i*271) % 1600) - platGame.camX*0.25;
+    const sy = 50 + ((i*97) % 120);
+    const x = ((sx % (w+260)) + (w+260)) - 130;
+    if (night){
+      platCtx.fillRect(x, sy, 2, 2);
+      platCtx.fillRect(x+40, sy+20, 2, 2);
     } else {
-      drawPixelCloud(px, 20 + ((platGame.player.x * 0.03) % 50), 18, "rgba(255,255,255,0.95)");
-      drawPixelCloud(px, 120 + ((platGame.player.x * 0.02) % 60), 32, "rgba(255,255,255,0.85)");
-      drawPixelCloud(px, 220 + ((platGame.player.x * 0.025) % 70), 14, "rgba(255,255,255,0.88)");
+      rrPath(platCtx, x, sy, 70, 18, 9);
+      platCtx.fill();
+      rrPath(platCtx, x+25, sy-10, 52, 18, 9);
+      platCtx.fill();
     }
+  }
+  platCtx.globalAlpha = 1;
 
-    const cam = platGame.camX;
+  function drawChocoRect(x,y,wid,hei){
+    platCtx.fillStyle = "#5b341f";
+    rrPath(platCtx, x, y, wid, hei, 8);
+    platCtx.fill();
 
-    // Platforms as chunky tiles
-    for (const plat of platGame.platforms){
-      const x = Math.round(worldToPx(plat.x - cam));
-      const y = Math.round(worldToPx(plat.y));
-      const w = Math.round(worldToPx(plat.w));
-      const h = Math.max(3, Math.round(worldToPx(plat.h)));
+    platCtx.fillStyle = "#7c4a2a";
+    rrPath(platCtx, x, y, wid, Math.min(10,hei), 8);
+    platCtx.fill();
 
-      if (x > W || x + w < 0) continue;
+    platCtx.globalAlpha = 0.75;
+    for (let i=0;i<Math.min(24, (wid/18)|0); i++){
+      const sx = x + 10 + (i*17)%Math.max(14,wid-20);
+      const sy = y + 4 + ((i*29)%6);
+      platCtx.fillStyle = ["#fb7185","#60a5fa","#22c55e","#f59e0b","#a78bfa"][i%5];
+      rrPath(platCtx, sx, sy, 6, 2, 1);
+      platCtx.fill();
+    }
+    platCtx.globalAlpha = 1;
+  }
 
-      pxRect(px, x, y, w, Math.min(3, h), grass, outline);
-      pxRect(px, x, y + Math.min(3, h), w, h - Math.min(3, h), dirt, outline);
+  platCtx.save();
+  platCtx.translate(-platGame.camX, 0);
 
-      px.fillStyle = night ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-      for (let tx = x + 2; tx < x + w - 2; tx += 8) {
-        px.fillRect(tx, y + h - 2, 2, 1);
+  for (const s of platGame.platforms){
+    drawChocoRect(s.x, s.y, s.w, s.h);
+  }
+  for (const m of platGame.movers){
+    drawChocoRect(m.x, m.y, m.w, m.h);
+    platCtx.globalAlpha = 0.18;
+    platCtx.fillStyle = "#fb7185";
+    rrPath(platCtx, m.x-2, m.y-2, m.w+4, m.h+4, 10);
+    platCtx.fill();
+    platCtx.globalAlpha = 1;
+  }
+
+  for (const sp of platGame.spikes){
+    platCtx.fillStyle = night ? "rgba(244,63,94,0.85)" : "rgba(244,63,94,0.78)";
+    const step = 10;
+    if (sp.dir === "up"){
+      for (let x=sp.x; x<sp.x+sp.w; x+=step){
+        platCtx.beginPath();
+        platCtx.moveTo(x, sp.y+sp.h);
+        platCtx.lineTo(x+step/2, sp.y);
+        platCtx.lineTo(x+step, sp.y+sp.h);
+        platCtx.closePath();
+        platCtx.fill();
+      }
+    } else if (sp.dir === "left"){
+      for (let y=sp.y; y<sp.y+sp.h; y+=step){
+        platCtx.beginPath();
+        platCtx.moveTo(sp.x+sp.w, y);
+        platCtx.lineTo(sp.x, y+step/2);
+        platCtx.lineTo(sp.x+sp.w, y+step);
+        platCtx.closePath();
+        platCtx.fill();
+      }
+    } else if (sp.dir === "right"){
+      for (let y=sp.y; y<sp.y+sp.h; y+=step){
+        platCtx.beginPath();
+        platCtx.moveTo(sp.x, y);
+        platCtx.lineTo(sp.x+sp.w, y+step/2);
+        platCtx.lineTo(sp.x, y+step);
+        platCtx.closePath();
+        platCtx.fill();
       }
     }
-
-    // Hearts (pixel hearts)
-    for (const heart of platGame.hearts){
-      if (heart.taken) continue;
-      const hx = Math.round(worldToPx(heart.x - cam));
-      const hy = Math.round(worldToPx(heart.y));
-      if (hx < -20 || hx > W + 20) continue;
-      drawPixelHeart(px, hx - 3, hy - 3, "#ff3b7a", "#ffd1e1");
-    }
-
-    // Goal (pixel-ish love letter)
-    {
-      const gx = Math.round(worldToPx(platGame.goal.x - cam));
-      const gy = Math.round(worldToPx(platGame.goal.y));
-      pxRect(px, gx - 5, gy - 4, 10, 8, night ? "#e5e7eb" : "#fff7ed", outline);
-      px.fillStyle = night ? "#111827" : "#7c2d12";
-      px.fillRect(gx - 3, gy - 2, 6, 1);
-      px.fillRect(gx - 3, gy, 5, 1);
-    }
-
-    // Player (pixel character)
-    {
-      const p = platGame.player;
-      const pxX = Math.round(worldToPx(p.x - cam));
-      const pxY = Math.round(worldToPx(p.y));
-
-      pxRect(px, pxX, pxY, 8, 10, night ? "#fb7185" : "#ef4444", outline);
-      px.fillStyle = "rgba(0,0,0,0.6)";
-      px.fillRect(pxX + 2, pxY + 3, 1, 1);
-      px.fillRect(pxX + 5, pxY + 3, 1, 1);
-      px.fillStyle = night ? "rgba(59,130,246,0.7)" : "rgba(96,165,250,0.75)";
-      px.fillRect(pxX - 2, pxY + 4, 2, 5);
-    }
-
-    // Blit pixel buffer -> main canvas (crispy pixels)
-    ctx.imageSmoothingEnabled = false;
-    const cssW = platCanvas.getBoundingClientRect().width;
-    const cssH = platCanvas.getBoundingClientRect().height;
-    ctx.clearRect(0, 0, cssW, cssH);
-    ctx.drawImage(platRender.off, 0, 0, W, H, 0, 0, cssW, cssH);
   }
 
-  function platformerLoop(ts){
-    if (!platGame.running) return;
-    if (!platLast) platLast = ts;
-    const dt = Math.min(0.033, (ts - platLast) / 1000);
-    platLast = ts;
-
-    for (let i=0;i<Math.max(1, Math.floor(dt/0.016)); i++){
-      updatePlatformer();
-    }
-    drawPlatformer();
-    platRaf = requestAnimationFrame(platformerLoop);
+  for (const b of platGame.berries){
+    if (b.taken) continue;
+    drawStrawberry(platCtx, b.x, b.y, 0.95);
   }
 
-  function startPlatformer(){
-    resetPlatformer();
-    platGame.running = true;
-    platOverlay.style.opacity = "0";
-    platStartBtn.style.opacity = "0";
-    platStartBtn.style.pointerEvents = "none";
-    platMsg.innerHTML = `Go go go 💞 Collect ${platGame.heartsTarget} hearts!`;
-    platLast = 0;
-    platRaf = requestAnimationFrame(platformerLoop);
+  const gb = platGame.goal;
+  platCtx.save();
+  platCtx.translate(gb.x, gb.y);
+  rrPath(platCtx, 0, 0, gb.w, gb.h, 6);
+  platCtx.fillStyle = "rgba(255,255,255,0.92)";
+  platCtx.fill();
+  platCtx.fillStyle = "#ef4444";
+  heartShape(platCtx, gb.w/2, gb.h/2+1, 7);
+  platCtx.fill();
+  if (platGame.got < platGame.target){
+    platCtx.globalAlpha = 0.85;
+    platCtx.fillStyle = night ? "rgba(255,255,255,0.75)" : "rgba(15,23,42,0.65)";
+    platCtx.font = "12px system-ui";
+    platCtx.fillText(`${platGame.target-platGame.got} left`, -6, -8);
+    platCtx.globalAlpha = 1;
   }
+  platCtx.restore();
 
-  function stopPlatformer(showOverlay = true){
-    platGame.running = false;
-    if (platRaf) cancelAnimationFrame(platRaf);
-    platRaf = null;
-    if (showOverlay){
-      platOverlay.style.opacity = "1";
-      platStartBtn.style.opacity = "1";
-      platStartBtn.style.pointerEvents = "auto";
-    }
-  }
+  const p = platGame.player;
+  drawLotad(platCtx, p.x + p.w/2, p.y + p.h/2, p.face);
 
-  function winPlatformer(){
-    stopPlatformer(false);
-    platOverlay.style.opacity = "1";
-    platOverlay.innerHTML = `
-      <div class="text-slate-800/80">
-        <div class="text-4xl font-extrabold">LOVE QUEST COMPLETE 💌</div>
-        <div class="text-sm font-semibold mt-2">Okay… that was adorable.</div>
-      </div>
-    `;
-    platStartBtn.style.opacity = "1";
-    platStartBtn.style.pointerEvents = "auto";
-    platStartBtn.textContent = "Play Again";
-    platMsg.innerHTML = `Awwww 💖 You did it!`;
-    try { confetti({ particleCount: PERF.lowEnd ? 110 : 180, spread: 90, origin: { y: 0.65 } }); } catch {}
-  }
+  platCtx.restore();
 
-  platStartBtn.addEventListener("click", startPlatformer);
+  platCtx.fillStyle = night ? "rgba(255,255,255,0.82)" : "rgba(15,23,42,0.70)";
+  platCtx.font = "12px system-ui";
+  platCtx.fillText(`Deaths: ${platGame.deaths}`, 12, 18);
+}
+
+function platLoop(ts){
+  if (!platGame.running) return;
+  if (!platLast) platLast = ts;
+  const dt = Math.min(0.033, (ts-platLast)/1000);
+  platLast = ts;
+
+  updatePlatformer(dt);
+  drawPlatformer();
+
+  platRAF = requestAnimationFrame(platLoop);
+}
+
+function startPlatformer(){
   resetPlatformer();
+  platGame.running = true;
+  platOverlay.style.opacity="0";
+  platStartBtn.style.opacity="0";
+  platStartBtn.style.pointerEvents="none";
+  platLast = 0;
+  platRAF = requestAnimationFrame(platLoop);
+}
 
-  window.addEventListener("resize", () => {
-    fitCanvasToCSS(bossCanvas, bossCtx2);
+function stopPlatformer(silent=false){
+  platGame.running = false;
+  if (platRAF) cancelAnimationFrame(platRAF);
+  platRAF = null;
+  if (!silent){
+    platOverlay.style.opacity="1";
+    platStartBtn.style.opacity="1";
+    platStartBtn.style.pointerEvents="auto";
+  }
+}
+
+function winPlatformer(){
+  stopPlatformer(true);
+  platOverlay.style.opacity="1";
+  platOverlay.innerHTML = `
+    <div class="text-white drop-shadow-lg">
+      <div class="text-4xl font-extrabold">YOU DID IT 🍓🍫💌</div>
+      <div class="text-sm font-semibold mt-2">Insane mode cleared. Respect.</div>
+    </div>`;
+  platStartBtn.style.opacity="1";
+  platStartBtn.style.pointerEvents="auto";
+  platStartBtn.textContent="Replay (why?)";
+  try{ confetti({particleCount: 240, spread: 90, origin:{y:0.7}}); }catch{}
+}
+
+platStartBtn.addEventListener("click", startPlatformer);
+resetPlatformer();
+
+// touch controls (lightweight):
+let touchLeft=false, touchRight=false;
+let lastTap = 0;
+platCanvas.addEventListener("pointerdown", (e)=>{
+  if (!platGame.running) return;
+  const r = platCanvas.getBoundingClientRect();
+  const x = e.clientX - r.left;
+  const y = e.clientY - r.top;
+
+  const now = performance.now();
+  const dbl = (now - lastTap) < 260;
+  lastTap = now;
+
+  if (dbl){
+    keys.add("Shift");
+    setTimeout(()=>keys.delete("Shift"), 60);
+    return;
+  }
+
+  if (y > r.height*0.70){
+    keys.add(" ");
+    setTimeout(()=>keys.delete(" "), 60);
+    return;
+  }
+
+  if (x < r.width*0.5){
+    touchLeft=true; keys.add("a");
+  } else {
+    touchRight=true; keys.add("d");
+  }
+});
+platCanvas.addEventListener("pointerup", ()=>{
+  if (touchLeft){ keys.delete("a"); touchLeft=false; }
+  if (touchRight){ keys.delete("d"); touchRight=false; }
+});
+platCanvas.addEventListener("pointercancel", ()=>{
+  if (touchLeft){ keys.delete("a"); touchLeft=false; }
+  if (touchRight){ keys.delete("d"); touchRight=false; }
+});
+
+/* ============================================================
+   RESIZE (prevents “stopped working”)
+============================================================ */
+function safeResize(){
+  try{
+    fitCanvasToCSS(bossCanvas, bossCtx);
     fitCanvasToCSS(platCanvas, platCtx);
-    // keep pixel scale consistent
-    platRender.cacheKey = "";
-  });
+  }catch{}
+}
+window.addEventListener("resize", safeResize, {passive:true});
+setTimeout(safeResize, 40);
+
+/* ============================================================
+   7 EASTER EGGS (one is Konami)
+============================================================ */
+let bossSlowUntil = 0;
+let platLowGUntil = 0;
+let godUntil = 0;
+let sprinkleBoost = false;
+let rainbowMode = false;
+
+function nowMs(){ return performance.now(); }
+function showToast(text){
+  bossMsg.textContent = text;
+  bossMsg.animate([{transform:"translateY(0)", opacity:1},{transform:"translateY(-6px)", opacity:0.95},{transform:"translateY(0)",opacity:1}], {duration:420});
+}
+
+function applyModifiers(){
+  if (bossGame.running && nowMs() < bossSlowUntil){
+    for (const b of bossGame.bullets){
+      b.vx *= 0.985;
+      b.vy *= 0.985;
+    }
+  }
+  platGame.gravity = (platGame.running && nowMs() < platLowGUntil) ? 0.36 : 0.62;
+
+  if (nowMs() < godUntil){
+    if (bossGame.running) bossGame.player.inv = 0.2;
+  }
+}
+
+// hook modifiers into loops
+const _bossLoop = bossLoop;
+bossLoop = function(ts){
+  if (!bossGame.running) return;
+  applyModifiers();
+  _bossLoop(ts);
+};
+const _platLoop = platLoop;
+platLoop = function(ts){
+  if (!platGame.running) return;
+  applyModifiers();
+  _platLoop(ts);
+};
+
+// 1) KONAMI CODE
+const KONAMI = ["arrowup","arrowup","arrowdown","arrowdown","arrowleft","arrowright","arrowleft","arrowright","b","a"];
+let konamiBuf = [];
+window.addEventListener("keydown", (e)=>{
+  const k = (e.key || "").toLowerCase();
+  konamiBuf.push(k);
+  if (konamiBuf.length > KONAMI.length) konamiBuf.shift();
+  if (KONAMI.every((v,i)=>konamiBuf[i]===v)){
+    godUntil = nowMs() + 10000;
+    showToast("KONAMI 💥 Invincibility for 10 seconds!");
+    try{ confetti({particleCount: 200, spread: 85, origin:{y:0.25}}); }catch{}
+  }
+});
+
+// 2) Press B = slow boss bullets (6s)
+window.addEventListener("keydown", (e)=>{
+  if ((e.key||"").toLowerCase() === "b"){
+    bossSlowUntil = nowMs() + 6000;
+    showToast("Egg: Bullet time activated 🕰️");
+  }
+});
+
+// 3) Press L = low gravity in platformer (8s)
+window.addEventListener("keydown", (e)=>{
+  if ((e.key||"").toLowerCase() === "l"){
+    platLowGUntil = nowMs() + 8000;
+    platMsg.innerHTML = `Egg: Low gravity 🌙 for 8 seconds • Strawberries: <b>${platGame.got}/${platGame.target}</b> • Deaths: <b>${platGame.deaths}</b>`;
+  }
+});
+
+// 4) Double-click big title = confetti storm
+document.getElementById("bigTitle").addEventListener("dblclick", ()=>{
+  try{ confetti({particleCount: 260, spread: 100, origin:{y:0.18}}); }catch{}
+  showToast("Egg: Title sparkle unlocked ✨");
+});
+
+// 5) Click mana bar = fill animation + tiny confetti
+document.getElementById("manaWrap").addEventListener("click", ()=>{
+  manaBarInner.style.width = "100%";
+  manaPctEl.textContent = "100";
+  try{ confetti({particleCount: 60, spread: 60, origin:{y:0.08}}); }catch{}
+  showToast("Egg: Max mana 💯");
+});
+
+// 6) Type “sprinkles” anywhere toggles stronger sprinkles
+let wordBuf = "";
+window.addEventListener("keydown", (e)=>{
+  const ch = (e.key || "");
+  if (ch.length === 1 && /[a-z]/i.test(ch)){
+    wordBuf = (wordBuf + ch.toLowerCase()).slice(-16);
+    if (wordBuf.endsWith("sprinkles")){
+      sprinkleBoost = !sprinkleBoost;
+      const sg = document.querySelector(".sprinkle-grid");
+      if (sg) sg.style.opacity = sprinkleBoost ? "0.36" : "";
+      showToast(`Egg: Sprinkles ${sprinkleBoost ? "MAXED" : "normal"} 🍩`);
+    }
+  }
+});
+
+// 7) Press R toggles “rainbow mode”
+window.addEventListener("keydown", (e)=>{
+  if ((e.key||"").toLowerCase() === "r"){
+    rainbowMode = !rainbowMode;
+    document.body.style.filter = rainbowMode ? "hue-rotate(55deg) saturate(1.1)" : "";
+    showToast(`Egg: Rainbow ${rainbowMode ? "ON" : "OFF"} 🌈`);
+  }
+});
 </script>
 </body>
 </html>
+ 
