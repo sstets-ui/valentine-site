@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Will you be my Valentine Andrew Getzow?</title>
+  <title>Will you be my rEdACtEd Andrew Getzow?</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
+    
     /* =========================================================
       NEW: Day/Night + prettier global palette using CSS vars
     ========================================================= */
+    
     :root{
       --bg-a: rgba(255, 182, 193, 0.55);
       --bg-b: rgba(255, 105, 180, 0.28);
@@ -67,6 +69,7 @@
       color: var(--ink);
     }
 
+  
     /* keep your shiny-mode, now it stacks with day/night */
     body.shiny-mode{
       background:
@@ -76,6 +79,7 @@
         linear-gradient(180deg, #f5f3ff 0%, #e0f2fe 50%, #fff7ed 100%);
     }
 
+ 
     /* Boss mode tint */
     body.boss-mode::before{
       content:"";
@@ -90,9 +94,12 @@
       mix-blend-mode: multiply;
     }
 
+   
     /* =========================================================
       NEW: Extra “pretty” layout styling (frames + ribbons)
     ========================================================= */
+
+    
     .quest-shell{
       position: relative;
       border-radius: 28px;
@@ -121,7 +128,9 @@
       opacity: .85;
     }
 
+
     /* BG layers */
+
     #bg {
       position: fixed;
       inset: 0;
@@ -167,7 +176,10 @@
       background-size: 180px 180px;
     }
 
+   
     /* your black hole GIF grid */
+
+    
     .pixel-grid{
       position:absolute;
       inset:0;
@@ -179,7 +191,9 @@
       filter: saturate(0.95) contrast(1.05);
     }
 
+  
     /* Floating particles */
+    
     #powerups, #hearts, #petals{
       position: fixed;
       inset: 0;
@@ -216,7 +230,9 @@
       100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15) rotate(var(--rot)); opacity: 0; }
     }
 
+
     /* Pixel clouds */
+    
     #pixelClouds{
       position: fixed;
       inset: 0;
@@ -244,7 +260,9 @@
       to   { transform: translateX(calc(100vw + 520px)) scale(var(--s)); }
     }
 
+   
     /* Big title */
+    
     #bigTitle{
       position: relative;
       z-index: 3;
