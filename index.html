@@ -9,13 +9,97 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
+      /* --------- Complex dreamy background --------- */
+      body {
+        background:
+          radial-gradient(900px 520px at 20% 15%, rgba(255, 182, 193, 0.55), transparent 60%),
+          radial-gradient(900px 520px at 80% 25%, rgba(255, 105, 180, 0.28), transparent 60%),
+          radial-gradient(900px 520px at 55% 85%, rgba(147, 197, 253, 0.35), transparent 60%),
+          linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
+      }
+
+      #bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .blob {
+        position: absolute;
+        width: 520px;
+        height: 520px;
+        border-radius: 999px;
+        filter: blur(55px);
+        opacity: 0.55;
+        transform: translate3d(0,0,0);
+        mix-blend-mode: multiply;
+        will-change: transform;
+      }
+
+      .blob.a {
+        left: -140px;
+        top: -160px;
+        background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.55), rgba(255, 182, 193, 0.25) 55%, transparent 70%);
+        animation: floatA 14s ease-in-out infinite;
+      }
+
+      .blob.b {
+        right: -160px;
+        top: -120px;
+        background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.45), rgba(147, 197, 253, 0.22) 55%, transparent 70%);
+        animation: floatB 16s ease-in-out infinite;
+      }
+
+      .blob.c {
+        left: 10%;
+        bottom: -210px;
+        background: radial-gradient(circle at 30% 30%, rgba(147, 197, 253, 0.45), rgba(244, 63, 94, 0.18) 55%, transparent 70%);
+        animation: floatC 18s ease-in-out infinite;
+      }
+
+      @keyframes floatA {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50%      { transform: translate(80px, 60px) scale(1.08); }
+      }
+      @keyframes floatB {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50%      { transform: translate(-90px, 70px) scale(1.06); }
+      }
+      @keyframes floatC {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        50%      { transform: translate(120px, -60px) scale(1.1); }
+      }
+
+      /* subtle noise overlay */
+      .noise {
+        position: absolute;
+        inset: 0;
+        opacity: 0.10;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+        background-size: 180px 180px;
+      }
+
+      /* Nintendo-ish polish */
+      .pixel-vibe {
+        text-shadow: 0 2px 0 rgba(0,0,0,0.08);
+      }
+      .mascot-bounce {
+        animation: mascotBounce 1.8s ease-in-out infinite;
+      }
+      @keyframes mascotBounce {
+        0%,100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
+
       /* Moving hearts background */
       #hearts {
         position: fixed;
         inset: 0;
         overflow: hidden;
         pointer-events: none;
-        z-index: 0;
+        z-index: 1;
       }
       .heart {
         position: absolute;
@@ -31,8 +115,16 @@
         100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity: 0; }
       }
 
-      /* Keep card above hearts */
-      .card { position: relative; z-index: 1; }
+      /* Card above everything */
+      .card {
+        position: relative;
+        z-index: 2;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 22px 70px rgba(0,0,0,0.14);
+      }
 
       /* If a gif fails you won't see a harsh white block */
       #valImage {
@@ -91,11 +183,49 @@
     </style>
   </head>
 
-  <body class="min-h-screen bg-pink-50 flex items-center justify-center p-6">
+  <body class="min-h-screen flex items-center justify-center p-6">
+    <!-- Background blobs + noise -->
+    <div id="bg" aria-hidden="true">
+      <div class="blob a"></div>
+      <div class="blob b"></div>
+      <div class="blob c"></div>
+      <div class="noise"></div>
+    </div>
+
     <div id="hearts" aria-hidden="true"></div>
 
-    <div class="card bg-white rounded-2xl shadow-lg p-6 max-w-md w-full text-center">
-      <h1 class="text-2xl font-bold mb-4">Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘</h1>
+    <div class="card rounded-3xl p-7 max-w-md w-full text-center">
+      <h1 class="text-2xl font-bold mb-3 pixel-vibe">Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘</h1>
+
+      <!-- Dedede-inspired mascot (original, not Nintendo art) -->
+      <div class="mx-auto mb-3 w-24 h-24 mascot-bounce">
+        <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
+          <!-- crown -->
+          <path d="M40 24 L64 10 L88 24 L82 44 H46 Z" fill="#fbbf24"/>
+          <circle cx="64" cy="22" r="6" fill="#f59e0b"/>
+          <!-- face -->
+          <ellipse cx="64" cy="62" rx="34" ry="28" fill="#60a5fa"/>
+          <ellipse cx="64" cy="70" rx="26" ry="18" fill="#93c5fd" opacity="0.9"/>
+          <!-- eyes -->
+          <ellipse cx="52" cy="58" rx="7" ry="10" fill="#0f172a"/>
+          <ellipse cx="76" cy="58" rx="7" ry="10" fill="#0f172a"/>
+          <circle cx="50" cy="55" r="2" fill="#fff"/>
+          <circle cx="74" cy="55" r="2" fill="#fff"/>
+          <!-- beak -->
+          <path d="M64 64 C56 62 56 74 64 76 C72 74 72 62 64 64 Z" fill="#f59e0b"/>
+          <!-- robe -->
+          <path d="M30 92 C34 78 48 72 64 72 C80 72 94 78 98 92
+                   C90 108 78 118 64 118 C50 118 38 108 30 92 Z"
+                fill="#ef4444"/>
+          <!-- robe trim -->
+          <path d="M38 94 C44 104 54 110 64 110 C74 110 84 104 90 94"
+                stroke="#fff" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+          <!-- tiny hammer silhouette -->
+          <rect x="92" y="70" width="8" height="30" rx="3" fill="#334155"/>
+          <rect x="84" y="60" width="26" height="14" rx="6" fill="#475569"/>
+          <circle cx="84" cy="67" r="6" fill="#475569"/>
+        </svg>
+      </div>
 
       <img
         id="valImage"
@@ -122,7 +252,7 @@
         </button>
       </div>
 
-      <p id="hint" class="text-sm text-gray-500 mt-4">
+      <p id="hint" class="text-sm text-gray-600 mt-4">
         Tip: click a button. If a GIF host blocks embeds, it’ll auto-try another link.
       </p>
     </div>
@@ -422,13 +552,12 @@
 
           const capped = Math.max(1, Math.min(battleIntensity, 6));
           const bpm = 120 + capped * 10;
-          const stepDur = 60 / bpm / 2; // 8th notes
+          const stepDur = 60 / bpm / 2;
           const t = battleCtx.currentTime + 0.02;
 
           const riff = ["E3","G3","A3","G3","E3","D3","E3","B2"];
           const lead = ["E4","G4","A4","B4","A4","G4","E4","D4"];
 
-          // Bass
           const bassNote = riff[battleStep % riff.length];
           const bassOsc = battleCtx.createOscillator();
           bassOsc.type = "sawtooth";
@@ -447,7 +576,6 @@
           bassOsc.start(t);
           bassOsc.stop(t + stepDur);
 
-          // Lead stab
           if (battleStep % 2 === 0) {
             const leadNote = lead[(battleStep / 2) % lead.length];
             const leadOsc = battleCtx.createOscillator();
@@ -464,7 +592,6 @@
             leadOsc.stop(t + stepDur * 0.9);
           }
 
-          // Drums
           const isKick = battleStep % 4 === 0 || battleStep % 4 === 2;
           const isSnare = battleStep % 4 === 1 || battleStep % 4 === 3;
 
@@ -499,7 +626,7 @@
 
       // ------------------ YES / NO click handlers ------------------
       yesBtn.addEventListener("click", () => {
-        stopBattleMusic(); // ✅ stop battle music on YES
+        stopBattleMusic();
 
         setImageTry(GIFS.yesMain, "YES GIF failed to load.");
         hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
@@ -518,7 +645,6 @@
         setImageTry(GIFS.no, "NO GIF failed to load.");
         hint.textContent = "No (Are you sure about that?) 😳";
 
-        // Grow + intensify battle music
         noScale *= 1.35;
         noDodges += 1;
 
@@ -539,6 +665,10 @@
 
         applyNoTransform();
       });
+    </script>
+  </body>
+</html>
+
     </script>
   </body>
 </html>
