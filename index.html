@@ -50,7 +50,7 @@
         position: relative;
         filter: drop-shadow(0 10px 14px rgba(0,0,0,.16));
         transition: transform .12s ease, filter .12s ease;
-        will-change: transform; /* ✅ helps smooth scaling/moving */
+        will-change: transform;
       }
 
       .svg-heart svg{
@@ -59,10 +59,9 @@
         display: block;
       }
 
-      .svg-heart.yes path{ fill: #ef4444; } /* red */
-      .svg-heart.no  path{ fill: #f43f5e; } /* rose */
+      .svg-heart.yes path{ fill: #ef4444; }
+      .svg-heart.no  path{ fill: #f43f5e; }
 
-      /* ✅ Text nudge so it doesn't sit in the heart dip */
       .svg-heart span{
         position: absolute;
         inset: 0;
@@ -96,7 +95,7 @@
     <div id="hearts" aria-hidden="true"></div>
 
     <div class="card bg-white rounded-2xl shadow-lg p-6 max-w-md w-full text-center">
-      <h1 class="text-2xl font-bold mb-4">Will you be my Valentine Andrew Getzow? Pretty Please? 💘</h1>
+      <h1 class="text-2xl font-bold mb-4">Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘</h1>
 
       <img
         id="valImage"
@@ -203,7 +202,7 @@
 
       setImageTry(GIFS.start, "Start GIF failed to load.");
 
-      // ------------------ More complicated chest-fanfare (original) ------------------
+      // ------------------ Chest-fanfare (original) ------------------
       function playGlueSong() {
         try {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -211,11 +210,9 @@
           if (ctx.state === "suspended") ctx.resume();
 
           const now = ctx.currentTime;
-
           const bpm = 132;
           const beat = 60 / bpm;
 
-          // Small echo to make it feel more "game-y"
           const delay = ctx.createDelay(1.0);
           delay.delayTime.value = 0.12;
 
@@ -316,10 +313,8 @@
           const sparkle = [
             { note: "C6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 },
             { note: "B6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "C6", beats: 0.25 },
-
             { note: "D6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "D7", beats: 0.25 },
             { note: "C7", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "D6", beats: 0.25 },
-
             { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "E7", beats: 0.25 },
             { note: "D7", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 },
           ];
@@ -345,7 +340,6 @@
         noBtn.style.transform = `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) ${extra}`;
       }
 
-      // starts dodging after 2 clicks
       noBtn.addEventListener("mouseenter", () => {
         if (noDodges < 2) return;
 
@@ -365,7 +359,148 @@
         applyNoTransform();
       });
 
+      // ------------------ Battle music (original, looped) ------------------
+      let battleCtx = null;
+      let battleMaster = null;
+      let battleInterval = null;
+      let battleStep = 0;
+      let battleIntensity = 1;
+
+      function noiseHit(ctx, time, duration, volume, cutoffHz) {
+        const bufferSize = Math.floor(ctx.sampleRate * duration);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(cutoffHz, time);
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(volume, time + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+        src.connect(filter).connect(gain).connect(battleMaster);
+        src.start(time);
+        src.stop(time + duration);
+      }
+
+      function noteToFreq(note) {
+        const m = /^([A-G])(#|b)?(\d)$/.exec(note);
+        if (!m) return null;
+        const [, letter, accidental, octaveStr] = m;
+        const octave = Number(octaveStr);
+        const SEMI = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+        let n = SEMI[letter];
+        if (accidental === "#") n += 1;
+        if (accidental === "b") n -= 1;
+        const midi = (octave + 1) * 12 + n;
+        return 440 * Math.pow(2, (midi - 69) / 12);
+      }
+
+      function startBattleMusic(intensity = 1) {
+        if (battleCtx) return;
+
+        battleIntensity = intensity;
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        battleCtx = new AudioCtx();
+        if (battleCtx.state === "suspended") battleCtx.resume();
+
+        battleMaster = battleCtx.createGain();
+        battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
+        battleMaster.connect(battleCtx.destination);
+
+        battleStep = 0;
+
+        const tick = () => {
+          if (!battleCtx) return;
+
+          const capped = Math.max(1, Math.min(battleIntensity, 6));
+          const bpm = 120 + capped * 10;
+          const stepDur = 60 / bpm / 2; // 8th notes
+          const t = battleCtx.currentTime + 0.02;
+
+          const riff = ["E3","G3","A3","G3","E3","D3","E3","B2"];
+          const lead = ["E4","G4","A4","B4","A4","G4","E4","D4"];
+
+          // Bass
+          const bassNote = riff[battleStep % riff.length];
+          const bassOsc = battleCtx.createOscillator();
+          bassOsc.type = "sawtooth";
+          bassOsc.frequency.setValueAtTime(noteToFreq(bassNote), t);
+
+          const bassGain = battleCtx.createGain();
+          bassGain.gain.setValueAtTime(0, t);
+          bassGain.gain.linearRampToValueAtTime(0.12 + capped * 0.01, t + 0.01);
+          bassGain.gain.exponentialRampToValueAtTime(0.0001, t + stepDur);
+
+          const bassFilter = battleCtx.createBiquadFilter();
+          bassFilter.type = "lowpass";
+          bassFilter.frequency.setValueAtTime(600 + capped * 180, t);
+
+          bassOsc.connect(bassFilter).connect(bassGain).connect(battleMaster);
+          bassOsc.start(t);
+          bassOsc.stop(t + stepDur);
+
+          // Lead stab
+          if (battleStep % 2 === 0) {
+            const leadNote = lead[(battleStep / 2) % lead.length];
+            const leadOsc = battleCtx.createOscillator();
+            leadOsc.type = "square";
+            leadOsc.frequency.setValueAtTime(noteToFreq(leadNote), t);
+
+            const leadGain = battleCtx.createGain();
+            leadGain.gain.setValueAtTime(0, t);
+            leadGain.gain.linearRampToValueAtTime(0.07 + capped * 0.008, t + 0.008);
+            leadGain.gain.exponentialRampToValueAtTime(0.0001, t + stepDur * 0.9);
+
+            leadOsc.connect(leadGain).connect(battleMaster);
+            leadOsc.start(t);
+            leadOsc.stop(t + stepDur * 0.9);
+          }
+
+          // Drums
+          const isKick = battleStep % 4 === 0 || battleStep % 4 === 2;
+          const isSnare = battleStep % 4 === 1 || battleStep % 4 === 3;
+
+          if (isKick)  noiseHit(battleCtx, t, 0.06, 0.10 + capped * 0.01, 220 + capped * 20);
+          if (isSnare) noiseHit(battleCtx, t, 0.05, 0.06 + capped * 0.008, 1200 + capped * 120);
+          noiseHit(battleCtx, t, 0.02, 0.03 + capped * 0.004, 6000 + capped * 300);
+
+          battleStep++;
+        };
+
+        battleInterval = setInterval(tick, 90);
+        tick();
+      }
+
+      function updateBattleIntensity(intensity) {
+        battleIntensity = intensity;
+        if (!battleCtx) return;
+        battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
+      }
+
+      function stopBattleMusic() {
+        if (battleInterval) clearInterval(battleInterval);
+        battleInterval = null;
+
+        if (battleCtx) {
+          const ctx = battleCtx;
+          battleCtx = null;
+          battleMaster = null;
+          setTimeout(() => ctx.close().catch(() => {}), 50);
+        }
+      }
+
+      // ------------------ YES / NO click handlers ------------------
       yesBtn.addEventListener("click", () => {
+        stopBattleMusic(); // ✅ stop battle music on YES
+
         setImageTry(GIFS.yesMain, "YES GIF failed to load.");
         hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
         noBtn.style.display = "none";
@@ -379,13 +514,16 @@
         }, 2000);
       });
 
-      // REPLACED NO handler: grows + wiggles + eventually runs away
       noBtn.addEventListener("click", () => {
         setImageTry(GIFS.no, "NO GIF failed to load.");
         hint.textContent = "No (Are you sure about that?) 😳";
 
+        // Grow + intensify battle music
         noScale *= 1.35;
         noDodges += 1;
+
+        startBattleMusic(noDodges);
+        updateBattleIntensity(noDodges);
 
         const capped = Math.min(noScale, 4.5);
 
