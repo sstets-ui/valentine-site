@@ -91,15 +91,18 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
       background-size: 180px 180px;
     }
+
+    /* ✅ CHANGED: the grid overlay is now your BLACK HOLE GIF */
     .pixel-grid{
       position:absolute;
       inset:0;
-      opacity:.08;
-      background-image:
-        linear-gradient(to right, rgba(15,23,42,.25) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(15,23,42,.25) 1px, transparent 1px);
-      background-size: 26px 26px;
+      opacity: .32; /* tweak: 0.15 subtle, 0.45 intense */
+      background-image: url("https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       mix-blend-mode: overlay;
+      filter: saturate(1.15) contrast(1.08);
     }
 
     /* Floating particles */
@@ -984,7 +987,6 @@
   const pixelCloudSvg = encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="32" viewBox="0 0 64 32">
       <rect width="64" height="32" fill="none"/>
-      <!-- chunky pixel cloud -->
       <g fill="#ffffff">
         <rect x="10" y="14" width="8" height="6"/>
         <rect x="18" y="12" width="10" height="8"/>
@@ -1084,6 +1086,259 @@
   ];
   setImageTryFor(blackholeGif, BLACKHOLE_GIFS, "Blackhole GIF failed.");
 
+  // ============================================================
+  // ✅ MUSIC (added): fanfare on YES + battle loop on NO
+  // ============================================================
+  function playGlueSong() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      if (ctx.state === "suspended") ctx.resume();
+
+      const now = ctx.currentTime;
+      const bpm = 132;
+      const beat = 60 / bpm;
+
+      const delay = ctx.createDelay(1.0);
+      delay.delayTime.value = 0.12;
+
+      const feedback = ctx.createGain();
+      feedback.gain.value = 0.25;
+
+      const wet = ctx.createGain();
+      wet.gain.value = 0.35;
+
+      const dry = ctx.createGain();
+      dry.gain.value = 0.85;
+
+      delay.connect(feedback);
+      feedback.connect(delay);
+      delay.connect(wet);
+      wet.connect(ctx.destination);
+      dry.connect(ctx.destination);
+
+      const noteToFreq = (note) => {
+        if (note === "REST") return null;
+        const m = /^([A-G])(#|b)?(\d)$/.exec(note);
+        if (!m) return null;
+
+        const [, letter, accidental, octaveStr] = m;
+        const octave = Number(octaveStr);
+        const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+        let n = SEMI[letter];
+        if (accidental === "#") n += 1;
+        if (accidental === "b") n -= 1;
+
+        const midi = (octave + 1) * 12 + n;
+        return 440 * Math.pow(2, (midi - 69) / 12);
+      };
+
+      function schedule(sequence, {
+        type = "triangle",
+        volume = 0.12,
+        offset = 0,
+        detune = 0,
+        toDelay = true
+      } = {}) {
+        let t = now + offset;
+        for (const step of sequence) {
+          const dur = step.beats * beat;
+          const freq = noteToFreq(step.note);
+          if (freq) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, t);
+            osc.detune.setValueAtTime(detune, t);
+
+            const attack = Math.min(0.012, dur * 0.25);
+            const release = Math.min(0.09, dur * 0.45);
+
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(volume, t + attack);
+            gain.gain.setValueAtTime(volume, t + Math.max(attack, dur - release));
+            gain.gain.linearRampToValueAtTime(0, t + dur);
+
+            osc.connect(gain);
+            gain.connect(dry);
+            if (toDelay) gain.connect(delay);
+
+            osc.start(t);
+            osc.stop(t + dur);
+          }
+          t += dur;
+        }
+        return t;
+      }
+
+      const lead = [
+        { note: "C5", beats: 0.5 }, { note: "E5", beats: 0.5 }, { note: "G5", beats: 0.5 }, { note: "C6", beats: 1.5 },
+        { note: "B5", beats: 0.5 }, { note: "C6", beats: 2 },
+        { note: "G5", beats: 0.5 }, { note: "C6", beats: 2.5 }
+      ];
+      const harmony = [
+        { note: "E4", beats: 0.5 }, { note: "G4", beats: 0.5 }, { note: "C5", beats: 0.5 }, { note: "E5", beats: 1.5 },
+        { note: "D5", beats: 0.5 }, { note: "E5", beats: 2 },
+        { note: "C5", beats: 0.5 }, { note: "E5", beats: 2.5 }
+      ];
+      const bass = [
+        { note: "C3", beats: 1 }, { note: "REST", beats: 1 },
+        { note: "G3", beats: 1 }, { note: "REST", beats: 1 },
+        { note: "C3", beats: 2 },
+      ];
+      const sparkle = [
+        { note: "C6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 },
+        { note: "B6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 }, { note: "C6", beats: 0.25 },
+        { note: "D6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "D7", beats: 0.25 },
+        { note: "C7", beats: 0.25 }, { note: "A6", beats: 0.25 }, { note: "F6", beats: 0.25 }, { note: "D6", beats: 0.25 },
+        { note: "E6", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "E7", beats: 0.25 },
+        { note: "D7", beats: 0.25 }, { note: "C7", beats: 0.25 }, { note: "G6", beats: 0.25 }, { note: "E6", beats: 0.25 },
+      ];
+
+      const t1 = schedule(lead,    { type: "triangle", volume: 0.14, offset: 0.00, detune: +4 });
+      const t2 = schedule(harmony, { type: "sine",     volume: 0.10, offset: 0.02, detune: -3 });
+      const t3 = schedule(bass,    { type: "square",   volume: 0.06, offset: 0.00, detune:  0, toDelay: false });
+      const t4 = schedule(sparkle, { type: "sine",     volume: 0.07, offset: 0.10, detune: +6 });
+
+      const end = Math.max(t1, t2, t3, t4);
+      setTimeout(() => ctx.close().catch(() => {}), Math.ceil((end - now + 0.35) * 1000));
+    } catch {}
+  }
+
+  let battleCtx = null;
+  let battleMaster = null;
+  let battleInterval = null;
+  let battleStep = 0;
+  let battleIntensity = 1;
+
+  function noiseHit(ctx, time, duration, volume, cutoffHz) {
+    const bufferSize = Math.floor(ctx.sampleRate * duration);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(cutoffHz, time);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(volume, time + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+    src.connect(filter).connect(gain).connect(battleMaster);
+    src.start(time);
+    src.stop(time + duration);
+  }
+
+  function noteToFreqBattle(note) {
+    const m = /^([A-G])(#|b)?(\d)$/.exec(note);
+    if (!m) return null;
+    const [, letter, accidental, octaveStr] = m;
+    const octave = Number(octaveStr);
+    const SEMI = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+    let n = SEMI[letter];
+    if (accidental === "#") n += 1;
+    if (accidental === "b") n -= 1;
+    const midi = (octave + 1) * 12 + n;
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  function startBattleMusic(intensity = 1) {
+    if (battleCtx) return;
+    battleIntensity = intensity;
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    battleCtx = new AudioCtx();
+    if (battleCtx.state === "suspended") battleCtx.resume();
+
+    battleMaster = battleCtx.createGain();
+    battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
+    battleMaster.connect(battleCtx.destination);
+
+    battleStep = 0;
+
+    const tick = () => {
+      if (!battleCtx) return;
+
+      const capped = Math.max(1, Math.min(battleIntensity, 6));
+      const bpm = 120 + capped * 10;
+      const stepDur = 60 / bpm / 2;
+      const t = battleCtx.currentTime + 0.02;
+
+      const riff = ["E3","G3","A3","G3","E3","D3","E3","B2"];
+      const lead = ["E4","G4","A4","B4","A4","G4","E4","D4"];
+
+      const bassNote = riff[battleStep % riff.length];
+      const bassOsc = battleCtx.createOscillator();
+      bassOsc.type = "sawtooth";
+      bassOsc.frequency.setValueAtTime(noteToFreqBattle(bassNote), t);
+
+      const bassGain = battleCtx.createGain();
+      bassGain.gain.setValueAtTime(0, t);
+      bassGain.gain.linearRampToValueAtTime(0.12 + capped * 0.01, t + 0.01);
+      bassGain.gain.exponentialRampToValueAtTime(0.0001, t + stepDur);
+
+      const bassFilter = battleCtx.createBiquadFilter();
+      bassFilter.type = "lowpass";
+      bassFilter.frequency.setValueAtTime(600 + capped * 180, t);
+
+      bassOsc.connect(bassFilter).connect(bassGain).connect(battleMaster);
+      bassOsc.start(t);
+      bassOsc.stop(t + stepDur);
+
+      if (battleStep % 2 === 0) {
+        const leadNote = lead[(battleStep / 2) % lead.length];
+        const leadOsc = battleCtx.createOscillator();
+        leadOsc.type = "square";
+        leadOsc.frequency.setValueAtTime(noteToFreqBattle(leadNote), t);
+
+        const leadGain = battleCtx.createGain();
+        leadGain.gain.setValueAtTime(0, t);
+        leadGain.gain.linearRampToValueAtTime(0.07 + capped * 0.008, t + 0.008);
+        leadGain.gain.exponentialRampToValueAtTime(0.0001, t + stepDur * 0.9);
+
+        leadOsc.connect(leadGain).connect(battleMaster);
+        leadOsc.start(t);
+        leadOsc.stop(t + stepDur * 0.9);
+      }
+
+      const isKick = battleStep % 4 === 0 || battleStep % 4 === 2;
+      const isSnare = battleStep % 4 === 1 || battleStep % 4 === 3;
+
+      if (isKick)  noiseHit(battleCtx, t, 0.06, 0.10 + capped * 0.01, 220 + capped * 20);
+      if (isSnare) noiseHit(battleCtx, t, 0.05, 0.06 + capped * 0.008, 1200 + capped * 120);
+      noiseHit(battleCtx, t, 0.02, 0.03 + capped * 0.004, 6000 + capped * 300);
+
+      battleStep++;
+    };
+
+    battleInterval = setInterval(tick, 90);
+    tick();
+  }
+
+  function updateBattleIntensity(intensity) {
+    battleIntensity = intensity;
+    if (!battleCtx) return;
+    battleMaster.gain.value = 0.12 + Math.min(battleIntensity, 6) * 0.02;
+  }
+
+  function stopBattleMusic() {
+    if (battleInterval) clearInterval(battleInterval);
+    battleInterval = null;
+
+    if (battleCtx) {
+      const ctx = battleCtx;
+      battleCtx = null;
+      battleMaster = null;
+      setTimeout(() => ctx.close().catch(() => {}), 50);
+    }
+  }
+
   // ========== Lock YES/NO until boss beaten ==========
   const yesBtn = document.getElementById("yesBtn");
   const noBtn = document.getElementById("noBtn");
@@ -1127,6 +1382,7 @@
 
   // ========== YES/NO handlers ==========
   let yesFinalTimer = null;
+  let noClickCount = 0; // ✅ added: so NO music ramps up each click
 
   yesBtn.addEventListener("click", () => {
     if (yesLocked){
@@ -1134,6 +1390,12 @@
       yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
       return;
     }
+
+    // ✅ MUSIC still plays on YES
+    stopBattleMusic();
+    playGlueSong();
+    noClickCount = 0;
+
     setImageTryFor(valImage, GIFS.yesMain, "YES GIF failed to load.");
     hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
     noBtn.style.display = "none";
@@ -1148,6 +1410,12 @@
       noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
       return;
     }
+
+    // ✅ MUSIC still plays on NO (battle loop)
+    noClickCount++;
+    startBattleMusic(noClickCount);
+    updateBattleIntensity(noClickCount);
+
     setImageTryFor(valImage, GIFS.no, "NO GIF failed to load.");
     hint.textContent = "No (Are you sure about that?) 😳";
   });
@@ -1379,7 +1647,6 @@
       setHPBars();
     }
     if (it.effect === "capture"){
-      // cute fake capture chance
       const roll = Math.random();
       if (roll > 0.72){
         battleText.textContent = "The Love Ball clicked! Valentine is captured 💘 (it’s basically YES.)";
@@ -2242,3 +2509,4 @@
 </script>
 </body>
 </html>
+
