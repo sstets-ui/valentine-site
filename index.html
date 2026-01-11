@@ -50,6 +50,7 @@
         position: relative;
         filter: drop-shadow(0 10px 14px rgba(0,0,0,.16));
         transition: transform .12s ease, filter .12s ease;
+        will-change: transform; /* ✅ helps smooth scaling/moving */
       }
 
       .svg-heart svg{
@@ -61,7 +62,7 @@
       .svg-heart.yes path{ fill: #ef4444; } /* red */
       .svg-heart.no  path{ fill: #f43f5e; } /* rose */
 
-      /* ✅ FIX: nudge text up so it doesn't sit in the heart dip */
+      /* ✅ Text nudge so it doesn't sit in the heart dip */
       .svg-heart span{
         position: absolute;
         inset: 0;
@@ -75,6 +76,7 @@
         letter-spacing: .7px;
         text-shadow: 0 1px 2px rgba(0,0,0,.25);
         user-select: none;
+        pointer-events: none;
       }
 
       .svg-heart:hover{
@@ -94,7 +96,7 @@
     <div id="hearts" aria-hidden="true"></div>
 
     <div class="card bg-white rounded-2xl shadow-lg p-6 max-w-md w-full text-center">
-      <h1 class="text-2xl font-bold mb-4">Will you be my Valentine Andrew Getzow? Pretty Pleases? Newest Version 💘</h1>
+      <h1 class="text-2xl font-bold mb-4">Will you be my Valentine Andrew Getzow? Pretty Pleasesss? 💘</h1>
 
       <img
         id="valImage"
@@ -334,6 +336,35 @@
 
       let yesFinalTimer = null;
 
+      // ------------------ NO button gets huge + runs away ------------------
+      let noScale = 1;
+      let noDodges = 0;
+
+      function applyNoTransform(extra = "") {
+        const capped = Math.min(noScale, 4.5);
+        noBtn.style.transform = `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) ${extra}`;
+      }
+
+      // starts dodging after 2 clicks
+      noBtn.addEventListener("mouseenter", () => {
+        if (noDodges < 2) return;
+
+        const rect = noBtn.getBoundingClientRect();
+        const pad = 12;
+
+        const maxX = window.innerWidth - rect.width - pad;
+        const maxY = window.innerHeight - rect.height - pad;
+
+        const tx = Math.floor(Math.random() * maxX) - rect.left + pad;
+        const ty = Math.floor(Math.random() * maxY) - rect.top + pad;
+
+        noBtn.dataset.tx = tx;
+        noBtn.dataset.ty = ty;
+
+        noBtn.style.transition = "transform 0.15s ease";
+        applyNoTransform();
+      });
+
       yesBtn.addEventListener("click", () => {
         setImageTry(GIFS.yesMain, "YES GIF failed to load.");
         hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
@@ -348,9 +379,27 @@
         }, 2000);
       });
 
+      // REPLACED NO handler: grows + wiggles + eventually runs away
       noBtn.addEventListener("click", () => {
         setImageTry(GIFS.no, "NO GIF failed to load.");
         hint.textContent = "No (Are you sure about that?) 😳";
+
+        noScale *= 1.35;
+        noDodges += 1;
+
+        const capped = Math.min(noScale, 4.5);
+
+        noBtn.animate(
+          [
+            { transform: `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) rotate(0deg)` },
+            { transform: `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) rotate(-7deg)` },
+            { transform: `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) rotate(7deg)` },
+            { transform: `translate(${noBtn.dataset.tx || 0}px, ${noBtn.dataset.ty || 0}px) scale(${capped}) rotate(0deg)` },
+          ],
+          { duration: 220, iterations: 1 }
+        );
+
+        applyNoTransform();
       });
     </script>
   </body>
