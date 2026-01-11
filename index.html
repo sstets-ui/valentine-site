@@ -41,7 +41,7 @@
 
       /* --------- Neat heart buttons (SVG) --------- */
       .svg-heart{
-        width: 56px;          /* smaller + tidy */
+        width: 56px;
         height: 50px;
         border: 0;
         background: transparent;
@@ -61,16 +61,18 @@
       .svg-heart.yes path{ fill: #ef4444; } /* red */
       .svg-heart.no  path{ fill: #f43f5e; } /* rose */
 
+      /* ✅ FIX: nudge text up so it doesn't sit in the heart dip */
       .svg-heart span{
         position: absolute;
         inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        transform: translateY(-4px);
         color: white;
         font-weight: 900;
-        font-size: 12px;      /* readable */
-        letter-spacing: .6px;
+        font-size: 11px;
+        letter-spacing: .7px;
         text-shadow: 0 1px 2px rgba(0,0,0,.25);
         user-select: none;
       }
