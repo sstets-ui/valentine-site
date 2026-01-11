@@ -56,21 +56,24 @@
         alt="Valentine gif"
       />
 
-      <div class="flex gap-3 justify-center">
+      <!-- HEART BUTTONS -->
+      <div class="flex gap-6 justify-center">
         <button
           id="yesBtn"
-          class="px-5 py-3 rounded-xl font-semibold bg-blue-500 text-white hover:bg-blue-600"
+          class="w-20 h-20 rounded-full bg-red-500 text-white text-4xl flex items-center justify-center shadow-lg hover:bg-red-600 active:scale-95 transition"
           type="button"
+          aria-label="Yes"
         >
-          Yes 💙
+          ❤️
         </button>
 
         <button
           id="noBtn"
-          class="px-5 py-3 rounded-xl font-semibold bg-gray-200 hover:bg-gray-300"
+          class="w-20 h-20 rounded-full bg-red-500 text-white text-4xl flex items-center justify-center shadow-lg hover:bg-red-600 active:scale-95 transition"
           type="button"
+          aria-label="No"
         >
-          No
+          ❤️
         </button>
       </div>
 
@@ -134,20 +137,19 @@
       const yesBtn = document.getElementById("yesBtn");
       const noBtn = document.getElementById("noBtn");
 
-      // All-GIPHY (reliable for you), with optional Tenor fallback for Eevee
+      // GIFS (start + final Eevee updated)
       const GIFS = {
         start: [
-          "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
+          "https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif",
+          "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" // fallback
         ],
         yesMain: [
           "https://media.giphy.com/media/sQfnbNwfNcQly/giphy.gif"
         ],
-        // After YES, swap to Eevee (GIPHY first; Tenor as backup)
+        // After YES, swap to Eevee (YOUR requested Tenor gif first)
         yesFinal: [
-          // GIPHY direct (from GIPHY’s media CDN)
-          "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnd5OW94bW81Zzg5MXpyMHB6eTE0azRiMGU5OHhlYTl4MmNiMHh6biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TqK5V0YnrWaR2/200.gif",
-          // optional fallback (Tenor direct gif)
-          "https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"
+          "https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif",
+          "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnd5OW94bW81Zzg5MXpyMHB6eTE0azRiMGU5OHhlYTl4MmNiMHh6biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TqK5V0YnrWaR2/200.gif" // fallback
         ],
         no: [
           "https://media.giphy.com/media/3og0IPxMM0erATueVW/giphy.gif"
@@ -157,7 +159,7 @@
       // initial
       setImageTry(
         GIFS.start,
-        "Start GIF failed to load. (Unlikely if GIPHY works for you.)"
+        "Start GIF failed to load."
       );
 
       // tiny sound
@@ -186,10 +188,11 @@
       let yesFinalTimer = null;
 
       yesBtn.addEventListener("click", () => {
-        // show first YES gif
         setImageTry(GIFS.yesMain, "YES GIF failed to load.");
 
-        yesBtn.textContent = "Forever 💙";
+        // Text below since the buttons are hearts
+        hint.textContent = "You are now my Valentine FOREVER...er I mean um, for uh 2026! 💙";
+
         noBtn.style.display = "none";
 
         playGlueSong();
@@ -200,20 +203,18 @@
         yesFinalTimer = setTimeout(() => {
           setImageTry(
             GIFS.yesFinal,
-            "Final Eevee GIF failed to load. If this happens, we’ll pick a different GIPHY Eevee link."
+            "Final Eevee GIF failed to load."
           );
         }, 2000);
       });
 
       noBtn.addEventListener("click", () => {
         setImageTry(GIFS.no, "NO GIF failed to load.");
-        noBtn.textContent = "Are you sure about that?";
+        hint.textContent = "No (Are you sure about that?) 😳";
 
         yesBtn.classList.add("scale-125");
         setTimeout(() => yesBtn.classList.remove("scale-125"), 300);
       });
     </script>
   </body>
-</html>
-
 </html>
