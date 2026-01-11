@@ -42,9 +42,9 @@
         background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));
       }
 
-      /* ---------------- Heart-shaped buttons ---------------- */
+      /* ---------------- Heart-shaped buttons (SMALLER) ---------------- */
       .heart-btn{
-        --size: 84px;
+        --size: 64px; /* was 84px */
         width: var(--size);
         height: var(--size);
         position: relative;
@@ -52,9 +52,10 @@
         cursor: pointer;
         background: #ef4444;              /* Tailwind red-500 */
         transform: rotate(-45deg);
-        border-radius: 14px;
-        box-shadow: 0 12px 20px rgba(0,0,0,.18);
+        border-radius: 12px;
+        box-shadow: 0 10px 16px rgba(0,0,0,.16);
         transition: transform .15s ease, filter .15s ease;
+        overflow: visible;
       }
 
       /* the two top lobes */
@@ -87,7 +88,7 @@
         transform: rotate(45deg);         /* rotate text back */
         color:#fff;
         font-weight: 800;
-        font-size: 18px;
+        font-size: 14px;                  /* was 18px */
         letter-spacing: .4px;
         text-transform: uppercase;
         user-select: none;
@@ -114,8 +115,8 @@
         alt="Valentine gif"
       />
 
-      <!-- HEART BUTTONS (heart-shaped + Yes/No text) -->
-      <div class="flex gap-8 justify-center">
+      <!-- HEART BUTTONS (smaller + more spacing) -->
+      <div class="flex gap-10 justify-center">
         <button id="yesBtn" class="heart-btn yes" type="button" aria-label="Yes">
           <span>Yes</span>
         </button>
