@@ -1,4 +1,4 @@
-<html lang="en">
+file<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -2307,244 +2307,835 @@
   bossStartBtn.addEventListener("click", startBossFight);
   resetBossFight();
 
-  // ========== Platformer ==========
-  const platCanvas = document.getElementById("platCanvas");
-  const platCtx = platCanvas.getContext("2d");
-  const platStartBtn = document.getElementById("platStart");
-  const platOverlay = document.getElementById("platOverlay");
-  const platMsg = document.getElementById("platMsg");
-  const platCountEl = document.getElementById("platCount");
+// ========== Platformer (Valentine C-Side Edition) ==========
+const platCanvas = document.getElementById("platCanvas");
+const platCtx = platCanvas.getContext("2d");
+const platStartBtn = document.getElementById("platStart");
+const platOverlay = document.getElementById("platOverlay");
+const platMsg = document.getElementById("platMsg");
+const platCountEl = document.getElementById("platCount");
 
-  let platRaf = null;
-  let platLast = 0;
+let platRaf = null;
+let platLast = 0;
 
-  fitCanvasToCSS(platCanvas, platCtx);
+fitCanvasToCSS(platCanvas, platCtx);
 
-  const platGame = {
-    running: false,
-    heartsTarget: 7,
-    heartsGot: 0,
-    camX: 0,
-    levelW: 1500,
-    gravity: 0.55,
-    player: { x: 60, y: 160, w: 18, h: 22, vx: 0, vy: 0, onGround: false },
-    platforms: [],
-    hearts: [],
-    goal: { x: 1420, y: 140, w: 24, h: 24 }
-  };
+// --- Valentine palette ---
+const VDAY = {
+  pink: "#ff4d8d",
+  hotPink: "#ff2d6d",
+  blush: "#ffd1dc",
+  cream: "#fff5f7",
+  lavender: "#d8ccff",
+  mint: "#bff7e6",
+  cocoa: "#6b3f2a",
+  ink: "rgba(15,23,42,0.20)"
+};
 
-  function rectsOverlap(a, b){
-    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+const SWEETS = ["🍫", "🌹", "💖", "🍓", "🧁"];
+
+const platGame = {
+  running: false,
+
+  // Celeste-y target (keep your UI counter)
+  heartsTarget: 14,
+  heartsGot: 0,
+
+  camX: 0,
+  levelW: 1900,
+
+  // movement tuning (C-side-ish)
+  gravity: 0.62,
+  maxFall: 14.5,
+  accel: 0.62,
+  maxRun: 4.55,
+  friction: 0.80,
+
+  jumpVel: -9.9,
+  wallJumpX: 5.6,
+  wallJumpY: -9.6,
+  wallSlideMax: 3.1,
+
+  // buffers (tight but forgiving enough to feel good)
+  coyoteMax: 0.085,
+  jumpBufferMax: 0.11,
+
+  dashSpeed: 9.2,
+  dashDuration: 0.14,
+  dashCooldown: 0.05,
+
+  player: {
+    x: 60, y: 160, w: 18, h: 22,
+    vx: 0, vy: 0,
+    onGround: false,
+    onWall: 0,      // -1 = wall on left, +1 = wall on right, 0 = none
+    facing: 1,
+
+    coyote: 0,
+    jumpBuffer: 0,
+
+    dashAvail: 1,
+    dashT: 0,
+    dashCd: 0
+  },
+
+  spawn: { x: 60, y: 160 },
+  platforms: [],
+  hazards: [],        // spikes etc
+  movers: [],         // moving platforms
+  hearts: [],
+
+  dashCrystals: [],   // dash refresh pickups
+  checkpoints: [],
+
+  goal: { x: 1820, y: 130, w: 28, h: 28 },
+
+  bgHearts: [],
+  prev: { jump: false, dash: false }
+};
+
+function rectsOverlap(a, b){
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function rand(min, max){ return min + Math.random()*(max-min); }
+function sign(n){ return n < 0 ? -1 : (n > 0 ? 1 : 0); }
+
+function initValentineSky(){
+  const w = platCanvas.getBoundingClientRect().width;
+  const h = platCanvas.getBoundingClientRect().height;
+  platGame.bgHearts = Array.from({ length: 28 }, () => ({
+    x: Math.random()*w,
+    y: Math.random()*h,
+    vx: rand(-0.15, 0.15),
+    vy: rand(0.12, 0.50),
+    a: rand(0.08, 0.22),
+    emoji: Math.random() < 0.65 ? "💗" : (Math.random() < 0.5 ? "💖" : "✨")
+  }));
+}
+
+function drawSprinklePlatform(ctx, x, y, w, h){
+  // shadow
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = "#000";
+  roundRectPath(ctx, x+2, y+4, w, h, 14);
+  ctx.fill();
+  ctx.restore();
+
+  // base candy
+  const g = ctx.createLinearGradient(x, y, x, y+h);
+  g.addColorStop(0, VDAY.cream);
+  g.addColorStop(1, VDAY.blush);
+
+  ctx.fillStyle = g;
+  ctx.strokeStyle = VDAY.ink;
+  ctx.lineWidth = 2;
+  roundRectPath(ctx, x, y, w, h, 14);
+  ctx.fill();
+  ctx.stroke();
+
+  // frosting stripe
+  ctx.globalAlpha = 0.7;
+  ctx.fillStyle = "#ffffff";
+  roundRectPath(ctx, x+8, y+6, Math.max(0, w-16), Math.max(0, h-12), 12);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // sprinkles
+  for (let i = 0; i < Math.floor(w / 22); i++){
+    const sx = x + 14 + i*22 + (Math.random()*4);
+    const sy = y + 8 + (Math.random()*(h-16));
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate((Math.random()*0.8)-0.4);
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = Math.random() < 0.5 ? VDAY.lavender : VDAY.mint;
+    ctx.fillRect(-5, -1.5, 10, 3);
+    ctx.restore();
   }
 
-  function resetPlatformer(){
-    platGame.running = false;
-    platGame.heartsGot = 0;
-    platCountEl.textContent = "0";
-    platMsg.innerHTML = `Collect <b>${platGame.heartsTarget}</b> hearts 💖 and touch the <b>love letter</b> 💌.`;
-    platOverlay.style.opacity = "1";
-    platStartBtn.style.opacity = "1";
-    platStartBtn.style.pointerEvents = "auto";
-    platStartBtn.textContent = "Start Platformer";
+  // tiny hearts along edge
+  ctx.font = "12px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  ctx.globalAlpha = 0.35;
+  const count = Math.max(1, Math.floor(w / 90));
+  for (let i=0;i<count;i++){
+    ctx.fillText("💗", x + 18 + i*(w/(count)), y + h - 6);
+  }
+  ctx.globalAlpha = 1;
+}
 
-    platGame.player.x = 60; platGame.player.y = 160;
-    platGame.player.vx = 0; platGame.player.vy = 0; platGame.player.onGround = false;
-    platGame.camX = 0;
+function drawCupidHeart(ctx, cx, cy, size){
+  ctx.save();
+  ctx.translate(cx, cy);
 
-    platGame.platforms = [
-      { x: 0,   y: 250, w: 420, h: 22 },
-      { x: 460, y: 220, w: 170, h: 18 },
-      { x: 680, y: 190, w: 160, h: 18 },
-      { x: 890, y: 235, w: 190, h: 18 },
-      { x: 1120,y: 190, w: 200, h: 18 },
-      { x: 1360,y: 245, w: 160, h: 18 },
-      { x: 0,   y: 300, w: 1500, h: 70 },
-    ];
+  ctx.fillStyle = VDAY.hotPink;
+  drawHeartShape(ctx, 0, 2, size);
+  ctx.fill();
 
-    platGame.hearts = [
-      { x: 140, y: 205, taken: false },
-      { x: 320, y: 195, taken: false },
-      { x: 520, y: 175, taken: false },
-      { x: 730, y: 145, taken: false },
-      { x: 940, y: 185, taken: false },
-      { x: 1180,y: 145, taken: false },
-      { x: 1370,y: 190, taken: false },
-    ];
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = "#fff";
+  drawHeartShape(ctx, -3, -2, size*0.55);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // wings
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+
+  // left wing
+  ctx.beginPath();
+  ctx.moveTo(-size*0.9, -1);
+  ctx.quadraticCurveTo(-size*1.25, -size*0.45, -size*0.75, -size*0.85);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(-size*0.75, 2);
+  ctx.quadraticCurveTo(-size*1.1, -size*0.2, -size*0.65, -size*0.6);
+  ctx.stroke();
+
+  // right wing
+  ctx.beginPath();
+  ctx.moveTo(size*0.9, -1);
+  ctx.quadraticCurveTo(size*1.25, -size*0.45, size*0.75, -size*0.85);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(size*0.75, 2);
+  ctx.quadraticCurveTo(size*1.1, -size*0.2, size*0.65, -size*0.6);
+  ctx.stroke();
+
+  // tiny cupid arrow
+  ctx.strokeStyle = "rgba(255,255,255,0.85)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-size*0.1, size*0.95);
+  ctx.lineTo(size*0.9, size*0.15);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(size*0.85, size*0.15);
+  ctx.lineTo(size*0.65, size*0.1);
+  ctx.lineTo(size*0.75, size*0.3);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawSpikes(ctx, s){
+  // simple spike strip rect; draw as triangles
+  ctx.save();
+  ctx.globalAlpha = 0.95;
+  ctx.fillStyle = "rgba(255, 45, 109, 0.90)";
+  ctx.strokeStyle = "rgba(15,23,42,0.18)";
+  ctx.lineWidth = 1;
+
+  const count = Math.max(1, Math.floor((s.w || s.h) / 10));
+  ctx.beginPath();
+
+  if (s.dir === "up"){
+    const y = s.y + s.h;
+    for (let i=0;i<count;i++){
+      const x0 = s.x + (i*(s.w/count));
+      const x1 = s.x + ((i+1)*(s.w/count));
+      const xm = (x0+x1)/2;
+      ctx.moveTo(x0, y);
+      ctx.lineTo(xm, s.y);
+      ctx.lineTo(x1, y);
+    }
+  } else if (s.dir === "down"){
+    const y = s.y;
+    for (let i=0;i<count;i++){
+      const x0 = s.x + (i*(s.w/count));
+      const x1 = s.x + ((i+1)*(s.w/count));
+      const xm = (x0+x1)/2;
+      ctx.moveTo(x0, y);
+      ctx.lineTo(xm, s.y + s.h);
+      ctx.lineTo(x1, y);
+    }
+  } else if (s.dir === "left"){
+    const x = s.x + s.w;
+    for (let i=0;i<count;i++){
+      const y0 = s.y + (i*(s.h/count));
+      const y1 = s.y + ((i+1)*(s.h/count));
+      const ym = (y0+y1)/2;
+      ctx.moveTo(x, y0);
+      ctx.lineTo(s.x, ym);
+      ctx.lineTo(x, y1);
+    }
+  } else { // right
+    const x = s.x;
+    for (let i=0;i<count;i++){
+      const y0 = s.y + (i*(s.h/count));
+      const y1 = s.y + ((i+1)*(s.h/count));
+      const ym = (y0+y1)/2;
+      ctx.moveTo(x, y0);
+      ctx.lineTo(s.x + s.w, ym);
+      ctx.lineTo(x, y1);
+    }
   }
 
-  function updatePlatformer(){
-    const w = platCanvas.getBoundingClientRect().width;
-    const left = keys.has("ArrowLeft") || keys.has("a");
-    const right = keys.has("ArrowRight") || keys.has("d");
-    const jump = keys.has("ArrowUp") || keys.has("w") || keys.has(" ");
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
 
-    const p = platGame.player;
-    const accel = 0.55;
-    const maxV = 4.2;
-    const friction = 0.82;
+function resetPlatformer(){
+  platGame.running = false;
+  platGame.heartsGot = 0;
+  platCountEl.textContent = "0";
 
-    if (left) p.vx -= accel;
-    if (right) p.vx += accel;
-    if (!left && !right) p.vx *= friction;
-    p.vx = clamp2(p.vx, -maxV, maxV);
+  platMsg.innerHTML = `
+    <b>C-Side Love Run 💘</b><br>
+    Collect <b>${platGame.heartsTarget}</b> treats 🍫🌹, avoid spikes 💔, and deliver the gift 💝.<br>
+    <span class="opacity-80">Controls: Move (←→ / A D), Jump (↑ / W / Space), Dash (Shift / X) + direction.</span>
+  `;
 
-    if (jump && p.onGround){
-      p.vy = -9.3;
-      p.onGround = false;
+  platOverlay.style.opacity = "1";
+  platStartBtn.style.opacity = "1";
+  platStartBtn.style.pointerEvents = "auto";
+  platStartBtn.textContent = "Start C-Side 💞";
+
+  const p = platGame.player;
+  p.x = 60; p.y = 160;
+  p.vx = 0; p.vy = 0;
+  p.onGround = false;
+  p.onWall = 0;
+  p.facing = 1;
+  p.coyote = 0;
+  p.jumpBuffer = 0;
+  p.dashAvail = 1;
+  p.dashT = 0;
+  p.dashCd = 0;
+
+  platGame.spawn = { x: 60, y: 160 };
+  platGame.camX = 0;
+
+  // --- C-Side-ish layout: tiny ledges + spike pits + wall tech + moving timing ---
+  platGame.platforms = [
+    // Start zone
+    { id:"p0", x: 0,   y: 300, w: 260, h: 22 },
+    { id:"p1", x: 285, y: 262, w: 68,  h: 16 },
+    { id:"p2", x: 382, y: 230, w: 62,  h: 16 },
+
+    // Tight dash chain
+    { id:"p3", x: 488, y: 260, w: 60,  h: 16 },
+    { id:"p4", x: 570, y: 220, w: 56,  h: 16 },
+    { id:"p5", x: 650, y: 190, w: 54,  h: 16 },
+
+    // Wall section (two thin pillars)
+    { id:"w1", x: 760, y: 160, w: 24,  h: 140 },
+    { id:"w2", x: 860, y: 120, w: 24,  h: 180 },
+
+    // A few evil ledges
+    { id:"p6", x: 940,  y: 200, w: 72,  h: 16 },
+    { id:"p7", x: 1040, y: 172, w: 64,  h: 16 },
+
+    // Moving platform lane (timed)
+    { id:"mBase", x: 1165, y: 240, w: 76, h: 16, moving: true, axis:"x", range: 150, speed: 1.35 },
+
+    // Post-mover micro hops
+    { id:"p8",  x: 1365, y: 210, w: 54, h: 16 },
+    { id:"p9",  x: 1450, y: 178, w: 54, h: 16 },
+    { id:"p10", x: 1535, y: 150, w: 62, h: 16 },
+
+    // Final approach
+    { id:"p11", x: 1640, y: 182, w: 62, h: 16 },
+    { id:"p12", x: 1730, y: 160, w: 58, h: 16 },
+
+    // Ground (mostly deadly via spikes above it)
+    { id:"ground", x: 0, y: 340, w: platGame.levelW, h: 80 }
+  ];
+
+  // moving platform state (separate list so we can update deltas)
+  platGame.movers = platGame.platforms
+    .filter(p => p.moving)
+    .map(p => ({ ref: p, t: 0, lastX: p.x, lastY: p.y, dx: 0, dy: 0 }));
+
+  // spikes (instant death)
+  platGame.hazards = [
+    // spike pits between ledges (up spikes)
+    { x: 260, y: 322, w: 26, h: 18, dir:"up" },
+    { x: 353, y: 322, w: 29, h: 18, dir:"up" },
+
+    { x: 444, y: 322, w: 44, h: 18, dir:"up" },
+    { x: 548, y: 322, w: 22, h: 18, dir:"up" },
+    { x: 626, y: 322, w: 24, h: 18, dir:"up" },
+
+    // wall spikes to force wall jumps
+    { x: 784, y: 210, w: 14, h: 80, dir:"right" },
+    { x: 846, y: 150, w: 14, h: 110, dir:"left" },
+
+    // moving lane spikes
+    { x: 1110, y: 322, w: 240, h: 18, dir:"up" },
+
+    // final choke spikes
+    { x: 1605, y: 322, w: 190, h: 18, dir:"up" },
+    { x: 1790, y: 210, w: 14, h: 95, dir:"left" }
+  ];
+
+  // dash crystals (refill dash mid-air)
+  platGame.dashCrystals = [
+    { x: 720, y: 160, used: false },
+    { x: 1240, y: 210, used: false },
+    { x: 1585, y: 118, used: false }
+  ];
+
+  // checkpoint (mid)
+  platGame.checkpoints = [
+    { x: 980, y: 155, w: 26, h: 40, hit: false }
+  ];
+
+  // treats (still needed to win)
+  const spots = [
+    { x: 120,  y: 250 },
+    { x: 315,  y: 225 },
+    { x: 402,  y: 195 },
+    { x: 512,  y: 228 },
+    { x: 586,  y: 186 },
+    { x: 662,  y: 156 },
+    { x: 776,  y: 130 },
+    { x: 872,  y: 105 },
+    { x: 962,  y: 170 },
+    { x: 1060, y: 142 },
+    { x: 1210, y: 200 },
+    { x: 1378, y: 182 },
+    { x: 1548, y: 122 },
+    { x: 1740, y: 132 }
+  ];
+
+  platGame.hearts = spots.slice(0, platGame.heartsTarget).map(s => ({
+    x: s.x, y: s.y,
+    taken: false,
+    emoji: SWEETS[Math.floor(Math.random()*SWEETS.length)]
+  }));
+
+  initValentineSky();
+}
+
+function diePlatformer(){
+  const p = platGame.player;
+  // respawn at checkpoint / spawn
+  p.x = platGame.spawn.x;
+  p.y = platGame.spawn.y;
+  p.vx = 0; p.vy = 0;
+  p.onGround = false;
+  p.onWall = 0;
+  p.coyote = 0;
+  p.jumpBuffer = 0;
+  p.dashAvail = 1;
+  p.dashT = 0;
+  p.dashCd = 0;
+
+  try { confetti({ particleCount: 40, spread: 70, origin: { y: 0.55 } }); } catch {}
+  platMsg.innerHTML = `Ouch 💔 Respawn! (C-Side means pain… but make it cute 💞)`;
+}
+
+function updateMovingPlatforms(dt){
+  for (const m of platGame.movers){
+    const p = m.ref;
+    m.lastX = p.x; m.lastY = p.y;
+
+    m.t += dt * p.speed;
+
+    if (p.axis === "x"){
+      p.x = (p.baseX ?? (p.baseX = p.x)) + Math.sin(m.t * Math.PI * 2) * p.range;
+    } else {
+      p.y = (p.baseY ?? (p.baseY = p.y)) + Math.sin(m.t * Math.PI * 2) * p.range;
     }
 
-    p.vy += platGame.gravity;
-    p.vy = clamp2(p.vy, -20, 12);
+    m.dx = p.x - m.lastX;
+    m.dy = p.y - m.lastY;
+  }
+}
 
-    p.x += p.vx;
-    p.y += p.vy;
+function moveAndCollide(dt){
+  const p = platGame.player;
 
-    p.x = clamp2(p.x, 0, platGame.levelW - p.w);
-    if (p.y > 440) { p.y = 120; p.vy = 0; }
+  // Reset wall info each step; we'll set it if we collide sideways
+  p.onWall = 0;
 
-    p.onGround = false;
-    for (const plat of platGame.platforms){
-      const a = { x: p.x, y: p.y, w: p.w, h: p.h };
-      const b = { x: plat.x, y: plat.y, w: plat.w, h: plat.h };
-      if (rectsOverlap(a,b)){
-        if (p.vy > 0 && (p.y + p.h - p.vy) <= plat.y + 2){
-          p.y = plat.y - p.h;
-          p.vy = 0;
-          p.onGround = true;
-        } else if (p.vy < 0 && (p.y - p.vy) >= plat.y + plat.h - 2){
-          p.y = plat.y + plat.h;
-          p.vy = 0;
+  // ---- Horizontal ----
+  p.x += p.vx;
+
+  for (const plat of platGame.platforms){
+    const a = { x: p.x, y: p.y, w: p.w, h: p.h };
+    const b = { x: plat.x, y: plat.y, w: plat.w, h: plat.h };
+    if (!rectsOverlap(a,b)) continue;
+
+    if (p.vx > 0){
+      p.x = plat.x - p.w;
+      p.vx = 0;
+      p.onWall = +1;
+    } else if (p.vx < 0){
+      p.x = plat.x + plat.w;
+      p.vx = 0;
+      p.onWall = -1;
+    }
+  }
+
+  // ---- Vertical ----
+  p.y += p.vy;
+  p.onGround = false;
+
+  for (const plat of platGame.platforms){
+    const a = { x: p.x, y: p.y, w: p.w, h: p.h };
+    const b = { x: plat.x, y: plat.y, w: plat.w, h: plat.h };
+    if (!rectsOverlap(a,b)) continue;
+
+    if (p.vy > 0){
+      // landing
+      p.y = plat.y - p.h;
+      p.vy = 0;
+      p.onGround = true;
+
+      // carry by moving platforms if we landed on them this step
+      if (plat.moving){
+        const mover = platGame.movers.find(m => m.ref === plat);
+        if (mover){
+          p.x += mover.dx;
+          p.y += mover.dy;
         }
       }
+    } else if (p.vy < 0){
+      // head bonk
+      p.y = plat.y + plat.h;
+      p.vy = 0;
+    }
+  }
+}
+
+function updatePlatformer(dt){
+  const w = platCanvas.getBoundingClientRect().width;
+
+  // Inputs
+  const left  = keys.has("ArrowLeft")  || keys.has("a");
+  const right = keys.has("ArrowRight") || keys.has("d");
+  const up    = keys.has("ArrowUp")    || keys.has("w");
+  const down  = keys.has("ArrowDown")  || keys.has("s");
+  const jumpHeld = up || keys.has(" ") || keys.has("Spacebar");
+  const dashHeld = keys.has("Shift") || keys.has("x");
+
+  const pressedJump = jumpHeld && !platGame.prev.jump;
+  const pressedDash = dashHeld && !platGame.prev.dash;
+  platGame.prev.jump = jumpHeld;
+  platGame.prev.dash = dashHeld;
+
+  const p = platGame.player;
+
+  // Facing
+  if (left) p.facing = -1;
+  if (right) p.facing = +1;
+
+  // Buffers
+  p.jumpBuffer = Math.max(0, p.jumpBuffer - dt);
+  p.coyote = Math.max(0, p.coyote - dt);
+
+  if (pressedJump) p.jumpBuffer = platGame.jumpBufferMax;
+
+  // Dash cooldown/time
+  p.dashCd = Math.max(0, p.dashCd - dt);
+  if (p.dashT > 0){
+    p.dashT = Math.max(0, p.dashT - dt);
+  }
+
+  // Update movers BEFORE physics so collision uses current positions
+  updateMovingPlatforms(dt);
+
+  // Refill dash on ground (Celeste style)
+  if (p.onGround){
+    p.dashAvail = 1;
+    p.coyote = platGame.coyoteMax;
+  }
+
+  // Horizontal accel (disabled during dash)
+  if (p.dashT <= 0){
+    if (left)  p.vx -= platGame.accel;
+    if (right) p.vx += platGame.accel;
+    if (!left && !right) p.vx *= platGame.friction;
+    p.vx = clamp2(p.vx, -platGame.maxRun, platGame.maxRun);
+  }
+
+  // Gravity / fall (disabled during dash)
+  if (p.dashT <= 0){
+    p.vy += platGame.gravity;
+    p.vy = clamp2(p.vy, -22, platGame.maxFall);
+  }
+
+  // Apply movement + collisions
+  moveAndCollide(dt);
+
+  // Wall slide (after collisions)
+  if (!p.onGround && p.onWall !== 0 && p.dashT <= 0 && p.vy > 0){
+    p.vy = Math.min(p.vy, platGame.wallSlideMax);
+  }
+
+  // Jump resolve (buffer + coyote + wall jump)
+  if (p.jumpBuffer > 0){
+    if (p.onGround || p.coyote > 0){
+      p.vy = platGame.jumpVel;
+      p.onGround = false;
+      p.coyote = 0;
+      p.jumpBuffer = 0;
+    } else if (p.onWall !== 0){
+      // wall jump away from wall
+      p.vy = platGame.wallJumpY;
+      p.vx = -p.onWall * platGame.wallJumpX;
+      p.jumpBuffer = 0;
+      p.dashAvail = 1; // optional: keeps it spicy but survivable
+    }
+  }
+
+  // Dash (8-way)
+  if (pressedDash && p.dashAvail > 0 && p.dashCd <= 0 && p.dashT <= 0){
+    let dx = (right ? 1 : 0) - (left ? 1 : 0);
+    let dy = (down ? 1 : 0) - (up ? 1 : 0);
+
+    if (dx === 0 && dy === 0){
+      dx = p.facing || 1;
+      dy = 0;
     }
 
-    for (const heart of platGame.hearts){
-      if (heart.taken) continue;
-      const hb = { x: heart.x - 8, y: heart.y - 8, w: 16, h: 16 };
-      const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-      if (rectsOverlap(pb, hb)){
-        heart.taken = true;
-        platGame.heartsGot += 1;
-        platCountEl.textContent = String(platGame.heartsGot);
-        try { confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 } }); } catch {}
-        platMsg.innerHTML = `Aww 💖 ${platGame.heartsGot}/${platGame.heartsTarget} collected!`;
-      }
-    }
+    // normalize
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len; dy /= len;
 
-    platGame.camX = clamp2(p.x - w*0.35, 0, platGame.levelW - w);
+    p.vx = dx * platGame.dashSpeed;
+    p.vy = dy * platGame.dashSpeed;
+    p.dashAvail -= 1;
+    p.dashT = platGame.dashDuration;
+    p.dashCd = platGame.dashCooldown;
+    p.onGround = false;
 
-    const goal = platGame.goal;
+    try { confetti({ particleCount: 24, spread: 45, origin: { y: 0.6 } }); } catch {}
+  }
+
+  // Keep player within world
+  p.x = clamp2(p.x, 0, platGame.levelW - p.w);
+  if (p.y > 520) diePlatformer();
+
+  // Treat pickups
+  for (const heart of platGame.hearts){
+    if (heart.taken) continue;
+    const hb = { x: heart.x - 9, y: heart.y - 12, w: 20, h: 20 };
     const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    const gb = { x: goal.x, y: goal.y, w: goal.w, h: goal.h };
-    if (rectsOverlap(pb, gb) && platGame.heartsGot >= platGame.heartsTarget){
-      winPlatformer();
+    if (rectsOverlap(pb, hb)){
+      heart.taken = true;
+      platGame.heartsGot += 1;
+      platCountEl.textContent = String(platGame.heartsGot);
+      try { confetti({ particleCount: 70, spread: 75, origin: { y: 0.7 } }); } catch {}
+      platMsg.innerHTML = `Sweet! 💞 ${platGame.heartsGot}/${platGame.heartsTarget} collected!`;
     }
   }
 
-  function drawPlatformer(){
-    const w = platCanvas.getBoundingClientRect().width;
-    const h = platCanvas.getBoundingClientRect().height;
-    platCtx.clearRect(0,0,w,h);
-
-    const g = platCtx.createLinearGradient(0,0,0,h);
-    g.addColorStop(0, "rgba(255, 192, 203, 0.20)");
-    g.addColorStop(1, "rgba(173, 216, 230, 0.22)");
-    platCtx.fillStyle = g;
-    platCtx.fillRect(0,0,w,h);
-
-    const cam = platGame.camX;
-    platCtx.save();
-    platCtx.translate(-cam, 0);
-
-    for (const plat of platGame.platforms){
-      platCtx.globalAlpha = 0.95;
-      platCtx.fillStyle = "#ffffff";
-      platCtx.strokeStyle = "rgba(15, 23, 42, 0.15)";
-      platCtx.lineWidth = 2;
-      roundRectPath(platCtx, plat.x, plat.y, plat.w, plat.h, 12);
-      platCtx.fill();
-      platCtx.stroke();
-      platCtx.globalAlpha = 1;
+  // Dash crystal pickups
+  for (const c of platGame.dashCrystals){
+    if (c.used) continue;
+    const cb = { x: c.x - 10, y: c.y - 10, w: 20, h: 20 };
+    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+    if (rectsOverlap(pb, cb)){
+      c.used = true;
+      p.dashAvail = 1;
+      try { confetti({ particleCount: 45, spread: 70, origin: { y: 0.6 } }); } catch {}
+      platMsg.innerHTML = `Dash refilled ✨ (use it wisely 💘)`;
     }
+  }
 
-    for (const heart of platGame.hearts){
-      if (heart.taken) continue;
-      platCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-      platCtx.fillText("💖", heart.x - 8, heart.y + 6);
+  // Checkpoints
+  for (const cp of platGame.checkpoints){
+    const cpb = { x: cp.x, y: cp.y, w: cp.w, h: cp.h };
+    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+    if (!cp.hit && rectsOverlap(pb, cpb)){
+      cp.hit = true;
+      platGame.spawn = { x: cp.x, y: cp.y - 30 };
+      try { confetti({ particleCount: 80, spread: 90, origin: { y: 0.6 } }); } catch {}
+      platMsg.innerHTML = `Checkpoint saved 💌 Keep going…`;
     }
+  }
 
+  // Hazards (spikes)
+  for (const hz of platGame.hazards){
+    // use the rect area as hurtbox
+    const hb = { x: hz.x, y: hz.y, w: hz.w, h: hz.h };
+    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+    if (rectsOverlap(pb, hb)){
+      diePlatformer();
+      break;
+    }
+  }
+
+  // Camera follow
+  platGame.camX = clamp2(p.x - w*0.35, 0, platGame.levelW - w);
+
+  // Win check
+  const goal = platGame.goal;
+  const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+  const gb = { x: goal.x, y: goal.y, w: goal.w, h: goal.h };
+  if (rectsOverlap(pb, gb) && platGame.heartsGot >= platGame.heartsTarget){
+    winPlatformer();
+  }
+}
+
+function drawPlatformer(){
+  const w = platCanvas.getBoundingClientRect().width;
+  const h = platCanvas.getBoundingClientRect().height;
+  platCtx.clearRect(0,0,w,h);
+
+  // Cotton candy sky
+  const sky = platCtx.createLinearGradient(0,0,0,h);
+  sky.addColorStop(0, "rgba(255, 209, 220, 0.55)");
+  sky.addColorStop(0.55, "rgba(216, 204, 255, 0.35)");
+  sky.addColorStop(1, "rgba(191, 247, 230, 0.28)");
+  platCtx.fillStyle = sky;
+  platCtx.fillRect(0,0,w,h);
+
+  // Floating hearts (screen space)
+  if (!platGame.bgHearts || platGame.bgHearts.length === 0) initValentineSky();
+  platCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  for (const bh of platGame.bgHearts){
+    platCtx.globalAlpha = bh.a;
+    platCtx.fillText(bh.emoji, bh.x, bh.y);
+    bh.x += bh.vx;
+    bh.y += bh.vy;
+    if (bh.y > h + 20) { bh.y = -20; bh.x = rand(0,w); }
+    if (bh.x < -30) bh.x = w + 30;
+    if (bh.x > w + 30) bh.x = -30;
+  }
+  platCtx.globalAlpha = 1;
+
+  // World
+  const cam = platGame.camX;
+  platCtx.save();
+  platCtx.translate(-cam, 0);
+
+  // Platforms
+  for (const plat of platGame.platforms){
+    drawSprinklePlatform(platCtx, plat.x, plat.y, plat.w, plat.h);
+  }
+
+  // Spikes
+  for (const hz of platGame.hazards){
+    drawSpikes(platCtx, hz);
+  }
+
+  // Dash crystals
+  platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  for (const c of platGame.dashCrystals){
+    if (c.used) continue;
+    const bob = Math.sin((performance.now()/240) + c.x*0.02) * 2;
+    platCtx.globalAlpha = 0.98;
+    platCtx.fillText("💎", c.x - 10, c.y + 10 + bob);
+  }
+  platCtx.globalAlpha = 1;
+
+  // Checkpoint
+  for (const cp of platGame.checkpoints){
     platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-    platCtx.fillText("💌", platGame.goal.x - 4, platGame.goal.y + 20);
+    platCtx.globalAlpha = cp.hit ? 1 : 0.65;
+    platCtx.fillText(cp.hit ? "💌" : "📍", cp.x - 8, cp.y + 22);
+  }
+  platCtx.globalAlpha = 1;
 
-    const p = platGame.player;
-    platCtx.save();
-    platCtx.translate(p.x + p.w/2, p.y + p.h/2);
-    platCtx.fillStyle = "#ef4444";
-    drawHeartShape(platCtx, 0, 2, 14);
+  // Treats
+  platCtx.font = "20px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  for (const heart of platGame.hearts){
+    if (heart.taken) continue;
+    const bob = Math.sin((performance.now()/250) + heart.x*0.02) * 2;
+    platCtx.fillText(heart.emoji, heart.x - 9, heart.y + 6 + bob);
+  }
+
+  // Goal
+  platCtx.font = "28px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  platCtx.fillText("💝", platGame.goal.x - 6, platGame.goal.y + 26);
+
+  // Player (Cupid heart)
+  const p = platGame.player;
+  platCtx.save();
+  platCtx.translate(p.x + p.w/2, p.y + p.h/2);
+  const floaty = p.onGround ? 0 : Math.sin(performance.now()/120) * 1.5;
+  drawCupidHeart(platCtx, 0, 2 + floaty, 13.5);
+
+  // tiny dash aura
+  if (p.dashT > 0){
+    platCtx.globalAlpha = 0.28;
+    platCtx.beginPath();
+    platCtx.ellipse(0, 4, 22, 12, 0, 0, Math.PI*2);
+    platCtx.fillStyle = "#fff";
     platCtx.fill();
-    platCtx.restore();
-
-    platCtx.restore();
+    platCtx.globalAlpha = 1;
   }
 
-  function platformerLoop(ts){
-    if (!platGame.running) return;
-    if (!platLast) platLast = ts;
-    const dt = Math.min(0.033, (ts - platLast) / 1000);
-    platLast = ts;
+  platCtx.restore();
 
-    for (let i=0;i<Math.max(1, Math.floor(dt/0.016)); i++){
-      updatePlatformer();
-    }
-    drawPlatformer();
-    platRaf = requestAnimationFrame(platformerLoop);
+  platCtx.restore();
+}
+
+function platformerLoop(ts){
+  if (!platGame.running) return;
+  if (!platLast) platLast = ts;
+
+  const dt = Math.min(0.033, (ts - platLast) / 1000);
+  platLast = ts;
+
+  // fixed-ish stepping for consistent feel
+  const steps = Math.max(1, Math.floor(dt / 0.016));
+  const stepDt = dt / steps;
+  for (let i=0;i<steps;i++){
+    updatePlatformer(stepDt);
   }
 
-  function startPlatformer(){
-    resetPlatformer();
-    platGame.running = true;
-    platOverlay.style.opacity = "0";
-    platStartBtn.style.opacity = "0";
-    platStartBtn.style.pointerEvents = "none";
-    platMsg.innerHTML = `Go go go 💞 Collect ${platGame.heartsTarget} hearts!`;
-    platLast = 0;
-    platRaf = requestAnimationFrame(platformerLoop);
-  }
+  drawPlatformer();
+  platRaf = requestAnimationFrame(platformerLoop);
+}
 
-  function stopPlatformer(showOverlay = true){
-    platGame.running = false;
-    if (platRaf) cancelAnimationFrame(platRaf);
-    platRaf = null;
-    if (showOverlay){
-      platOverlay.style.opacity = "1";
-      platStartBtn.style.opacity = "1";
-      platStartBtn.style.pointerEvents = "auto";
-    }
-  }
+function startPlatformer(){
+  resetPlatformer();
+  platGame.running = true;
+  platOverlay.style.opacity = "0";
+  platStartBtn.style.opacity = "0";
+  platStartBtn.style.pointerEvents = "none";
+  platMsg.innerHTML = `C-Side time 💘 Dash + wall jump or perish 💔`;
+  platLast = 0;
+  platRaf = requestAnimationFrame(platformerLoop);
+}
 
-  function winPlatformer(){
-    stopPlatformer(false);
+function stopPlatformer(showOverlay = true){
+  platGame.running = false;
+  if (platRaf) cancelAnimationFrame(platRaf);
+  platRaf = null;
+  if (showOverlay){
     platOverlay.style.opacity = "1";
-    platOverlay.innerHTML = `
-      <div class="text-slate-800/80">
-        <div class="text-4xl font-extrabold">LOVE QUEST COMPLETE 💌</div>
-        <div class="text-sm font-semibold mt-2">Okay… that was adorable.</div>
-      </div>
-    `;
     platStartBtn.style.opacity = "1";
     platStartBtn.style.pointerEvents = "auto";
-    platStartBtn.textContent = "Play Again";
-    platMsg.innerHTML = `Awwww 💖 You did it!`;
-    try { confetti({ particleCount: 180, spread: 90, origin: { y: 0.65 } }); } catch {}
   }
+}
 
-  platStartBtn.addEventListener("click", startPlatformer);
-  resetPlatformer();
+function winPlatformer(){
+  stopPlatformer(false);
+  platOverlay.style.opacity = "1";
+  platOverlay.innerHTML = `
+    <div class="text-slate-800/90">
+      <div class="text-4xl font-extrabold">C-SIDE CLEARED 💝</div>
+      <div class="text-sm font-semibold mt-2">That was UNREASONABLY cute and hard 💘</div>
+    </div>
+  `;
+  platStartBtn.style.opacity = "1";
+  platStartBtn.style.pointerEvents = "auto";
+  platStartBtn.textContent = "Run it Back 💞";
+  platMsg.innerHTML = `Perfect delivery 💖`;
 
-  window.addEventListener("resize", () => {
-    fitCanvasToCSS(bossCanvas, bossCtx2);
-    fitCanvasToCSS(platCanvas, platCtx);
-  });
+  try { confetti({ particleCount: 260, spread: 100, origin: { y: 0.65 } }); } catch {}
+}
+
+platStartBtn.addEventListener("click", startPlatformer);
+resetPlatformer();
+
+window.addEventListener("resize", () => {
+  fitCanvasToCSS(platCanvas, platCtx);
+});
+
 </script>
 </body>
 </html>
