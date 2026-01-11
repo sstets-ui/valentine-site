@@ -66,33 +66,31 @@
         overflow: hidden; /* keep stamp inside pill */
       }
 
-      /* Diagonal LETS GOOOO on the pink pill (hidden until YES) */
+      /* ✅ Updated: LETS GOOOO off to the side (right), all black */
       #letsGo{
         position: absolute;
-        left: 55%;
+        right: 22px;            /* move to the side where there’s no text */
         top: 50%;
-        transform: translate(-50%, -50%) rotate(-14deg) scale(0.7);
-        font-weight: 900;
-        font-size: clamp(1.4rem, 3.6vw, 2.6rem);
-        letter-spacing: 0.10em;
+        transform: translateY(-50%) rotate(-12deg) scale(0.7);
+        font-weight: 1000;
+        font-size: clamp(1.15rem, 3vw, 2.1rem);
+        letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(255,255,255,0.95);
-        text-shadow:
-          0 3px 0 rgba(0,0,0,0.18),
-          0 12px 22px rgba(0,0,0,0.22);
+        color: rgba(0,0,0,0.92);           /* all black */
+        text-shadow: 0 10px 18px rgba(0,0,0,0.18); /* soft depth */
         opacity: 0;
         pointer-events: none;
         white-space: nowrap;
-        z-index: 5;
+        z-index: 6;
       }
       #letsGo.show{
         opacity: 1;
         animation: letsGoPop 650ms cubic-bezier(.2,.9,.2,1) forwards;
       }
       @keyframes letsGoPop{
-        0%   { transform: translate(-50%, -50%) rotate(-14deg) scale(0.55); opacity: 0; }
-        60%  { transform: translate(-50%, -50%) rotate(-14deg) scale(1.12); opacity: 1; }
-        100% { transform: translate(-50%, -50%) rotate(-14deg) scale(1.0);  opacity: 1; }
+        0%   { transform: translateY(-50%) rotate(-12deg) scale(0.55); opacity: 0; }
+        60%  { transform: translateY(-50%) rotate(-12deg) scale(1.05); opacity: 1; }
+        100% { transform: translateY(-50%) rotate(-12deg) scale(0.92); opacity: 1; }
       }
 
       #bg {
@@ -299,7 +297,6 @@
     <div id="powerups" aria-hidden="true"></div>
     <div id="hearts" aria-hidden="true"></div>
 
-    <!-- ✅ Updated: title pill now contains the diagonal LETS GOOOO stamp -->
     <h1 id="bigTitle" class="w-full px-4">
       <span id="titlePill">
         Will you be my Valentine Andrew Getzow? Pretty Pleases? 💘
@@ -308,7 +305,6 @@
     </h1>
 
     <div class="card rounded-3xl p-7 max-w-md w-full text-center">
-      <!-- Dedede-inspired mascot + date -->
       <div class="mx-auto mb-3 w-28 mascot-bounce">
         <div class="w-24 h-24 mx-auto">
           <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
@@ -739,7 +735,7 @@
 
       // ------------------ YES / NO click handlers ------------------
       yesBtn.addEventListener("click", () => {
-        // ✅ show LETS GOOOO diagonally on the pink title pill
+        // ✅ show LETS GOOOO (black, on the right side of pill)
         document.getElementById("letsGo")?.classList.add("show");
 
         stopBattleMusic();
@@ -783,6 +779,10 @@
 
         applyNoTransform();
       });
+    </script>
+  </body>
+</html>
+
     </script>
   </body>
 </html>
