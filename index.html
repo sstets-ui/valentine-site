@@ -2546,6 +2546,319 @@ make the platform section way more valentinesday garphics, chnage the graphics a
     fitCanvasToCSS(bossCanvas, bossCtx2);
     fitCanvasToCSS(platCanvas, platCtx);
   });
+  /* ===================== PATCH START =====================
+   Romantic Platformer + Lotad Player + NO runaway escalation
+   Paste this just before </script>
+======================================================== */
+
+// ---------- Platformer Romantic VFX + Lotad draw helpers ----------
+const platVfx = { petals: [], t: 0 };
+
+function spawnPetal(){
+  const viewW = platCanvas.getBoundingClientRect().width;
+  const x = platGame.camX + (Math.random() * (viewW + 120)) - 60;
+  const y = -20 - Math.random() * 120;
+  const s = 0.75 + Math.random() * 1.25;
+  platVfx.petals.push({
+    x, y,
+    vx: (Math.random() * 0.6 - 0.3),
+    vy: 0.8 + Math.random() * 1.0,
+    rot: Math.random() * Math.PI * 2,
+    vr: (Math.random() * 0.05 - 0.025),
+    s,
+    life: 900 + Math.random() * 500
+  });
+}
+
+function updatePetals(){
+  platVfx.t += 0.016;
+
+  if (platVfx.petals.length < 70 && Math.random() < 0.6) spawnPetal();
+
+  const viewW = platCanvas.getBoundingClientRect().width;
+  for (const p of platVfx.petals){
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.002;
+    p.rot += p.vr;
+    p.life -= 1;
+
+    if (p.y > 520) {
+      p.y = -30;
+      p.x = platGame.camX + Math.random() * (viewW + 120) - 60;
+      p.vy = 0.8 + Math.random() * 1.0;
+    }
+  }
+  platVfx.petals = platVfx.petals.filter(p => p.life > 0);
+}
+
+function drawPetals(ctx){
+  ctx.save();
+  ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  for (const p of platVfx.petals){
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = 0.30;
+    ctx.scale(p.s, p.s);
+    ctx.fillText(Math.random() > 0.5 ? "🌸" : "🌷", -8, 8);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function drawLotad(ctx, x, y, scale = 1){
+  // simple Lotad-style sprite: green lily pad + blue body + cute face
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  // shadow
+  ctx.globalAlpha = 0.25;
+  ctx.beginPath();
+  ctx.ellipse(0, 14, 16, 6, 0, 0, Math.PI*2);
+  ctx.fillStyle = "#000000";
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // lily pad
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 18, 12, 0, 0, Math.PI*2);
+  ctx.fillStyle = "#22c55e";
+  ctx.fill();
+
+  // pad highlight
+  ctx.beginPath();
+  ctx.ellipse(-5, -3, 9, 5, -0.2, 0, Math.PI*2);
+  ctx.fillStyle = "rgba(255,255,255,0.25)";
+  ctx.fill();
+
+  // pad notch
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, 18, -0.10, 0.35, false);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(0,0,0,0.10)";
+  ctx.fill();
+
+  // blue body
+  ctx.beginPath();
+  ctx.ellipse(0, 10, 12, 10, 0, 0, Math.PI*2);
+  ctx.fillStyle = "#60a5fa";
+  ctx.fill();
+
+  // face
+  ctx.beginPath();
+  ctx.ellipse(0, 11, 9, 7, 0, 0, Math.PI*2);
+  ctx.fillStyle = "#93c5fd";
+  ctx.fill();
+
+  // eyes
+  ctx.fillStyle = "#0f172a";
+  ctx.beginPath(); ctx.arc(-4, 10, 1.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( 4, 10, 1.5, 0, Math.PI*2); ctx.fill();
+
+  // romantic blush
+  ctx.fillStyle = "rgba(244,63,94,0.35)";
+  ctx.beginPath(); ctx.arc(-6, 13, 2.2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( 6, 13, 2.2, 0, Math.PI*2); ctx.fill();
+
+  ctx.restore();
+}
+
+// ---------- Wrap resetPlatformer to (1) clear petals and (2) romantic text ----------
+const __resetPlatformer = resetPlatformer;
+resetPlatformer = function(){
+  __resetPlatformer();
+
+  // Clear romantic particles
+  platVfx.petals.length = 0;
+
+  // Romantic instructions (visual-only)
+  platMsg.innerHTML = `Collect <b>${platGame.heartsTarget}</b> hearts 💖 to power up the <b>love letter</b> 💌 (romance boost active 🌸).`;
+};
+
+// ---------- Wrap startPlatformer to use romantic start message ----------
+const __startPlatformer = startPlatformer;
+startPlatformer = function(){
+  __startPlatformer();
+  platMsg.innerHTML = `Romance run 💞 Collect ${platGame.heartsTarget} hearts and deliver the love letter 🌷💌`;
+};
+
+// ---------- Override drawPlatformer (graphics only) ----------
+drawPlatformer = function(){
+  const w = platCanvas.getBoundingClientRect().width;
+  const h = platCanvas.getBoundingClientRect().height;
+  platCtx.clearRect(0,0,w,h);
+
+  // Romantic sky gradient
+  const g = platCtx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0, "rgba(251, 113, 133, 0.20)");
+  g.addColorStop(0.55, "rgba(236, 72, 153, 0.16)");
+  g.addColorStop(1, "rgba(99, 102, 241, 0.14)");
+  platCtx.fillStyle = g;
+  platCtx.fillRect(0,0,w,h);
+
+  // Heart twinkles
+  platCtx.globalAlpha = 0.18;
+  platCtx.font = "16px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  for (let i=0;i<22;i++){
+    const sx = (i * 97) % w;
+    const sy = (i * 61) % h;
+    platCtx.fillText(i % 3 === 0 ? "💗" : "✨", sx, sy);
+  }
+  platCtx.globalAlpha = 1;
+
+  const cam = platGame.camX;
+  platCtx.save();
+  platCtx.translate(-cam, 0);
+
+  // Romantic petals (world space)
+  drawPetals(platCtx);
+
+  // Platforms with glow
+  for (const plat of platGame.platforms){
+    platCtx.globalAlpha = 0.95;
+    platCtx.shadowBlur = 16;
+    platCtx.shadowColor = "rgba(236, 72, 153, 0.22)";
+    platCtx.fillStyle = "rgba(255,255,255,0.95)";
+    platCtx.strokeStyle = "rgba(251, 113, 133, 0.22)";
+    platCtx.lineWidth = 2;
+
+    roundRectPath(platCtx, plat.x, plat.y, plat.w, plat.h, 12);
+    platCtx.fill();
+    platCtx.stroke();
+
+    platCtx.shadowBlur = 0;
+    platCtx.globalAlpha = 1;
+  }
+
+  // Hearts + goal (unchanged gameplay)
+  for (const heart of platGame.hearts){
+    if (heart.taken) continue;
+    platCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+    platCtx.fillText("💖", heart.x - 8, heart.y + 6);
+  }
+
+  platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+  platCtx.fillText("💌", platGame.goal.x - 4, platGame.goal.y + 20);
+
+  // Player as Lotad (hitbox unchanged)
+  const p = platGame.player;
+  const cx = p.x + p.w/2;
+  const cy = p.y + p.h/2;
+  const bob = Math.sin(performance.now()/140) * 0.6;
+  drawLotad(platCtx, cx, cy + bob, 1.0);
+
+  platCtx.restore();
+};
+
+// ---------- Override platformerLoop to update petals every frame ----------
+platformerLoop = function(ts){
+  if (!platGame.running) return;
+  if (!platLast) platLast = ts;
+  const dt = Math.min(0.033, (ts - platLast) / 1000);
+  platLast = ts;
+
+  updatePetals();
+
+  for (let i=0;i<Math.max(1, Math.floor(dt/0.016)); i++){
+    updatePlatformer();
+  }
+  drawPlatformer();
+  platRaf = requestAnimationFrame(platformerLoop);
+};
+
+// ---------- NO button escalation + run away + darken (without editing existing handlers) ----------
+const noDarker = document.createElement("div");
+noDarker.style.position = "fixed";
+noDarker.style.inset = "0";
+noDarker.style.zIndex = "55";
+noDarker.style.pointerEvents = "none";
+noDarker.style.background = "rgba(2,6,23,0.0)";
+noDarker.style.transition = "background 140ms ease";
+document.body.appendChild(noDarker);
+
+let noPresses = 0;
+let noOffsetX = 0;
+let noOffsetY = 0;
+
+function applyNoTransform(){
+  const s = 1 + noPresses * 0.22;
+  noBtn.style.transform = `translate(${noOffsetX}px, ${noOffsetY}px) scale(${s})`;
+}
+
+function darkenForNo(){
+  const a = Math.min(0.14 + noPresses * 0.10, 0.70);
+  noDarker.style.background = `rgba(2,6,23,${a})`;
+}
+
+noBtn.style.position = "relative";
+
+function runAwayFromPointer(clientX, clientY){
+  if (noLocked) return;
+  if (noBtn.style.display === "none") return;
+
+  const r = noBtn.getBoundingClientRect();
+  const cx = r.left + r.width/2;
+  const cy = r.top + r.height/2;
+
+  const dx = cx - clientX;
+  const dy = cy - clientY;
+  const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+
+  const threshold = 220;
+  if (dist > threshold) return;
+
+  const push = (threshold - dist) / threshold;
+  const step = 16 + noPresses * 7;
+
+  const nx = dx / dist;
+  const ny = dy / dist;
+
+  noOffsetX += nx * step * push;
+  noOffsetY += ny * step * push;
+
+  noOffsetX = Math.max(-140, Math.min(140, noOffsetX));
+  noOffsetY = Math.max(-90,  Math.min(90,  noOffsetY));
+
+  applyNoTransform();
+}
+
+window.addEventListener("pointermove", (e) => runAwayFromPointer(e.clientX, e.clientY), { passive: true });
+
+// Capture-phase click handler so the original NO click handler won’t run
+noBtn.addEventListener("click", (e) => {
+  // stop the existing NO click listener (the one already in your file)
+  e.preventDefault();
+  e.stopImmediatePropagation();
+
+  if (noLocked){
+    hint.textContent = "NO is locked 😈 Beat the boss first!";
+    noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
+    return;
+  }
+
+  // Escalate
+  noPresses++;
+  darkenForNo();
+
+  const span = noBtn.querySelector("span");
+  if (span) span.textContent = noPresses === 1 ? "ARE YOU SURE?" : "ARE YOU SURE??";
+
+  hint.textContent = noPresses === 1 ? "No… are you sure? 😳" : "ARE YOU SURE?? 😳";
+  applyNoTransform();
+
+  // Keep original “battle vibe” behavior
+  startBattleMusic(3);
+  updateBattleIntensity(3);
+  setTimeout(() => { if (!bossGame?.running) stopBattleMusic(); }, 2200);
+
+  setImageTryFor(valImage, GIFS.no);
+}, true);
+
+/* ====================== PATCH END ====================== */
+
 </script>
 </body>
 </html>
