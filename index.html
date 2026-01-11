@@ -113,31 +113,40 @@
         setTimeout(() => s.remove(), (dur + delay) * 1000);
       }
 
-      // Start hearts
       setInterval(spawnHeart, 220);
-      // a few immediately so it doesn't feel empty
       for (let i = 0; i < 12; i++) spawnHeart();
 
-      // ---------- GIF LOADING (LOCAL-FIRST, REMOTE FALLBACK) ----------
+      // ---------- GIF LOADING (GIPHY-FIRST; WORKS LIKE YOUR YES GIF) ----------
       const yesBtn = document.getElementById("yesBtn");
       const noBtn = document.getElementById("noBtn");
       const valImage = document.getElementById("valImage");
       const hint = document.getElementById("hint");
 
-      // Put these GIF files in the SAME folder as index.html for guaranteed working:
-      //   start.gif, yes.gif, no.gif
+      // If you don't want local files at all, keep these local entries but it's fine if they don't exist;
+      // it'll automatically fall back to GIPHY.
       const GIFS = {
+        // Start screen GIF (GIPHY)
         start: [
           "start.gif",
-          "https://media1.tenor.com/m/nPQM0lKYWOUAAAAd/in-love-love.gif"
+          "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
         ],
+
+        // After YES click (your working one)
         yes: [
           "yes.gif",
           "https://media.giphy.com/media/sQfnbNwfNcQly/giphy.gif"
         ],
+
+        // Final gif AFTER YES (Eevee)
+        yesFinal: [
+          "yes-final.gif",
+          "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnd5OW94bW81Zzg5MXpyMHB6eTE0azRiMGU5OHhlYTl4MmNiMHh6biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TqK5V0YnrWaR2/200.gif"
+        ],
+
+        // NO click gif (GIPHY)
         no: [
           "no.gif",
-          "https://giffiles.alphacoders.com/211/211238.gif"
+          "https://media.giphy.com/media/3og0IPxMM0erATueVW/giphy.gif"
         ]
       };
 
@@ -146,7 +155,7 @@
 
         function tryNext() {
           if (i >= urlList.length) {
-            hint.textContent = `Image blocked/not found. Fix: upload ${labelForErrors}.gif into the repo next to index.html`;
+            hint.textContent = `Image blocked/not found. (Tried ${labelForErrors})`;
             return;
           }
 
@@ -166,7 +175,7 @@
       // Load starting GIF
       setImageFromList(GIFS.start, "start");
 
-      // Tiny sound (same as before)
+      // Tiny sound
       function playGlueSong() {
         try {
           const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -189,6 +198,8 @@
         } catch {}
       }
 
+      let finalTimer = null;
+
       // YES
       yesBtn.addEventListener("click", () => {
         setImageFromList(GIFS.yes, "yes");
@@ -205,6 +216,12 @@
         });
 
         hint.textContent = "Yay 💙";
+
+        // After ~2 seconds, show the final Eevee gif
+        if (finalTimer) clearTimeout(finalTimer);
+        finalTimer = setTimeout(() => {
+          setImageFromList(GIFS.yesFinal, "yesFinal");
+        }, 2000);
       });
 
       // NO
