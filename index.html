@@ -324,6 +324,9 @@
 
     /* Tiny helpers */
     .hidden{ display:none !important; }
+
+    /* Platformer crisp pixels + stable layout */
+    #pfCanvas { image-rendering: pixelated; touch-action: none; }
   </style>
 </head>
 
@@ -777,6 +780,64 @@
                       style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy</button>
             </div>
           </div>
+
+          <!-- Platformer: Rooms of Romance -->
+          <section class="glass rounded-3xl overflow-hidden" id="platformerModule">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
+              <div class="font-black text-slate-800/80">🕹️ Platformer: Rooms of Romance</div>
+              <div class="text-xs font-black text-slate-700/70">Move: A/D or ←/→ • Jump: W/↑/Space • Reset: R</div>
+            </div>
+
+            <div class="px-6 py-5">
+              <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 items-start">
+                <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
+                  <canvas id="pfCanvas" class="w-full block h-[420px]"></canvas>
+
+                  <button id="pfStart"
+                    class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+                    style="background: linear-gradient(135deg, #fb7185, #6366f1);">
+                    Start Platformer
+                  </button>
+
+                  <div id="pfOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
+                    <div class="text-slate-800/80">
+                      <div class="text-3xl font-extrabold">Collect 💖, avoid 💔</div>
+                      <div class="text-sm font-semibold mt-2">Pickups reward tokens + affection.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+                  <div class="text-xs font-black text-slate-700/70">RUN STATS</div>
+                  <div class="mt-2 text-sm font-extrabold text-slate-800/80 space-y-1">
+                    <div>Room: <span id="pfRoom">1</span>/<span id="pfRoomMax">12</span></div>
+                    <div>Hearts: <span id="pfHearts">0</span></div>
+                    <div>Hits: <span id="pfHits">0</span></div>
+                    <div>Best: <span id="pfBest">—</span></div>
+                  </div>
+
+                  <div class="mt-4 text-xs font-black text-slate-700/70">REWARDS</div>
+                  <div class="mt-2 text-sm font-semibold text-slate-800/80">
+                    💖 pickup: +Affection, -Nerves, +Random mana<br/>
+                    💔 hazard: +Nerves, small HP ding
+                  </div>
+
+                  <div class="mt-4">
+                    <button id="pfReset"
+                      class="w-full rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                      style="background: linear-gradient(135deg, #f59e0b, #fb7185);">
+                      Reset Run (R)
+                    </button>
+                  </div>
+
+                  <div id="pfMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
+                    Ready when you are.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
         </section>
       </main>
     </div>
@@ -821,6 +882,10 @@
     </div>
   </div>
 
+  <!-- =========================================================
+       MAIN GAME SCRIPT (fixed)
+       NOTE: Platformer JS is in a separate script below.
+  ========================================================== -->
   <script>
   (() => {
     "use strict";
@@ -1073,24 +1138,21 @@
       safeConfetti({ particleCount: 260, spread: 95, origin: { y: 0.6 } });
     });
 
-    noBtn.addEventListener("click", (e) => {
+    noBtn.addEventListener("click", () => {
       if (!unlocked){
         hint.textContent = "NO is locked 😈 Beat the boss first!";
         noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
         return;
       }
-      // If NO is runaway, prevent “easy click”
       statusLine.textContent = "NO?! 😳";
       hint.textContent = "No (Are you sure about that?)";
       setImageTryFor(valImage, GIFS.no);
     });
 
     function enableRunawayNo(){
-      // Convert NO into absolute runaway inside arena
       noBtn.classList.add("runaway");
-      noBtn.classList.add("no"); // ensure style
+      noBtn.classList.add("no");
 
-      // Place NO roughly where it currently is
       const arenaRect0 = arena.getBoundingClientRect();
       const noRect0 = noBtn.getBoundingClientRect();
       let nx = (noRect0.left - arenaRect0.left);
@@ -1137,7 +1199,6 @@
         flee(140);
       }, { passive:false });
 
-      // If it gets clicked: grows + runs farther
       noBtn.addEventListener("click", (e) => {
         if (!unlocked) return;
         e.preventDefault();
@@ -1176,7 +1237,6 @@
       bossStart.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:520});
     });
 
-    // blackhole gif source
     setImageTryFor(blackholeGif, [
       "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif"
     ]);
@@ -1249,12 +1309,24 @@
       ctx.restore();
     }
 
+    // Polyfill-ish helper: roundRect fallback for older browsers
+    function rr(ctx, x, y, w, h, r){
+      if (ctx.roundRect) { ctx.roundRect(x,y,w,h,r); return; }
+      // fallback path
+      r = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.arcTo(x+w, y,   x+w, y+h, r);
+      ctx.arcTo(x+w, y+h, x,   y+h, r);
+      ctx.arcTo(x,   y+h, x,   y,   r);
+      ctx.arcTo(x,   y,   x+w, y,   r);
+      ctx.closePath();
+    }
+
     function drawBossSprite(ctx, x, y){
-      // Simple “magolor-ish” blob
       ctx.save();
       ctx.translate(x,y);
 
-      // shadow
       ctx.globalAlpha = 0.24;
       ctx.beginPath();
       ctx.ellipse(0, 14, 54, 28, 0, 0, Math.PI*2);
@@ -1262,7 +1334,6 @@
       ctx.fill();
       ctx.globalAlpha = 1;
 
-      // cape
       ctx.beginPath();
       ctx.moveTo(-52, 10);
       ctx.quadraticCurveTo(0, 64, 52, 10);
@@ -1271,28 +1342,24 @@
       ctx.fillStyle = "#0b1224";
       ctx.fill();
 
-      // body
       ctx.beginPath();
       ctx.ellipse(0, -6, 44, 38, 0, 0, Math.PI*2);
       ctx.fillStyle = "#2563eb";
       ctx.fill();
 
-      // face
       ctx.beginPath();
       ctx.ellipse(0, -6, 30, 24, 0, 0, Math.PI*2);
       ctx.fillStyle = "#0b1020";
       ctx.fill();
 
-      // eyes
       ctx.beginPath();
       ctx.ellipse(-10, -10, 5, 12, 0, 0, Math.PI*2);
       ctx.ellipse( 10, -10, 5, 12, 0, 0, Math.PI*2);
       ctx.fillStyle = "#fde047";
       ctx.fill();
 
-      // teeth
       ctx.beginPath();
-      ctx.roundRect(-46, 4, 92, 24, 12);
+      rr(ctx, -46, 4, 92, 24, 12);
       ctx.fillStyle = "#f8fafc";
       ctx.fill();
 
@@ -1418,12 +1485,10 @@
       const w = bossCanvas.getBoundingClientRect().width;
       const h = bossCanvas.getBoundingClientRect().height;
 
-      // boss wobble
       bossGame.boss.wob += dt;
       bossGame.boss.x = w * 0.5 + Math.cos(bossGame.boss.wob * 0.9) * 95;
       bossGame.boss.y = 95 + Math.sin(bossGame.boss.wob * 1.1) * 16;
 
-      // player movement
       let mx = 0, my = 0;
       if (keys.has("ArrowLeft") || keys.has("a")) mx -= 1;
       if (keys.has("ArrowRight") || keys.has("d")) mx += 1;
@@ -1434,10 +1499,8 @@
       bossGame.player.x = clamp(bossGame.player.x + mx * speed, 18, w - 18);
       bossGame.player.y = clamp(bossGame.player.y + my * speed, 120, h - 18);
 
-      // shooting
       if (keys.has(" ")) shoot();
 
-      // phase & pattern
       bossGame.phaseTimer += dt;
       const intensity = 1 + (1 - bossGame.boss.hp / bossGame.boss.maxHp) * 1.7;
       if (bossGame.phaseTimer > 2.2) choosePattern();
@@ -1464,7 +1527,6 @@
             blackholeGif.style.opacity = "0";
             bossMsg.textContent = "Keep going!! Turn chaos into cuddles 😤💞";
           } else {
-            // pull player toward boss
             const dx = bossGame.boss.x - bossGame.player.x;
             const dy = bossGame.boss.y - bossGame.player.y;
             const d = Math.sqrt(dx*dx + dy*dy) || 1;
@@ -1482,7 +1544,6 @@
         blackholeGif.style.opacity = "0";
       }
 
-      // fire patterns
       if (bossGame.pattern === "spray"){
         if (Math.floor(bossGame.t * 12) !== Math.floor((bossGame.t - dt) * 12)){
           const ang = Math.atan2(bossGame.player.y - bossGame.boss.y, bossGame.player.x - bossGame.boss.x);
@@ -1510,7 +1571,6 @@
         }
       }
 
-      // move bullets/beams/particles
       for (const b of bossGame.bullets){ b.x += b.vx; b.y += b.vy; }
       bossGame.bullets = bossGame.bullets.filter(b => b.x > -70 && b.x < w+70 && b.y > -70 && b.y < h+70);
 
@@ -1522,7 +1582,6 @@
       }
       bossGame.particles = bossGame.particles.filter(pt => pt.life > 0);
 
-      // collisions: beams -> boss
       for (let i=bossGame.beams.length-1;i>=0;i--){
         const p = bossGame.beams[i];
         if (dist2(p.x,p.y, bossGame.boss.x,bossGame.boss.y) < (p.r + bossGame.boss.r) ** 2){
@@ -1534,7 +1593,6 @@
         }
       }
 
-      // collisions: bullets -> player
       if (bossGame.player.inv > 0) bossGame.player.inv -= dt;
       for (let i=bossGame.bullets.length-1;i>=0;i--){
         const b = bossGame.bullets[i];
@@ -1557,7 +1615,6 @@
 
       bossCtx.clearRect(0,0,w,h);
 
-      // backdrop
       const g = bossCtx.createLinearGradient(0, 0, 0, h);
       g.addColorStop(0, "rgba(2, 6, 23, 0.75)");
       g.addColorStop(1, "rgba(88, 28, 135, 0.45)");
@@ -1567,16 +1624,13 @@
       bossCtx.fillStyle = "rgba(0,0,0,0.16)";
       bossCtx.fillRect(0,0,w,h);
 
-      // boss + player
       drawBossSprite(bossCtx, bossGame.boss.x, bossGame.boss.y);
 
-      // player heart
       const blink = bossGame.player.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
       bossCtx.globalAlpha = blink;
       drawHeart(bossCtx, bossGame.player.x, bossGame.player.y, 14, "#ef4444");
       bossCtx.globalAlpha = 1;
 
-      // bullets
       for (const b of bossGame.bullets){
         if (b.kind === "orb"){
           bossCtx.globalAlpha = 0.92;
@@ -1589,7 +1643,7 @@
           bossCtx.globalAlpha = 0.95;
           bossCtx.fillStyle = "#fb7185";
           bossCtx.beginPath();
-          bossCtx.roundRect(b.x-14, b.y-5, 28, 10, 6);
+          rr(bossCtx, b.x-14, b.y-5, 28, 10, 6);
           bossCtx.fill();
           bossCtx.globalAlpha = 1;
         } else {
@@ -1599,17 +1653,15 @@
         }
       }
 
-      // beams
       for (const p of bossGame.beams){
         bossCtx.globalAlpha = 0.88;
         bossCtx.fillStyle = "#22c55e";
         bossCtx.beginPath();
-        bossCtx.roundRect(p.x-3, p.y-12, 6, 24, 6);
+        rr(bossCtx, p.x-3, p.y-12, 6, 24, 6);
         bossCtx.fill();
         bossCtx.globalAlpha = 1;
       }
 
-      // particles
       for (const pt of bossGame.particles){
         bossCtx.globalAlpha = clamp(pt.life/40, 0, 1);
         bossCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
@@ -1630,7 +1682,7 @@
       bossGame.raf = requestAnimationFrame(bossLoop);
     }
 
-    bossCanvas.addEventListener("pointerdown", (e) => {
+    bossCanvas.addEventListener("pointerdown", () => {
       if (!bossGame.running) return;
       shoot();
     });
@@ -1691,7 +1743,6 @@
     const tokenLootLog = $("tokenLootLog");
     const inventoryPanel = $("inventoryPanel");
 
-    // battle widgets
     const battleText = $("battleText");
     const battleStatus = $("battleStatus");
     const enemyHPBar = $("enemyHPBar");
@@ -1715,7 +1766,6 @@
       tokens: [],
       gifts: { bouquet:0, chocoBox:0, candleKit:0, dateTicket:0 },
 
-      // encounter
       enemyHP: 100,
       youHP: 100,
       enemyAffection: 0,
@@ -1787,7 +1837,6 @@
       }
     }
 
-    // Card tilt
     function setCardTiltFromEvent(e){
       const r = tcgCard.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width;
@@ -1799,7 +1848,6 @@
     tcgCard.addEventListener("mousemove", setCardTiltFromEvent);
     tcgCard.addEventListener("mouseleave", () => tcgCard.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)");
 
-    // Cinematic
     function showCinematic(line){
       cinematicLine.textContent = line;
       cinematicOverlay.classList.remove("hidden");
@@ -1807,7 +1855,6 @@
     }
     cinematicOverlay.addEventListener("click", () => cinematicOverlay.classList.add("hidden"));
 
-    // Alt art
     let altIndex = 0;
     altArtBtn.addEventListener("click", () => {
       showCinematic(QUOTES[Math.floor(Math.random()*QUOTES.length)]);
@@ -1823,7 +1870,6 @@
       updateHUD();
     });
 
-    /* Spellbook */
     const SPELLS = [
       { name:"Playlist of Us", rarity:"Uncommon", cost:{ sparkle:1 }, tags:["playlist","cozy"],
         text:"Reduce Nerves and add Confidence.",
@@ -2044,7 +2090,6 @@
 
     resolveStackBtn.addEventListener("click", resolveStack);
 
-    /* Tokens + crafting */
     const TOKEN_TABLE = [
       { emoji:"🌹", type:"rose",    mana:{ heart:1 },   w:30 },
       { emoji:"🍫", type:"choc",    mana:{ choc:1 },    w:26 },
@@ -2209,7 +2254,6 @@
       battleText.textContent = "Not enough ingredients 💔 (Create more tokens!)";
     });
 
-    /* Battle (simple but fun) */
     function setBars(){
       enemyHPBar.style.width = `${clamp(STATE.enemyHP,0,100)}%`;
       youHPBar.style.width = `${clamp(STATE.youHP,0,100)}%`;
@@ -2220,7 +2264,6 @@
     }
 
     function enemyTurn(){
-      // enemy “pressure” scales with low buffs
       let nervUp = 6;
       let txt = "Valentine tilts their head… judging your vibe. 😳";
 
@@ -2230,7 +2273,6 @@
       STATE.nerves += nervUp;
       STATE.youHP -= Math.max(0, nervUp - 2);
 
-      // decay statuses
       for (const k of Object.keys(STATE.status)) STATE.status[k] = Math.max(0, STATE.status[k] - 1);
 
       if (STATE.nerves >= 95) txt = "You panic a little 💔 (Cast spells, craft gifts, or use Cozy!)";
@@ -2304,105 +2346,50 @@
       btn.addEventListener("click", () => applyMove(btn.dataset.move));
     });
 
-    <!-- =========================================================
-     PLATFORMER MODULE (PASTE ONCE)
-     - Includes HTML + CSS + JS in one block
-     - Collect 💖 for affection + mana tokens
-     - Avoid 💔 hazards (adds nerves + small HP ding)
-========================================================= -->
-<section class="glass rounded-3xl overflow-hidden" id="platformerModule">
-  <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-    <div class="font-black text-slate-800/80">🕹️ Platformer: Rooms of Romance</div>
-    <div class="text-xs font-black text-slate-700/70">Move: A/D or ←/→ • Jump: W/↑/Space • Reset: R</div>
-  </div>
+    // init
+    giftCount.textContent = "0";
+    tokenCount.textContent = "0";
+    renderStack();
+    renderInventory();
+    updateSynergy();
+    updateHUD();
+    setBars();
 
-  <div class="px-6 py-5">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 items-start">
-      <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
-        <canvas id="pfCanvas" class="w-full block h-[420px]"></canvas>
+    window.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      dateModal.classList.add("hidden");
+      cinematicOverlay.classList.add("hidden");
+    });
 
-        <button id="pfStart"
-          class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-          style="background: linear-gradient(135deg, #fb7185, #6366f1);">
-          Start Platformer
-        </button>
+    // ---------------------------------------------------------
+    // Expose shared state/helpers so platformer can reward safely
+    // ---------------------------------------------------------
+    window.STATE = STATE;
+    window.updateHUD = updateHUD;
+    window.setBars = setBars;
+    window.unlockLoveLine = unlockLoveLine;
+    window.safeConfetti = safeConfetti;
 
-        <div id="pfOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
-          <div class="text-slate-800/80">
-            <div class="text-3xl font-extrabold">Collect 💖, avoid 💔</div>
-            <div class="text-sm font-semibold mt-2">Pickups reward tokens + affection.</div>
-          </div>
-        </div>
-      </div>
+  })();
+  </script>
 
-      <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
-        <div class="text-xs font-black text-slate-700/70">RUN STATS</div>
-        <div class="mt-2 text-sm font-extrabold text-slate-800/80 space-y-1">
-          <div>Room: <span id="pfRoom">1</span>/<span id="pfRoomMax">12</span></div>
-          <div>Hearts: <span id="pfHearts">0</span></div>
-          <div>Hits: <span id="pfHits">0</span></div>
-          <div>Best: <span id="pfBest">—</span></div>
-        </div>
-
-        <div class="mt-4 text-xs font-black text-slate-700/70">REWARDS</div>
-        <div class="mt-2 text-sm font-semibold text-slate-800/80">
-          💖 pickup: +Affection, -Nerves, +Random mana token<br/>
-          💔 hazard: +Nerves, small HP ding
-        </div>
-
-        <div class="mt-4">
-          <button id="pfReset"
-            class="w-full rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-            style="background: linear-gradient(135deg, #f59e0b, #fb7185);">
-            Reset Run (R)
-          </button>
-        </div>
-
-        <div id="pfMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
-          Ready when you are.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <style>
-    /* Platformer crisp pixels + stable layout */
-    #pfCanvas { image-rendering: pixelated; touch-action: none; }
-  </style>
-
+  <!-- =========================================================
+       PLATFORMER SCRIPT (separate, valid JS)
+  ========================================================== -->
   <script>
-    (() => {
-      "use strict";
+  (() => {
+    "use strict";
 
-      // ------------------------------
-      // Safe hooks into your main game
-      // ------------------------------
-      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    function ready(fn){
+      if (document.readyState !== "loading") fn();
+      else document.addEventListener("DOMContentLoaded", fn);
+    }
 
-      // If your main code has STATE/updateHUD/setBars/safeConfetti, we’ll use them.
-      // If not, we fall back to harmless no-ops so the platformer still runs.
-      const getSTATE = () => (typeof window.STATE === "object" && window.STATE) ? window.STATE : null;
-      const updateHUD = () => { try { window.updateHUD?.(); } catch {} };
-      const setBars   = () => { try { window.setBars?.(); } catch {} };
-      const confetti  = (opts) => { try { window.safeConfetti?.(opts); } catch {} };
-      const unlockLoveLine = () => { try { window.unlockLoveLine?.(); } catch {} };
+    ready(() => {
+      const canvas = document.getElementById("pfCanvas");
+      if (!canvas) return;
 
-      // If no STATE exists, create a minimal one so rewards don’t error.
-      if (!getSTATE()) {
-        window.STATE = {
-          affection: 0,
-          nerves: 0,
-          youHP: 100,
-          mana: { heart: 0, choc: 0, popcorn: 0, sparkle: 0 }
-        };
-      }
-
-      // ------------------------------
-      // DOM
-      // ------------------------------
-      const canvas  = document.getElementById("pfCanvas");
-      const ctx     = canvas.getContext("2d");
-
+      const ctx = canvas.getContext("2d");
       const startBtn = document.getElementById("pfStart");
       const resetBtn = document.getElementById("pfReset");
       const overlay  = document.getElementById("pfOverlay");
@@ -2414,9 +2401,14 @@
       const pfHits    = document.getElementById("pfHits");
       const pfBest    = document.getElementById("pfBest");
 
-      // ------------------------------
-      // Canvas fit (self-contained)
-      // ------------------------------
+      const clamp = (v,a,b) => Math.max(a, Math.min(b,v));
+
+      const STATE = window.STATE;
+      const updateHUD = () => { try { window.updateHUD?.(); } catch {} };
+      const setBars   = () => { try { window.setBars?.(); } catch {} };
+      const boom      = (opts) => { try { window.safeConfetti?.(opts); } catch {} };
+      const unlockLoveLine = () => { try { window.unlockLoveLine?.(); } catch {} };
+
       function fitCanvas() {
         const dpr = Math.max(1, window.devicePixelRatio || 1);
         const rect = canvas.getBoundingClientRect();
@@ -2427,9 +2419,6 @@
       fitCanvas();
       window.addEventListener("resize", fitCanvas);
 
-      // ------------------------------
-      // Controls
-      // ------------------------------
       const KEYS = new Set();
       window.addEventListener("keydown", (e) => {
         const k = e.key;
@@ -2438,19 +2427,14 @@
           if (k === " ") e.preventDefault();
           if (k.toLowerCase() === "r") doReset();
         }
-      }, { passive: false });
-
+      }, { passive:false });
       window.addEventListener("keyup", (e) => KEYS.delete(e.key));
 
-      // Tap/click canvas to jump (mobile-friendly)
       canvas.addEventListener("pointerdown", () => {
         if (!run.active) return;
         if (player.onGround) player.vy = -8.6;
       });
 
-      // ------------------------------
-      // World
-      // ------------------------------
       const ROOM_COUNT = 12;
       pfRoomMax.textContent = String(ROOM_COUNT);
 
@@ -2460,7 +2444,6 @@
 
       function makeRoom(i) {
         const grid = Array.from({ length: H_TILES }, () => Array(W_TILES).fill(0));
-        // floor
         for (let x = 0; x < W_TILES; x++) grid[H_TILES - 1][x] = 1;
 
         const p = (x, y, len) => {
@@ -2507,27 +2490,8 @@
 
       const ROOMS = Array.from({ length: ROOM_COUNT }, (_, idx) => makeRoom(idx + 1));
 
-      // ------------------------------
-      // Player + run state
-      // ------------------------------
-      const player = {
-        x: 2 * TILE,
-        y: 10 * TILE,
-        w: 16,
-        h: 20,
-        vx: 0,
-        vy: 0,
-        onGround: false,
-        inv: 0
-      };
-
-      const run = {
-        active: false,
-        room: 1,
-        hearts: 0,
-        hits: 0,
-        best: null
-      };
+      const player = { x: 2*TILE, y: 10*TILE, w:16, h:20, vx:0, vy:0, onGround:false, inv:0 };
+      const run = { active:false, room:1, hearts:0, hits:0, best:null };
 
       function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
         return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
@@ -2543,7 +2507,6 @@
       function resolveCollisions(room) {
         const steps = 2;
         for (let s = 0; s < steps; s++) {
-          // X
           player.x += player.vx / steps;
           if (player.vx !== 0) {
             const left = player.x;
@@ -2562,7 +2525,6 @@
             }
           }
 
-          // Y
           player.y += player.vy / steps;
           player.onGround = false;
           if (player.vy !== 0) {
@@ -2588,13 +2550,8 @@
         }
       }
 
-      // ------------------------------
-      // Rewards + damage
-      // ------------------------------
       function rewardHeart() {
-        const STATE = getSTATE();
         run.hearts += 1;
-
         STATE.affection += 2.2;
         STATE.nerves -= 1.2;
 
@@ -2608,13 +2565,11 @@
 
         updateHUD();
         setBars();
-        confetti({ particleCount: 40, spread: 70, origin: { y: 0.7 } });
+        boom({ particleCount: 40, spread: 70, origin: { y: 0.7 } });
       }
 
       function takeHit() {
         if (player.inv > 0) return;
-        const STATE = getSTATE();
-
         player.inv = 0.9;
         run.hits += 1;
 
@@ -2625,9 +2580,6 @@
         setBars();
       }
 
-      // ------------------------------
-      // UI + room flow
-      // ------------------------------
       function setStatsUI() {
         pfRoom.textContent = String(run.room);
         pfHearts.textContent = String(run.hearts);
@@ -2646,17 +2598,12 @@
       }
 
       function finishRun() {
-        const STATE = getSTATE();
         const score = { hearts: run.hearts, hits: run.hits };
-        const better =
-          !run.best ||
-          score.hearts > run.best.hearts ||
-          (score.hearts === run.best.hearts && score.hits < run.best.hits);
-
+        const better = !run.best || score.hearts > run.best.hearts || (score.hearts === run.best.hearts && score.hits < run.best.hits);
         if (better) run.best = score;
 
         msg.textContent = `RUN COMPLETE 💘 Hearts: ${score.hearts}, Hits: ${score.hits}`;
-        confetti({ particleCount: 160, spread: 95, origin: { y: 0.55 } });
+        boom({ particleCount: 160, spread: 95, origin: { y: 0.55 } });
 
         STATE.affection += 10;
         STATE.nerves -= 8;
@@ -2676,9 +2623,6 @@
         msg.textContent = "Run reset. Go again 😤💖";
       }
 
-      // ------------------------------
-      // Draw
-      // ------------------------------
       function drawRoom(room) {
         const w = canvas.getBoundingClientRect().width;
         const h = canvas.getBoundingClientRect().height;
@@ -2689,7 +2633,6 @@
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, w, h);
 
-        // tiles
         for (let y = 0; y < H_TILES; y++) {
           for (let x = 0; x < W_TILES; x++) {
             if (room.grid[y][x] === 1) {
@@ -2701,36 +2644,25 @@
           }
         }
 
-        // exit
         ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
         ctx.fillText("🚪", room.exit.x - 10, room.exit.y + 10);
 
-        // pickups
         for (const p of room.pickups) {
           if (p.taken) continue;
-          ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
           ctx.fillText("💖", p.x - 10, p.y + 10);
         }
 
-        // hazards
         for (const hz of room.hazards) {
-          ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
           ctx.fillText("💔", hz.x - 10, hz.y + 10);
         }
 
-        // player
         ctx.globalAlpha = player.inv > 0 ? (Math.floor(performance.now() / 90) % 2 ? 0.35 : 1) : 1;
         ctx.font = "24px system-ui, Apple Color Emoji, Segoe UI Emoji";
         ctx.fillText("🫶", player.x - 6, player.y + player.h);
         ctx.globalAlpha = 1;
       }
 
-      // ------------------------------
-      // Main loop
-      // ------------------------------
-      let raf = null;
       let last = 0;
-
       function loop(ts) {
         if (!run.active) return;
         if (!last) last = ts;
@@ -2739,7 +2671,6 @@
 
         const room = ROOMS[run.room - 1];
 
-        // input
         let ax = 0;
         if (KEYS.has("ArrowLeft") || KEYS.has("a")) ax -= 1;
         if (KEYS.has("ArrowRight") || KEYS.has("d")) ax += 1;
@@ -2747,13 +2678,12 @@
         const accel = 26;
         const maxV = 5.0;
         player.vx += ax * accel * dt;
-        player.vx *= Math.pow(0.0008, dt); // friction
+        player.vx *= Math.pow(0.0008, dt);
         player.vx = clamp(player.vx, -maxV, maxV);
 
         const wantsJump = KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has(" ");
         if (wantsJump && player.onGround) player.vy = -8.6;
 
-        // gravity
         player.vy += 24 * dt;
         player.vy = clamp(player.vy, -16, 14);
 
@@ -2761,7 +2691,6 @@
 
         resolveCollisions(room);
 
-        // pickups
         for (const p of room.pickups) {
           if (p.taken) continue;
           const hit = rectsOverlap(player.x, player.y, player.w, player.h, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
@@ -2772,7 +2701,6 @@
           }
         }
 
-        // hazards
         for (const hz of room.hazards) {
           const hit = rectsOverlap(player.x, player.y, player.w, player.h, hz.x - hz.r, hz.y - hz.r, hz.r * 2, hz.r * 2);
           if (hit) {
@@ -2781,7 +2709,6 @@
           }
         }
 
-        // exit
         const atExit = rectsOverlap(
           player.x, player.y, player.w, player.h,
           room.exit.x - room.exit.r, room.exit.y - room.exit.r,
@@ -2793,11 +2720,10 @@
           else finishRun();
         }
 
-        // draw
         ctx.clearRect(0, 0, canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
         drawRoom(room);
 
-        raf = requestAnimationFrame(loop);
+        requestAnimationFrame(loop);
       }
 
       function start() {
@@ -2814,29 +2740,12 @@
         enterRoom(1);
         setStatsUI();
 
-        raf = requestAnimationFrame(loop);
+        requestAnimationFrame(loop);
       }
 
       startBtn.addEventListener("click", start);
       resetBtn.addEventListener("click", doReset);
-
       setStatsUI();
-    })();
-
-   // init
-    giftCount.textContent = "0";
-    tokenCount.textContent = "0";
-    renderStack();
-    renderInventory();
-    updateSynergy();
-    updateHUD();
-    setBars();
-
-    /* ESC to close modals */
-    window.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-      dateModal.classList.add("hidden");
-      cinematicOverlay.classList.add("hidden");
     });
   })();
   </script>
