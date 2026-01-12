@@ -3,719 +3,3993 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Valentine</title>
+  <title>Valentine’s Day 2026 — Sarah Stets</title>
+
+  <!-- Tailwind + Confetti -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <style>
+    /* =========================================================
+       0) Base + Background
+    ========================================================= */
     :root{
-      --bg1:#fff1f5;
-      --bg2:#ffe4ee;
-      --card:#ffffffcc;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --pink:#fb7185;
-      --pink2:#f43f5e;
-      --shadow: 0 18px 55px rgba(0,0,0,.12);
-      --radius: 22px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      color:var(--text);
-      background: radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%),
-                  radial-gradient(900px 700px at 85% 20%, #ffd0df, transparent 55%),
-                  linear-gradient(180deg, var(--bg1), #fff);
-      overflow-x:hidden;
+      --glass: rgba(255,255,255,0.78);
+      --glass-border: rgba(255,255,255,0.60);
+      --shadow: 0 22px 70px rgba(0,0,0,0.14);
     }
 
-    /* Heart background */
-    #heartBg{
+    body{
+      margin:0;
+      min-height:100vh;
+      overflow-x:hidden;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(900px 520px at 20% 15%, rgba(255, 182, 193, 0.55), transparent 60%),
+        radial-gradient(900px 520px at 80% 25%, rgba(255, 105, 180, 0.28), transparent 60%),
+        radial-gradient(900px 520px at 55% 85%, rgba(147, 197, 253, 0.35), transparent 60%),
+        linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fdf2f8 70%, #eff6ff 100%);
+    }
+
+    body.shiny-mode{
+      background:
+        radial-gradient(900px 520px at 20% 15%, rgba(167, 139, 250, 0.50), transparent 60%),
+        radial-gradient(900px 520px at 80% 25%, rgba(34, 211, 238, 0.22), transparent 60%),
+        radial-gradient(900px 520px at 55% 85%, rgba(250, 204, 21, 0.24), transparent 60%),
+        linear-gradient(180deg, #f5f3ff 0%, #e0f2fe 50%, #fff7ed 100%);
+    }
+
+    /* Boss tint */
+    body.boss-mode::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:
+        radial-gradient(900px 520px at 55% 55%, rgba(15, 23, 42, 0.55), transparent 65%),
+        linear-gradient(180deg, rgba(15,23,42,0.25), rgba(0,0,0,0.10));
+      opacity:0.85;
+      mix-blend-mode:multiply;
+    }
+
+    /* Background layers */
+    #bg{
       position:fixed;
       inset:0;
       pointer-events:none;
-      overflow:hidden;
       z-index:0;
+      overflow:hidden;
     }
-    .heart{
+    .blob{
       position:absolute;
-      top:-10vh;
-      width:14px;height:14px;
-      transform: rotate(45deg);
-      opacity:.25;
-      animation: fall linear forwards;
-      filter: drop-shadow(0 2px 8px rgba(244,63,94,.25));
+      width:520px;
+      height:520px;
+      border-radius:999px;
+      filter: blur(55px);
+      opacity:0.55;
+      mix-blend-mode:multiply;
+      will-change:transform;
+      transform: translate3d(0,0,0);
     }
-    .heart::before,.heart::after{
-      content:"";
+    .blob.a{
+      left:-140px;
+      top:-160px;
+      background: radial-gradient(circle at 30% 30%, rgba(244,63,94,0.55), rgba(255,182,193,0.25) 55%, transparent 70%);
+      animation: floatA 14s ease-in-out infinite;
+    }
+    .blob.b{
+      right:-160px;
+      top:-120px;
+      background: radial-gradient(circle at 30% 30%, rgba(236,72,153,0.45), rgba(147,197,253,0.22) 55%, transparent 70%);
+      animation: floatB 16s ease-in-out infinite;
+    }
+    .blob.c{
+      left:10%;
+      bottom:-210px;
+      background: radial-gradient(circle at 30% 30%, rgba(147,197,253,0.45), rgba(244,63,94,0.18) 55%, transparent 70%);
+      animation: floatC 18s ease-in-out infinite;
+    }
+    @keyframes floatA { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(80px,60px) scale(1.08);} }
+    @keyframes floatB { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(-90px,70px) scale(1.06);} }
+    @keyframes floatC { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(120px,-60px) scale(1.1);} }
+
+    body.boss-mode .blob.a{ animation-duration: 9s; }
+    body.boss-mode .blob.b{ animation-duration: 10s; }
+    body.boss-mode .blob.c{ animation-duration: 11s; }
+
+    .noise{
       position:absolute;
-      width:14px;height:14px;
-      background: rgba(244,63,94,.9);
-      border-radius:50%;
-    }
-    .heart{
-      background: rgba(244,63,94,.9);
-      border-radius:3px;
-    }
-    .heart::before{left:-7px; top:0}
-    .heart::after{left:0; top:-7px}
-
-    @keyframes fall{
-      to{
-        transform: translateY(120vh) rotate(45deg);
-        opacity:0;
-      }
+      inset:0;
+      opacity:0.10;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      background-size:180px 180px;
     }
 
-    .wrap{
-      position:relative;
-      z-index:1;
-      min-height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px 14px 56px;
+    .pixel-grid{
+      position:absolute;
+      inset:0;
+      opacity:.22;
+      background-image:url("https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif");
+      background-size:cover;
+      background-position:center;
+      mix-blend-mode:overlay;
+      filter:saturate(.95) contrast(1.05);
     }
-    .card{
-      width:min(410px, 94vw);
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,.65);
-      border-radius: var(--radius);
+
+    /* =========================================================
+       1) Floating layers (hearts/powerups/clouds)
+    ========================================================= */
+    #hearts, #powerups, #pixelClouds{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:2;
+      overflow:hidden;
+    }
+    #powerups{ z-index:1; }
+
+    .heart, .powerup{
+      position:absolute;
+      bottom:-40px;
+      user-select:none;
+      will-change: transform, opacity;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
+      opacity:0;
+    }
+    .heart{ animation: floatUp linear forwards; }
+    .powerup{ animation: puFloat linear forwards; }
+    @keyframes floatUp{
+      0%   { transform: translateY(0) translateX(0) scale(1); opacity:0; }
+      10%  { opacity:.85; }
+      100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity:0; }
+    }
+    @keyframes puFloat{
+      0%   { transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity:0; }
+      12%  { opacity:.9; }
+      100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity:0; }
+    }
+
+    .pixel-cloud{
+      position:absolute;
+      left:-260px;
+      top: var(--top);
+      width:240px;
+      height:120px;
+      opacity:0.30;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.08));
+      image-rendering: pixelated;
+      background-repeat:no-repeat;
+      background-size:100% 100%;
+      animation: cloudDrift linear forwards;
+      transform: translateZ(0);
+    }
+    body.boss-mode .pixel-cloud{ opacity:0.18; }
+    @keyframes cloudDrift{
+      from { transform: translateX(0) scale(var(--s)); }
+      to { transform: translateX(calc(100vw + 520px)) scale(var(--s)); }
+    }
+
+    /* =========================================================
+       2) Glass + Title + Mana
+    ========================================================= */
+    .glass{
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .top{
-      padding:18px 18px 10px;
-      text-align:center;
-    }
-    .date{
-      font-weight:800;
-      letter-spacing:.03em;
-      color:#374151;
-      margin-top:8px;
-    }
-    h1{
-      margin:10px 0 0;
-      font-size:20px;
-      line-height:1.25;
-      font-weight:900;
-    }
-    .img{
-      padding:10px 16px 0;
-    }
-    .img img{
-      width:100%;
-      border-radius: 18px;
-      display:block;
-      box-shadow: 0 10px 28px rgba(0,0,0,.10);
-      object-fit:cover;
-      max-height: 280px;
     }
 
-    .buttons{
-      margin:14px 16px 0;
-      background: rgba(255,255,255,.7);
-      border: 1px solid rgba(255,255,255,.75);
-      border-radius: 18px;
-      padding:16px;
-      display:flex;
-      gap:14px;
-      justify-content:center;
-      align-items:center;
-    }
-    .pill{
-      border:0;
-      border-radius:999px;
-      padding:12px 18px;
-      font-weight:900;
-      letter-spacing:.02em;
-      cursor:pointer;
-      min-width:132px;
-      transition: transform .12s ease, opacity .12s ease, filter .12s ease;
-    }
-    .pill:active{transform:scale(.98)}
-    .yes{background: linear-gradient(180deg, #fb7185, #f43f5e); color:white;}
-    .no{background: linear-gradient(180deg, #fda4af, #fb7185); color:white;}
-    .locked{
-      opacity:.55;
-      filter: grayscale(.25);
-      cursor:not-allowed;
-    }
-
-    .hint{
-      padding:12px 18px 4px;
+    #bigTitle{
       text-align:center;
-      font-weight:700;
-      color:var(--muted);
-      font-size:13px;
-    }
-    .status{
-      padding:0 18px 16px;
-      text-align:center;
-      font-weight:900;
-      color:#374151;
-      font-size:13px;
-    }
-
-    .boss{
-      padding:16px 16px 18px;
-      border-top:1px solid rgba(0,0,0,.06);
-    }
-    .bossHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:10px;
-    }
-    .bossHead h2{
-      margin:0;
-      font-size:14px;
-      letter-spacing:.02em;
-      font-weight:900;
-      color:#111827;
-    }
-    .bossHead button{
-      border:0;
-      border-radius:999px;
-      padding:10px 14px;
-      font-weight:900;
-      background:#111827;
-      color:white;
-      cursor:pointer;
-    }
-    .arena{
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 0.95;
+      font-size: clamp(2.0rem, 5vw, 3.8rem);
+      color:#fff;
+      text-shadow: 0 4px 0 rgba(0,0,0,0.15), 0 10px 28px rgba(0,0,0,0.22);
+      margin-bottom: 0.9rem;
       position:relative;
-      border-radius:18px;
-      overflow:hidden;
-      background: radial-gradient(700px 300px at 50% 10%, rgba(244,63,94,.20), transparent 60%),
-                  linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.35));
-      border:1px solid rgba(0,0,0,.06);
+      z-index:3;
     }
-    canvas{display:block; width:100%; height:260px;}
-    .overlay{
+    #bigTitle span{
+      display:inline-block;
+      padding: .18em .42em;
+      border-radius:999px;
+      background: rgba(244,63,94,0.20);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.35);
+    }
+
+    #manaWrap{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    #manaBarInner{
+      width:0%;
+      transition: width 160ms ease;
+    }
+
+    /* =========================================================
+       3) Buttons (Heart SVG buttons)
+    ========================================================= */
+    .svg-heart{
+      width: 62px;
+      height: 56px;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.16));
+      transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+      will-change: transform;
+    }
+    .svg-heart svg{ width:100%; height:100%; display:block; }
+    .svg-heart.yes path{ fill: #ef4444; }
+    .svg-heart.no  path{ fill: #f43f5e; }
+    .svg-heart span{
       position:absolute;
       inset:0;
       display:flex;
       align-items:center;
       justify-content:center;
-      text-align:center;
-      padding:18px;
-      background: rgba(255,255,255,.70);
-      backdrop-filter: blur(8px);
+      transform: translateY(-3px);
+      color:#fff;
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing: .7px;
+      text-shadow: 0 1px 2px rgba(0,0,0,.25);
+      user-select:none;
+      pointer-events:none;
     }
-    .overlay.hidden{display:none}
-    .overlayBox{
-      max-width: 310px;
-      padding:16px 16px 14px;
-      border-radius:18px;
-      background: rgba(255,255,255,.85);
-      border: 1px solid rgba(0,0,0,.06);
-      box-shadow: 0 16px 40px rgba(0,0,0,.12);
+    .svg-heart:hover{ transform: scale(1.06); filter: drop-shadow(0 12px 18px rgba(0,0,0,.18)); }
+    .svg-heart:active{ transform: scale(.96); }
+
+    /* Runaway arena */
+    #heartButtons{
+      position: relative;
+      height: 118px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.60);
+      border: 1px solid rgba(255,255,255,.62);
+      overflow: hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 24px;
     }
-    .overlayBox .big{
-      font-size:22px;
-      font-weight:1000;
-      margin:0 0 6px;
+    .svg-heart.no.runaway{
+      position:absolute;
+      left:0; top:0;
+      z-index: 20;
+      --nx: 0px;
+      --ny: 0px;
+      --nscale: 1;
+      transform: translate(var(--nx), var(--ny)) scale(var(--nscale));
+      transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
     }
-    .overlayBox .small{
-      margin:0;
-      color:var(--muted);
-      font-weight:800;
-      font-size:13px;
-      line-height:1.35;
+    .svg-heart.no.runaway.is-running{ transition: transform 60ms linear; }
+
+    /* Mascot bounce */
+    .mascot-bounce{ animation: mascotBounce 1.8s ease-in-out infinite; }
+    @keyframes mascotBounce { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-6px);} }
+
+    /* Boss overlay gif */
+    #blackholeGif{
+      position:absolute;
+      left:50%;
+      top:44%;
+      transform: translate(-50%, -50%);
+      width:170px;
+      height:170px;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 160ms ease;
+      filter: drop-shadow(0 12px 24px rgba(0,0,0,0.22));
+      mix-blend-mode: screen;
     }
 
-    .bars{
-      display:flex;
-      gap:10px;
-      margin-top:10px;
+    /* Simple modal */
+    .modal{
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: grid;
+      place-items: center;
+      padding: 18px;
     }
-    .barWrap{
-      flex:1;
-      background: rgba(17,24,39,.08);
-      border-radius:999px;
-      overflow:hidden;
-      height:10px;
+    .modal.hidden{ display:none; }
+    .modal .backdrop{
+      position:absolute;
+      inset:0;
+      background: rgba(2,6,23,0.50);
+      backdrop-filter: blur(6px);
     }
-    .bar{height:100%; width:100%}
-    #playerHPBar{background: linear-gradient(90deg,#fb7185,#f43f5e)}
-    #bossHPBar{background: linear-gradient(90deg,#60a5fa,#6366f1)}
-    #loveBar{background: linear-gradient(90deg,#fda4af,#fb7185)}
-    .barLabels{
-      display:flex;
-      justify-content:space-between;
-      margin-top:8px;
-      color:var(--muted);
-      font-size:11px;
-      font-weight:900;
-      letter-spacing:.02em;
+    .modal .panel{
+      position:relative;
+      width: min(980px, calc(100vw - 24px));
+      max-height: min(82vh, 760px);
+      overflow:auto;
+      border-radius: 28px;
+      padding: 18px;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(255,255,255,0.62);
+      box-shadow: 0 40px 90px rgba(2,6,23,0.25);
     }
-    .bossMsg{
-      margin:10px 0 0;
-      text-align:center;
-      font-weight:900;
-      font-size:13px;
-      color:#374151;
-    }
+
+    /* Tiny helpers */
+    .hidden{ display:none !important; }
+
+    /* Platformer crisp pixels + stable layout */
+    #pfCanvas { image-rendering: pixelated; touch-action: none; }
   </style>
 </head>
 
-<body>
-  <div id="heartBg" aria-hidden="true"></div>
+<body class="min-h-screen">
+  <!-- Background -->
+  <div id="bg" aria-hidden="true">
+    <div class="blob a"></div>
+    <div class="blob b"></div>
+    <div class="blob c"></div>
+    <div class="noise"></div>
+    <div class="pixel-grid"></div>
+  </div>
 
-  <div class="wrap">
-    <div class="card">
-      <div class="top">
-        <!-- optional little icon -->
-        <div style="font-size:34px; line-height:1;">💙</div>
-        <div class="date" id="dateText">2/14/26</div>
-        <h1 id="questionText">Will you be my Valentine, Andrew Getzow?</h1>
-      </div>
+  <!-- Floating layers -->
+  <div id="powerups" aria-hidden="true"></div>
+  <div id="pixelClouds" aria-hidden="true"></div>
+  <div id="hearts" aria-hidden="true"></div>
 
-      <div class="img">
-        <!-- swap this src to your Eevee image file if you want -->
-        <img id="mainImage" alt="Valentine image" src="https://images.unsplash.com/photo-1546447147-3fc2b8181b69?auto=format&fit=crop&w=1200&q=80">
-      </div>
+  <!-- Title + Mana -->
+  <header class="relative z-[3] px-4 pt-6">
+    <div class="max-w-7xl mx-auto">
+      <h1 id="bigTitle"><span>Love Beyond the Multiverse 💘</span></h1>
 
-      <div class="buttons">
-        <button id="yesBtn" class="pill yes locked" disabled>LOCKED</button>
-        <button id="noBtn" class="pill no locked" disabled>LOCKED</button>
-      </div>
-
-      <div class="hint" id="hintText">Both buttons are locked 😈 Beat the boss first.</div>
-      <div class="status" id="statusText">Status: Undecided</div>
-
-      <div class="boss" id="bossSection">
-        <div class="bossHead">
-          <h2>Boss Fight</h2>
-          <button id="bossStart">Start</button>
+      <div id="manaWrap" class="glass rounded-2xl px-4 py-3 mb-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm font-extrabold text-slate-800/80">
+            Affection Mana: <span id="manaPct">0</span>%
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="musicBtn" class="text-sm font-black text-slate-700/80 hover:text-slate-900 transition">
+              🎵 Music: Off
+            </button>
+            <button id="shinyStar" class="text-sm font-black text-slate-700/80 hover:text-slate-900 transition" title="psst… click me 3x">
+              ⭐ Shiny Chance
+            </button>
+          </div>
         </div>
+        <div class="mt-2 h-3 rounded-full bg-white/70 border border-white/60 overflow-hidden">
+          <div id="manaBarInner" class="h-full bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300"></div>
+        </div>
+      </div>
 
-        <div class="arena">
-          <canvas id="bossCanvas"></canvas>
+      <div class="text-center text-white/90 font-extrabold tracking-wide drop-shadow-sm mb-5">
+        Two universes. One question.
+        <span class="block text-sm font-semibold text-white/80 mt-1">Defeat the boss to unlock YES + NO.</span>
+      </div>
+    </div>
+  </header>
 
-          <div class="overlay" id="bossOverlay">
-            <div class="overlayBox">
-              <p class="big">Beat the Boss</p>
-              <p class="small">Move: WASD / Arrow Keys (or drag).<br/>Attack: Space (or tap).</p>
+  <!-- Main layout -->
+  <div class="relative z-[3] max-w-7xl mx-auto px-4 pb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-5 items-start">
+
+      <!-- LEFT: Valentine card -->
+      <aside class="lg:sticky lg:top-24">
+        <div class="glass rounded-3xl p-6 text-center">
+          <div class="mx-auto mb-3 w-28 mascot-bounce">
+            <div class="w-24 h-24 mx-auto">
+              <svg viewBox="0 0 128 128" class="w-full h-full drop-shadow-sm" aria-hidden="true">
+                <path d="M40 24 L64 10 L88 24 L82 44 H46 Z" fill="#fbbf24"/>
+                <circle cx="64" cy="22" r="6" fill="#f59e0b"/>
+                <ellipse cx="64" cy="62" rx="34" ry="28" fill="#60a5fa"/>
+                <ellipse cx="64" cy="70" rx="26" ry="18" fill="#93c5fd" opacity="0.9"/>
+                <ellipse cx="52" cy="58" rx="7" ry="10" fill="#0f172a"/>
+                <ellipse cx="76" cy="58" rx="7" ry="10" fill="#0f172a"/>
+                <circle cx="50" cy="55" r="2" fill="#fff"/>
+                <circle cx="74" cy="55" r="2" fill="#fff"/>
+                <path d="M64 64 C56 62 56 74 64 76 C72 74 72 62 64 64 Z" fill="#f59e0b"/>
+                <path d="M30 92 C34 78 48 72 64 72 C80 72 94 78 98 92
+                         C90 108 78 118 64 118 C50 118 38 108 30 92 Z"
+                      fill="#ef4444"/>
+                <path d="M38 94 C44 104 54 110 64 110 C74 110 84 104 90 94"
+                      stroke="#fff" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+              </svg>
+            </div>
+            <div class="mt-1 text-center font-extrabold text-sm tracking-wide text-slate-800/80">
+              2/14/26
+            </div>
+          </div>
+
+          <div class="font-black text-slate-800/80 mb-3">
+            Will you be my Valentine, Andrew Getzow?
+          </div>
+
+          <img id="valImage"
+               class="w-full h-64 object-cover rounded-xl mb-4"
+               style="background: linear-gradient(135deg, rgba(255,192,203,0.25), rgba(173,216,230,0.25));"
+               alt="Valentine gif" />
+
+          <!-- Runaway arena -->
+          <div id="heartButtons" class="mx-auto">
+            <button id="yesBtn" class="svg-heart yes" type="button" aria-label="Yes">
+              <svg viewBox="0 0 64 58" aria-hidden="true">
+                <path d="M32 54s-20-11.6-27-24C-1.2 18.4 6.2 6 18.3 6c6.1 0 10.2 3.1 13.7 7.4C35.5 9.1 39.6 6 45.7 6 57.8 6 65.2 18.4 59 30c-7 12.4-27 24-27 24z"/>
+              </svg>
+              <span>YES</span>
+            </button>
+
+            <button id="noBtn" class="svg-heart no" type="button" aria-label="No">
+              <svg viewBox="0 0 64 58" aria-hidden="true">
+                <path d="M32 54s-20-11.6-27-24C-1.2 18.4 6.2 6 18.3 6c6.1 0 10.2 3.1 13.7 7.4C35.5 9.1 39.6 6 45.7 6 57.8 6 65.2 18.4 59 30c-7 12.4-27 24-27 24z"/>
+              </svg>
+              <span>NO</span>
+            </button>
+          </div>
+
+          <p id="hint" class="text-sm text-gray-700 mt-4 font-semibold">
+            Both buttons are locked 😈 Beat the boss first.
+          </p>
+
+          <div class="mt-3 text-xs font-black text-slate-700/70">
+            Status: <span id="statusLine" class="font-extrabold">Undecided</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT: content -->
+      <main class="space-y-5">
+
+        <!-- Begin -->
+        <section class="glass rounded-3xl p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <div class="text-2xl font-black text-slate-800/80">Begin the Event</div>
+              <div class="text-sm font-semibold text-slate-700/80 mt-1">
+                Defeat the boss to unlock the final question… and then try to click NO. (lol)
+              </div>
+            </div>
+            <button id="beginEvent"
+              class="rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+              style="background: linear-gradient(135deg, #fb7185, #ec4899, #6366f1);">
+              Begin
+            </button>
+          </div>
+        </section>
+
+        <!-- Boss Fight -->
+        <section class="glass rounded-3xl overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
+            <div class="font-black text-slate-800/80">👾 Boss Fight (Love Edition)</div>
+            <div class="text-xs font-black text-slate-700/70">Move: WASD/Arrows • Attack: Space / Tap</div>
+          </div>
+
+          <div class="px-6 py-5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+              <div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">YOU 💖</div>
+                <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+                  <div id="playerHPBar" class="h-full w-full bg-gradient-to-r from-rose-500 to-pink-500"></div>
+                </div>
+              </div>
+              <div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">BOSS ☄️</div>
+                <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+                  <div id="bossHPBar" class="h-full w-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"></div>
+                </div>
+              </div>
+              <div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">LOVE METER 💘</div>
+                <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+                  <div id="loveBar" class="h-full w-0 bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
+              <canvas id="bossCanvas" class="w-full block h-[420px]"></canvas>
+              <img id="blackholeGif" alt="Black hole gif" />
+
+              <div id="bossOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
+                <div class="text-slate-800/80">
+                  <div class="text-3xl font-extrabold">A wild boss appeared!</div>
+                  <div class="text-sm font-semibold mt-2">Dodge cursed hearts. Shoot love beams.</div>
+                </div>
+              </div>
+
+              <button id="bossStart"
+                class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+                style="background: linear-gradient(135deg, #6366f1, #ec4899, #fb7185);">
+                Start Boss Fight
+              </button>
+            </div>
+
+            <div id="bossMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
+              Beat the boss to unlock YES + NO.
+            </div>
+          </div>
+        </section>
+
+        <!-- TCG + HUD + Spellbook + Tokens + Battle -->
+        <section class="glass rounded-3xl p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+              <div class="text-2xl font-black text-slate-800/80">Romance Arcade System</div>
+              <div class="text-sm font-semibold text-slate-700/80 mt-1">
+                Tokens → mana → cast spells → buffs → unlock love lines 💌
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="altArtBtn"
+                class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
+                style="background: linear-gradient(135deg, #fb7185, #6366f1);">
+                Reveal Alt Art
+              </button>
+              <button id="openDateModal"
+                class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
+                style="background: linear-gradient(135deg, #ec4899, #60a5fa);">
+                Open Spellbook
+              </button>
+            </div>
+          </div>
+
+          <!-- Cinematic -->
+          <div id="cinematicOverlay" class="modal hidden" aria-hidden="true">
+            <div class="backdrop"></div>
+            <div class="panel text-center">
+              <div class="text-xl font-black text-slate-900/80">✨ ALT ART UNLOCKED ✨</div>
+              <div id="cinematicLine" class="mt-3 font-extrabold text-slate-800/80">
+                “I would choose you in every draft.”
+              </div>
+              <div class="mt-3 text-xs font-black text-slate-700/70">Click anywhere to continue</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-4">
+
+            <!-- Card -->
+            <div class="rounded-3xl bg-white/60 border border-white/60 p-4">
+              <div id="tcgCard" class="rounded-3xl bg-white/70 border border-white/60 p-4"
+                   style="transform-style:preserve-3d; cursor:pointer;">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="font-black text-slate-800/80">
+                    Andrew Getzow, Keeper of My Heart
+                    <span class="ml-2 text-xs font-black text-slate-700/70">VAL-014</span>
+                  </div>
+                  <div class="text-xs font-black text-slate-700/70">
+                    Cost: 🍫 ❤️ 🍿 ✨
+                  </div>
+                </div>
+
+                <div class="mt-3 rounded-2xl overflow-hidden border border-slate-900/10 bg-white/70 relative">
+                  <div id="cardArt" class="h-44 flex items-center justify-center font-black text-slate-700/70"
+                       style="background:
+                         radial-gradient(600px 120px at 30% 30%, rgba(255,77,141,0.20), transparent 55%),
+                         radial-gradient(600px 120px at 80% 60%, rgba(99,102,241,0.14), transparent 55%),
+                         rgba(255,255,255,0.62);">
+                    (Put a cute photo here later)
+                  </div>
+                  <div class="absolute left-3 bottom-3 px-3 py-1 rounded-full bg-white/80 border border-slate-900/10 text-xs font-black text-slate-700/70">
+                    <span id="artCaption">“Dinner Date Foil”</span>
+                  </div>
+                </div>
+
+                <div class="mt-3 rounded-2xl bg-white/70 border border-white/60 p-4">
+                  <div class="text-sm font-semibold text-slate-800/80 leading-relaxed">
+                    <div><b>Whenever you smile</b>, create a <b>Heart token</b>.</div>
+                    <div class="mt-1"><b>{T}:</b> Go on a date. If it’s Valentine’s Day, you may also get dessert.</div>
+                    <div class="mt-1"><b>Partner</b> with <b>You, Hopeless Romantic</b>.</div>
+                  </div>
+                  <div class="mt-3 text-xs italic font-black text-slate-700/70">
+                    <span id="flavorQuote">“I’d tap all my mana for you.”</span>
+                  </div>
+                  <div class="mt-3 text-sm font-extrabold text-slate-800/80">
+                    Love Letter: <span id="loveLetterLine">“If love were a format, I’d still pick you first.”</span>
+                  </div>
+                  <div class="mt-2 text-xs font-black text-slate-700/70" id="loveLineUnlocks">0/8 unlocked 💌</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HUD -->
+            <div class="rounded-3xl bg-white/60 border border-white/60 p-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-xl font-black text-slate-800/80">Romance HUD</div>
+                  <div class="text-sm font-semibold text-slate-700/80 mt-1">Play the system for buffs + unlocks.</div>
+                </div>
+                <div class="text-xs font-black text-slate-700/70">
+                  Phase: <span id="romancePhase" class="px-2 py-1 rounded-full bg-white/80 border border-white/60">I</span>
+                </div>
+              </div>
+
+              <div class="mt-4 space-y-3">
+                <div>
+                  <div class="flex items-center justify-between text-xs font-black text-slate-700/70">
+                    <span>Affection</span><span id="affectionText">0%</span>
+                  </div>
+                  <div class="h-3 rounded-full bg-white/70 border border-white/60 overflow-hidden">
+                    <div id="affectionFill" class="h-full bg-gradient-to-r from-pink-500 to-fuchsia-500" style="width:0%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between text-xs font-black text-slate-700/70">
+                    <span>Nerves</span><span id="nervesText">25%</span>
+                  </div>
+                  <div class="h-3 rounded-full bg-white/70 border border-white/60 overflow-hidden">
+                    <div id="nervesFill" class="h-full bg-gradient-to-r from-indigo-500 to-sky-400" style="width:25%"></div>
+                  </div>
+                </div>
+
+                <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+                  <div class="text-xs font-black text-slate-700/70">Mana Pool</div>
+                  <div id="manaPoolMini" class="mt-1 text-sm font-extrabold text-slate-800/80">🍫0 ❤️0 🍿0 ✨0</div>
+                </div>
+
+                <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+                  <div class="text-xs font-black text-slate-700/70">Achievements</div>
+                  <div id="achievementsMini" class="mt-1 text-sm font-extrabold text-slate-800/80">— none yet —</div>
+                </div>
+
+                <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+                  <div class="text-xs font-black text-slate-700/70">Battle Status</div>
+                  <div class="mt-1 text-sm font-extrabold text-slate-800/80">
+                    <span id="battleStatus">Neutral</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spellbook + Stack summary -->
+          <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+              <div class="text-sm font-semibold text-slate-700/80" id="chosenDate">
+                Selected spell: <b>None yet</b>
+              </div>
+              <div class="mt-2 text-xs font-black text-slate-700/70">
+                Mana pool: <span id="manaSpent">🍫0 ❤️0 🍿0 ✨0</span>
+              </div>
+              <div class="mt-2 text-xs font-black text-slate-700/70">
+                Combo bonus: <span id="comboBonus">None</span>
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+              <div class="flex items-center justify-between">
+                <div class="text-xs font-black text-slate-700/70">THE STACK</div>
+                <button id="resolveStack"
+                  class="rounded-full px-3 py-2 text-xs font-black text-white shadow active:scale-95 transition"
+                  style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
+                  Resolve ✨
+                </button>
+              </div>
+              <div id="spellStack" class="mt-2 space-y-2 text-sm font-semibold text-slate-800/80">
+                <div class="opacity-70">— empty —</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tokens + crafting -->
+          <div class="mt-5 grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-3">
+            <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-lg font-black text-slate-800/80">Heart Token Atelier</div>
+                  <div class="text-sm font-semibold text-slate-700/80 mt-1">
+                    Generate tokens → gain mana → craft gifts.
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button id="craftBtn"
+                    class="rounded-full px-4 py-2 font-extrabold text-white shadow-lg active:scale-95 transition"
+                    style="background: linear-gradient(135deg, #6366f1, #ec4899);">
+                    Craft Gift
+                  </button>
+                  <button id="tokenBtn"
+                    class="rounded-full px-4 py-2 font-extrabold text-white shadow-lg active:scale-95 transition"
+                    style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
+                    Create Token
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-3 grid grid-cols-8 sm:grid-cols-12 gap-2" id="tokenGrid"></div>
+
+              <div class="mt-3 text-sm font-semibold text-slate-700/80" id="tokenMsg">
+                Tokens: <b id="tokenCount">0</b> • Crafted gifts: <b id="giftCount">0</b>
+              </div>
+              <div class="mt-2 text-xs font-black text-slate-700/70" id="tokenLootLog">
+                Loot log: — —
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+              <div class="text-xs font-black text-slate-700/70 mb-2">CRAFTING RECIPES</div>
+              <div class="text-sm font-semibold text-slate-800/80">
+                <div><b>💐 Bouquet</b> = 🌹 + 🌹 + ✨</div>
+                <div class="mt-1"><b>🍫 Chocolate Box</b> = 🍫 + 🍫 + ❤️</div>
+                <div class="mt-1"><b>🕯️ Candle Kit</b> = 🕯️ + ✨ + ❤️</div>
+                <div class="mt-1"><b>🎟️ Date Ticket</b> = 🍿 + 🍿 + ❤️</div>
+              </div>
+
+              <div class="mt-4">
+                <div class="text-xs font-black text-slate-700/70 mb-2">INVENTORY</div>
+                <div id="inventoryPanel" class="text-sm font-semibold text-slate-800/80 opacity-90">
+                  — empty —
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- “Wild Valentine” battle (simple) -->
+          <div class="mt-5 rounded-3xl bg-white/60 border border-white/60 p-5">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-xl font-black text-slate-800/80">Wild Valentine Encounter</div>
+                <div id="battleText" class="text-sm font-semibold text-slate-700/80 mt-1">
+                  A wild Valentine appeared!
+                </div>
+              </div>
+              <div class="text-xs font-black text-slate-700/70">
+                Enemy Affection: <span id="enemyAff">0%</span>
+              </div>
+            </div>
+
+            <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+                <div class="text-xs font-black text-slate-700/70">Enemy HP</div>
+                <div class="mt-2 h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+                  <div id="enemyHPBar" class="h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500" style="width:100%"></div>
+                </div>
+                <div class="mt-3 text-4xl text-center select-none">💘</div>
+              </div>
+
+              <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+                <div class="text-xs font-black text-slate-700/70">You HP</div>
+                <div class="mt-2 h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+                  <div id="youHPBar" class="h-full bg-gradient-to-r from-rose-500 to-pink-500" style="width:100%"></div>
+                </div>
+
+                <div class="mt-3 text-xs font-black text-slate-700/70 flex items-center justify-between">
+                  <span>Nerves</span><span id="youNerves">25%</span>
+                </div>
+                <div class="mt-2 h-2 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+                  <div id="youNervesBar" class="h-full bg-gradient-to-r from-sky-500 to-indigo-400" style="width:25%"></div>
+                </div>
+
+                <div class="mt-3 text-4xl text-center select-none">🫶</div>
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                      style="background: linear-gradient(135deg, #fb7185, #ec4899);" data-move="Compliment Beam">Compliment</button>
+              <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                      style="background: linear-gradient(135deg, #60a5fa, #22c55e);" data-move="Snack Shield">Snack</button>
+              <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                      style="background: linear-gradient(135deg, #f59e0b, #fb7185);" data-move="Laugh Attack">Laugh</button>
+              <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+                      style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy</button>
+            </div>
+          </div>
+
+         <!-- =========================================================
+     PLATFORMER MODULE (DROP-IN REPLACEMENT)
+     - “C-side inspired” hard platforming (original level; not copied)
+     - Romantic candle-dinner theme
+     - Hooks into your main STATE/updateHUD/setBars/unlockLoveLine/safeConfetti if present
+========================================================= -->
+<section class="glass rounded-3xl overflow-hidden" id="platformerModule">
+  <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
+    <div class="font-black text-slate-800/80">🕯️💘 Candlelight C-Side: Dinner Dash</div>
+    <div class="text-xs font-black text-slate-700/70">
+      Move: A/D or ←/→ • Jump: W/↑/Space • Dash: Shift / K • Reset: R
+    </div>
+  </div>
+
+  <div class="px-6 py-5">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 items-start">
+      <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
+        <canvas id="pfCanvas" class="w-full block h-[420px]"></canvas>
+
+        <button id="pfStart"
+          class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+          style="background: linear-gradient(135deg, #fb7185, #6366f1);">
+          Start Candlelight C-Side
+        </button>
+
+        <div id="pfOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
+          <div class="text-slate-800/80">
+            <div class="text-3xl font-extrabold">🕯️ Dash through dinner</div>
+            <div class="text-sm font-semibold mt-2">
+              Super hard. Super romantic. Collect 💖, light 🕯️, reach 🍽️.
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="bars">
-          <div class="barWrap"><div class="bar" id="playerHPBar"></div></div>
-          <div class="barWrap"><div class="bar" id="bossHPBar"></div></div>
+      <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+        <div class="text-xs font-black text-slate-700/70">RUN STATS</div>
+        <div class="mt-2 text-sm font-extrabold text-slate-800/80 space-y-1">
+          <div>Room: <span id="pfRoom">1</span>/<span id="pfRoomMax">5</span></div>
+          <div>Hearts: <span id="pfHearts">0</span></div>
+          <div>Notes: <span id="pfNotes">0</span></div>
+          <div>Deaths: <span id="pfDeaths">0</span></div>
+          <div>Best: <span id="pfBest">—</span></div>
         </div>
 
-        <div class="barLabels">
-          <div>YOU</div>
-          <div>BOSS</div>
+        <div class="mt-4 text-xs font-black text-slate-700/70">MECHANICS</div>
+        <div class="mt-2 text-sm font-semibold text-slate-800/80 leading-relaxed">
+          💖 pickup: +Affection, -Nerves, +random mana<br/>
+          🕯️ candle: checkpoint + dash refill<br/>
+          🔷 crystal: dash refill<br/>
+          🪨 crumble: falls after touch<br/>
+          🛗 mover: timed platform cycle<br/>
+          🔑 key: opens the dinner gate<br/>
+          💔 spikes: instant death (respawn at last candle)
         </div>
 
-        <div class="barWrap" style="margin-top:10px">
-          <div class="bar" id="loveBar" style="width:0%"></div>
+        <div class="mt-4">
+          <button id="pfReset"
+            class="w-full rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+            style="background: linear-gradient(135deg, #f59e0b, #fb7185);">
+            Reset Room (R)
+          </button>
         </div>
-        <div class="barLabels"><div>LOVE METER</div><div id="lovePct">0%</div></div>
 
-        <p class="bossMsg" id="bossMsg">Beat the boss to unlock YES/NO 💘</p>
+        <div id="pfMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
+          Tip: Dash (Shift/K) + wall jump. Candle checkpoints save your sanity.
+        </div>
       </div>
     </div>
   </div>
 
-<script>
-/* =========================
-   HEART BACKGROUND (simple)
-========================= */
-const heartBg = document.getElementById("heartBg");
-function spawnHeart(){
-  const h = document.createElement("div");
-  h.className = "heart";
-  const size = 10 + Math.random()*16;
-  h.style.width = size + "px";
-  h.style.height = size + "px";
-  h.style.left = (Math.random()*100) + "vw";
-  h.style.opacity = (0.10 + Math.random()*0.28).toFixed(2);
-  const dur = 4 + Math.random()*6;
-  h.style.animationDuration = dur + "s";
-  h.style.animationDelay = (Math.random()*0.5) + "s";
-  heartBg.appendChild(h);
-  setTimeout(()=>h.remove(), (dur+1)*1000);
-}
-setInterval(spawnHeart, 180);
+  <style>
+    /* Platformer crisp pixels + stable layout */
+    #pfCanvas { image-rendering: pixelated; touch-action: none; }
+  </style>
 
-/* =========================
-   YES/NO LOCK + STATUS
-========================= */
-const yesBtn = document.getElementById("yesBtn");
-const noBtn  = document.getElementById("noBtn");
-const statusText = document.getElementById("statusText");
+  <script>
+    (() => {
+      "use strict";
 
-function lockYesNo(){
-  yesBtn.textContent = "LOCKED";
-  noBtn.textContent  = "LOCKED";
-  yesBtn.disabled = true; noBtn.disabled = true;
-  yesBtn.classList.add("locked");
-  noBtn.classList.add("locked");
-}
-function unlockYesNo(){
-  yesBtn.textContent = "YES 💖";
-  noBtn.textContent  = "NO 🙃";
-  yesBtn.disabled = false; noBtn.disabled = false;
-  yesBtn.classList.remove("locked");
-  noBtn.classList.remove("locked");
-}
+      // ------------------------------
+      // Safe hooks into your main game
+      // ------------------------------
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-yesBtn.addEventListener("click", ()=>{
-  statusText.textContent = "Status: YES 💖";
-});
-noBtn.addEventListener("click", ()=>{
-  statusText.textContent = "Status: NO 🙃";
-});
+      const getSTATE = () => (typeof window.STATE === "object" && window.STATE) ? window.STATE : null;
+      const updateHUD = () => { try { window.updateHUD?.(); } catch {} };
+      const setBars   = () => { try { window.setBars?.(); } catch {} };
+      const boomfetti = (opts) => { try { window.safeConfetti?.(opts); } catch {} };
+      const unlockLoveLine = () => { try { window.unlockLoveLine?.(); } catch {} };
 
-lockYesNo();
+      if (!getSTATE()) {
+        window.STATE = {
+          affection: 0,
+          nerves: 0,
+          youHP: 100,
+          mana: { heart: 0, choc: 0, popcorn: 0, sparkle: 0 }
+        };
+      }
 
-/* =========================
-   BOSS FIGHT (clean + minimal)
-   - Move: WASD / Arrows / Drag
-   - Shoot: Space / Tap
-   Win unlocks buttons
-========================= */
-const bossCanvas   = document.getElementById("bossCanvas");
-const bossStartBtn = document.getElementById("bossStart");
-const bossOverlay  = document.getElementById("bossOverlay");
-const bossMsg      = document.getElementById("bossMsg");
-const playerHPBar  = document.getElementById("playerHPBar");
-const bossHPBar    = document.getElementById("bossHPBar");
-const loveBar      = document.getElementById("loveBar");
-const lovePctText  = document.getElementById("lovePct");
+      // ------------------------------
+      // DOM
+      // ------------------------------
+      const canvas  = document.getElementById("pfCanvas");
+      const ctx     = canvas.getContext("2d");
 
-const ctx = bossCanvas.getContext("2d");
+      const startBtn = document.getElementById("pfStart");
+      const resetBtn = document.getElementById("pfReset");
+      const overlay  = document.getElementById("pfOverlay");
+      const msg      = document.getElementById("pfMsg");
 
-let raf = null, running = false, lastT = 0;
-const keys = new Set();
+      const pfRoom    = document.getElementById("pfRoom");
+      const pfRoomMax = document.getElementById("pfRoomMax");
+      const pfHearts  = document.getElementById("pfHearts");
+      const pfNotes   = document.getElementById("pfNotes");
+      const pfDeaths  = document.getElementById("pfDeaths");
+      const pfBest    = document.getElementById("pfBest");
 
-let pointerActive = false, pointerX = 0, pointerY = 0;
+      // ------------------------------
+      // Canvas fit
+      // ------------------------------
+      function fitCanvas() {
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const rect = canvas.getBoundingClientRect();
+        canvas.width  = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      fitCanvas();
+      window.addEventListener("resize", fitCanvas);
 
-const player = { x:0,y:0,r:14, hp:100, hpMax:100, speed:280, inv:0 };
-const boss   = { x:0,y:0,r:26, hp:100, hpMax:100, t:0, phase:1 };
+      // ------------------------------
+      // Controls (Celeste-ish)
+      // ------------------------------
+      const KEYS = new Set();
+      window.addEventListener("keydown", (e) => {
+        const k = e.key;
+        const dashKey = (k === "Shift" || k === "k" || k === "K");
+        const jumpKey = (k === " " || k === "w" || k === "W" || k === "ArrowUp");
+        if (["ArrowLeft","ArrowRight","a","A","d","D","ArrowUp","w","W"," ","Shift","k","K","r","R"].includes(k)) {
+          KEYS.add(k);
+          if (jumpKey || dashKey) e.preventDefault();
+          if (k === "r" || k === "R") doRoomReset();
+        }
+      }, { passive: false });
+      window.addEventListener("keyup", (e) => KEYS.delete(e.key));
 
-const bullets = [];
-const hazards = [];
-const sparks  = [];
+      const wantsLeft  = () => KEYS.has("ArrowLeft") || KEYS.has("a") || KEYS.has("A");
+      const wantsRight = () => KEYS.has("ArrowRight") || KEYS.has("d") || KEYS.has("D");
+      const wantsJump  = () => KEYS.has(" ") || KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has("W");
+      const wantsDash  = () => KEYS.has("Shift") || KEYS.has("k") || KEYS.has("K");
 
-function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
-function dist(ax,ay,bx,by){ return Math.hypot(ax-bx, ay-by); }
+      // Mobile: tap left/right zones, tap top half to jump, double-tap to dash
+      let lastTap = 0;
+      canvas.addEventListener("pointerdown", (e) => {
+        if (!run.active) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
-function setBar(el, pct){ el.style.width = clamp(pct,0,100) + "%"; }
+        const now = performance.now();
+        const dbl = (now - lastTap) < 240;
+        lastTap = now;
 
-function resizeBossCanvas(){
-  const r = bossCanvas.getBoundingClientRect();
-  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-  bossCanvas.width = Math.floor(r.width * dpr);
-  bossCanvas.height = Math.floor(r.height * dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0); // draw in CSS px
-  resetPositions();
-}
-window.addEventListener("resize", resizeBossCanvas, {passive:true});
+        if (dbl) {
+          // dash toward pointer
+          input.mobileDash = { x: x / rect.width, y: y / rect.height, t: 0.08 };
+          return;
+        }
+        if (y < rect.height * 0.55) {
+          input.mobileJump = 0.08;
+        } else if (x < rect.width * 0.5) {
+          input.mobileLeft = 0.10;
+        } else {
+          input.mobileRight = 0.10;
+        }
+      }, { passive: true });
 
-function resetPositions(){
-  const r = bossCanvas.getBoundingClientRect();
-  player.x = r.width * 0.22;
-  player.y = r.height * 0.55;
-  boss.x   = r.width * 0.78;
-  boss.y   = r.height * 0.45;
-}
+      const input = {
+        mobileLeft: 0,
+        mobileRight: 0,
+        mobileJump: 0,
+        mobileDash: null
+      };
 
-function spark(x,y,n=10){
-  for(let i=0;i<n;i++){
-    sparks.push({
-      x,y,
-      vx:(Math.random()*2-1)*140,
-      vy:(Math.random()*2-1)*140,
-      life:0.35 + Math.random()*0.25
+      // ------------------------------
+      // World
+      // ------------------------------
+      const TILE = 16;           // tighter feel
+      const W = 32;              // tiles
+      const H = 24;
+      const ROOM_COUNT = 5;
+      pfRoomMax.textContent = String(ROOM_COUNT);
+
+      // Tile IDs:
+      // 0 empty
+      // 1 solid
+      // 2 spikes (death)
+      // 3 crumble
+      // 4 one-way (solid from top)
+      // 5 dream (dash-through w/ pop)
+      // 6 glass (solid but pretty)
+      const T = {
+        EMPTY:0, SOLID:1, SPIKE:2, CRUMBLE:3, ONEWAY:4, DREAM:5, GLASS:6
+      };
+
+      // Helper to build tilemaps from ascii
+      function mapFromAscii(rows, legend){
+        const grid = [];
+        for (let y=0;y<rows.length;y++){
+          const row = rows[y];
+          const arr = [];
+          for (let x=0;x<row.length;x++){
+            const ch = row[x];
+            arr.push(legend[ch] ?? 0);
+          }
+          grid.push(arr);
+        }
+        return grid;
+      }
+
+      // Original “C-side inspired” rooms (tight + mean, but fair-ish)
+      // Theme objects are entities, not tiles: candles, crystals, key, gate, dinner goal
+      const ROOMS = [
+        // Room 1: dash intro + first candle
+        {
+          name:"Appetizer Alley",
+          grid: mapFromAscii([
+            "................................",
+            "................................",
+            "................................",
+            "................................",
+            "...............^..^..^..........",
+            "...............########..........",
+            "...............#......#..........",
+            "...............#..c...#..........",
+            "....####.......#......#....####..",
+            "....#..#.......#......#....#..#..",
+            "....#..#.......#..d...#....#..#..",
+            "....#..#.......########....#..#..",
+            "....#..#....................#..#.",
+            "....#..#....o...............#..#.",
+            "....#..#....................#..#.",
+            "....#..##########..##########..#.",
+            "....#............##............#.",
+            "....############.##.############.",
+            "..............#..##..#...........",
+            "..............#..##..#...........",
+            "..............#..##..#...........",
+            "..............#......#...........",
+            "..............########...........",
+            "################################",
+          ], {
+            ".":T.EMPTY,
+            "#":T.SOLID,
+            "^":T.SPIKE,
+            "o":T.DREAM,
+          }),
+          entities: [
+            { kind:"candle", x: 18, y: 7 },        // checkpoint
+            { kind:"crystal", x: 19, y: 10 },      // dash refill
+            { kind:"note", x: 6, y: 13, text:"I saved you a seat 🕯️🍷" },
+            { kind:"goal", x: 28, y: 20, next: 2 }, // door
+          ]
+        },
+
+        // Room 2: wall jumps + crumble + spikes
+        {
+          name:"Rose-Petal Ruin",
+          grid: mapFromAscii([
+            "................................",
+            "................................",
+            ".................^^^^^^.........",
+            ".................######.........",
+            ".................#....#.........",
+            ".....####........#....#.........",
+            ".....#..#........#....#.........",
+            ".....#..#....c...#....#.........",
+            ".....#..######...######.........",
+            ".....#......#...........^^^^^...",
+            ".....######.#...........#####...",
+            "..........#.#...................",
+            "..........#.#....dddd...........",
+            "..........#.#....####....k......",
+            "..........#.#............^^^^^..",
+            "..........#.#............#####..",
+            "....^^^^^.#.#...................",
+            "....#####.#.###########..#######",
+            "..........#...........#..#.....#",
+            "..........###########.#..#..g..#",
+            ".....................#..##.....#",
+            ".....................#.........#",
+            ".....................###########",
+            "################################",
+          ], {
+            ".":T.EMPTY,
+            "#":T.SOLID,
+            "^":T.SPIKE,
+            "d":T.CRUMBLE,
+          }),
+          entities: [
+            { kind:"candle", x: 13, y: 7 },
+            { kind:"heart", x: 24, y: 12 },
+            { kind:"note", x: 4, y: 6, text:"If you fall, I’ll catch you. (Checkpoint does too.) 💞" },
+            { kind:"key", x: 24, y: 13 },
+            { kind:"gate", x: 25, y: 19 }, // needs key
+            { kind:"goal", x: 25, y: 19, next: 3, requires:"key" },
+          ]
+        },
+
+        // Room 3: mover cycles + dream pop + crystals
+        {
+          name:"Candle Drift Corridors",
+          grid: mapFromAscii([
+            "................................",
+            "................................",
+            "...........^^^^^^...............",
+            "...........######...............",
+            "...........#....#...............",
+            "....o......#....#......o........",
+            "....#......#....#......#........",
+            "....#..c...#....#..c...#........",
+            "....######.#....#.######........",
+            "..........#......#..............",
+            "..........#..^^^^#..............",
+            "..........#..####...............",
+            "....m......#....................",
+            "....####...#...........m........",
+            "...........#...........####.....",
+            "...........#....................",
+            "....^^^^...#....o...............",
+            "....####...#....#...............",
+            "...........#....#...............",
+            "...........######...............",
+            "...............^^^^^^^^^^.......",
+            "...............##########.......",
+            "................................",
+            "################################",
+          ], {
+            ".":T.EMPTY,
+            "#":T.SOLID,
+            "^":T.SPIKE,
+            "o":T.DREAM,
+          }),
+          entities: [
+            { kind:"candle", x: 7, y: 7 },
+            { kind:"candle", x: 19, y: 7 },
+            { kind:"crystal", x: 5, y: 5 },
+            { kind:"crystal", x: 25, y: 16 },
+            { kind:"mover", x: 4, y: 12, w: 6, h: 1, path:[{x:4,y:12},{x:16,y:12}], speed: 2.2 },
+            { kind:"mover", x: 22, y: 13, w: 6, h: 1, path:[{x:22,y:13},{x:22,y:8}], speed: 2.1 },
+            { kind:"note", x: 2, y: 21, text:"Dash between candles like we’re dancing between courses 🕯️💃" },
+            { kind:"goal", x: 28, y: 21, next: 4 },
+          ]
+        },
+
+        // Room 4: feather glide section + spikes tunnel
+        {
+          name:"Feather of Forever",
+          grid: mapFromAscii([
+            "................................",
+            "................................",
+            ".............^^^^^^^............",
+            ".............#######............",
+            ".............#.....#............",
+            ".............#.....#............",
+            ".............#..f..#............",
+            ".............#.....#............",
+            "....^^^^^....#######....^^^^^...",
+            "....#####...............#####...",
+            "................................",
+            "....o...........^^^^^^..........",
+            "....#...........######..........",
+            "....#.....c.....#....#..........",
+            "....######......#....#..........",
+            "...............^#....#^.........",
+            "...............^######^.........",
+            "...............^^^^^^^^.........",
+            "...............########.........",
+            "......................#.........",
+            "......................#.....g...",
+            "......................##########",
+            "................................",
+            "################################",
+          ], {
+            ".":T.EMPTY,
+            "#":T.SOLID,
+            "^":T.SPIKE,
+            "o":T.DREAM,
+          }),
+          entities: [
+            { kind:"candle", x: 10, y: 13 },
+            { kind:"feather", x: 14, y: 6, duration: 3.2 },
+            { kind:"heart", x: 22, y: 10 },
+            { kind:"note", x: 3, y: 10, text:"Float like a secret wish: dinner, candles, you & me 🕯️🍽️" },
+            { kind:"goal", x: 25, y: 20, next: 5 },
+          ]
+        },
+
+        // Room 5: final key-gated dinner table finish (very tight)
+        {
+          name:"The Table Is Set",
+          grid: mapFromAscii([
+            "................................",
+            "................................",
+            "....^^^^^^^...........^^^^^^^...",
+            "....#######...........#######...",
+            "....#.....#...........#.....#...",
+            "....#.....#...........#.....#...",
+            "....#..c..#....dddd...#..c..#...",
+            "....#.....#....####...#.....#...",
+            "....#######...........#######...",
+            "..........^^^^^^^...............",
+            "..........#######...............",
+            "......................k.........",
+            "....m................####.......",
+            "....####..............^^^.......",
+            "......................###.......",
+            "....^^^^^^^.....................",
+            "....#######.............o.......",
+            "....#.....#.............#.......",
+            "....#..g..###############.......",
+            "....#.....#.....................",
+            "....#######.............🍽️......",
+            "................................",
+            "................................",
+            "################################",
+          ], {
+            ".":T.EMPTY,
+            "#":T.SOLID,
+            "^":T.SPIKE,
+            "d":T.CRUMBLE,
+            "o":T.DREAM,
+            "🍽":T.EMPTY, // decorative handled as entity
+          }),
+          entities: [
+            { kind:"candle", x: 7, y: 6 },
+            { kind:"candle", x: 22, y: 6 },
+            { kind:"key", x: 22, y: 11 },
+            { kind:"mover", x: 4, y: 12, w: 6, h: 1, path:[{x:4,y:12},{x:14,y:12}], speed: 2.4 },
+            { kind:"gate", x: 6, y: 18 },
+            { kind:"dinner", x: 26, y: 20, requires:"key" }, // final goal
+            { kind:"note", x: 18, y: 21, text:"Make it to the table and I’ll say it: I choose you. 💘" },
+          ]
+        }
+      ];
+
+      // ------------------------------
+      // Utility
+      // ------------------------------
+      const px = (tx) => tx * TILE;
+      const py = (ty) => ty * TILE;
+
+      function inBounds(tx, ty){
+        return ty >= 0 && ty < H && tx >= 0 && tx < W;
+      }
+
+      function tileAt(room, x, y){
+        const tx = Math.floor(x / TILE);
+        const ty = Math.floor(y / TILE);
+        if (!inBounds(tx, ty)) return T.EMPTY;
+        return room.grid[ty][tx] ?? T.EMPTY;
+      }
+
+      function solidTile(id){ return id === T.SOLID || id === T.GLASS; }
+
+      function rectOverlap(ax,ay,aw,ah, bx,by,bw,bh){
+        return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+      }
+
+      // ------------------------------
+      // Player (Celeste-ish feel)
+      // ------------------------------
+      const player = {
+        x: px(2), y: py(18),
+        w: 10, h: 14,
+        vx: 0, vy: 0,
+        face: 1,
+        onGround: false,
+        onWall: 0,  // -1 left, +1 right
+        coyote: 0,
+        jumpBuf: 0,
+        dashAvail: 1,
+        dashing: 0,
+        dashVX: 0,
+        dashVY: 0,
+        dashLock: 0,
+        dead: false,
+        spawn: { x: px(2), y: py(18) },
+        hasKey: false,
+        feather: 0
+      };
+
+      const run = {
+        active: false,
+        room: 1,
+        hearts: 0,
+        notes: 0,
+        deaths: 0,
+        best: null,
+        checkpointName: "Start",
+      };
+
+      // “feel” constants
+      const CFG = {
+        accel: 1400,
+        maxRun: 120,
+        friction: 1800,
+        gravity: 900,
+        maxFall: 260,
+        jumpVel: 270,
+        wallSlide: 90,
+        wallJumpX: 160,
+        wallJumpY: 250,
+        coyoteTime: 0.09,
+        jumpBuffer: 0.10,
+        dashTime: 0.14,
+        dashSpeed: 260,
+        dashEndFriction: 0.90,
+      };
+
+      // ------------------------------
+      // Entities
+      // ------------------------------
+      function cloneRoomEntities(room){
+        return room.entities.map(e => ({ ...e, taken:false, lit:false, t:0, id: Math.random().toString(16).slice(2) }));
+      }
+
+      let entities = cloneRoomEntities(ROOMS[0]);
+      let crumble = []; // active crumble tiles {tx,ty,t}
+      let movers = [];  // active movers w/ phase
+      let dreamPop = []; // particles
+
+      function initRoomState(){
+        const base = ROOMS[run.room - 1];
+        entities = cloneRoomEntities(base);
+        crumble = [];
+        movers = [];
+        dreamPop = [];
+
+        // init movers
+        for (const e of entities){
+          if (e.kind === "mover"){
+            movers.push({
+              ...e,
+              idx: 0,
+              x: px(e.x), y: py(e.y),
+              vx: 0, vy: 0,
+              p: 0,
+              wait: 0
+            });
+          }
+        }
+      }
+
+      // ------------------------------
+      // Main game -> rewards hooks
+      // ------------------------------
+      function reward(kind){
+        const S = getSTATE();
+
+        if (kind === "heart"){
+          run.hearts++;
+          S.affection += 2.4;
+          S.nerves -= 1.2;
+
+          const r = Math.random();
+          if (r < 0.28) S.mana.heart += 1;
+          else if (r < 0.52) S.mana.choc += 1;
+          else if (r < 0.78) S.mana.popcorn += 1;
+          else S.mana.sparkle += 1;
+
+          if (run.hearts % 4 === 0) unlockLoveLine();
+
+          boomfetti({ particleCount: 40, spread: 70, origin: { y: 0.7 } });
+          msg.textContent = "💖 Collected! Your vibe is getting dangerously romantic.";
+        }
+
+        if (kind === "candle"){
+          S.affection += 1.0;
+          S.nerves -= 0.8;
+          S.mana.sparkle += 1;
+          boomfetti({ particleCount: 24, spread: 55, origin: { y: 0.65 } });
+          msg.textContent = "🕯️ Candle lit! Checkpoint saved (and your dash refilled).";
+        }
+
+        if (kind === "note"){
+          run.notes++;
+          S.affection += 1.2;
+          S.nerves -= 0.6;
+          msg.textContent = "💌 A note warms your hands. Keep going.";
+        }
+
+        updateHUD();
+        setBars();
+      }
+
+      function die(reason="💔"){
+        if (player.dead) return;
+        player.dead = true;
+        run.deaths++;
+        msg.textContent = `${reason} Ouch. Back to the last candle…`;
+
+        // tiny penalty to nerves, but not brutal
+        const S = getSTATE();
+        S.nerves += 2.5;
+        S.youHP = Math.max(0, (S.youHP ?? 100) - 2);
+        updateHUD(); setBars();
+
+        setTimeout(() => respawn(), 260);
+      }
+
+      function respawn(){
+        player.dead = false;
+        player.vx = player.vy = 0;
+        player.dashing = 0;
+        player.dashLock = 0;
+        player.feather = 0;
+        player.x = player.spawn.x;
+        player.y = player.spawn.y;
+        player.dashAvail = 1;
+      }
+
+      // ------------------------------
+      // Room / checkpoint
+      // ------------------------------
+      function setStatsUI(){
+        pfRoom.textContent = String(run.room);
+        pfHearts.textContent = String(run.hearts);
+        pfNotes.textContent = String(run.notes);
+        pfDeaths.textContent = String(run.deaths);
+        pfBest.textContent = run.best ? `${run.best.deaths} deaths • ${run.best.hearts}💖` : "—";
+      }
+
+      function enterRoom(n){
+        run.room = clamp(n, 1, ROOM_COUNT);
+        initRoomState();
+
+        // default spawn
+        player.spawn.x = px(2);
+        player.spawn.y = py(18);
+        player.hasKey = false;
+
+        // if room has candle near start, keep spawn there (but unlit until touched)
+        player.x = player.spawn.x;
+        player.y = player.spawn.y;
+
+        msg.textContent = `Room ${run.room}: ${ROOMS[run.room-1].name}.`;
+        setStatsUI();
+      }
+
+      function finishRun(){
+        const score = { deaths: run.deaths, hearts: run.hearts };
+        const better =
+          !run.best ||
+          score.deaths < run.best.deaths ||
+          (score.deaths === run.best.deaths && score.hearts > run.best.hearts);
+
+        if (better) run.best = score;
+
+        const S = getSTATE();
+        S.affection += 12;
+        S.nerves -= 10;
+        S.mana.sparkle += 2;
+        updateHUD(); setBars();
+
+        boomfetti({ particleCount: 180, spread: 95, origin: { y: 0.55 } });
+        msg.textContent = "🍽️🕯️ DINNER ACHIEVED. The table is set… and so is my heart. 💘";
+        setStatsUI();
+      }
+
+      function doRoomReset(){
+        if (!run.active) return;
+        msg.textContent = "Reset! Deep breath. You’ve got this. 💞";
+        initRoomState();
+        respawn();
+        setStatsUI();
+      }
+
+      // ------------------------------
+      // Movers + crumble tile state
+      // ------------------------------
+      function isCrumbleGone(tx, ty){
+        return crumble.some(c => c.tx === tx && c.ty === ty && c.t >= 0.45);
+      }
+
+      function touchCrumble(tx, ty){
+        if (crumble.some(c => c.tx === tx && c.ty === ty)) return;
+        crumble.push({ tx, ty, t: 0 });
+      }
+
+      // ------------------------------
+      // Physics + collisions
+      // ------------------------------
+      function collideSolid(room, x, y){
+        const id = tileAt(room, x, y);
+        if (id === T.CRUMBLE){
+          const tx = Math.floor(x / TILE);
+          const ty = Math.floor(y / TILE);
+          if (isCrumbleGone(tx, ty)) return false;
+          return true;
+        }
+        if (id === T.ONEWAY){
+          // handled separately
+          return false;
+        }
+        return solidTile(id) || id === T.CRUMBLE;
+      }
+
+      function hitSpike(room, x, y){
+        return tileAt(room, x, y) === T.SPIKE;
+      }
+
+      function hitDream(room, x, y){
+        return tileAt(room, x, y) === T.DREAM;
+      }
+
+      function resolve(room, dt){
+        // Movement steps
+        const steps = 4;
+
+        // wall detection
+        player.onWall = 0;
+
+        // apply gravity unless dashing or feather
+        if (player.feather > 0) {
+          // feather glide: softer gravity and more air control
+          const target = (input.mobileLeft>0||wantsLeft()? -1 : 0) + (input.mobileRight>0||wantsRight()? 1 : 0);
+          player.vx += target * 900 * dt;
+          player.vx = clamp(player.vx, -140, 140);
+          player.vy += 220 * dt;
+          player.vy = clamp(player.vy, -120, 160);
+        } else if (player.dashing <= 0){
+          player.vy += CFG.gravity * dt;
+          if (player.vy > CFG.maxFall) player.vy = CFG.maxFall;
+        }
+
+        // horizontal accel/friction if not dashing
+        if (player.dashing <= 0 && player.feather <= 0){
+          const left = wantsLeft() || input.mobileLeft > 0;
+          const right = wantsRight() || input.mobileRight > 0;
+          const ax = (right ? 1 : 0) - (left ? 1 : 0);
+          if (ax !== 0){
+            player.face = ax;
+            player.vx += ax * CFG.accel * dt;
+            player.vx = clamp(player.vx, -CFG.maxRun, CFG.maxRun);
+          } else {
+            // friction
+            const fr = CFG.friction * dt;
+            if (Math.abs(player.vx) <= fr) player.vx = 0;
+            else player.vx -= Math.sign(player.vx) * fr;
+          }
+        }
+
+        // dash handling
+        if (player.dashLock > 0) player.dashLock -= dt;
+        if (player.dashing > 0){
+          player.dashing -= dt;
+          player.vx = player.dashVX;
+          player.vy = player.dashVY;
+          if (player.dashing <= 0){
+            player.vx *= CFG.dashEndFriction;
+            player.vy *= CFG.dashEndFriction;
+          }
+        }
+
+        // jump buffer timers
+        if (player.jumpBuf > 0) player.jumpBuf -= dt;
+        if (player.coyote > 0) player.coyote -= dt;
+
+        // detect jump pressed -> set buffer
+        const jumpPressed = wantsJump() || input.mobileJump > 0;
+        if (jumpPressed) player.jumpBuf = CFG.jumpBuffer;
+
+        // move + collide in steps
+        player.onGround = false;
+        for (let s=0; s<steps; s++){
+          const vx = player.vx * dt / steps;
+          const vy = player.vy * dt / steps;
+
+          // X
+          player.x += vx;
+          if (vx !== 0){
+            const dir = Math.sign(vx);
+            const px1 = (dir > 0) ? player.x + player.w : player.x;
+            const yTop = player.y + 1;
+            const yBot = player.y + player.h - 1;
+
+            for (let yy=yTop; yy<=yBot; yy += 5){
+              if (collideSolid(room, px1, yy)){
+                const tx = Math.floor(px1 / TILE);
+                if (dir > 0) player.x = tx * TILE - player.w - 0.01;
+                else player.x = (tx + 1) * TILE + 0.01;
+                player.vx = 0;
+                player.onWall = dir;
+                break;
+              }
+            }
+          }
+
+          // Y
+          player.y += vy;
+          if (vy !== 0){
+            const dir = Math.sign(vy);
+            const py1 = (dir > 0) ? player.y + player.h : player.y;
+            const xL = player.x + 1;
+            const xR = player.x + player.w - 1;
+
+            for (let xx=xL; xx<=xR; xx += 5){
+              // one-way platforms: only collide when falling and above platform
+              const id = tileAt(room, xx, py1);
+              const hitsOneWay = (id === T.ONEWAY) && (dir > 0) && (player.vy >= 0) && (player.y + player.h - vy <= Math.floor(py1 / TILE) * TILE + 2);
+
+              if (hitsOneWay || collideSolid(room, xx, py1)){
+                const ty = Math.floor(py1 / TILE);
+                if (id === T.CRUMBLE){
+                  const tx = Math.floor(xx / TILE);
+                  touchCrumble(tx, ty);
+                }
+                if (dir > 0){
+                  player.y = ty * TILE - player.h - 0.01;
+                  player.onGround = true;
+                  player.coyote = CFG.coyoteTime;
+                } else {
+                  player.y = (ty + 1) * TILE + 0.01;
+                }
+                player.vy = 0;
+                break;
+              }
+            }
+          }
+
+          // spikes check (corners)
+          const corners = [
+            [player.x+1, player.y+1],
+            [player.x+player.w-1, player.y+1],
+            [player.x+1, player.y+player.h-1],
+            [player.x+player.w-1, player.y+player.h-1]
+          ];
+          for (const [cx,cy] of corners){
+            if (hitSpike(room, cx, cy)) { die("💔 SPIKED"); return; }
+          }
+
+          // dream block: dash-through, but hurts if not dashing (C-side mean)
+          if (hitDream(room, player.x + player.w/2, player.y + player.h/2)){
+            if (player.dashing > 0){
+              dreamPop.push({ x: player.x, y: player.y, t:0 });
+            } else {
+              die("💔 DREAM BLOCK BONK");
+              return;
+            }
+          }
+        }
+
+        // wall slide
+        if (!player.onGround && player.onWall !== 0 && player.vy > CFG.wallSlide && player.dashing <= 0 && player.feather <= 0){
+          player.vy = CFG.wallSlide;
+        }
+
+        // coyote time set when grounded
+        if (player.onGround) player.coyote = CFG.coyoteTime;
+
+        // jump consume
+        const canJump = (player.onGround || player.coyote > 0);
+        if (player.jumpBuf > 0){
+          // normal jump
+          if (canJump){
+            player.jumpBuf = 0;
+            player.vy = -CFG.jumpVel;
+            player.onGround = false;
+            player.coyote = 0;
+          }
+          // wall jump
+          else if (player.onWall !== 0){
+            player.jumpBuf = 0;
+            player.vy = -CFG.wallJumpY;
+            player.vx = -player.onWall * CFG.wallJumpX;
+            player.onWall = 0;
+          }
+        }
+
+        // dash input
+        const dashPressed = wantsDash() || (input.mobileDash && input.mobileDash.t > 0);
+        if (dashPressed && player.dashAvail > 0 && player.dashing <= 0 && player.dashLock <= 0){
+          const dir = dashDirection();
+          doDash(dir.x, dir.y);
+        }
+      }
+
+      function dashDirection(){
+        // default = facing
+        let dx = player.face || 1;
+        let dy = 0;
+
+        // keyboard: use movement keys to choose direction
+        const up = KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has("W");
+        const down = KEYS.has("ArrowDown") || KEYS.has("s") || KEYS.has("S");
+        const left = wantsLeft();
+        const right = wantsRight();
+
+        dx = (right?1:0) - (left?1:0);
+        dy = (down?1:0) - (up?1:0);
+
+        // mobile dash points toward tap
+        if (input.mobileDash && input.mobileDash.t > 0){
+          const nx = input.mobileDash.x * 2 - 1;
+          const ny = input.mobileDash.y * 2 - 1;
+          dx = nx;
+          dy = ny;
+        }
+
+        // normalize
+        const mag = Math.hypot(dx, dy) || 1;
+        dx /= mag; dy /= mag;
+        return { x: dx, y: dy };
+      }
+
+      function doDash(dx, dy){
+        player.dashAvail -= 1;
+        player.dashing = CFG.dashTime;
+        player.dashLock = 0.08;
+        player.dashVX = dx * CFG.dashSpeed;
+        player.dashVY = dy * CFG.dashSpeed;
+        // cancel feather
+        player.feather = 0;
+
+        // clear mobile dash
+        if (input.mobileDash) input.mobileDash.t = 0;
+
+        boomfetti({ particleCount: 18, spread: 45, origin: { y: 0.75 } });
+      }
+
+      // ------------------------------
+      // Entity interactions
+      // ------------------------------
+      function entityRect(e){
+        return { x: px(e.x) + 2, y: py(e.y) + 2, w: TILE-4, h: TILE-4 };
+      }
+
+      function updateEntities(dt){
+        // update crumble timers
+        for (const c of crumble) c.t += dt;
+        // remove fully gone after some time
+        crumble = crumble.filter(c => c.t < 1.15);
+
+        // update movers
+        for (const m of movers){
+          const a = m.path[m.idx];
+          const b = m.path[(m.idx+1) % m.path.length];
+          const ax = px(a.x), ay = py(a.y);
+          const bx = px(b.x), by = py(b.y);
+
+          m.p += dt * m.speed;
+          if (m.p >= 1){
+            m.p = 0;
+            m.idx = (m.idx + 1) % m.path.length;
+          }
+          const nx = ax + (bx - ax) * m.p;
+          const ny = ay + (by - ay) * m.p;
+
+          m.vx = nx - m.x;
+          m.vy = ny - m.y;
+          m.x = nx;
+          m.y = ny;
+
+          // carry player if standing on mover
+          const onTop = rectOverlap(
+            player.x, player.y + player.h, player.w, 2,
+            m.x, m.y - 2, m.w * TILE, m.h * TILE + 2
+          );
+          const withinX = rectOverlap(
+            player.x, player.y, player.w, player.h,
+            m.x, m.y, m.w * TILE, m.h * TILE
+          );
+          if (onTop && player.vy >= 0 && player.dashing <= 0){
+            player.x += m.vx;
+            player.y += m.vy;
+            player.onGround = true;
+            player.coyote = CFG.coyoteTime;
+          } else if (withinX){
+            // if inside, push out gently (C-side mean)
+            player.x += Math.sign(player.x - (m.x + (m.w*TILE)/2)) * 0.8;
+          }
+        }
+
+        // dream pop
+        for (const p of dreamPop) p.t += dt;
+        dreamPop = dreamPop.filter(p => p.t < 0.22);
+
+        // feather tick
+        if (player.feather > 0) player.feather -= dt;
+
+        // mobile inputs decay
+        input.mobileLeft = Math.max(0, input.mobileLeft - dt);
+        input.mobileRight = Math.max(0, input.mobileRight - dt);
+        input.mobileJump = Math.max(0, input.mobileJump - dt);
+        if (input.mobileDash) input.mobileDash.t = Math.max(0, input.mobileDash.t - dt);
+
+        // entity pickups
+        const room = ROOMS[run.room - 1];
+        for (const e of entities){
+          if (e.taken) continue;
+
+          if (e.kind === "mover") continue; // handled separately
+
+          const r = entityRect(e);
+          const hit = rectOverlap(player.x, player.y, player.w, player.h, r.x, r.y, r.w, r.h);
+          if (!hit) continue;
+
+          if (e.kind === "heart"){
+            e.taken = true;
+            reward("heart");
+          }
+          else if (e.kind === "crystal"){
+            e.taken = true;
+            player.dashAvail = 1;
+            boomfetti({ particleCount: 14, spread: 45, origin: { y: 0.75 } });
+            msg.textContent = "🔷 Dash refilled!";
+          }
+          else if (e.kind === "candle"){
+            // checkpoint + dash refill
+            e.lit = true;
+            player.dashAvail = 1;
+            player.spawn.x = px(e.x);
+            player.spawn.y = py(e.y) - 6;
+            reward("candle");
+          }
+          else if (e.kind === "note"){
+            e.taken = true;
+            run.notes++;
+            reward("note");
+            msg.textContent = e.text || "💌";
+          }
+          else if (e.kind === "key"){
+            e.taken = true;
+            player.hasKey = true;
+            msg.textContent = "🔑 Key acquired! The dinner gate will open.";
+            boomfetti({ particleCount: 55, spread: 80, origin: { y: 0.7 } });
+          }
+          else if (e.kind === "feather"){
+            e.taken = true;
+            player.feather = e.duration ?? 3.0;
+            player.dashAvail = 1;
+            msg.textContent = "🪶 Feather! Glide through the candlelight.";
+            boomfetti({ particleCount: 60, spread: 85, origin: { y: 0.65 } });
+          }
+          else if (e.kind === "goal"){
+            // door to next room
+            if (e.requires === "key" && !player.hasKey){
+              msg.textContent = "🚪 Locked. Bring the key 🔑";
+            } else {
+              enterRoom(e.next);
+              respawn();
+              return;
+            }
+          }
+          else if (e.kind === "dinner"){
+            if (e.requires === "key" && !player.hasKey){
+              msg.textContent = "🍽️ The table is set… but the gate is locked 🔑";
+            } else {
+              finishRun();
+              run.active = false;
+              startBtn.style.opacity = "1";
+              startBtn.style.pointerEvents = "auto";
+              startBtn.textContent = "Play Again (you maniac 💘)";
+              overlay.style.opacity = "0";
+            }
+          }
+        }
+
+        // gate collision (simple)
+        for (const e of entities){
+          if (e.kind !== "gate") continue;
+          const gx = px(e.x), gy = py(e.y);
+          const gw = TILE, gh = TILE*2;
+          const locked = !player.hasKey;
+          if (!locked) continue;
+          if (rectOverlap(player.x, player.y, player.w, player.h, gx, gy-gh+TILE, gw, gh)){
+            // push back
+            if (player.x + player.w/2 < gx + gw/2) player.x -= 1.2;
+            else player.x += 1.2;
+            msg.textContent = "🔒 Gate won’t budge without the key.";
+          }
+        }
+      }
+
+      // ------------------------------
+      // Draw
+      // ------------------------------
+      function draw(room){
+        const w = canvas.getBoundingClientRect().width;
+        const h = canvas.getBoundingClientRect().height;
+
+        // soft romantic vignette
+        const g = ctx.createLinearGradient(0,0,0,h);
+        g.addColorStop(0, "rgba(255,241,242,0.10)");
+        g.addColorStop(1, "rgba(30,41,59,0.08)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0,0,w,h);
+
+        // draw tiles
+        for (let y=0;y<H;y++){
+          for (let x=0;x<W;x++){
+            const id = room.grid[y][x];
+            if (id === T.EMPTY) continue;
+
+            const X = x*TILE, Y=y*TILE;
+
+            if (id === T.SOLID){
+              ctx.fillStyle = "rgba(255,255,255,0.74)";
+              ctx.fillRect(X, Y, TILE, TILE);
+            }
+            else if (id === T.SPIKE){
+              ctx.fillStyle = "rgba(244,63,94,0.85)";
+              ctx.beginPath();
+              ctx.moveTo(X, Y+TILE);
+              ctx.lineTo(X+TILE/2, Y);
+              ctx.lineTo(X+TILE, Y+TILE);
+              ctx.closePath();
+              ctx.fill();
+            }
+            else if (id === T.CRUMBLE){
+              const gone = isCrumbleGone(x, y);
+              if (!gone){
+                const t = crumble.find(c => c.tx===x && c.ty===y)?.t ?? 0;
+                const a = clamp(1 - t*1.2, 0.15, 1);
+                ctx.fillStyle = `rgba(251,113,133,${0.22 + 0.45*a})`;
+                ctx.fillRect(X, Y, TILE, TILE);
+                ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.35*a})`;
+                ctx.fillRect(X+2, Y+2, TILE-4, TILE-4);
+              }
+            }
+            else if (id === T.ONEWAY){
+              ctx.fillStyle = "rgba(99,102,241,0.30)";
+              ctx.fillRect(X, Y+TILE-4, TILE, 4);
+            }
+            else if (id === T.DREAM){
+              ctx.fillStyle = "rgba(167,139,250,0.18)";
+              ctx.fillRect(X, Y, TILE, TILE);
+              ctx.fillStyle = "rgba(236,72,153,0.18)";
+              ctx.fillRect(X+3, Y+3, TILE-6, TILE-6);
+            }
+            else if (id === T.GLASS){
+              ctx.fillStyle = "rgba(147,197,253,0.35)";
+              ctx.fillRect(X, Y, TILE, TILE);
+            }
+          }
+        }
+
+        // movers
+        for (const m of movers){
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.fillRect(m.x, m.y, m.w*TILE, m.h*TILE);
+          ctx.fillStyle = "rgba(236,72,153,0.22)";
+          ctx.fillRect(m.x+2, m.y+2, m.w*TILE-4, m.h*TILE-4);
+        }
+
+        // dream pop
+        for (const p of dreamPop){
+          const a = 1 - (p.t/0.22);
+          ctx.globalAlpha = clamp(a,0,1);
+          ctx.fillStyle = "rgba(236,72,153,0.22)";
+          ctx.fillRect(p.x-6, p.y-6, player.w+12, player.h+12);
+          ctx.globalAlpha = 1;
+        }
+
+        // entities
+        ctx.font = "14px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        for (const e of entities){
+          if (e.kind === "mover") continue;
+          if (e.taken && e.kind !== "candle") continue;
+
+          const X = px(e.x), Y = py(e.y);
+
+          if (e.kind === "heart"){
+            ctx.fillText("💖", X, Y+TILE);
+          } else if (e.kind === "crystal"){
+            ctx.fillText("🔷", X, Y+TILE);
+          } else if (e.kind === "candle"){
+            ctx.fillText(e.lit ? "🕯️" : "🕯️", X, Y+TILE);
+            if (e.lit){
+              ctx.globalAlpha = 0.25;
+              ctx.fillStyle = "rgba(251,113,133,1)";
+              ctx.beginPath();
+              ctx.arc(X+8, Y+8, 18, 0, Math.PI*2);
+              ctx.fill();
+              ctx.globalAlpha = 1;
+            }
+          } else if (e.kind === "note"){
+            ctx.fillText("💌", X, Y+TILE);
+          } else if (e.kind === "key"){
+            ctx.fillText("🔑", X, Y+TILE);
+          } else if (e.kind === "gate"){
+            // gate drawn as a tall candlelit arch
+            const locked = !player.hasKey;
+            ctx.fillText(locked ? "🔒" : "🔓", X, Y+TILE);
+            ctx.fillText("🕯️", X, Y);
+          } else if (e.kind === "feather"){
+            ctx.fillText("🪶", X, Y+TILE);
+          } else if (e.kind === "goal"){
+            ctx.fillText("🚪", X, Y+TILE);
+          } else if (e.kind === "dinner"){
+            ctx.fillText("🍽️", X, Y+TILE);
+            ctx.fillText("🕯️", X-14, Y+TILE);
+            ctx.fillText("🕯️", X+14, Y+TILE);
+          }
+        }
+
+        // player
+        const blink = player.dashing > 0 ? (Math.floor(performance.now()/70)%2 ? 0.45 : 1) : 1;
+        ctx.globalAlpha = blink;
+        ctx.font = "16px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        ctx.fillText(player.feather > 0 ? "🪶" : "🫶", player.x - 2, player.y + player.h);
+        ctx.globalAlpha = 1;
+
+        // HUD tiny: dash indicator
+        ctx.font = "12px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        ctx.fillStyle = "rgba(15,23,42,0.65)";
+        ctx.fillText(`Dash: ${player.dashAvail}`, 8, 14);
+        if (player.hasKey) ctx.fillText("🔑", 66, 14);
+      }
+
+      // ------------------------------
+      // Loop
+      // ------------------------------
+      let raf = null;
+      let last = 0;
+
+      function loop(ts){
+        if (!run.active) return;
+        if (!last) last = ts;
+        const dt = Math.min(0.033, (ts-last)/1000);
+        last = ts;
+
+        const room = ROOMS[run.room - 1];
+
+        // dash refill on ground (Celeste-ish: only once you land and not dashing)
+        if (player.onGround && player.dashing <= 0 && player.feather <= 0){
+          player.dashAvail = 1;
+        }
+
+        // mobile directional
+        if (input.mobileLeft > 0 && input.mobileRight <= 0) player.vx -= 18;
+        if (input.mobileRight > 0 && input.mobileLeft <= 0) player.vx += 18;
+
+        // crumble activation if standing on crumble tiles
+        if (player.onGround){
+          const tx = Math.floor((player.x + player.w/2) / TILE);
+          const ty = Math.floor((player.y + player.h + 1) / TILE);
+          if (inBounds(tx,ty) && room.grid[ty][tx] === T.CRUMBLE) touchCrumble(tx,ty);
+        }
+
+        // update physics
+        if (!player.dead){
+          resolve(room, dt);
+          updateEntities(dt);
+        }
+
+        // if fall out of world
+        if (player.y > py(H+2)) die("💔 Fell into the void");
+
+        // draw
+        ctx.clearRect(0,0,canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
+        draw(room);
+
+        // stats
+        setStatsUI();
+
+        raf = requestAnimationFrame(loop);
+      }
+
+      function start(){
+        run.active = true;
+        overlay.style.opacity = "0";
+        startBtn.style.opacity = "0";
+        startBtn.style.pointerEvents = "none";
+        startBtn.textContent = "Running…";
+
+        run.room = 1;
+        run.hearts = 0;
+        run.notes = 0;
+        run.deaths = 0;
+
+        enterRoom(1);
+        respawn();
+        last = 0;
+
+        msg.textContent = "🕯️ Candlelight C-Side begins. Don’t blink.";
+        setStatsUI();
+
+        raf = requestAnimationFrame(loop);
+      }
+
+      startBtn.addEventListener("click", start);
+      resetBtn.addEventListener("click", doRoomReset);
+
+      // init UI
+      setStatsUI();
+      enterRoom(1);
+      respawn();
+    })();
+  </script>
+</section>
+
+  <!-- Spellbook Modal -->
+  <div id="dateModal" class="modal hidden" aria-hidden="true">
+    <div class="backdrop" data-close="1"></div>
+    <div class="panel">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="text-xl font-black text-slate-800/80">Spellbook of Dates</div>
+          <div class="text-sm font-semibold text-slate-700/80 mt-1">
+            Add spells to the stack → resolve for buffs ✨
+          </div>
+        </div>
+        <button id="closeDateModal"
+          class="rounded-full px-3 py-2 font-black bg-white/80 border border-white/60 active:scale-95 transition">
+          Close
+        </button>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-3">
+        <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+          <div class="text-xs font-black text-slate-700/70 mb-3">SPELL LIST</div>
+          <div id="spellList" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        </div>
+
+        <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+          <div class="text-xs font-black text-slate-700/70 mb-2">CURRENT SYNERGY</div>
+          <div id="synergyPanel" class="text-sm font-semibold text-slate-800/80">
+            Add spells to see combo effects.
+          </div>
+
+          <div class="mt-4 text-xs font-black text-slate-700/70 mb-2">STACK CONTROLS</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="stackUndo" class="rounded-xl px-3 py-2 font-black bg-white/85 border border-white/60 active:scale-95 transition">Undo</button>
+            <button id="stackClear" class="rounded-xl px-3 py-2 font-black bg-white/85 border border-white/60 active:scale-95 transition">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MAIN GAME SCRIPT (fixed)
+       NOTE: Platformer JS is in a separate script below.
+  ========================================================== -->
+  <script>
+  (() => {
+    "use strict";
+
+    /* =========================================================
+       Helpers
+    ========================================================= */
+    const $ = (id) => document.getElementById(id);
+    const clamp = (n,a,b) => Math.max(a, Math.min(b,n));
+
+    function safeConfetti(opts){
+      try { confetti(opts); } catch {}
+    }
+
+    function setImageTryFor(imgEl, urls) {
+      let i = 0;
+      const tryNext = () => {
+        if (i >= urls.length) return;
+        const url = urls[i++];
+        const probe = new Image();
+        probe.onload = () => { imgEl.src = url; };
+        probe.onerror = tryNext;
+        probe.src = url;
+      };
+      tryNext();
+    }
+
+    /* =========================================================
+       1) Floating hearts / powerups / pixel clouds
+    ========================================================= */
+    const heartsLayer = $("hearts");
+    const powerupsLayer = $("powerups");
+    const pixelCloudsLayer = $("pixelClouds");
+
+    function spawnHeart(){
+      const el = document.createElement("span");
+      el.className = "heart";
+      el.textContent = Math.random() > 0.25 ? "💗" : "💖";
+      const left = Math.random() * 100;
+      const size = 14 + Math.random() * 28;
+      const dur  = 5 + Math.random() * 7;
+      const drift = (Math.random() * 60 - 30) + "px";
+      el.style.left = left + "vw";
+      el.style.fontSize = size + "px";
+      el.style.opacity = (0.30 + Math.random() * 0.50).toFixed(2);
+      el.style.animationDuration = dur + "s";
+      el.style.setProperty("--drift", drift);
+      heartsLayer.appendChild(el);
+      setTimeout(() => el.remove(), dur * 1000 + 150);
+    }
+
+    function spawnPowerup(){
+      const el = document.createElement("span");
+      el.className = "powerup";
+      const items = ["⭐","🪙","✨","💖","🎮","💌","🌹"];
+      el.textContent = items[Math.floor(Math.random() * items.length)];
+      const left = Math.random() * 100;
+      const size = 14 + Math.random() * 22;
+      const dur  = 6 + Math.random() * 8;
+      const drift = (Math.random() * 80 - 40) + "px";
+      const rot = (Math.random() * 160 - 80) + "deg";
+      el.style.left = left + "vw";
+      el.style.fontSize = size + "px";
+      el.style.animationDuration = dur + "s";
+      el.style.setProperty("--drift", drift);
+      el.style.setProperty("--rot", rot);
+      powerupsLayer.appendChild(el);
+      setTimeout(() => el.remove(), dur * 1000 + 250);
+    }
+
+    const pixelCloudSvg = encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="32" viewBox="0 0 64 32">
+        <rect width="64" height="32" fill="none"/>
+        <g fill="#ffffff">
+          <rect x="10" y="14" width="8" height="6"/>
+          <rect x="18" y="12" width="10" height="8"/>
+          <rect x="28" y="10" width="12" height="10"/>
+          <rect x="40" y="12" width="10" height="8"/>
+          <rect x="50" y="14" width="6" height="6"/>
+          <rect x="14" y="18" width="40" height="8"/>
+        </g>
+        <g fill="#e2e8f0" opacity="0.85">
+          <rect x="18" y="18" width="10" height="8"/>
+          <rect x="32" y="18" width="10" height="8"/>
+        </g>
+      </svg>
+    `);
+
+    function spawnPixelCloud(){
+      const el = document.createElement("div");
+      el.className = "pixel-cloud";
+      const top = (Math.random() * 55) + "vh";
+      const dur = (18 + Math.random() * 18) + "s";
+      const scale = (0.55 + Math.random() * 0.65).toFixed(2);
+      el.style.setProperty("--top", top);
+      el.style.setProperty("--s", scale);
+      el.style.animationDuration = dur;
+      el.style.backgroundImage = `url("data:image/svg+xml,${pixelCloudSvg}")`;
+      pixelCloudsLayer.appendChild(el);
+      setTimeout(() => el.remove(), parseFloat(dur) * 1000 + 300);
+    }
+
+    for (let i = 0; i < 12; i++) spawnHeart();
+    for (let i = 0; i < 8; i++) spawnPowerup();
+    for (let i = 0; i < 6; i++) spawnPixelCloud();
+    setInterval(spawnHeart, 220);
+    setInterval(spawnPowerup, 650);
+    setInterval(spawnPixelCloud, 1700);
+
+    /* =========================================================
+       2) Mana bar (scroll progress) + shiny mode
+    ========================================================= */
+    const manaBarInner = $("manaBarInner");
+    const manaPctEl = $("manaPct");
+    function updateMana(){
+      const doc = document.documentElement;
+      const scrollTop = doc.scrollTop || document.body.scrollTop;
+      const max = (doc.scrollHeight - doc.clientHeight) || 1;
+      const pct = clamp((scrollTop / max) * 100, 0, 100);
+      manaBarInner.style.width = pct.toFixed(1) + "%";
+      manaPctEl.textContent = String(Math.round(pct));
+    }
+    window.addEventListener("scroll", updateMana, { passive:true });
+    updateMana();
+
+    const shinyStar = $("shinyStar");
+    let shinyClicks = 0;
+    shinyStar.addEventListener("click", () => {
+      shinyClicks++;
+      if (shinyClicks >= 3){
+        document.body.classList.toggle("shiny-mode");
+        shinyClicks = 0;
+        safeConfetti({ particleCount: 120, spread: 80, origin: { y: 0.2 } });
+      } else {
+        shinyStar.animate([{transform:"scale(1)"},{transform:"scale(1.2)"},{transform:"scale(1)"}], {duration:260});
+      }
     });
-  }
-}
 
-let shootCd = 0;
-function shoot(){
-  const dx = boss.x - player.x;
-  const dy = boss.y - player.y;
-  const m = Math.hypot(dx,dy) || 1;
-  bullets.push({
-    x:player.x, y:player.y,
-    vx:(dx/m)*520, vy:(dy/m)*520,
-    r:5, dmg:9
-  });
-  spark(player.x, player.y, 6);
-}
+    /* =========================================================
+       3) Simple music toggle (low volume oscillator “vibe bed”)
+    ========================================================= */
+    const musicBtn = $("musicBtn");
+    let audioCtx = null;
+    let musicOsc = null;
+    let musicOn = false;
 
-function bossFire(dt){
-  boss.t += dt;
-  const hpPct = boss.hp / boss.hpMax;
-  boss.phase = hpPct > 0.65 ? 1 : hpPct > 0.30 ? 2 : 3;
+    function startMusic(){
+      try{
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 220;
+        gain.gain.value = 0.02;
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start();
+        musicOsc = { osc, gain };
 
-  bossFire._cd = (bossFire._cd ?? 0) - dt;
-  const rate = boss.phase===1 ? 0.95 : boss.phase===2 ? 0.70 : 0.45;
-  if (bossFire._cd > 0) return;
-  bossFire._cd = rate;
+        let step = 0;
+        const chord = [220, 277.18, 329.63, 392.00];
+        const timer = setInterval(() => {
+          if (!musicOn || !musicOsc){ clearInterval(timer); return; }
+          step = (step + 1) % chord.length;
+          musicOsc.osc.frequency.setTargetAtTime(chord[step], audioCtx.currentTime, 0.08);
+        }, 900);
+      } catch {}
+    }
 
-  const dx = player.x - boss.x;
-  const dy = player.y - boss.y;
-  const m = Math.hypot(dx,dy) || 1;
+    function stopMusic(){
+      try{
+        if (!musicOsc || !audioCtx) return;
+        musicOsc.gain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.05);
+        setTimeout(() => {
+          try { musicOsc.osc.stop(); } catch {}
+          musicOsc = null;
+        }, 120);
+      } catch {}
+    }
 
-  const spread = boss.phase===1 ? 0.10 : boss.phase===2 ? 0.18 : 0.26;
-  const ang = Math.atan2(dy,dx) + (Math.random()*2-1)*spread;
-  const spd = boss.phase===1 ? 220 : boss.phase===2 ? 260 : 320;
+    musicBtn.addEventListener("click", () => {
+      musicOn = !musicOn;
+      musicBtn.textContent = `🎵 Music: ${musicOn ? "On" : "Off"}`;
+      if (musicOn) startMusic();
+      else stopMusic();
+    });
 
-  const big = (boss.phase===3 && Math.random()<0.25);
-  hazards.push({
-    x:boss.x, y:boss.y,
-    vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd,
-    r: big ? 14 : 10,
-    dmg: big ? 20 : 12,
-    wobble: boss.phase===3 ? (Math.random()*2-1)*10 : 0,
-    t:0
-  });
+    /* =========================================================
+       4) Valentine GIF (clean loader)
+    ========================================================= */
+    const valImage = $("valImage");
+    const GIFS = {
+      start: ["https://media1.tenor.com/m/rcvI6iu2HrYAAAAd/pokemon-eevee-eevee.gif"],
+      yes:   ["https://media1.tenor.com/m/hmEGDJNxK0cAAAAd/eevee.gif"],
+      no:    ["https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExanJvMHd5MXBwYjJsaWUxeTNrc3ptdHYzNnpndDhncXoyYzN0bnJxZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oabY4xGwzUB8c/giphy.gif"]
+    };
+    setImageTryFor(valImage, GIFS.start);
 
-  if (boss.phase===3 && Math.random()<0.35){
-    const n=8;
-    for(let i=0;i<n;i++){
-      const a = (i/n)*Math.PI*2;
-      hazards.push({
-        x:boss.x, y:boss.y,
-        vx:Math.cos(a)*190, vy:Math.sin(a)*190,
-        r:8, dmg:10, wobble:0, t:0
+    /* =========================================================
+       5) YES/NO locking + runaway NO (AFTER boss victory)
+    ========================================================= */
+    const yesBtn = $("yesBtn");
+    const noBtn  = $("noBtn");
+    const hint   = $("hint");
+    const statusLine = $("statusLine");
+    const arena = $("heartButtons");
+
+    let unlocked = false;
+
+    function lockButton(btn, label){
+      btn.disabled = true;
+      btn.style.opacity = "0.55";
+      btn.style.cursor = "not-allowed";
+      const span = btn.querySelector("span");
+      if (span) span.textContent = label;
+    }
+    function unlockButton(btn, label){
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
+      const span = btn.querySelector("span");
+      if (span) span.textContent = label;
+    }
+    function lockYesNo(){
+      unlocked = false;
+      lockButton(yesBtn, "LOCKED");
+      lockButton(noBtn, "LOCKED");
+      hint.textContent = "Both buttons are locked 😈 Beat the boss first.";
+      statusLine.textContent = "Undecided";
+    }
+    function unlockYesNo(){
+      unlocked = true;
+      unlockButton(yesBtn, "YES");
+      unlockButton(noBtn, "NO");
+      hint.textContent = "Unlocked! 😳 Now choose wisely...";
+      statusLine.textContent = "Unlocked";
+      enableRunawayNo();
+      safeConfetti({ particleCount: 220, spread: 85, origin: { y: 0.6 } });
+    }
+    lockYesNo();
+
+    yesBtn.addEventListener("click", () => {
+      if (!unlocked){
+        hint.textContent = "YES is locked 😈 Beat the boss first!";
+        yesBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
+        return;
+      }
+      statusLine.textContent = "YES 💖";
+      hint.textContent = "You are now my Valentine FOREVER… (for 2026 😇)";
+      setImageTryFor(valImage, GIFS.yes);
+      safeConfetti({ particleCount: 260, spread: 95, origin: { y: 0.6 } });
+    });
+
+    noBtn.addEventListener("click", () => {
+      if (!unlocked){
+        hint.textContent = "NO is locked 😈 Beat the boss first!";
+        noBtn.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:320});
+        return;
+      }
+      statusLine.textContent = "NO?! 😳";
+      hint.textContent = "No (Are you sure about that?)";
+      setImageTryFor(valImage, GIFS.no);
+    });
+
+    function enableRunawayNo(){
+      noBtn.classList.add("runaway");
+      noBtn.classList.add("no");
+
+      const arenaRect0 = arena.getBoundingClientRect();
+      const noRect0 = noBtn.getBoundingClientRect();
+      let nx = (noRect0.left - arenaRect0.left);
+      let ny = (noRect0.top  - arenaRect0.top);
+      let scale = 1;
+      let moveCount = 0;
+
+      noBtn.style.left = "0px";
+      noBtn.style.top  = "0px";
+      setTransform();
+
+      function setTransform(){
+        noBtn.style.setProperty("--nx", `${nx}px`);
+        noBtn.style.setProperty("--ny", `${ny}px`);
+        noBtn.style.setProperty("--nscale", `${scale}`);
+      }
+
+      function flee(extraBoost=0){
+        const arenaRect = arena.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+        const bw = btnRect.width;
+        const bh = btnRect.height;
+
+        const maxX = Math.max(0, arenaRect.width - bw);
+        const maxY = Math.max(0, arenaRect.height - bh);
+
+        const dx = (Math.random()*2 - 1);
+        const dy = (Math.random()*2 - 1);
+        const step = 120 + extraBoost + Math.min(260, moveCount * 12);
+
+        nx = clamp(nx + dx * step, 0, maxX);
+        ny = clamp(ny + dy * step, 0, maxY);
+
+        moveCount++;
+        noBtn.classList.add("is-running");
+        setTransform();
+        setTimeout(() => noBtn.classList.remove("is-running"), 120);
+      }
+
+      noBtn.addEventListener("mouseenter", () => unlocked && flee(90));
+      noBtn.addEventListener("touchstart", (e) => {
+        if (!unlocked) return;
+        e.preventDefault();
+        flee(140);
+      }, { passive:false });
+
+      noBtn.addEventListener("click", (e) => {
+        if (!unlocked) return;
+        e.preventDefault();
+        e.stopPropagation();
+        statusLine.textContent = "NO?! 😳 (it panicked)";
+        scale = clamp(scale * 1.18, 1, 2.6);
+        setTransform();
+        flee(260);
+      });
+
+      window.addEventListener("resize", () => {
+        const arenaRect = arena.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+        nx = clamp(nx, 0, Math.max(0, arenaRect.width - btnRect.width));
+        ny = clamp(ny, 0, Math.max(0, arenaRect.height - btnRect.height));
+        setTransform();
       });
     }
-  }
-}
 
-function update(dt){
-  const r = bossCanvas.getBoundingClientRect();
+    /* =========================================================
+       6) Boss fight (cleaned + self-contained)
+    ========================================================= */
+    const beginEvent = $("beginEvent");
+    const bossCanvas = $("bossCanvas");
+    const bossCtx = bossCanvas.getContext("2d");
+    const bossOverlay = $("bossOverlay");
+    const bossStart = $("bossStart");
+    const bossMsg = $("bossMsg");
+    const playerHPBar = $("playerHPBar");
+    const bossHPBar = $("bossHPBar");
+    const loveBar = $("loveBar");
+    const blackholeGif = $("blackholeGif");
 
-  // move
-  let mx=0,my=0;
-  if(keys.has("arrowleft")||keys.has("a")) mx -= 1;
-  if(keys.has("arrowright")||keys.has("d")) mx += 1;
-  if(keys.has("arrowup")||keys.has("w")) my -= 1;
-  if(keys.has("arrowdown")||keys.has("s")) my += 1;
+    beginEvent.addEventListener("click", () => {
+      bossStart.scrollIntoView({ behavior: "smooth", block: "center" });
+      bossStart.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}], {duration:520});
+    });
 
-  if(pointerActive){
-    const dx = pointerX - player.x;
-    const dy = pointerY - player.y;
-    const m = Math.hypot(dx,dy);
-    if(m>6){ mx = dx/m; my = dy/m; } else { mx=0; my=0; }
-  }
+    setImageTryFor(blackholeGif, [
+      "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif"
+    ]);
 
-  const mag = Math.hypot(mx,my) || 1;
-  mx/=mag; my/=mag;
+    const keys = new Set();
+    window.addEventListener("keydown", (e) => {
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"," "].includes(e.key)){
+        keys.add(e.key);
+        if (e.key === " ") e.preventDefault();
+      }
+    });
+    window.addEventListener("keyup", (e) => keys.delete(e.key));
 
-  player.x += mx*player.speed*dt;
-  player.y += my*player.speed*dt;
-
-  player.x = clamp(player.x, player.r+6, r.width-player.r-6);
-  player.y = clamp(player.y, player.r+6, r.height-player.r-6);
-
-  // boss hover
-  boss.y += Math.sin(boss.t*1.7)*18*dt;
-  boss.x += Math.cos(boss.t*1.1)*10*dt;
-  boss.x = clamp(boss.x, r.width*0.55, r.width-boss.r-10);
-  boss.y = clamp(boss.y, boss.r+10, r.height-boss.r-10);
-
-  shootCd = Math.max(0, shootCd - dt);
-  bossFire(dt);
-
-  // bullets
-  for(let i=bullets.length-1;i>=0;i--){
-    const b = bullets[i];
-    b.x += b.vx*dt; b.y += b.vy*dt;
-    if(b.x<-40||b.x>r.width+40||b.y<-40||b.y>r.height+40){
-      bullets.splice(i,1); continue;
+    function fitCanvasToCSS(canvas, ctx){
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width  = Math.floor(rect.width  * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
     }
-    if(dist(b.x,b.y,boss.x,boss.y) < b.r + boss.r){
-      boss.hp -= b.dmg;
-      bullets.splice(i,1);
-      spark(b.x,b.y,12);
-      if(boss.hp<=0){ boss.hp=0; winBoss(); }
+    fitCanvasToCSS(bossCanvas, bossCtx);
+    window.addEventListener("resize", () => fitCanvasToCSS(bossCanvas, bossCtx));
+
+    const bossGame = {
+      running:false,
+      raf:null,
+      lastTs:0,
+      t:0,
+      lastShot:0,
+      phase2:false,
+      blackHole: { active:false, timer:0, cool:2.0 },
+      bullets:[],
+      beams:[],
+      particles:[],
+      player:{ x:120, y:260, r:10, hp:5, maxHp:5, inv:0 },
+      boss:{ x:0, y:0, r:28, hp:100, maxHp:100, wob:0 },
+      pattern:"spray",
+      phaseTimer:0
+    };
+
+    function dist2(ax,ay,bx,by){ const dx=ax-bx, dy=ay-by; return dx*dx+dy*dy; }
+
+    function setBossBars(){
+      playerHPBar.style.width = (bossGame.player.hp / bossGame.player.maxHp * 100) + "%";
+      bossHPBar.style.width   = (bossGame.boss.hp / bossGame.boss.maxHp * 100) + "%";
+      const lovePct = (1 - bossGame.boss.hp / bossGame.boss.maxHp) * 100;
+      loveBar.style.width = lovePct.toFixed(1) + "%";
     }
-  }
 
-  // hazards
-  for(let i=hazards.length-1;i>=0;i--){
-    const h = hazards[i];
-    h.t += dt;
-    if(h.wobble){
-      h.vx += Math.sin(h.t*10)*h.wobble*dt;
-      h.vy += Math.cos(h.t*10)*h.wobble*dt;
+    function spawnParticle(x,y,emoji){
+      bossGame.particles.push({
+        x,y,
+        vx:(Math.random()*2-1)*1.2,
+        vy:(Math.random()*2-1)*1.2 - 0.8,
+        life: 40 + Math.random()*20,
+        emoji
+      });
     }
-    h.x += h.vx*dt; h.y += h.vy*dt;
 
-    if(h.x<-80||h.x>r.width+80||h.y<-80||h.y>r.height+80){
-      hazards.splice(i,1); continue;
+    function drawHeart(ctx, x, y, size, color){
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.beginPath();
+      ctx.moveTo(0, size*0.25);
+      ctx.bezierCurveTo(-size, -size*0.35, -size*0.6, -size, 0, -size*0.45);
+      ctx.bezierCurveTo(size*0.6, -size, size, -size*0.35, 0, size*0.25);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.restore();
     }
-    if(player.inv<=0 && dist(h.x,h.y,player.x,player.y) < h.r + player.r){
-      player.hp -= h.dmg;
-      player.inv = 0.7;
-      hazards.splice(i,1);
-      spark(player.x,player.y,18);
-      if(player.hp<=0){ player.hp=0; loseBoss(); }
+
+    // Polyfill-ish helper: roundRect fallback for older browsers
+    function rr(ctx, x, y, w, h, r){
+      if (ctx.roundRect) { ctx.roundRect(x,y,w,h,r); return; }
+      // fallback path
+      r = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.arcTo(x+w, y,   x+w, y+h, r);
+      ctx.arcTo(x+w, y+h, x,   y+h, r);
+      ctx.arcTo(x,   y+h, x,   y,   r);
+      ctx.arcTo(x,   y,   x+w, y,   r);
+      ctx.closePath();
     }
-  }
 
-  // sparks
-  for(let i=sparks.length-1;i>=0;i--){
-    const p=sparks[i];
-    p.life -= dt;
-    p.x += p.vx*dt; p.y += p.vy*dt;
-    p.vx *= (1-2.5*dt); p.vy *= (1-2.5*dt);
-    if(p.life<=0) sparks.splice(i,1);
-  }
+    function drawBossSprite(ctx, x, y){
+      ctx.save();
+      ctx.translate(x,y);
 
-  player.inv = Math.max(0, player.inv - dt);
+      ctx.globalAlpha = 0.24;
+      ctx.beginPath();
+      ctx.ellipse(0, 14, 54, 28, 0, 0, Math.PI*2);
+      ctx.fillStyle = "#111827";
+      ctx.fill();
+      ctx.globalAlpha = 1;
 
-  // ui
-  setBar(playerHPBar, (player.hp/player.hpMax)*100);
-  setBar(bossHPBar, (boss.hp/boss.hpMax)*100);
-  const love = 100 - (boss.hp/boss.hpMax)*100;
-  setBar(loveBar, love);
-  lovePctText.textContent = Math.round(love) + "%";
-}
+      ctx.beginPath();
+      ctx.moveTo(-52, 10);
+      ctx.quadraticCurveTo(0, 64, 52, 10);
+      ctx.quadraticCurveTo(0, 36, -52, 10);
+      ctx.closePath();
+      ctx.fillStyle = "#0b1224";
+      ctx.fill();
 
-function draw(){
-  const r = bossCanvas.getBoundingClientRect();
-  ctx.clearRect(0,0,r.width,r.height);
+      ctx.beginPath();
+      ctx.ellipse(0, -6, 44, 38, 0, 0, Math.PI*2);
+      ctx.fillStyle = "#2563eb";
+      ctx.fill();
 
-  // vignette
-  const g = ctx.createRadialGradient(r.width/2,r.height/2,40,r.width/2,r.height/2,r.width*0.6);
-  g.addColorStop(0,"rgba(255,255,255,0.0)");
-  g.addColorStop(1,"rgba(15,23,42,0.10)");
-  ctx.fillStyle=g;
-  ctx.fillRect(0,0,r.width,r.height);
+      ctx.beginPath();
+      ctx.ellipse(0, -6, 30, 24, 0, 0, Math.PI*2);
+      ctx.fillStyle = "#0b1020";
+      ctx.fill();
 
-  // boss
-  ctx.save();
-  ctx.translate(boss.x,boss.y);
-  ctx.beginPath();
-  ctx.arc(0,0,boss.r,0,Math.PI*2);
-  ctx.fillStyle="rgba(99,102,241,0.92)";
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(-8,-6,4,0,Math.PI*2);
-  ctx.arc(8,-6,4,0,Math.PI*2);
-  ctx.fillStyle="rgba(15,23,42,0.85)";
-  ctx.fill();
-  ctx.restore();
+      ctx.beginPath();
+      ctx.ellipse(-10, -10, 5, 12, 0, 0, Math.PI*2);
+      ctx.ellipse( 10, -10, 5, 12, 0, 0, Math.PI*2);
+      ctx.fillStyle = "#fde047";
+      ctx.fill();
 
-  // player
-  ctx.save();
-  ctx.translate(player.x,player.y);
-  ctx.beginPath();
-  ctx.arc(0,0,player.r,0,Math.PI*2);
-  ctx.fillStyle = player.inv>0 ? "rgba(244,63,94,0.55)" : "rgba(244,63,94,0.90)";
-  ctx.fill();
-  ctx.restore();
+      ctx.beginPath();
+      rr(ctx, -46, 4, 92, 24, 12);
+      ctx.fillStyle = "#f8fafc";
+      ctx.fill();
 
-  // bullets
-  for(const b of bullets){
-    ctx.beginPath();
-    ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
-    ctx.fillStyle="rgba(255,255,255,0.95)";
-    ctx.fill();
-  }
+      ctx.restore();
+    }
 
-  // hazards
-  for(const h of hazards){
-    ctx.beginPath();
-    ctx.arc(h.x,h.y,h.r,0,Math.PI*2);
-    ctx.fillStyle="rgba(236,72,153,0.90)";
-    ctx.fill();
-  }
+    function fireBullet(angle, speed, kind="heart"){
+      bossGame.bullets.push({
+        x: bossGame.boss.x,
+        y: bossGame.boss.y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        r: kind === "orb" ? 8 : 7,
+        kind
+      });
+    }
 
-  // sparks
-  for(const p of sparks){
-    ctx.globalAlpha = clamp(p.life/0.6,0,1);
-    ctx.fillStyle="rgba(255,255,255,0.9)";
-    ctx.fillRect(p.x,p.y,2,2);
-  }
-  ctx.globalAlpha=1;
-}
+    function shoot(){
+      const now = performance.now();
+      if (now - bossGame.lastShot < 120) return;
+      bossGame.lastShot = now;
 
-function loop(t){
-  if(!running) return;
-  const dt = Math.min(0.033, (t-lastT)/1000 || 0);
-  lastT = t;
-  update(dt);
-  draw();
-  raf = requestAnimationFrame(loop);
-}
+      bossGame.beams.push({
+        x: bossGame.player.x,
+        y: bossGame.player.y - 12,
+        vx: 0,
+        vy: -7.6,
+        r: 6
+      });
+      spawnParticle(bossGame.player.x, bossGame.player.y-10, "💞");
+    }
 
-function startBoss(){
-  bullets.length=0; hazards.length=0; sparks.length=0;
-  player.hp=player.hpMax; player.inv=0;
-  boss.hp=boss.hpMax; boss.t=0;
-  bossMsg.textContent = "Fight! Dodge cursed hearts and shoot love beams 💘";
-  bossOverlay.classList.add("hidden");
-  running=true;
-  lastT=performance.now();
-  raf=requestAnimationFrame(loop);
-}
+    function choosePattern(){
+      const hpPct = bossGame.boss.hp / bossGame.boss.maxHp;
+      const pool = hpPct > 0.65 ? ["spray","ring"]
+                 : hpPct > 0.30 ? ["spray","ring","dash"]
+                 : ["spray","ring","dash","spiral"];
+      bossGame.pattern = pool[Math.floor(Math.random()*pool.length)];
+      bossGame.phaseTimer = 0;
+    }
 
-function stopBoss(){
-  running=false;
-  if(raf) cancelAnimationFrame(raf);
-  raf=null;
-}
+    function resetBossFight(){
+      bossGame.running = false;
+      bossGame.lastTs = 0;
+      bossGame.t = 0;
+      bossGame.lastShot = 0;
+      bossGame.phase2 = false;
+      bossGame.blackHole.active = false;
+      bossGame.blackHole.timer = 0;
+      bossGame.blackHole.cool = 2.0;
+      bossGame.bullets.length = 0;
+      bossGame.beams.length = 0;
+      bossGame.particles.length = 0;
 
-function winBoss(){
-  stopBoss();
-  bossMsg.textContent = "YOU WON! Buttons unlocked 💖";
-  unlockYesNo();
-}
+      bossGame.player.x = 120;
+      bossGame.player.y = 260;
+      bossGame.player.hp = bossGame.player.maxHp = 5;
+      bossGame.player.inv = 0;
 
-function loseBoss(){
-  stopBoss();
-  bossMsg.textContent = "You got heartbroken 😭 Hit Start to try again.";
-  bossOverlay.classList.remove("hidden");
-  bossOverlay.querySelector(".big").textContent = "You Lost!";
-  bossOverlay.querySelector(".small").innerHTML = "Hit Start to rematch.<br/>Move + Attack like before.";
-}
+      bossGame.boss.hp = bossGame.boss.maxHp = 100;
+      bossGame.boss.wob = 0;
 
-/* controls */
-window.addEventListener("keydown",(e)=>{
-  const k = e.key.toLowerCase();
-  if(["arrowleft","arrowright","arrowup","arrowdown"," "].includes(e.key)) e.preventDefault();
-  keys.add(k);
-  if(e.key === " " && running && shootCd<=0){
-    shootCd=0.18;
-    shoot();
-  }
-});
-window.addEventListener("keyup",(e)=>keys.delete(e.key.toLowerCase()));
+      bossGame.pattern = "spray";
+      bossGame.phaseTimer = 0;
 
-bossCanvas.addEventListener("pointerdown",(e)=>{
-  pointerActive=true;
-  const r=bossCanvas.getBoundingClientRect();
-  pointerX=e.clientX-r.left; pointerY=e.clientY-r.top;
-  if(running && shootCd<=0){ shootCd=0.18; shoot(); }
-});
-bossCanvas.addEventListener("pointermove",(e)=>{
-  if(!pointerActive) return;
-  const r=bossCanvas.getBoundingClientRect();
-  pointerX=e.clientX-r.left; pointerY=e.clientY-r.top;
-});
-window.addEventListener("pointerup",()=>pointerActive=false);
+      blackholeGif.style.opacity = "0";
+      setBossBars();
+      bossOverlay.style.opacity = "1";
+      bossOverlay.innerHTML = `
+        <div class="text-slate-800/80">
+          <div class="text-3xl font-extrabold">A wild boss appeared!</div>
+          <div class="text-sm font-semibold mt-2">Dodge cursed hearts. Shoot love beams.</div>
+        </div>
+      `;
+      bossStart.style.opacity = "1";
+      bossStart.style.pointerEvents = "auto";
+      bossStart.textContent = "Start Boss Fight";
+      bossMsg.textContent = "Beat the boss to unlock YES + NO.";
+    }
 
-bossStartBtn.addEventListener("click", startBoss);
+    function stopBossFight(){
+      bossGame.running = false;
+      if (bossGame.raf) cancelAnimationFrame(bossGame.raf);
+      bossGame.raf = null;
+      document.body.classList.remove("boss-mode");
+      blackholeGif.style.opacity = "0";
+    }
 
-/* init */
-resizeBossCanvas();
-resetPositions();
-setBar(playerHPBar,100);
-setBar(bossHPBar,100);
-setBar(loveBar,0);
-</script>
+    function winBossFight(){
+      stopBossFight();
+      bossOverlay.style.opacity = "1";
+      bossOverlay.innerHTML = `
+        <div class="text-white drop-shadow-lg">
+          <div class="text-4xl font-extrabold">BOSS DEFEATED 💘</div>
+          <div class="text-sm font-semibold mt-2">Unlocked! Now click YES 😤💞</div>
+        </div>
+      `;
+      bossStart.style.opacity = "1";
+      bossStart.style.pointerEvents = "auto";
+      bossStart.textContent = "Rematch (optional)";
+      bossMsg.textContent = "Unlocked! YES + NO are now available.";
+      unlockYesNo();
+    }
+
+    function loseBossFight(){
+      stopBossFight();
+      bossOverlay.style.opacity = "1";
+      bossOverlay.innerHTML = `
+        <div class="text-white drop-shadow-lg">
+          <div class="text-4xl font-extrabold">You got bonked 💥</div>
+          <div class="text-sm font-semibold mt-2">Try again… turn chaos into cuddles 😤</div>
+        </div>
+      `;
+      bossStart.style.opacity = "1";
+      bossStart.style.pointerEvents = "auto";
+      bossStart.textContent = "Try Again";
+      bossMsg.textContent = "Tip: Move in circles while shooting!";
+    }
+
+    function updateBoss(dt){
+      bossGame.t += dt;
+
+      const w = bossCanvas.getBoundingClientRect().width;
+      const h = bossCanvas.getBoundingClientRect().height;
+
+      bossGame.boss.wob += dt;
+      bossGame.boss.x = w * 0.5 + Math.cos(bossGame.boss.wob * 0.9) * 95;
+      bossGame.boss.y = 95 + Math.sin(bossGame.boss.wob * 1.1) * 16;
+
+      let mx = 0, my = 0;
+      if (keys.has("ArrowLeft") || keys.has("a")) mx -= 1;
+      if (keys.has("ArrowRight") || keys.has("d")) mx += 1;
+      if (keys.has("ArrowUp") || keys.has("w")) my -= 1;
+      if (keys.has("ArrowDown") || keys.has("s")) my += 1;
+
+      const speed = 4.25;
+      bossGame.player.x = clamp(bossGame.player.x + mx * speed, 18, w - 18);
+      bossGame.player.y = clamp(bossGame.player.y + my * speed, 120, h - 18);
+
+      if (keys.has(" ")) shoot();
+
+      bossGame.phaseTimer += dt;
+      const intensity = 1 + (1 - bossGame.boss.hp / bossGame.boss.maxHp) * 1.7;
+      if (bossGame.phaseTimer > 2.2) choosePattern();
+
+      if (!bossGame.phase2 && bossGame.boss.hp <= bossGame.boss.maxHp * 0.5){
+        bossGame.phase2 = true;
+        bossMsg.textContent = "PHASE 2 😳 BLACK HOLE PULL ACTIVATED!";
+        spawnParticle(bossGame.boss.x, bossGame.boss.y, "🖤");
+      }
+
+      if (bossGame.phase2){
+        bossGame.blackHole.cool -= dt;
+        if (!bossGame.blackHole.active && bossGame.blackHole.cool <= 0){
+          bossGame.blackHole.active = true;
+          bossGame.blackHole.timer = 1.6;
+          bossGame.blackHole.cool = 4.2;
+          bossMsg.textContent = "BLACK HOLE PULL 🖤💫";
+        }
+        if (bossGame.blackHole.active){
+          blackholeGif.style.opacity = "0.95";
+          bossGame.blackHole.timer -= dt;
+          if (bossGame.blackHole.timer <= 0){
+            bossGame.blackHole.active = false;
+            blackholeGif.style.opacity = "0";
+            bossMsg.textContent = "Keep going!! Turn chaos into cuddles 😤💞";
+          } else {
+            const dx = bossGame.boss.x - bossGame.player.x;
+            const dy = bossGame.boss.y - bossGame.player.y;
+            const d = Math.sqrt(dx*dx + dy*dy) || 1;
+            const pull = 3.3 * (1 - Math.min(d / 520, 1));
+            bossGame.player.x += (dx / d) * pull;
+            bossGame.player.y += (dy / d) * pull;
+            bossGame.player.x = clamp(bossGame.player.x, 18, w - 18);
+            bossGame.player.y = clamp(bossGame.player.y, 120, h - 18);
+            spawnParticle(bossGame.player.x, bossGame.player.y, "💔");
+          }
+        } else {
+          blackholeGif.style.opacity = "0";
+        }
+      } else {
+        blackholeGif.style.opacity = "0";
+      }
+
+      if (bossGame.pattern === "spray"){
+        if (Math.floor(bossGame.t * 12) !== Math.floor((bossGame.t - dt) * 12)){
+          const ang = Math.atan2(bossGame.player.y - bossGame.boss.y, bossGame.player.x - bossGame.boss.x);
+          const spread = 0.20 + 0.10 * intensity;
+          fireBullet(ang + (Math.random()*2-1)*spread, 3.0 + 0.75*intensity, "heart");
+        }
+      } else if (bossGame.pattern === "ring"){
+        if (bossGame.phaseTimer < dt + 0.02){
+          const n = 10 + Math.floor(intensity*4);
+          for (let i=0;i<n;i++){
+            const a = (Math.PI*2) * (i/n);
+            fireBullet(a, 2.35 + 0.7*intensity, "orb");
+          }
+          spawnParticle(bossGame.boss.x, bossGame.boss.y, "💗");
+        }
+      } else if (bossGame.pattern === "dash"){
+        if (Math.floor(bossGame.t * 5) !== Math.floor((bossGame.t - dt) * 5)){
+          const laneY = 150 + Math.random() * (h - 190);
+          bossGame.bullets.push({ x:-20, y:laneY, vx: 6.2 + 1.25*intensity, vy:0, r:9, kind:"dash" });
+        }
+      } else if (bossGame.pattern === "spiral"){
+        if (Math.floor(bossGame.t * 14) !== Math.floor((bossGame.t - dt) * 14)){
+          const base = bossGame.boss.wob * 2.2;
+          fireBullet(base, 2.15 + 0.95*intensity, "heart");
+        }
+      }
+
+      for (const b of bossGame.bullets){ b.x += b.vx; b.y += b.vy; }
+      bossGame.bullets = bossGame.bullets.filter(b => b.x > -70 && b.x < w+70 && b.y > -70 && b.y < h+70);
+
+      for (const p of bossGame.beams){ p.x += p.vx; p.y += p.vy; }
+      bossGame.beams = bossGame.beams.filter(p => p.y > -50);
+
+      for (const pt of bossGame.particles){
+        pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.03; pt.life -= 1;
+      }
+      bossGame.particles = bossGame.particles.filter(pt => pt.life > 0);
+
+      for (let i=bossGame.beams.length-1;i>=0;i--){
+        const p = bossGame.beams[i];
+        if (dist2(p.x,p.y, bossGame.boss.x,bossGame.boss.y) < (p.r + bossGame.boss.r) ** 2){
+          bossGame.beams.splice(i,1);
+          bossGame.boss.hp = Math.max(0, bossGame.boss.hp - 2);
+          spawnParticle(bossGame.boss.x, bossGame.boss.y, "✨");
+          setBossBars();
+          if (bossGame.boss.hp <= 0) winBossFight();
+        }
+      }
+
+      if (bossGame.player.inv > 0) bossGame.player.inv -= dt;
+      for (let i=bossGame.bullets.length-1;i>=0;i--){
+        const b = bossGame.bullets[i];
+        if (dist2(b.x,b.y, bossGame.player.x,bossGame.player.y) < (b.r + bossGame.player.r) ** 2){
+          bossGame.bullets.splice(i,1);
+          if (bossGame.player.inv <= 0){
+            bossGame.player.hp = Math.max(0, bossGame.player.hp - 1);
+            bossGame.player.inv = 0.9;
+            spawnParticle(bossGame.player.x, bossGame.player.y, "💥");
+            setBossBars();
+            if (bossGame.player.hp <= 0) loseBossFight();
+          }
+        }
+      }
+    }
+
+    function drawBoss(){
+      const w = bossCanvas.getBoundingClientRect().width;
+      const h = bossCanvas.getBoundingClientRect().height;
+
+      bossCtx.clearRect(0,0,w,h);
+
+      const g = bossCtx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, "rgba(2, 6, 23, 0.75)");
+      g.addColorStop(1, "rgba(88, 28, 135, 0.45)");
+      bossCtx.fillStyle = g;
+      bossCtx.fillRect(0,0,w,h);
+
+      bossCtx.fillStyle = "rgba(0,0,0,0.16)";
+      bossCtx.fillRect(0,0,w,h);
+
+      drawBossSprite(bossCtx, bossGame.boss.x, bossGame.boss.y);
+
+      const blink = bossGame.player.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
+      bossCtx.globalAlpha = blink;
+      drawHeart(bossCtx, bossGame.player.x, bossGame.player.y, 14, "#ef4444");
+      bossCtx.globalAlpha = 1;
+
+      for (const b of bossGame.bullets){
+        if (b.kind === "orb"){
+          bossCtx.globalAlpha = 0.92;
+          bossCtx.beginPath();
+          bossCtx.arc(b.x,b.y,b.r,0,Math.PI*2);
+          bossCtx.fillStyle = "#a78bfa";
+          bossCtx.fill();
+          bossCtx.globalAlpha = 1;
+        } else if (b.kind === "dash"){
+          bossCtx.globalAlpha = 0.95;
+          bossCtx.fillStyle = "#fb7185";
+          bossCtx.beginPath();
+          rr(bossCtx, b.x-14, b.y-5, 28, 10, 6);
+          bossCtx.fill();
+          bossCtx.globalAlpha = 1;
+        } else {
+          bossCtx.globalAlpha = 0.92;
+          drawHeart(bossCtx, b.x, b.y, b.r, "#f43f5e");
+          bossCtx.globalAlpha = 1;
+        }
+      }
+
+      for (const p of bossGame.beams){
+        bossCtx.globalAlpha = 0.88;
+        bossCtx.fillStyle = "#22c55e";
+        bossCtx.beginPath();
+        rr(bossCtx, p.x-3, p.y-12, 6, 24, 6);
+        bossCtx.fill();
+        bossCtx.globalAlpha = 1;
+      }
+
+      for (const pt of bossGame.particles){
+        bossCtx.globalAlpha = clamp(pt.life/40, 0, 1);
+        bossCtx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        bossCtx.fillText(pt.emoji, pt.x, pt.y);
+      }
+      bossCtx.globalAlpha = 1;
+    }
+
+    function bossLoop(ts){
+      if (!bossGame.running) return;
+      if (!bossGame.lastTs) bossGame.lastTs = ts;
+      const dt = Math.min(0.033, (ts - bossGame.lastTs) / 1000);
+      bossGame.lastTs = ts;
+
+      updateBoss(dt);
+      drawBoss();
+
+      bossGame.raf = requestAnimationFrame(bossLoop);
+    }
+
+    bossCanvas.addEventListener("pointerdown", () => {
+      if (!bossGame.running) return;
+      shoot();
+    });
+
+    bossStart.addEventListener("click", () => {
+      resetBossFight();
+      bossGame.running = true;
+      bossOverlay.style.opacity = "0";
+      bossStart.style.opacity = "0";
+      bossStart.style.pointerEvents = "none";
+      bossMsg.textContent = "Boss is being dramatic 😳 Hit him with LOVE BEAMS.";
+      document.body.classList.add("boss-mode");
+      bossGame.lastTs = 0;
+      bossGame.raf = requestAnimationFrame(bossLoop);
+    });
+
+    resetBossFight();
+
+    /* =========================================================
+       7) Romance arcade system (spellbook + tokens + battle)
+    ========================================================= */
+    const tcgCard = $("tcgCard");
+    const altArtBtn = $("altArtBtn");
+    const artCaption = $("artCaption");
+    const cardArt = $("cardArt");
+    const flavorQuote = $("flavorQuote");
+    const loveLetterLine = $("loveLetterLine");
+    const loveLineUnlocks = $("loveLineUnlocks");
+    const cinematicOverlay = $("cinematicOverlay");
+    const cinematicLine = $("cinematicLine");
+
+    const romancePhaseEl = $("romancePhase");
+    const affectionFill = $("affectionFill");
+    const nervesFill = $("nervesFill");
+    const affectionText = $("affectionText");
+    const nervesText = $("nervesText");
+    const manaPoolMini = $("manaPoolMini");
+    const achievementsMini = $("achievementsMini");
+
+    const openDateModal = $("openDateModal");
+    const dateModal = $("dateModal");
+    const closeDateModal = $("closeDateModal");
+    const spellList = $("spellList");
+    const spellStack = $("spellStack");
+    const chosenDate = $("chosenDate");
+    const manaSpent = $("manaSpent");
+    const comboBonus = $("comboBonus");
+    const synergyPanel = $("synergyPanel");
+    const resolveStackBtn = $("resolveStack");
+    const stackUndo = $("stackUndo");
+    const stackClear = $("stackClear");
+
+    const tokenBtn = $("tokenBtn");
+    const craftBtn = $("craftBtn");
+    const tokenGrid = $("tokenGrid");
+    const tokenCount = $("tokenCount");
+    const giftCount = $("giftCount");
+    const tokenLootLog = $("tokenLootLog");
+    const inventoryPanel = $("inventoryPanel");
+
+    const battleText = $("battleText");
+    const battleStatus = $("battleStatus");
+    const enemyHPBar = $("enemyHPBar");
+    const youHPBar = $("youHPBar");
+    const enemyAff = $("enemyAff");
+    const youNerves = $("youNerves");
+    const youNervesBar = $("youNervesBar");
+
+    const MOVE_BTNS = document.querySelectorAll("button[data-move]");
+
+    const STATE = {
+      affection: 0,
+      nerves: 25,
+      phase: 1,
+      mana: { choc:0, heart:0, popcorn:0, sparkle:0 },
+
+      loveLinesUnlocked: 0,
+      achievements: new Set(),
+
+      stack: [],
+      tokens: [],
+      gifts: { bouquet:0, chocoBox:0, candleKit:0, dateTicket:0 },
+
+      enemyHP: 100,
+      youHP: 100,
+      enemyAffection: 0,
+
+      status: { cozy:0, confident:0, starry:0 },
+      turnLock: false
+    };
+
+    const LOVE_LINES = [
+      "“If love were a format, I’d still pick you first.”",
+      "“Your laugh is my favorite soundtrack.”",
+      "“I brought dessert… but you’re the sweetest part.”",
+      "“If my heart had a commander, it’d be you.”",
+      "“Tonight’s forecast: 100% chance of me adoring you.”",
+      "“I’d shuffle the universe just to draw you.”",
+      "“Your kindness is the rarest pull.”",
+      "“No matter the matchup, I’m on your team.”"
+    ];
+
+    const QUOTES = [
+      "“I would choose you in every draft.”",
+      "“You’re my favorite top-deck.”",
+      "“I’m not bluffing. I like you.”",
+      "“Let’s resolve this into forever.”",
+      "“You’re the only combo I need.”"
+    ];
+
+    const ALT_ARTS = [
+      { caption:"“Dinner Date Foil”", art:"🕯️🌹🍷✨" },
+      { caption:"“Stargaze Promo”", art:"🌙✨💫💖" },
+      { caption:"“Cozy Couch Secret Rare”", art:"🛋️🍿💞🧸" },
+      { caption:"“Chocolate Edition”", art:"🍫💝🍓💗" }
+    ];
+
+    function fmtMana(m){ return `🍫${m.choc} ❤️${m.heart} 🍿${m.popcorn} ✨${m.sparkle}`; }
+
+    function addAchievement(name){
+      if (STATE.achievements.has(name)) return;
+      STATE.achievements.add(name);
+      achievementsMini.textContent = [...STATE.achievements].slice(-3).join(" • ") || "— none yet —";
+    }
+
+    function unlockLoveLine(){
+      if (STATE.loveLinesUnlocked >= LOVE_LINES.length) return;
+      STATE.loveLinesUnlocked += 1;
+      loveLetterLine.textContent = LOVE_LINES[STATE.loveLinesUnlocked - 1];
+      loveLineUnlocks.textContent = `${STATE.loveLinesUnlocked}/${LOVE_LINES.length} unlocked 💌`;
+    }
+
+    function updateHUD(){
+      STATE.affection = clamp(STATE.affection,0,100);
+      STATE.nerves = clamp(STATE.nerves,0,100);
+
+      affectionFill.style.width = `${STATE.affection}%`;
+      nervesFill.style.width = `${STATE.nerves}%`;
+      affectionText.textContent = `${Math.round(STATE.affection)}%`;
+      nervesText.textContent = `${Math.round(STATE.nerves)}%`;
+      manaPoolMini.textContent = fmtMana(STATE.mana);
+
+      let newPhase = 1;
+      if (STATE.affection >= 66) newPhase = 3;
+      else if (STATE.affection >= 33) newPhase = 2;
+
+      if (newPhase !== STATE.phase){
+        STATE.phase = newPhase;
+        romancePhaseEl.textContent = newPhase === 1 ? "I" : (newPhase === 2 ? "II" : "III");
+        addAchievement(`Phase ${romancePhaseEl.textContent}`);
+        unlockLoveLine();
+      }
+    }
+
+    function setCardTiltFromEvent(e){
+      const r = tcgCard.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (py - 0.5) * -10;
+      const ry = (px - 0.5) * 12;
+      tcgCard.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    }
+    tcgCard.addEventListener("mousemove", setCardTiltFromEvent);
+    tcgCard.addEventListener("mouseleave", () => tcgCard.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)");
+
+    function showCinematic(line){
+      cinematicLine.textContent = line;
+      cinematicOverlay.classList.remove("hidden");
+      safeConfetti({ particleCount: 80, spread: 70, origin: { y: 0.4 } });
+    }
+    cinematicOverlay.addEventListener("click", () => cinematicOverlay.classList.add("hidden"));
+
+    let altIndex = 0;
+    altArtBtn.addEventListener("click", () => {
+      showCinematic(QUOTES[Math.floor(Math.random()*QUOTES.length)]);
+      altIndex = (altIndex + 1) % ALT_ARTS.length;
+      const alt = ALT_ARTS[altIndex];
+      cardArt.textContent = alt.art;
+      artCaption.textContent = alt.caption;
+
+      STATE.affection += 2.5;
+      STATE.nerves -= 1.0;
+      unlockLoveLine();
+      addAchievement("Alt art revealed");
+      updateHUD();
+    });
+
+    const SPELLS = [
+      { name:"Playlist of Us", rarity:"Uncommon", cost:{ sparkle:1 }, tags:["playlist","cozy"],
+        text:"Reduce Nerves and add Confidence.",
+        onResolve:(ctx)=>{ STATE.nerves -= 8; STATE.status.confident += 2; STATE.affection += 4; } },
+
+      { name:"Candlelight Ritual", rarity:"Rare", cost:{ heart:1, sparkle:1 }, tags:["candle","cozy"],
+        text:"Cozy buff. Extra affection if after Playlist.",
+        onResolve:(ctx)=>{ STATE.status.cozy += 3; STATE.affection += ctx.has("playlist") ? 10 : 6; STATE.nerves -= 4; } },
+
+      { name:"Stargaze (Two Player)", rarity:"Mythic", cost:{ sparkle:2 }, tags:["stars"],
+        text:"Big affection. Bonus love line if after Candlelight.",
+        onResolve:(ctx)=>{ STATE.affection += ctx.has("candle") ? 14 : 10; STATE.status.starry += 3; if (ctx.has("candle")) unlockLoveLine(); } },
+
+      { name:"Shared Dessert", rarity:"Common", cost:{ choc:1 }, tags:["dessert"],
+        text:"Heal a bit; calm nerves.",
+        onResolve:(ctx)=>{ STATE.youHP = clamp(STATE.youHP + 8, 0, 100); STATE.nerves -= 3; STATE.affection += 3; } },
+
+      { name:"Movie Night (Kicker: Blankets)", rarity:"Uncommon", cost:{ popcorn:1, heart:1 }, tags:["movie","cozy"],
+        text:"Cozy buff. Stronger if Candle Kit crafted.",
+        onResolve:(ctx)=>{ const bonus = (STATE.gifts.candleKit > 0) ? 2 : 1; STATE.status.cozy += 2 * bonus; STATE.affection += 5; STATE.nerves -= 2; } },
+
+      { name:"Handhold (Split Second)", rarity:"Rare", cost:{ heart:2 }, tags:["handhold"],
+        text:"Huge nerves reduction.",
+        onResolve:(ctx)=>{ STATE.nerves -= 14; STATE.affection += 6; } },
+
+      { name:"Surprise Flower Drop", rarity:"Common", cost:{ heart:1 }, tags:["flowers"],
+        text:"Small affection; extra love line if Bouquet crafted.",
+        onResolve:(ctx)=>{ STATE.affection += 4; if (STATE.gifts.bouquet > 0) unlockLoveLine(); } },
+    ];
+
+    function spellCostText(cost){
+      const parts=[];
+      if (cost.choc) parts.push(`🍫${cost.choc}`);
+      if (cost.heart) parts.push(`❤️${cost.heart}`);
+      if (cost.popcorn) parts.push(`🍿${cost.popcorn}`);
+      if (cost.sparkle) parts.push(`✨${cost.sparkle}`);
+      return parts.join(" ");
+    }
+
+    function manaEnough(cost){
+      return STATE.mana.choc >= (cost.choc||0) &&
+             STATE.mana.heart >= (cost.heart||0) &&
+             STATE.mana.popcorn >= (cost.popcorn||0) &&
+             STATE.mana.sparkle >= (cost.sparkle||0);
+    }
+
+    function spendMana(cost){
+      STATE.mana.choc -= (cost.choc||0);
+      STATE.mana.heart -= (cost.heart||0);
+      STATE.mana.popcorn -= (cost.popcorn||0);
+      STATE.mana.sparkle -= (cost.sparkle||0);
+    }
+
+    function computeCombo(){
+      const tags = new Set(STATE.stack.flatMap(s => s.tags));
+      const has = (t)=>tags.has(t);
+      if (has("playlist") && has("candle") && has("stars")) return "✨ Perfect Date Combo";
+      if (has("movie") && has("cozy")) return "🛋️ Cozy Combo";
+      if (has("dessert") && has("handhold")) return "🍰 Brave Sweetheart Combo";
+      return "";
+    }
+
+    function updateSynergy(){
+      const combo = computeCombo();
+      comboBonus.textContent = combo || "None";
+      if (!combo){
+        synergyPanel.textContent = "Add spells to see combo effects.";
+        return;
+      }
+      if (combo.includes("Perfect Date")){
+        synergyPanel.innerHTML = `<div><b>${combo}</b></div>
+          <div class="mt-2 opacity-90">Resolve: +Affection, -Nerves, grants Starry + Cozy + Confident, unlocks extra line 💌</div>`;
+      } else if (combo.includes("Cozy")){
+        synergyPanel.innerHTML = `<div><b>${combo}</b></div>
+          <div class="mt-2 opacity-90">Resolve: Cozy stacks last longer, pressure reduced.</div>`;
+      } else {
+        synergyPanel.innerHTML = `<div><b>${combo}</b></div>
+          <div class="mt-2 opacity-90">Resolve: big nerves drop + affection spike.</div>`;
+      }
+    }
+
+    function renderSpellList(){
+      spellList.innerHTML = "";
+      SPELLS.forEach(sp => {
+        const btn = document.createElement("button");
+        btn.className = "rounded-2xl p-4 bg-white/85 border border-white/60 shadow active:scale-95 transition text-left";
+        btn.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="font-black text-slate-800/80">${sp.name}</div>
+            <div class="text-xs font-black text-slate-700/70">${sp.rarity}</div>
+          </div>
+          <div class="mt-1 text-xs font-black text-slate-700/70">Cost: ${spellCostText(sp.cost) || "Free"}</div>
+          <div class="mt-2 text-sm font-semibold text-slate-800/80">${sp.text}</div>
+          <div class="mt-2 text-xs font-black text-slate-700/70">Tags: ${sp.tags.join(", ")}</div>
+        `;
+        btn.addEventListener("click", () => {
+          if (!manaEnough(sp.cost)){
+            battleText.textContent = "Not enough mana 💔 (Create tokens first!)";
+            return;
+          }
+          spendMana(sp.cost);
+          STATE.stack.push(sp);
+          addAchievement("Added to stack");
+          renderStack();
+          updateSynergy();
+          updateHUD();
+        });
+        spellList.appendChild(btn);
+      });
+    }
+
+    function renderStack(){
+      if (STATE.stack.length === 0){
+        spellStack.innerHTML = `<div class="opacity-70">— empty —</div>`;
+        chosenDate.innerHTML = `Selected spell: <b>None yet</b>`;
+        manaSpent.textContent = fmtMana(STATE.mana);
+        comboBonus.textContent = "None";
+        return;
+      }
+
+      spellStack.innerHTML = "";
+      STATE.stack.slice().reverse().forEach((sp, idx) => {
+        const row = document.createElement("div");
+        row.className = "rounded-xl bg-white/85 border border-white/60 p-3 shadow flex items-center justify-between gap-2";
+        row.innerHTML = `
+          <div>
+            <div class="font-black">${sp.name}</div>
+            <div class="text-xs font-black text-slate-700/70">${sp.rarity} • ${spellCostText(sp.cost) || "Free"}</div>
+          </div>
+          <div class="text-xs font-black text-slate-700/70">#${STATE.stack.length - idx}</div>
+        `;
+        spellStack.appendChild(row);
+      });
+
+      const top = STATE.stack[STATE.stack.length - 1];
+      chosenDate.innerHTML = `Selected spell: <b>${top.name}</b>`;
+      manaSpent.textContent = fmtMana(STATE.mana);
+      comboBonus.textContent = computeCombo() || "None";
+    }
+
+    function resolveStack(){
+      if (STATE.stack.length === 0 || STATE.turnLock) return;
+      STATE.turnLock = true;
+      addAchievement("Resolved stack");
+      battleText.textContent = "Resolving the stack… ✨";
+
+      const tags = new Set(STATE.stack.flatMap(s => s.tags));
+      const ctx = { has:(t)=>tags.has(t) };
+
+      let i = STATE.stack.length - 1;
+      const tick = () => {
+        if (i < 0){
+          const combo = computeCombo();
+          if (combo.includes("Perfect Date")){
+            STATE.affection += 8;
+            STATE.nerves -= 6;
+            STATE.status.cozy += 2;
+            STATE.status.confident += 2;
+            STATE.status.starry += 2;
+            unlockLoveLine();
+          }
+
+          STATE.stack = [];
+          renderStack();
+          updateSynergy();
+          updateHUD();
+
+          battleText.textContent = "Stack resolved 💖 Your aura is dangerously charming.";
+          safeConfetti({ particleCount: 120, spread: 90, origin: { y: 0.7 } });
+          STATE.turnLock = false;
+          setBars();
+          return;
+        }
+
+        const sp = STATE.stack[i];
+        battleText.textContent = `✨ Resolving: ${sp.name}`;
+        sp.onResolve(ctx);
+        updateHUD();
+        setBars();
+        i -= 1;
+        setTimeout(tick, 520);
+      };
+      tick();
+    }
+
+    openDateModal.addEventListener("click", () => {
+      dateModal.classList.remove("hidden");
+      renderSpellList();
+      renderStack();
+      updateSynergy();
+    });
+
+    closeDateModal.addEventListener("click", () => dateModal.classList.add("hidden"));
+    dateModal.addEventListener("click", (e) => {
+      if (e.target && e.target.dataset && e.target.dataset.close) dateModal.classList.add("hidden");
+    });
+
+    stackUndo.addEventListener("click", () => {
+      if (STATE.stack.length === 0) return;
+      const sp = STATE.stack.pop();
+      STATE.mana.choc += (sp.cost.choc||0);
+      STATE.mana.heart += (sp.cost.heart||0);
+      STATE.mana.popcorn += (sp.cost.popcorn||0);
+      STATE.mana.sparkle += (sp.cost.sparkle||0);
+      renderStack(); updateSynergy(); updateHUD();
+    });
+
+    stackClear.addEventListener("click", () => {
+      while (STATE.stack.length){
+        const sp = STATE.stack.pop();
+        STATE.mana.choc += (sp.cost.choc||0);
+        STATE.mana.heart += (sp.cost.heart||0);
+        STATE.mana.popcorn += (sp.cost.popcorn||0);
+        STATE.mana.sparkle += (sp.cost.sparkle||0);
+      }
+      renderStack(); updateSynergy(); updateHUD();
+    });
+
+    resolveStackBtn.addEventListener("click", resolveStack);
+
+    const TOKEN_TABLE = [
+      { emoji:"🌹", type:"rose",    mana:{ heart:1 },   w:30 },
+      { emoji:"🍫", type:"choc",    mana:{ choc:1 },    w:26 },
+      { emoji:"🍿", type:"popcorn", mana:{ popcorn:1 }, w:18 },
+      { emoji:"✨", type:"sparkle", mana:{ sparkle:1 }, w:22 },
+      { emoji:"🕯️", type:"candle", mana:{ sparkle:1 }, w:12 },
+    ];
+
+    const RARITIES = [
+      { name:"Common", chance:0.70, glow:"none" },
+      { name:"Uncommon", chance:0.22, glow:"0 10px 30px rgba(99,102,241,0.20)" },
+      { name:"Rare", chance:0.07, glow:"0 12px 38px rgba(236,72,153,0.22)" },
+      { name:"Mythic", chance:0.01, glow:"0 16px 55px rgba(34,197,94,0.22)" },
+    ];
+
+    function rollRarity(){
+      const r = Math.random(); let acc = 0;
+      for (const rr of RARITIES){
+        acc += rr.chance;
+        if (r <= acc) return rr;
+      }
+      return RARITIES[0];
+    }
+
+    function weightedPick(items){
+      const total = items.reduce((a,i)=>a+i.w,0);
+      let r = Math.random()*total;
+      for (const it of items){
+        r -= it.w;
+        if (r <= 0) return it;
+      }
+      return items[0];
+    }
+
+    function addManaFromToken(tok){
+      if (tok.mana.choc) STATE.mana.choc += tok.mana.choc;
+      if (tok.mana.heart) STATE.mana.heart += tok.mana.heart;
+      if (tok.mana.popcorn) STATE.mana.popcorn += tok.mana.popcorn;
+      if (tok.mana.sparkle) STATE.mana.sparkle += tok.mana.sparkle;
+    }
+
+    function logLoot(msg){
+      tokenLootLog.textContent = `Loot log: ${msg}`;
+    }
+
+    function pushTokenToGrid(tok){
+      const el = document.createElement("div");
+      el.className = "rounded-xl bg-white/80 border border-white/60 shadow flex items-center justify-center text-xl select-none";
+      el.style.boxShadow = tok.rarity.glow;
+      el.title = `${tok.emoji} ${tok.rarity.name}`;
+      el.textContent = tok.emoji;
+      tokenGrid.appendChild(el);
+    }
+
+    function renderInventory(){
+      const counts = {};
+      for (const t of STATE.tokens) counts[t.type] = (counts[t.type]||0) + 1;
+
+      const lines = Object.keys(counts).map(k => {
+        const emoji = (TOKEN_TABLE.find(x=>x.type===k)?.emoji) || "💖";
+        return `${emoji} ${k}: <b>${counts[k]}</b>`;
+      });
+
+      const g = STATE.gifts;
+      const giftsLine = [
+        `💐 Bouquet: <b>${g.bouquet}</b>`,
+        `🍫 Chocolate Box: <b>${g.chocoBox}</b>`,
+        `🕯️ Candle Kit: <b>${g.candleKit}</b>`,
+        `🎟️ Date Ticket: <b>${g.dateTicket}</b>`
+      ].join(" • ");
+
+      inventoryPanel.innerHTML = `
+        <div>${lines.length ? lines.join(" • ") : "— empty —"}</div>
+        <div class="mt-2 opacity-90">${giftsLine}</div>
+      `;
+    }
+
+    function totalGifts(){
+      return Object.values(STATE.gifts).reduce((a,b)=>a+b,0);
+    }
+
+    function consumeTokens(req){
+      const needed = { ...req };
+      const remaining = [];
+      for (const t of STATE.tokens){
+        if (needed[t.type] > 0) needed[t.type] -= 1;
+        else remaining.push(t);
+      }
+      const ok = Object.values(needed).every(v => v <= 0);
+      if (!ok) return false;
+
+      STATE.tokens = remaining;
+      tokenGrid.innerHTML = "";
+      STATE.tokens.forEach(pushTokenToGrid);
+      tokenCount.textContent = String(STATE.tokens.length);
+      renderInventory();
+      return true;
+    }
+
+    tokenBtn.addEventListener("click", () => {
+      const rarity = rollRarity();
+      const base = weightedPick(TOKEN_TABLE);
+      const mult = rarity.name==="Mythic" ? 3 : (rarity.name==="Rare" ? 2 : 1);
+
+      const tok = {
+        emoji: base.emoji,
+        type: base.type,
+        mana: {
+          choc: (base.mana.choc||0)*mult,
+          heart: (base.mana.heart||0)*mult,
+          popcorn: (base.mana.popcorn||0)*mult,
+          sparkle: (base.mana.sparkle||0)*mult
+        },
+        rarity
+      };
+
+      STATE.tokens.push(tok);
+      addManaFromToken(tok);
+
+      tokenCount.textContent = String(STATE.tokens.length);
+      pushTokenToGrid(tok);
+      renderInventory();
+
+      STATE.affection += (rarity.name==="Mythic" ? 4 : 1.5);
+      STATE.nerves -= 0.6;
+
+      if (STATE.tokens.length >= 10) addAchievement("Token hoarder");
+      if (rarity.name === "Mythic"){ addAchievement("Mythic pull"); unlockLoveLine(); }
+
+      logLoot(`${tok.rarity.name} ${tok.emoji} (+${fmtMana(tok.mana)})`);
+      updateHUD();
+      setBars();
+
+      safeConfetti({ particleCount: 40, spread: 65, origin: { y: 0.75 } });
+    });
+
+    craftBtn.addEventListener("click", () => {
+      const recipes = [
+        { name:"Bouquet", key:"bouquet", req:{ rose:2, sparkle:1 } },
+        { name:"Chocolate Box", key:"chocoBox", req:{ choc:2, heart:1 } },
+        { name:"Candle Kit", key:"candleKit", req:{ candle:1, sparkle:1, heart:1 } },
+        { name:"Date Ticket", key:"dateTicket", req:{ popcorn:2, heart:1 } },
+      ];
+
+      for (const r of recipes){
+        if (consumeTokens(r.req)){
+          STATE.gifts[r.key] += 1;
+          giftCount.textContent = String(totalGifts());
+          STATE.affection += 6;
+          STATE.nerves -= 5;
+          addAchievement(`Crafted ${r.name}`);
+          unlockLoveLine();
+          updateHUD();
+          setBars();
+
+          logLoot(`Crafted: ${r.name} 💝`);
+          battleText.textContent = `You crafted ${r.name} 💝`;
+          safeConfetti({ particleCount: 120, spread: 90, origin: { y: 0.7 } });
+          return;
+        }
+      }
+      battleText.textContent = "Not enough ingredients 💔 (Create more tokens!)";
+    });
+
+    function setBars(){
+      enemyHPBar.style.width = `${clamp(STATE.enemyHP,0,100)}%`;
+      youHPBar.style.width = `${clamp(STATE.youHP,0,100)}%`;
+      enemyAff.textContent = `${Math.round(clamp(STATE.enemyAffection,0,100))}%`;
+      youNerves.textContent = `${Math.round(clamp(STATE.nerves,0,100))}%`;
+      youNervesBar.style.width = `${clamp(STATE.nerves,0,100)}%`;
+      battleStatus.textContent = STATE.enemyAffection >= 70 ? "Blushing" : "Neutral";
+    }
+
+    function enemyTurn(){
+      let nervUp = 6;
+      let txt = "Valentine tilts their head… judging your vibe. 😳";
+
+      if (STATE.status.cozy > 0){ nervUp -= 2; txt = "Valentine smiles softly… cozy aura is working. 🕯️"; }
+      if (STATE.status.confident > 0){ nervUp -= 2; txt = "Valentine looks impressed. Your confidence is *dangerous*. ✨"; }
+
+      STATE.nerves += nervUp;
+      STATE.youHP -= Math.max(0, nervUp - 2);
+
+      for (const k of Object.keys(STATE.status)) STATE.status[k] = Math.max(0, STATE.status[k] - 1);
+
+      if (STATE.nerves >= 95) txt = "You panic a little 💔 (Cast spells, craft gifts, or use Cozy!)";
+      battleText.textContent = txt;
+
+      if (STATE.youHP <= 0){
+        STATE.youHP = 100;
+        STATE.enemyHP = 100;
+        STATE.enemyAffection = 0;
+        battleText.textContent = "You fainted… but LOVE revives you instantly. Try again 😤💖";
+      }
+
+      updateHUD();
+      setBars();
+    }
+
+    function applyMove(move){
+      if (STATE.turnLock) return;
+      STATE.turnLock = true;
+
+      let affGain = 0, nervDown = 0, heal = 0;
+
+      if (move === "Compliment Beam"){
+        affGain = 14; nervDown = 4;
+        if (STATE.status.confident > 0) affGain += 6;
+        if (STATE.status.starry > 0) affGain += 4;
+        battleText.textContent = "You fire a Compliment Beam 💞 It lands perfectly.";
+      }
+      if (move === "Snack Shield"){
+        affGain = 6; nervDown = 10; heal = 8;
+        if (STATE.gifts.chocoBox > 0){ affGain += 4; heal += 4; }
+        battleText.textContent = "Snack Shield 🍫 Comfort increases dramatically.";
+      }
+      if (move === "Laugh Attack"){
+        affGain = 10; nervDown = 8;
+        if (STATE.status.cozy > 0) affGain += 3;
+        battleText.textContent = "Laugh Attack 😂 The tension melts.";
+      }
+      if (move === "Cozy Aura"){
+        affGain = 7; nervDown = 12;
+        STATE.status.cozy += 3;
+        if (STATE.gifts.candleKit > 0){ STATE.status.cozy += 2; affGain += 3; }
+        battleText.textContent = "Cozy Aura 🕯️ Everything feels warm and safe.";
+      }
+
+      STATE.enemyAffection += affGain;
+      STATE.nerves -= nervDown;
+      STATE.youHP += heal;
+      STATE.affection += (affGain * 0.25);
+
+      if (STATE.enemyAffection >= 50) addAchievement("Halfway to love");
+      if (STATE.nerves <= 15) addAchievement("Ice-cold rizz");
+      if (STATE.status.cozy >= 4) addAchievement("Cozy build");
+
+      if (STATE.enemyAffection >= 100){
+        STATE.enemyAffection = 100;
+        battleText.textContent = "Valentine is completely smitten 💘";
+        safeConfetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
+      }
+
+      updateHUD();
+      setBars();
+
+      setTimeout(() => {
+        enemyTurn();
+        STATE.turnLock = false;
+      }, 550);
+    }
+
+    MOVE_BTNS.forEach(btn => {
+      btn.addEventListener("click", () => applyMove(btn.dataset.move));
+    });
+
+    // init
+    giftCount.textContent = "0";
+    tokenCount.textContent = "0";
+    renderStack();
+    renderInventory();
+    updateSynergy();
+    updateHUD();
+    setBars();
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      dateModal.classList.add("hidden");
+      cinematicOverlay.classList.add("hidden");
+    });
+
+    // ---------------------------------------------------------
+    // Expose shared state/helpers so platformer can reward safely
+    // ---------------------------------------------------------
+    window.STATE = STATE;
+    window.updateHUD = updateHUD;
+    window.setBars = setBars;
+    window.unlockLoveLine = unlockLoveLine;
+    window.safeConfetti = safeConfetti;
+
+  })();
+  </script>
+
+  <!-- =========================================================
+       PLATFORMER SCRIPT (separate, valid JS)
+  ========================================================== -->
+  <script>
+  (() => {
+    "use strict";
+
+    function ready(fn){
+      if (document.readyState !== "loading") fn();
+      else document.addEventListener("DOMContentLoaded", fn);
+    }
+
+    ready(() => {
+      const canvas = document.getElementById("pfCanvas");
+      if (!canvas) return;
+
+      const ctx = canvas.getContext("2d");
+      const startBtn = document.getElementById("pfStart");
+      const resetBtn = document.getElementById("pfReset");
+      const overlay  = document.getElementById("pfOverlay");
+      const msg      = document.getElementById("pfMsg");
+
+      const pfRoom    = document.getElementById("pfRoom");
+      const pfRoomMax = document.getElementById("pfRoomMax");
+      const pfHearts  = document.getElementById("pfHearts");
+      const pfHits    = document.getElementById("pfHits");
+      const pfBest    = document.getElementById("pfBest");
+
+      const clamp = (v,a,b) => Math.max(a, Math.min(b,v));
+
+      const STATE = window.STATE;
+      const updateHUD = () => { try { window.updateHUD?.(); } catch {} };
+      const setBars   = () => { try { window.setBars?.(); } catch {} };
+      const boom      = (opts) => { try { window.safeConfetti?.(opts); } catch {} };
+      const unlockLoveLine = () => { try { window.unlockLoveLine?.(); } catch {} };
+
+      function fitCanvas() {
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const rect = canvas.getBoundingClientRect();
+        canvas.width  = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      fitCanvas();
+      window.addEventListener("resize", fitCanvas);
+
+      const KEYS = new Set();
+      window.addEventListener("keydown", (e) => {
+        const k = e.key;
+        if (["ArrowLeft","ArrowRight","ArrowUp","a","d","w"," ","r","R"].includes(k)) {
+          KEYS.add(k);
+          if (k === " ") e.preventDefault();
+          if (k.toLowerCase() === "r") doReset();
+        }
+      }, { passive:false });
+      window.addEventListener("keyup", (e) => KEYS.delete(e.key));
+
+      canvas.addEventListener("pointerdown", () => {
+        if (!run.active) return;
+        if (player.onGround) player.vy = -8.6;
+      });
+
+      const ROOM_COUNT = 12;
+      pfRoomMax.textContent = String(ROOM_COUNT);
+
+      const TILE = 24;
+      const W_TILES = 26;
+      const H_TILES = 16;
+
+      function makeRoom(i) {
+        const grid = Array.from({ length: H_TILES }, () => Array(W_TILES).fill(0));
+        for (let x = 0; x < W_TILES; x++) grid[H_TILES - 1][x] = 1;
+
+        const p = (x, y, len) => {
+          for (let k = 0; k < len; k++) {
+            const xx = x + k;
+            if (xx >= 0 && xx < W_TILES && y >= 0 && y < H_TILES) grid[y][xx] = 1;
+          }
+        };
+
+        const seed = i * 7;
+        p(2 + (seed % 6), 11, 6);
+        p(10 + (seed % 5), 9, 5);
+        p(5 + (seed % 4), 7, 4);
+        if (i % 3 === 0) p(16, 6, 6);
+        if (i % 4 === 0) p(8, 5, 3);
+
+        const pickups = [];
+        const hazards = [];
+        const place = (arr, kind, tx, ty) => arr.push({
+          kind,
+          x: tx * TILE + TILE / 2,
+          y: ty * TILE + TILE / 2,
+          r: 10,
+          taken: false
+        });
+
+        const heartsN = 2 + (i % 3);
+        for (let k = 0; k < heartsN; k++) {
+          const tx = 3 + ((seed + k * 5) % (W_TILES - 6));
+          const ty = 4 + ((seed + k * 3) % 8);
+          place(pickups, "heart", tx, ty);
+        }
+
+        const hazN = 1 + (i % 2);
+        for (let k = 0; k < hazN; k++) {
+          const tx = 6 + ((seed + k * 9) % (W_TILES - 10));
+          const ty = 10 - ((seed + k * 2) % 6);
+          place(hazards, "break", tx, ty);
+        }
+
+        const exit = { x: (W_TILES - 2) * TILE + TILE / 2, y: (H_TILES - 2) * TILE + TILE / 2, r: 12 };
+        return { grid, pickups, hazards, exit };
+      }
+
+      const ROOMS = Array.from({ length: ROOM_COUNT }, (_, idx) => makeRoom(idx + 1));
+
+      const player = { x: 2*TILE, y: 10*TILE, w:16, h:20, vx:0, vy:0, onGround:false, inv:0 };
+      const run = { active:false, room:1, hearts:0, hits:0, best:null };
+
+      function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+        return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+      }
+
+      function tileAt(room, px, py) {
+        const tx = Math.floor(px / TILE);
+        const ty = Math.floor(py / TILE);
+        if (tx < 0 || ty < 0 || tx >= W_TILES || ty >= H_TILES) return 0;
+        return room.grid[ty][tx];
+      }
+
+      function resolveCollisions(room) {
+        const steps = 2;
+        for (let s = 0; s < steps; s++) {
+          player.x += player.vx / steps;
+          if (player.vx !== 0) {
+            const left = player.x;
+            const right = player.x + player.w;
+            const top = player.y;
+            const bottom = player.y + player.h;
+            const checkX = player.vx > 0 ? right : left;
+
+            for (let yy = top; yy <= bottom; yy += 6) {
+              if (tileAt(room, checkX, yy) === 1) {
+                if (player.vx > 0) player.x = Math.floor(checkX / TILE) * TILE - player.w - 0.01;
+                else player.x = Math.floor(checkX / TILE + 1) * TILE + 0.01;
+                player.vx = 0;
+                break;
+              }
+            }
+          }
+
+          player.y += player.vy / steps;
+          player.onGround = false;
+          if (player.vy !== 0) {
+            const left = player.x;
+            const right = player.x + player.w;
+            const top = player.y;
+            const bottom = player.y + player.h;
+            const checkY = player.vy > 0 ? bottom : top;
+
+            for (let xx = left; xx <= right; xx += 6) {
+              if (tileAt(room, xx, checkY) === 1) {
+                if (player.vy > 0) {
+                  player.y = Math.floor(checkY / TILE) * TILE - player.h - 0.01;
+                  player.onGround = true;
+                } else {
+                  player.y = Math.floor(checkY / TILE + 1) * TILE + 0.01;
+                }
+                player.vy = 0;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      function rewardHeart() {
+        run.hearts += 1;
+        STATE.affection += 2.2;
+        STATE.nerves -= 1.2;
+
+        const roll = Math.random();
+        if (roll < 0.30) STATE.mana.heart += 1;
+        else if (roll < 0.55) STATE.mana.choc += 1;
+        else if (roll < 0.78) STATE.mana.popcorn += 1;
+        else STATE.mana.sparkle += 1;
+
+        if (run.hearts % 5 === 0) unlockLoveLine();
+
+        updateHUD();
+        setBars();
+        boom({ particleCount: 40, spread: 70, origin: { y: 0.7 } });
+      }
+
+      function takeHit() {
+        if (player.inv > 0) return;
+        player.inv = 0.9;
+        run.hits += 1;
+
+        STATE.nerves += 6;
+        STATE.youHP = Math.max(0, (STATE.youHP ?? 100) - 6);
+
+        updateHUD();
+        setBars();
+      }
+
+      function setStatsUI() {
+        pfRoom.textContent = String(run.room);
+        pfHearts.textContent = String(run.hearts);
+        pfHits.textContent = String(run.hits);
+        pfBest.textContent = run.best ? `${run.best.hearts}💖 / ${run.best.hits} hits` : "—";
+      }
+
+      function enterRoom(n) {
+        run.room = clamp(n, 1, ROOM_COUNT);
+        player.x = 1.5 * TILE;
+        player.y = 10 * TILE;
+        player.vx = 0;
+        player.vy = 0;
+        setStatsUI();
+        msg.textContent = `Room ${run.room}: find the hearts 💖`;
+      }
+
+      function finishRun() {
+        const score = { hearts: run.hearts, hits: run.hits };
+        const better = !run.best || score.hearts > run.best.hearts || (score.hearts === run.best.hearts && score.hits < run.best.hits);
+        if (better) run.best = score;
+
+        msg.textContent = `RUN COMPLETE 💘 Hearts: ${score.hearts}, Hits: ${score.hits}`;
+        boom({ particleCount: 160, spread: 95, origin: { y: 0.55 } });
+
+        STATE.affection += 10;
+        STATE.nerves -= 8;
+        STATE.mana.sparkle += 2;
+
+        updateHUD();
+        setBars();
+        setStatsUI();
+      }
+
+      function doReset() {
+        if (!run.active) return;
+        run.hearts = 0;
+        run.hits = 0;
+        enterRoom(1);
+        for (const rm of ROOMS) rm.pickups.forEach(p => p.taken = false);
+        msg.textContent = "Run reset. Go again 😤💖";
+      }
+
+      function drawRoom(room) {
+        const w = canvas.getBoundingClientRect().width;
+        const h = canvas.getBoundingClientRect().height;
+
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, "rgba(255,255,255,0.00)");
+        g.addColorStop(1, "rgba(255,255,255,0.25)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+
+        for (let y = 0; y < H_TILES; y++) {
+          for (let x = 0; x < W_TILES; x++) {
+            if (room.grid[y][x] === 1) {
+              ctx.globalAlpha = 0.95;
+              ctx.fillStyle = "rgba(255,255,255,0.70)";
+              ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+              ctx.globalAlpha = 1;
+            }
+          }
+        }
+
+        ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        ctx.fillText("🚪", room.exit.x - 10, room.exit.y + 10);
+
+        for (const p of room.pickups) {
+          if (p.taken) continue;
+          ctx.fillText("💖", p.x - 10, p.y + 10);
+        }
+
+        for (const hz of room.hazards) {
+          ctx.fillText("💔", hz.x - 10, hz.y + 10);
+        }
+
+        ctx.globalAlpha = player.inv > 0 ? (Math.floor(performance.now() / 90) % 2 ? 0.35 : 1) : 1;
+        ctx.font = "24px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        ctx.fillText("🫶", player.x - 6, player.y + player.h);
+        ctx.globalAlpha = 1;
+      }
+
+      let last = 0;
+      function loop(ts) {
+        if (!run.active) return;
+        if (!last) last = ts;
+        const dt = Math.min(0.033, (ts - last) / 1000);
+        last = ts;
+
+        const room = ROOMS[run.room - 1];
+
+        let ax = 0;
+        if (KEYS.has("ArrowLeft") || KEYS.has("a")) ax -= 1;
+        if (KEYS.has("ArrowRight") || KEYS.has("d")) ax += 1;
+
+        const accel = 26;
+        const maxV = 5.0;
+        player.vx += ax * accel * dt;
+        player.vx *= Math.pow(0.0008, dt);
+        player.vx = clamp(player.vx, -maxV, maxV);
+
+        const wantsJump = KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has(" ");
+        if (wantsJump && player.onGround) player.vy = -8.6;
+
+        player.vy += 24 * dt;
+        player.vy = clamp(player.vy, -16, 14);
+
+        if (player.inv > 0) player.inv -= dt;
+
+        resolveCollisions(room);
+
+        for (const p of room.pickups) {
+          if (p.taken) continue;
+          const hit = rectsOverlap(player.x, player.y, player.w, player.h, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+          if (hit) {
+            p.taken = true;
+            rewardHeart();
+            setStatsUI();
+          }
+        }
+
+        for (const hz of room.hazards) {
+          const hit = rectsOverlap(player.x, player.y, player.w, player.h, hz.x - hz.r, hz.y - hz.r, hz.r * 2, hz.r * 2);
+          if (hit) {
+            takeHit();
+            setStatsUI();
+          }
+        }
+
+        const atExit = rectsOverlap(
+          player.x, player.y, player.w, player.h,
+          room.exit.x - room.exit.r, room.exit.y - room.exit.r,
+          room.exit.r * 2, room.exit.r * 2
+        );
+
+        if (atExit) {
+          if (run.room < ROOM_COUNT) enterRoom(run.room + 1);
+          else finishRun();
+        }
+
+        ctx.clearRect(0, 0, canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
+        drawRoom(room);
+
+        requestAnimationFrame(loop);
+      }
+
+      function start() {
+        run.active = true;
+        overlay.style.opacity = "0";
+        startBtn.style.opacity = "0";
+        startBtn.style.pointerEvents = "none";
+        msg.textContent = "Go go go 💖";
+        last = 0;
+
+        for (const rm of ROOMS) rm.pickups.forEach(p => p.taken = false);
+        run.hearts = 0;
+        run.hits = 0;
+        enterRoom(1);
+        setStatsUI();
+
+        requestAnimationFrame(loop);
+      }
+
+      startBtn.addEventListener("click", start);
+      resetBtn.addEventListener("click", doReset);
+      setStatsUI();
+    });
+  })();
+  </script>
 </body>
 </html>
-
