@@ -781,17 +781,16 @@
             </div>
           </div>
 
-         <!-- =========================================================
-     PLATFORMER MODULE (DROP-IN REPLACEMENT)
-     - “C-side inspired” hard platforming (original level; not copied)
-     - Romantic candle-dinner theme
-     - Hooks into your main STATE/updateHUD/setBars/unlockLoveLine/safeConfetti if present
+ <!-- =========================================================
+     PLATFORMER MODULE v2 — "Candlelit C-Side: Dinner Date Gauntlet"
+     Replace your existing platformer section with this whole block.
+     (Standalone; safe even if your main script changes.)
 ========================================================= -->
 <section class="glass rounded-3xl overflow-hidden" id="platformerModule">
   <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-    <div class="font-black text-slate-800/80">🕯️💘 Candlelight C-Side: Dinner Dash</div>
+    <div class="font-black text-slate-800/80">🕯️💘 Platformer: Candlelit C-Side (Dinner Date)</div>
     <div class="text-xs font-black text-slate-700/70">
-      Move: A/D or ←/→ • Jump: W/↑/Space • Dash: Shift / K • Reset: R
+      Move: A/D or ←/→ • Jump: W/↑/Space • Dash: Shift / K • Grab: Hold J • Reset: R
     </div>
   </div>
 
@@ -803,14 +802,17 @@
         <button id="pfStart"
           class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
           style="background: linear-gradient(135deg, #fb7185, #6366f1);">
-          Start Candlelight C-Side
+          Start C-Side
         </button>
 
         <div id="pfOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
           <div class="text-slate-800/80">
-            <div class="text-3xl font-extrabold">🕯️ Dash through dinner</div>
+            <div class="text-3xl font-extrabold">🕯️ Candlelit C-Side</div>
             <div class="text-sm font-semibold mt-2">
-              Super hard. Super romantic. Collect 💖, light 🕯️, reach 🍽️.
+              Dash through tight spike corridors • chain wall-jumps • reach the dinner table 🍷
+            </div>
+            <div class="mt-2 text-xs font-black text-slate-700/70">
+              💖 hearts: +Affection +Mana • 🔷 crystals refill dash • 🕯️ flames hurt • 💔 spikes are instant bonk
             </div>
           </div>
         </div>
@@ -819,89 +821,84 @@
       <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
         <div class="text-xs font-black text-slate-700/70">RUN STATS</div>
         <div class="mt-2 text-sm font-extrabold text-slate-800/80 space-y-1">
-          <div>Room: <span id="pfRoom">1</span>/<span id="pfRoomMax">5</span></div>
+          <div>Room: <span id="pfRoom">1</span>/<span id="pfRoomMax">7</span></div>
           <div>Hearts: <span id="pfHearts">0</span></div>
-          <div>Notes: <span id="pfNotes">0</span></div>
           <div>Deaths: <span id="pfDeaths">0</span></div>
           <div>Best: <span id="pfBest">—</span></div>
         </div>
 
-        <div class="mt-4 text-xs font-black text-slate-700/70">MECHANICS</div>
-        <div class="mt-2 text-sm font-semibold text-slate-800/80 leading-relaxed">
-          💖 pickup: +Affection, -Nerves, +random mana<br/>
-          🕯️ candle: checkpoint + dash refill<br/>
-          🔷 crystal: dash refill<br/>
-          🪨 crumble: falls after touch<br/>
-          🛗 mover: timed platform cycle<br/>
-          🔑 key: opens the dinner gate<br/>
-          💔 spikes: instant death (respawn at last candle)
+        <div class="mt-4 text-xs font-black text-slate-700/70">THEME</div>
+        <div class="mt-2 text-sm font-semibold text-slate-800/80">
+          A brutal “C-side” date night: candles, velvet, and impossible jumps.<br/>
+          Finish = 🥂 “Dinner is served.”
         </div>
 
         <div class="mt-4">
           <button id="pfReset"
             class="w-full rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
             style="background: linear-gradient(135deg, #f59e0b, #fb7185);">
-            Reset Room (R)
+            Reset (R)
           </button>
         </div>
 
         <div id="pfMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
-          Tip: Dash (Shift/K) + wall jump. Candle checkpoints save your sanity.
+          Ready when you are.
         </div>
       </div>
     </div>
   </div>
 
   <style>
-    /* Platformer crisp pixels + stable layout */
+    /* Crisp pixels + stable layout */
     #pfCanvas { image-rendering: pixelated; touch-action: none; }
   </style>
 
   <script>
     (() => {
       "use strict";
+      // Prevent double-init if pasted twice
+      if (window.__CandlelitCSidePlatformer) return;
+      window.__CandlelitCSidePlatformer = true;
 
-      // ------------------------------
-      // Safe hooks into your main game
-      // ------------------------------
-      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+      // -----------------------------
+      // Soft integration hooks
+      // -----------------------------
+      const safe = (fn) => { try { fn(); } catch {} };
 
-      const getSTATE = () => (typeof window.STATE === "object" && window.STATE) ? window.STATE : null;
-      const updateHUD = () => { try { window.updateHUD?.(); } catch {} };
-      const setBars   = () => { try { window.setBars?.(); } catch {} };
-      const boomfetti = (opts) => { try { window.safeConfetti?.(opts); } catch {} };
-      const unlockLoveLine = () => { try { window.unlockLoveLine?.(); } catch {} };
-
-      if (!getSTATE()) {
-        window.STATE = {
-          affection: 0,
-          nerves: 0,
-          youHP: 100,
-          mana: { heart: 0, choc: 0, popcorn: 0, sparkle: 0 }
-        };
+      // Prefer your existing STATE/updateHUD/setBars/unlockLoveLine/safeConfetti if you’ve exposed them.
+      // Otherwise, create a minimal STATE so rewards won’t crash.
+      if (typeof window.STATE !== "object" || !window.STATE) {
+        window.STATE = { affection: 0, nerves: 25, youHP: 100, mana: { choc:0, heart:0, popcorn:0, sparkle:0 } };
       }
+      const STATE = window.STATE;
 
-      // ------------------------------
+      const updateHUD = () => safe(() => window.updateHUD && window.updateHUD());
+      const setBars   = () => safe(() => window.setBars && window.setBars());
+      const confetti  = (opts) => safe(() => window.safeConfetti && window.safeConfetti(opts));
+      const unlockLoveLine = () => safe(() => window.unlockLoveLine && window.unlockLoveLine());
+
+      const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+      // -----------------------------
       // DOM
-      // ------------------------------
-      const canvas  = document.getElementById("pfCanvas");
-      const ctx     = canvas.getContext("2d");
+      // -----------------------------
+      const canvas   = document.getElementById("pfCanvas");
+      const ctx      = canvas.getContext("2d");
 
       const startBtn = document.getElementById("pfStart");
       const resetBtn = document.getElementById("pfReset");
       const overlay  = document.getElementById("pfOverlay");
-      const msg      = document.getElementById("pfMsg");
+      const msgEl    = document.getElementById("pfMsg");
 
-      const pfRoom    = document.getElementById("pfRoom");
-      const pfRoomMax = document.getElementById("pfRoomMax");
-      const pfHearts  = document.getElementById("pfHearts");
-      const pfNotes   = document.getElementById("pfNotes");
-      const pfDeaths  = document.getElementById("pfDeaths");
-      const pfBest    = document.getElementById("pfBest");
+      const roomEl   = document.getElementById("pfRoom");
+      const roomMaxEl= document.getElementById("pfRoomMax");
+      const heartsEl = document.getElementById("pfHearts");
+      const deathsEl = document.getElementById("pfDeaths");
+      const bestEl   = document.getElementById("pfBest");
 
-      // ------------------------------
+      // -----------------------------
       // Canvas fit
-      // ------------------------------
+      // -----------------------------
       function fitCanvas() {
         const dpr = Math.max(1, window.devicePixelRatio || 1);
         const rect = canvas.getBoundingClientRect();
@@ -912,1178 +909,781 @@
       fitCanvas();
       window.addEventListener("resize", fitCanvas);
 
-      // ------------------------------
-      // Controls (Celeste-ish)
-      // ------------------------------
+      // -----------------------------
+      // Controls
+      // -----------------------------
       const KEYS = new Set();
       window.addEventListener("keydown", (e) => {
         const k = e.key;
-        const dashKey = (k === "Shift" || k === "k" || k === "K");
-        const jumpKey = (k === " " || k === "w" || k === "W" || k === "ArrowUp");
-        if (["ArrowLeft","ArrowRight","a","A","d","D","ArrowUp","w","W"," ","Shift","k","K","r","R"].includes(k)) {
+        if (["ArrowLeft","ArrowRight","ArrowUp","a","d","w"," ","Shift","k","K","j","J","r","R"].includes(k)) {
           KEYS.add(k);
-          if (jumpKey || dashKey) e.preventDefault();
-          if (k === "r" || k === "R") doRoomReset();
+          if (k === " " || k === "ArrowUp") e.preventDefault();
+          if (k.toLowerCase() === "r") resetRun();
         }
-      }, { passive: false });
+      }, { passive:false });
       window.addEventListener("keyup", (e) => KEYS.delete(e.key));
 
-      const wantsLeft  = () => KEYS.has("ArrowLeft") || KEYS.has("a") || KEYS.has("A");
-      const wantsRight = () => KEYS.has("ArrowRight") || KEYS.has("d") || KEYS.has("D");
-      const wantsJump  = () => KEYS.has(" ") || KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has("W");
-      const wantsDash  = () => KEYS.has("Shift") || KEYS.has("k") || KEYS.has("K");
-
-      // Mobile: tap left/right zones, tap top half to jump, double-tap to dash
+      // mobile: tap canvas to jump; double-tap to dash
       let lastTap = 0;
       canvas.addEventListener("pointerdown", (e) => {
-        if (!run.active) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
+        if (!RUN.active) return;
         const now = performance.now();
-        const dbl = (now - lastTap) < 240;
+        const dt = now - lastTap;
         lastTap = now;
-
-        if (dbl) {
-          // dash toward pointer
-          input.mobileDash = { x: x / rect.width, y: y / rect.height, t: 0.08 };
-          return;
-        }
-        if (y < rect.height * 0.55) {
-          input.mobileJump = 0.08;
-        } else if (x < rect.width * 0.5) {
-          input.mobileLeft = 0.10;
+        if (dt < 260) {
+          // dash toward tap direction
+          const rect = canvas.getBoundingClientRect();
+          const tx = e.clientX - rect.left;
+          const ty = e.clientY - rect.top;
+          const dx = tx - (PLAYER.x + PLAYER.w/2);
+          const dy = ty - (PLAYER.y + PLAYER.h/2);
+          const mag = Math.hypot(dx,dy) || 1;
+          tryDash(dx/mag, dy/mag);
         } else {
-          input.mobileRight = 0.10;
+          if (PLAYER.onGround || PLAYER.wallDir !== 0) jump();
         }
-      }, { passive: true });
+      });
 
-      const input = {
-        mobileLeft: 0,
-        mobileRight: 0,
-        mobileJump: 0,
-        mobileDash: null
-      };
+      // -----------------------------
+      // Level format (ASCII → tiles)
+      // Tiles:
+      //  # = solid
+      //  ^ v < > = spikes
+      //  * = dash crystal (refill)
+      //  H = heart pickup
+      //  S = spring
+      //  F = candle flame hazard (hurts, not instant)
+      //  D = dinner exit (room end)
+      // -----------------------------
+      const TILE = 20;
+      const W = 32;  // columns
+      const H = 18;  // rows
 
-      // ------------------------------
-      // World
-      // ------------------------------
-      const TILE = 16;           // tighter feel
-      const W = 32;              // tiles
-      const H = 24;
-      const ROOM_COUNT = 5;
-      pfRoomMax.textContent = String(ROOM_COUNT);
+      const ROOMS = [
+        {
+          name: "Aperitif Alley",
+          map: [
+"################################",
+"#..............................#",
+"#..............................#",
+"#..............H...............#",
+"#.............###..............#",
+"#.................*............#",
+"#..............#####...........#",
+"#..............................#",
+"#....S.........................#",
+"#...###..............F.........#",
+"#...........####...............#",
+"#......................###.....#",
+"#...........H..................#",
+"#...........###..........*.....#",
+"#..............................#",
+"#..................####........#",
+"#.........................D....#",
+"################################",
+          ],
+        },
+        {
+          name: "Candle Corridor",
+          map: [
+"################################",
+"#..............................#",
+"#...........^^^^^^^............#",
+"#...........#.....#............#",
+"#.....*.....#..H..#.....F......#",
+"#..........##.....##...........#",
+"#..........#.......#...........#",
+"#..S.......#..^^^^.#...........#",
+"#####......#..#..#.#...........#",
+"#..........#..#..#.#....*......#",
+"#..........#..#..#.#...........#",
+"#..........#..#..#.#...........#",
+"#..........#..#..#.#...........#",
+"#..........#..#..#.#...........#",
+"#..........#..#..#.#...........#",
+"#..........#..#..#.#......D....#",
+"#..........#########...........#",
+"################################",
+          ],
+        },
+        {
+          // This is the “7C screen 3 energy”: long, precise, spike-tight, dash refill rhythm.
+          // Original layout (not copied), same *feel*.
+          name: "Velvet Wallbounce Waltz",
+          map: [
+"################################",
+"#....................^^^^^^^...#",
+"#....................#.....#...#",
+"#..S.................#..*..#...#",
+"#####................#.....#...#",
+"#....................#..^^^#...#",
+"#....................#..#..#...#",
+"#.............H......#..#..#...#",
+"#.............###....#..#..#...#",
+"#....................#..#..#...#",
+"#.....^^^^^..........#..#..#...#",
+"#.....#...#..........#..#..#...#",
+"#..*..#...#..^^^^^...#..#..#...#",
+"#.....#...#..#...#...#..#..#...#",
+"#.....#...#..#...#...#..#..#...#",
+"#.....#...#..#...#...#..#..#D..#",
+"#.....#####..#####...#..####...#",
+"################################",
+          ],
+        },
+        {
+          name: "Table-for-Two Timing",
+          map: [
+"################################",
+"#..............................#",
+"#....^^^^^.....................#",
+"#....#...#..........H..........#",
+"#..S.#...#.........###.........#",
+"#####...^#.....................#",
+"#.......##....*................#",
+"#..............####............#",
+"#..................#...........#",
+"#....F.............#...........#",
+"#.............H....#...........#",
+"#............###...#...........#",
+"#..................#...........#",
+"#..^^^^^^..........#....*......#",
+"#..#....#..........#...........#",
+"#..#....#..........######..D...#",
+"#..######......................#",
+"################################",
+          ],
+        },
+        {
+          name: "Rose Petal Razorline",
+          map: [
+"################################",
+"#.....................^^^^^^...#",
+"#.....................#....#...#",
+"#..S..................#.*..#...#",
+"#####.................#....#...#",
+"#..........H..........######...#",
+"#.........###..................#",
+"#..............................#",
+"#..^^^^^^......................#",
+"#..#....#...........F..........#",
+"#..#....#......................#",
+"#..#....#....^^^^^.............#",
+"#..#....#....#...#.....*.......#",
+"#..######....#...#.............#",
+"#............#...#.............#",
+"#............#####.......D.....#",
+"#..............................#",
+"################################",
+          ],
+        },
+        {
+          name: "Dessert Dash (No Chill)",
+          map: [
+"################################",
+"#..................^^^^^.......#",
+"#..................#...#.......#",
+"#..S...............#.*.#.......#",
+"#####..............#...#.......#",
+"#..................#####.......#",
+"#........H.....................#",
+"#.......###..........F.........#",
+"#..............................#",
+"#....^^^^^^^...................#",
+"#....#.....#.....^^^^^.........#",
+"#....#..*..#.....#...#.........#",
+"#....#.....#.....#...#.........#",
+"#....#######.....#...#.........#",
+"#................#...#.........#",
+"#................#####....D....#",
+"#..............................#",
+"################################",
+          ],
+        },
+        {
+          name: "Dinner Is Served 🥂",
+          map: [
+"################################",
+"#..............................#",
+"#.............🍷🍝🕯️...............#",
+"#..............................#",
+"#....H.........................#",
+"#....###.......................#",
+"#...................*..........#",
+"#..................###.........#",
+"#..............................#",
+"#.............F................#",
+"#..............................#",
+"#..S...........................#",
+"#####....................^^^^..#",
+"#........................#..#..#",
+"#........................#..#..#",
+"#........................#..#D.#",
+"#........................####..#",
+"################################",
+          ],
+        },
+      ];
 
-      // Tile IDs:
-      // 0 empty
-      // 1 solid
-      // 2 spikes (death)
-      // 3 crumble
-      // 4 one-way (solid from top)
-      // 5 dream (dash-through w/ pop)
-      // 6 glass (solid but pretty)
-      const T = {
-        EMPTY:0, SOLID:1, SPIKE:2, CRUMBLE:3, ONEWAY:4, DREAM:5, GLASS:6
-      };
+      // NOTE: The last room contains emoji in the map lines; we’ll treat unknown chars as empty.
 
-      // Helper to build tilemaps from ascii
-      function mapFromAscii(rows, legend){
-        const grid = [];
-        for (let y=0;y<rows.length;y++){
-          const row = rows[y];
-          const arr = [];
-          for (let x=0;x<row.length;x++){
-            const ch = row[x];
-            arr.push(legend[ch] ?? 0);
-          }
-          grid.push(arr);
-        }
+      const ROOM_COUNT = ROOMS.length;
+      roomMaxEl.textContent = String(ROOM_COUNT);
+
+      function tileOf(ch){
+        if (ch === "#") return { t:"solid" };
+        if (ch === "^" || ch === "v" || ch === "<" || ch === ">") return { t:"spike", d:ch };
+        if (ch === "*") return { t:"crystal" };
+        if (ch === "H") return { t:"heart" };
+        if (ch === "S") return { t:"spring" };
+        if (ch === "F") return { t:"flame" };
+        if (ch === "D") return { t:"exit" };
+        return { t:"empty" };
+      }
+
+      function parseRoom(roomDef){
+        const grid = Array.from({length:H}, (_,y)=>{
+          const row = roomDef.map[y] || "";
+          return Array.from({length:W}, (_,x)=>{
+            const ch = row[x] || ".";
+            return tileOf(ch);
+          });
+        });
         return grid;
       }
 
-      // Original “C-side inspired” rooms (tight + mean, but fair-ish)
-      // Theme objects are entities, not tiles: candles, crystals, key, gate, dinner goal
-      const ROOMS = [
-        // Room 1: dash intro + first candle
-        {
-          name:"Appetizer Alley",
-          grid: mapFromAscii([
-            "................................",
-            "................................",
-            "................................",
-            "................................",
-            "...............^..^..^..........",
-            "...............########..........",
-            "...............#......#..........",
-            "...............#..c...#..........",
-            "....####.......#......#....####..",
-            "....#..#.......#......#....#..#..",
-            "....#..#.......#..d...#....#..#..",
-            "....#..#.......########....#..#..",
-            "....#..#....................#..#.",
-            "....#..#....o...............#..#.",
-            "....#..#....................#..#.",
-            "....#..##########..##########..#.",
-            "....#............##............#.",
-            "....############.##.############.",
-            "..............#..##..#...........",
-            "..............#..##..#...........",
-            "..............#..##..#...........",
-            "..............#......#...........",
-            "..............########...........",
-            "################################",
-          ], {
-            ".":T.EMPTY,
-            "#":T.SOLID,
-            "^":T.SPIKE,
-            "o":T.DREAM,
-          }),
-          entities: [
-            { kind:"candle", x: 18, y: 7 },        // checkpoint
-            { kind:"crystal", x: 19, y: 10 },      // dash refill
-            { kind:"note", x: 6, y: 13, text:"I saved you a seat 🕯️🍷" },
-            { kind:"goal", x: 28, y: 20, next: 2 }, // door
-          ]
-        },
+      const GRIDS = ROOMS.map(parseRoom);
 
-        // Room 2: wall jumps + crumble + spikes
-        {
-          name:"Rose-Petal Ruin",
-          grid: mapFromAscii([
-            "................................",
-            "................................",
-            ".................^^^^^^.........",
-            ".................######.........",
-            ".................#....#.........",
-            ".....####........#....#.........",
-            ".....#..#........#....#.........",
-            ".....#..#....c...#....#.........",
-            ".....#..######...######.........",
-            ".....#......#...........^^^^^...",
-            ".....######.#...........#####...",
-            "..........#.#...................",
-            "..........#.#....dddd...........",
-            "..........#.#....####....k......",
-            "..........#.#............^^^^^..",
-            "..........#.#............#####..",
-            "....^^^^^.#.#...................",
-            "....#####.#.###########..#######",
-            "..........#...........#..#.....#",
-            "..........###########.#..#..g..#",
-            ".....................#..##.....#",
-            ".....................#.........#",
-            ".....................###########",
-            "################################",
-          ], {
-            ".":T.EMPTY,
-            "#":T.SOLID,
-            "^":T.SPIKE,
-            "d":T.CRUMBLE,
-          }),
-          entities: [
-            { kind:"candle", x: 13, y: 7 },
-            { kind:"heart", x: 24, y: 12 },
-            { kind:"note", x: 4, y: 6, text:"If you fall, I’ll catch you. (Checkpoint does too.) 💞" },
-            { kind:"key", x: 24, y: 13 },
-            { kind:"gate", x: 25, y: 19 }, // needs key
-            { kind:"goal", x: 25, y: 19, next: 3, requires:"key" },
-          ]
-        },
-
-        // Room 3: mover cycles + dream pop + crystals
-        {
-          name:"Candle Drift Corridors",
-          grid: mapFromAscii([
-            "................................",
-            "................................",
-            "...........^^^^^^...............",
-            "...........######...............",
-            "...........#....#...............",
-            "....o......#....#......o........",
-            "....#......#....#......#........",
-            "....#..c...#....#..c...#........",
-            "....######.#....#.######........",
-            "..........#......#..............",
-            "..........#..^^^^#..............",
-            "..........#..####...............",
-            "....m......#....................",
-            "....####...#...........m........",
-            "...........#...........####.....",
-            "...........#....................",
-            "....^^^^...#....o...............",
-            "....####...#....#...............",
-            "...........#....#...............",
-            "...........######...............",
-            "...............^^^^^^^^^^.......",
-            "...............##########.......",
-            "................................",
-            "################################",
-          ], {
-            ".":T.EMPTY,
-            "#":T.SOLID,
-            "^":T.SPIKE,
-            "o":T.DREAM,
-          }),
-          entities: [
-            { kind:"candle", x: 7, y: 7 },
-            { kind:"candle", x: 19, y: 7 },
-            { kind:"crystal", x: 5, y: 5 },
-            { kind:"crystal", x: 25, y: 16 },
-            { kind:"mover", x: 4, y: 12, w: 6, h: 1, path:[{x:4,y:12},{x:16,y:12}], speed: 2.2 },
-            { kind:"mover", x: 22, y: 13, w: 6, h: 1, path:[{x:22,y:13},{x:22,y:8}], speed: 2.1 },
-            { kind:"note", x: 2, y: 21, text:"Dash between candles like we’re dancing between courses 🕯️💃" },
-            { kind:"goal", x: 28, y: 21, next: 4 },
-          ]
-        },
-
-        // Room 4: feather glide section + spikes tunnel
-        {
-          name:"Feather of Forever",
-          grid: mapFromAscii([
-            "................................",
-            "................................",
-            ".............^^^^^^^............",
-            ".............#######............",
-            ".............#.....#............",
-            ".............#.....#............",
-            ".............#..f..#............",
-            ".............#.....#............",
-            "....^^^^^....#######....^^^^^...",
-            "....#####...............#####...",
-            "................................",
-            "....o...........^^^^^^..........",
-            "....#...........######..........",
-            "....#.....c.....#....#..........",
-            "....######......#....#..........",
-            "...............^#....#^.........",
-            "...............^######^.........",
-            "...............^^^^^^^^.........",
-            "...............########.........",
-            "......................#.........",
-            "......................#.....g...",
-            "......................##########",
-            "................................",
-            "################################",
-          ], {
-            ".":T.EMPTY,
-            "#":T.SOLID,
-            "^":T.SPIKE,
-            "o":T.DREAM,
-          }),
-          entities: [
-            { kind:"candle", x: 10, y: 13 },
-            { kind:"feather", x: 14, y: 6, duration: 3.2 },
-            { kind:"heart", x: 22, y: 10 },
-            { kind:"note", x: 3, y: 10, text:"Float like a secret wish: dinner, candles, you & me 🕯️🍽️" },
-            { kind:"goal", x: 25, y: 20, next: 5 },
-          ]
-        },
-
-        // Room 5: final key-gated dinner table finish (very tight)
-        {
-          name:"The Table Is Set",
-          grid: mapFromAscii([
-            "................................",
-            "................................",
-            "....^^^^^^^...........^^^^^^^...",
-            "....#######...........#######...",
-            "....#.....#...........#.....#...",
-            "....#.....#...........#.....#...",
-            "....#..c..#....dddd...#..c..#...",
-            "....#.....#....####...#.....#...",
-            "....#######...........#######...",
-            "..........^^^^^^^...............",
-            "..........#######...............",
-            "......................k.........",
-            "....m................####.......",
-            "....####..............^^^.......",
-            "......................###.......",
-            "....^^^^^^^.....................",
-            "....#######.............o.......",
-            "....#.....#.............#.......",
-            "....#..g..###############.......",
-            "....#.....#.....................",
-            "....#######.............🍽️......",
-            "................................",
-            "................................",
-            "################################",
-          ], {
-            ".":T.EMPTY,
-            "#":T.SOLID,
-            "^":T.SPIKE,
-            "d":T.CRUMBLE,
-            "o":T.DREAM,
-            "🍽":T.EMPTY, // decorative handled as entity
-          }),
-          entities: [
-            { kind:"candle", x: 7, y: 6 },
-            { kind:"candle", x: 22, y: 6 },
-            { kind:"key", x: 22, y: 11 },
-            { kind:"mover", x: 4, y: 12, w: 6, h: 1, path:[{x:4,y:12},{x:14,y:12}], speed: 2.4 },
-            { kind:"gate", x: 6, y: 18 },
-            { kind:"dinner", x: 26, y: 20, requires:"key" }, // final goal
-            { kind:"note", x: 18, y: 21, text:"Make it to the table and I’ll say it: I choose you. 💘" },
-          ]
-        }
-      ];
-
-      // ------------------------------
-      // Utility
-      // ------------------------------
-      const px = (tx) => tx * TILE;
-      const py = (ty) => ty * TILE;
-
-      function inBounds(tx, ty){
-        return ty >= 0 && ty < H && tx >= 0 && tx < W;
-      }
-
-      function tileAt(room, x, y){
-        const tx = Math.floor(x / TILE);
-        const ty = Math.floor(y / TILE);
-        if (!inBounds(tx, ty)) return T.EMPTY;
-        return room.grid[ty][tx] ?? T.EMPTY;
-      }
-
-      function solidTile(id){ return id === T.SOLID || id === T.GLASS; }
-
-      function rectOverlap(ax,ay,aw,ah, bx,by,bw,bh){
-        return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
-      }
-
-      // ------------------------------
-      // Player (Celeste-ish feel)
-      // ------------------------------
-      const player = {
-        x: px(2), y: py(18),
-        w: 10, h: 14,
+      // -----------------------------
+      // Player / Physics (Celeste-ish)
+      // -----------------------------
+      const PLAYER = {
+        x: 2*TILE, y: 13*TILE,
+        w: 14, h: 18,
         vx: 0, vy: 0,
-        face: 1,
         onGround: false,
-        onWall: 0,  // -1 left, +1 right
-        coyote: 0,
-        jumpBuf: 0,
-        dashAvail: 1,
-        dashing: 0,
+        wallDir: 0,          // -1 left wall, +1 right wall
+        dash: 1,
+        dashLock: 0,
+        dashTime: 0,
         dashVX: 0,
         dashVY: 0,
-        dashLock: 0,
-        dead: false,
-        spawn: { x: px(2), y: py(18) },
-        hasKey: false,
-        feather: 0
+        grab: false,
+        stamina: 1.0,        // simple climb stamina (0..1)
+        inv: 0
       };
 
-      const run = {
+      const RUN = {
         active: false,
         room: 1,
         hearts: 0,
-        notes: 0,
         deaths: 0,
-        best: null,
-        checkpointName: "Start",
+        best: null
       };
 
-      // “feel” constants
-      const CFG = {
-        accel: 1400,
-        maxRun: 120,
-        friction: 1800,
-        gravity: 900,
-        maxFall: 260,
-        jumpVel: 270,
-        wallSlide: 90,
-        wallJumpX: 160,
-        wallJumpY: 250,
-        coyoteTime: 0.09,
-        jumpBuffer: 0.10,
-        dashTime: 0.14,
-        dashSpeed: 260,
-        dashEndFriction: 0.90,
-      };
-
-      // ------------------------------
-      // Entities
-      // ------------------------------
-      function cloneRoomEntities(room){
-        return room.entities.map(e => ({ ...e, taken:false, lit:false, t:0, id: Math.random().toString(16).slice(2) }));
+      function setUI(){
+        roomEl.textContent = String(RUN.room);
+        heartsEl.textContent = String(RUN.hearts);
+        deathsEl.textContent = String(RUN.deaths);
+        bestEl.textContent = RUN.best ? `${RUN.best.hearts}💖 / ${RUN.best.deaths} deaths` : "—";
       }
 
-      let entities = cloneRoomEntities(ROOMS[0]);
-      let crumble = []; // active crumble tiles {tx,ty,t}
-      let movers = [];  // active movers w/ phase
-      let dreamPop = []; // particles
-
-      function initRoomState(){
-        const base = ROOMS[run.room - 1];
-        entities = cloneRoomEntities(base);
-        crumble = [];
-        movers = [];
-        dreamPop = [];
-
-        // init movers
-        for (const e of entities){
-          if (e.kind === "mover"){
-            movers.push({
-              ...e,
-              idx: 0,
-              x: px(e.x), y: py(e.y),
-              vx: 0, vy: 0,
-              p: 0,
-              wait: 0
-            });
-          }
-        }
+      function rectOverlap(ax,ay,aw,ah,bx,by,bw,bh){
+        return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
       }
 
-      // ------------------------------
-      // Main game -> rewards hooks
-      // ------------------------------
-      function reward(kind){
-        const S = getSTATE();
+      function currentGrid(){ return GRIDS[RUN.room-1]; }
 
-        if (kind === "heart"){
-          run.hearts++;
-          S.affection += 2.4;
-          S.nerves -= 1.2;
-
-          const r = Math.random();
-          if (r < 0.28) S.mana.heart += 1;
-          else if (r < 0.52) S.mana.choc += 1;
-          else if (r < 0.78) S.mana.popcorn += 1;
-          else S.mana.sparkle += 1;
-
-          if (run.hearts % 4 === 0) unlockLoveLine();
-
-          boomfetti({ particleCount: 40, spread: 70, origin: { y: 0.7 } });
-          msg.textContent = "💖 Collected! Your vibe is getting dangerously romantic.";
-        }
-
-        if (kind === "candle"){
-          S.affection += 1.0;
-          S.nerves -= 0.8;
-          S.mana.sparkle += 1;
-          boomfetti({ particleCount: 24, spread: 55, origin: { y: 0.65 } });
-          msg.textContent = "🕯️ Candle lit! Checkpoint saved (and your dash refilled).";
-        }
-
-        if (kind === "note"){
-          run.notes++;
-          S.affection += 1.2;
-          S.nerves -= 0.6;
-          msg.textContent = "💌 A note warms your hands. Keep going.";
-        }
-
-        updateHUD();
-        setBars();
+      function solidAt(px,py){
+        const tx = Math.floor(px / TILE);
+        const ty = Math.floor(py / TILE);
+        if (tx<0 || ty<0 || tx>=W || ty>=H) return true; // out of bounds = solid
+        return currentGrid()[ty][tx].t === "solid";
       }
 
-      function die(reason="💔"){
-        if (player.dead) return;
-        player.dead = true;
-        run.deaths++;
-        msg.textContent = `${reason} Ouch. Back to the last candle…`;
-
-        // tiny penalty to nerves, but not brutal
-        const S = getSTATE();
-        S.nerves += 2.5;
-        S.youHP = Math.max(0, (S.youHP ?? 100) - 2);
-        updateHUD(); setBars();
-
-        setTimeout(() => respawn(), 260);
+      function tileAt(px,py){
+        const tx = Math.floor(px / TILE);
+        const ty = Math.floor(py / TILE);
+        if (tx<0 || ty<0 || tx>=W || ty>=H) return { t:"solid" };
+        return currentGrid()[ty][tx];
       }
 
       function respawn(){
-        player.dead = false;
-        player.vx = player.vy = 0;
-        player.dashing = 0;
-        player.dashLock = 0;
-        player.feather = 0;
-        player.x = player.spawn.x;
-        player.y = player.spawn.y;
-        player.dashAvail = 1;
-      }
+        RUN.deaths++;
+        // romantic penalty/reward: nerves up a touch, but you get a tiny “try again 💞”
+        STATE.nerves = clamp((STATE.nerves ?? 25) + 2, 0, 100);
+        STATE.youHP = clamp((STATE.youHP ?? 100) - 2, 0, 100);
+        updateHUD(); setBars();
 
-      // ------------------------------
-      // Room / checkpoint
-      // ------------------------------
-      function setStatsUI(){
-        pfRoom.textContent = String(run.room);
-        pfHearts.textContent = String(run.hearts);
-        pfNotes.textContent = String(run.notes);
-        pfDeaths.textContent = String(run.deaths);
-        pfBest.textContent = run.best ? `${run.best.deaths} deaths • ${run.best.hearts}💖` : "—";
+        PLAYER.x = 2*TILE;
+        PLAYER.y = 13*TILE;
+        PLAYER.vx = 0; PLAYER.vy = 0;
+        PLAYER.onGround = false;
+        PLAYER.wallDir = 0;
+        PLAYER.dash = 1;
+        PLAYER.dashLock = 0;
+        PLAYER.dashTime = 0;
+        PLAYER.stamina = 1.0;
+        PLAYER.inv = 0.35;
+
+        msgEl.textContent = "Bonked 💔 Breathe… then dash again.";
+        setUI();
       }
 
       function enterRoom(n){
-        run.room = clamp(n, 1, ROOM_COUNT);
-        initRoomState();
-
-        // default spawn
-        player.spawn.x = px(2);
-        player.spawn.y = py(18);
-        player.hasKey = false;
-
-        // if room has candle near start, keep spawn there (but unlit until touched)
-        player.x = player.spawn.x;
-        player.y = player.spawn.y;
-
-        msg.textContent = `Room ${run.room}: ${ROOMS[run.room-1].name}.`;
-        setStatsUI();
+        RUN.room = clamp(n, 1, ROOM_COUNT);
+        PLAYER.x = 2*TILE;
+        PLAYER.y = 13*TILE;
+        PLAYER.vx = 0; PLAYER.vy = 0;
+        PLAYER.onGround = false;
+        PLAYER.wallDir = 0;
+        PLAYER.dash = 1;
+        PLAYER.dashLock = 0;
+        PLAYER.dashTime = 0;
+        PLAYER.stamina = 1.0;
+        msgEl.textContent = `Room ${RUN.room}: ${ROOMS[RUN.room-1].name}`;
+        setUI();
       }
 
       function finishRun(){
-        const score = { deaths: run.deaths, hearts: run.hearts };
-        const better =
-          !run.best ||
-          score.deaths < run.best.deaths ||
-          (score.deaths === run.best.deaths && score.hearts > run.best.hearts);
+        const score = { hearts: RUN.hearts, deaths: RUN.deaths };
+        const better = !RUN.best
+          || score.hearts > RUN.best.hearts
+          || (score.hearts === RUN.best.hearts && score.deaths < RUN.best.deaths);
+        if (better) RUN.best = score;
 
-        if (better) run.best = score;
+        msgEl.textContent = "🥂 Dinner is served. (You’re insane. I love it.)";
+        confetti({ particleCount: 180, spread: 95, origin: { y: 0.6 } });
 
-        const S = getSTATE();
-        S.affection += 12;
-        S.nerves -= 10;
-        S.mana.sparkle += 2;
+        STATE.affection = clamp((STATE.affection ?? 0) + 8, 0, 100);
+        STATE.nerves = clamp((STATE.nerves ?? 25) - 6, 0, 100);
+        STATE.mana.sparkle = (STATE.mana?.sparkle ?? 0) + 2;
+        unlockLoveLine();
         updateHUD(); setBars();
 
-        boomfetti({ particleCount: 180, spread: 95, origin: { y: 0.55 } });
-        msg.textContent = "🍽️🕯️ DINNER ACHIEVED. The table is set… and so is my heart. 💘";
-        setStatsUI();
+        setUI();
+        RUN.active = false;
+        startBtn.style.opacity = "1";
+        startBtn.style.pointerEvents = "auto";
+        startBtn.textContent = "Run Again (for love)";
+        overlay.style.opacity = "1";
       }
 
-      function doRoomReset(){
-        if (!run.active) return;
-        msg.textContent = "Reset! Deep breath. You’ve got this. 💞";
-        initRoomState();
-        respawn();
-        setStatsUI();
+      function resetRun(){
+        if (!RUN.active) return;
+        RUN.hearts = 0;
+        RUN.deaths = 0;
+        enterRoom(1);
+        msgEl.textContent = "Reset. Candle’s still lit. Try again 😤🕯️";
+        setUI();
       }
 
-      // ------------------------------
-      // Movers + crumble tile state
-      // ------------------------------
-      function isCrumbleGone(tx, ty){
-        return crumble.some(c => c.tx === tx && c.ty === ty && c.t >= 0.45);
-      }
-
-      function touchCrumble(tx, ty){
-        if (crumble.some(c => c.tx === tx && c.ty === ty)) return;
-        crumble.push({ tx, ty, t: 0 });
-      }
-
-      // ------------------------------
-      // Physics + collisions
-      // ------------------------------
-      function collideSolid(room, x, y){
-        const id = tileAt(room, x, y);
-        if (id === T.CRUMBLE){
-          const tx = Math.floor(x / TILE);
-          const ty = Math.floor(y / TILE);
-          if (isCrumbleGone(tx, ty)) return false;
-          return true;
+      // -----------------------------
+      // Moves: jump / dash
+      // -----------------------------
+      function jump(){
+        // ground jump
+        if (PLAYER.onGround){
+          PLAYER.vy = -9.2;
+          PLAYER.onGround = false;
+          return;
         }
-        if (id === T.ONEWAY){
-          // handled separately
-          return false;
+        // wall jump
+        if (PLAYER.wallDir !== 0){
+          PLAYER.vy = -9.0;
+          PLAYER.vx = -PLAYER.wallDir * 5.2;
+          PLAYER.wallDir = 0;
+          PLAYER.stamina = clamp(PLAYER.stamina - 0.10, 0, 1);
         }
-        return solidTile(id) || id === T.CRUMBLE;
       }
 
-      function hitSpike(room, x, y){
-        return tileAt(room, x, y) === T.SPIKE;
+      function tryDash(dx,dy){
+        if (PLAYER.dash <= 0) return;
+        if (PLAYER.dashLock > 0) return;
+
+        // normalize, allow “neutral dash” to go right
+        let mag = Math.hypot(dx,dy);
+        if (mag < 0.2){ dx = 1; dy = 0; mag = 1; }
+        dx /= mag; dy /= mag;
+
+        PLAYER.dash -= 1;
+        PLAYER.dashTime = 0.13;     // dash duration
+        PLAYER.dashVX = dx * 10.5;
+        PLAYER.dashVY = dy * 10.5;
+        PLAYER.vx = PLAYER.dashVX;
+        PLAYER.vy = PLAYER.dashVY;
+        PLAYER.dashLock = 0.05;
+
+        msgEl.textContent = "💫 dash!";
       }
 
-      function hitDream(room, x, y){
-        return tileAt(room, x, y) === T.DREAM;
+      // -----------------------------
+      // Interactions
+      // -----------------------------
+      function grantHeart(){
+        RUN.hearts += 1;
+        STATE.affection = clamp((STATE.affection ?? 0) + 2.0, 0, 100);
+        STATE.nerves = clamp((STATE.nerves ?? 25) - 1.2, 0, 100);
+
+        // random mana (date-night loot)
+        const r = Math.random();
+        if (r < 0.30) STATE.mana.heart += 1;
+        else if (r < 0.55) STATE.mana.choc += 1;
+        else if (r < 0.78) STATE.mana.popcorn += 1;
+        else STATE.mana.sparkle += 1;
+
+        if (RUN.hearts % 4 === 0) unlockLoveLine();
+
+        updateHUD(); setBars();
+        confetti({ particleCount: 40, spread: 70, origin: { y: 0.75 } });
+        msgEl.textContent = "💖 collected. (Romantic AND cracked at platformers.)";
+        setUI();
       }
 
-      function resolve(room, dt){
-        // Movement steps
-        const steps = 4;
+      function refillDash(){
+        PLAYER.dash = 1;
+        msgEl.textContent = "🔷 dash refilled!";
+      }
 
-        // wall detection
-        player.onWall = 0;
+      function flameHit(){
+        if (PLAYER.inv > 0) return;
+        PLAYER.inv = 0.5;
+        STATE.nerves = clamp((STATE.nerves ?? 25) + 6, 0, 100);
+        STATE.youHP = clamp((STATE.youHP ?? 100) - 6, 0, 100);
+        updateHUD(); setBars();
+        msgEl.textContent = "🕯️ too hot! careful around the candles…";
+      }
 
-        // apply gravity unless dashing or feather
-        if (player.feather > 0) {
-          // feather glide: softer gravity and more air control
-          const target = (input.mobileLeft>0||wantsLeft()? -1 : 0) + (input.mobileRight>0||wantsRight()? 1 : 0);
-          player.vx += target * 900 * dt;
-          player.vx = clamp(player.vx, -140, 140);
-          player.vy += 220 * dt;
-          player.vy = clamp(player.vy, -120, 160);
-        } else if (player.dashing <= 0){
-          player.vy += CFG.gravity * dt;
-          if (player.vy > CFG.maxFall) player.vy = CFG.maxFall;
-        }
+      // -----------------------------
+      // Collision & step
+      // -----------------------------
+      function resolveCollisions(){
+        const steps = 3;
 
-        // horizontal accel/friction if not dashing
-        if (player.dashing <= 0 && player.feather <= 0){
-          const left = wantsLeft() || input.mobileLeft > 0;
-          const right = wantsRight() || input.mobileRight > 0;
-          const ax = (right ? 1 : 0) - (left ? 1 : 0);
-          if (ax !== 0){
-            player.face = ax;
-            player.vx += ax * CFG.accel * dt;
-            player.vx = clamp(player.vx, -CFG.maxRun, CFG.maxRun);
-          } else {
-            // friction
-            const fr = CFG.friction * dt;
-            if (Math.abs(player.vx) <= fr) player.vx = 0;
-            else player.vx -= Math.sign(player.vx) * fr;
-          }
-        }
-
-        // dash handling
-        if (player.dashLock > 0) player.dashLock -= dt;
-        if (player.dashing > 0){
-          player.dashing -= dt;
-          player.vx = player.dashVX;
-          player.vy = player.dashVY;
-          if (player.dashing <= 0){
-            player.vx *= CFG.dashEndFriction;
-            player.vy *= CFG.dashEndFriction;
-          }
-        }
-
-        // jump buffer timers
-        if (player.jumpBuf > 0) player.jumpBuf -= dt;
-        if (player.coyote > 0) player.coyote -= dt;
-
-        // detect jump pressed -> set buffer
-        const jumpPressed = wantsJump() || input.mobileJump > 0;
-        if (jumpPressed) player.jumpBuf = CFG.jumpBuffer;
-
-        // move + collide in steps
-        player.onGround = false;
         for (let s=0; s<steps; s++){
-          const vx = player.vx * dt / steps;
-          const vy = player.vy * dt / steps;
-
           // X
-          player.x += vx;
-          if (vx !== 0){
-            const dir = Math.sign(vx);
-            const px1 = (dir > 0) ? player.x + player.w : player.x;
-            const yTop = player.y + 1;
-            const yBot = player.y + player.h - 1;
+          PLAYER.x += PLAYER.vx / steps;
 
-            for (let yy=yTop; yy<=yBot; yy += 5){
-              if (collideSolid(room, px1, yy)){
-                const tx = Math.floor(px1 / TILE);
-                if (dir > 0) player.x = tx * TILE - player.w - 0.01;
-                else player.x = (tx + 1) * TILE + 0.01;
-                player.vx = 0;
-                player.onWall = dir;
+          if (PLAYER.vx !== 0){
+            const left = PLAYER.x;
+            const right = PLAYER.x + PLAYER.w;
+            const top = PLAYER.y + 2;
+            const bottom = PLAYER.y + PLAYER.h - 2;
+            const checkX = (PLAYER.vx > 0) ? right : left;
+
+            for (let yy = top; yy <= bottom; yy += 6){
+              if (solidAt(checkX, yy)){
+                if (PLAYER.vx > 0) PLAYER.x = Math.floor(checkX / TILE) * TILE - PLAYER.w - 0.01;
+                else PLAYER.x = (Math.floor(checkX / TILE) + 1) * TILE + 0.01;
+                PLAYER.vx = 0;
                 break;
               }
             }
           }
 
           // Y
-          player.y += vy;
-          if (vy !== 0){
-            const dir = Math.sign(vy);
-            const py1 = (dir > 0) ? player.y + player.h : player.y;
-            const xL = player.x + 1;
-            const xR = player.x + player.w - 1;
+          PLAYER.y += PLAYER.vy / steps;
+          PLAYER.onGround = false;
 
-            for (let xx=xL; xx<=xR; xx += 5){
-              // one-way platforms: only collide when falling and above platform
-              const id = tileAt(room, xx, py1);
-              const hitsOneWay = (id === T.ONEWAY) && (dir > 0) && (player.vy >= 0) && (player.y + player.h - vy <= Math.floor(py1 / TILE) * TILE + 2);
+          if (PLAYER.vy !== 0){
+            const left = PLAYER.x + 2;
+            const right = PLAYER.x + PLAYER.w - 2;
+            const top = PLAYER.y;
+            const bottom = PLAYER.y + PLAYER.h;
+            const checkY = (PLAYER.vy > 0) ? bottom : top;
 
-              if (hitsOneWay || collideSolid(room, xx, py1)){
-                const ty = Math.floor(py1 / TILE);
-                if (id === T.CRUMBLE){
-                  const tx = Math.floor(xx / TILE);
-                  touchCrumble(tx, ty);
-                }
-                if (dir > 0){
-                  player.y = ty * TILE - player.h - 0.01;
-                  player.onGround = true;
-                  player.coyote = CFG.coyoteTime;
+            for (let xx = left; xx <= right; xx += 6){
+              if (solidAt(xx, checkY)){
+                if (PLAYER.vy > 0){
+                  PLAYER.y = Math.floor(checkY / TILE) * TILE - PLAYER.h - 0.01;
+                  PLAYER.onGround = true;
+                  // tiny dash refresh on landing like “reset your hands”
+                  PLAYER.dashLock = 0;
                 } else {
-                  player.y = (ty + 1) * TILE + 0.01;
+                  PLAYER.y = (Math.floor(checkY / TILE) + 1) * TILE + 0.01;
                 }
-                player.vy = 0;
+                PLAYER.vy = 0;
                 break;
               }
             }
           }
+        }
 
-          // spikes check (corners)
-          const corners = [
-            [player.x+1, player.y+1],
-            [player.x+player.w-1, player.y+1],
-            [player.x+1, player.y+player.h-1],
-            [player.x+player.w-1, player.y+player.h-1]
-          ];
-          for (const [cx,cy] of corners){
-            if (hitSpike(room, cx, cy)) { die("💔 SPIKED"); return; }
-          }
+        // Wall detection (for wall slides / wall jumps)
+        PLAYER.wallDir = 0;
+        const midY = PLAYER.y + PLAYER.h*0.5;
+        if (!PLAYER.onGround){
+          if (solidAt(PLAYER.x - 1, midY)) PLAYER.wallDir = -1;
+          else if (solidAt(PLAYER.x + PLAYER.w + 1, midY)) PLAYER.wallDir = 1;
+        }
+      }
 
-          // dream block: dash-through, but hurts if not dashing (C-side mean)
-          if (hitDream(room, player.x + player.w/2, player.y + player.h/2)){
-            if (player.dashing > 0){
-              dreamPop.push({ x: player.x, y: player.y, t:0 });
-            } else {
-              die("💔 DREAM BLOCK BONK");
+      function deadlySpikeTouch(){
+        // check a few sample points around player against spike tiles
+        const samples = [
+          [PLAYER.x+2, PLAYER.y+2],
+          [PLAYER.x+PLAYER.w-2, PLAYER.y+2],
+          [PLAYER.x+2, PLAYER.y+PLAYER.h-2],
+          [PLAYER.x+PLAYER.w-2, PLAYER.y+PLAYER.h-2],
+          [PLAYER.x+PLAYER.w/2, PLAYER.y+PLAYER.h/2],
+        ];
+        for (const [sx,sy] of samples){
+          const t = tileAt(sx,sy);
+          if (t.t === "spike") return true;
+        }
+        return false;
+      }
+
+      function interactTiles(){
+        // scan a small neighborhood around player for pickups/hazards
+        const minX = Math.floor((PLAYER.x-2) / TILE);
+        const maxX = Math.floor((PLAYER.x+PLAYER.w+2) / TILE);
+        const minY = Math.floor((PLAYER.y-2) / TILE);
+        const maxY = Math.floor((PLAYER.y+PLAYER.h+2) / TILE);
+
+        for (let ty=minY; ty<=maxY; ty++){
+          for (let tx=minX; tx<=maxX; tx++){
+            if (tx<0||ty<0||tx>=W||ty>=H) continue;
+            const cell = currentGrid()[ty][tx];
+
+            const bx = tx*TILE, by=ty*TILE;
+            const hit = rectOverlap(PLAYER.x,PLAYER.y,PLAYER.w,PLAYER.h, bx,by, TILE,TILE);
+            if (!hit) continue;
+
+            if (cell.t === "heart"){
+              cell.t = "empty";
+              grantHeart();
+            }
+            if (cell.t === "crystal"){
+              cell.t = "empty";
+              refillDash();
+              confetti({ particleCount: 18, spread: 55, origin: { y: 0.7 } });
+            }
+            if (cell.t === "spring"){
+              // bounce up
+              PLAYER.vy = -12.0;
+              PLAYER.dashLock = 0;
+              msgEl.textContent = "Sproing 💞";
+            }
+            if (cell.t === "flame"){
+              flameHit();
+            }
+            if (cell.t === "exit"){
+              if (RUN.room < ROOM_COUNT) enterRoom(RUN.room + 1);
+              else finishRun();
               return;
             }
           }
         }
 
-        // wall slide
-        if (!player.onGround && player.onWall !== 0 && player.vy > CFG.wallSlide && player.dashing <= 0 && player.feather <= 0){
-          player.vy = CFG.wallSlide;
-        }
-
-        // coyote time set when grounded
-        if (player.onGround) player.coyote = CFG.coyoteTime;
-
-        // jump consume
-        const canJump = (player.onGround || player.coyote > 0);
-        if (player.jumpBuf > 0){
-          // normal jump
-          if (canJump){
-            player.jumpBuf = 0;
-            player.vy = -CFG.jumpVel;
-            player.onGround = false;
-            player.coyote = 0;
-          }
-          // wall jump
-          else if (player.onWall !== 0){
-            player.jumpBuf = 0;
-            player.vy = -CFG.wallJumpY;
-            player.vx = -player.onWall * CFG.wallJumpX;
-            player.onWall = 0;
-          }
-        }
-
-        // dash input
-        const dashPressed = wantsDash() || (input.mobileDash && input.mobileDash.t > 0);
-        if (dashPressed && player.dashAvail > 0 && player.dashing <= 0 && player.dashLock <= 0){
-          const dir = dashDirection();
-          doDash(dir.x, dir.y);
+        // spikes = instant death
+        if (deadlySpikeTouch()){
+          respawn();
         }
       }
 
-      function dashDirection(){
-        // default = facing
-        let dx = player.face || 1;
-        let dy = 0;
-
-        // keyboard: use movement keys to choose direction
-        const up = KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has("W");
-        const down = KEYS.has("ArrowDown") || KEYS.has("s") || KEYS.has("S");
-        const left = wantsLeft();
-        const right = wantsRight();
-
-        dx = (right?1:0) - (left?1:0);
-        dy = (down?1:0) - (up?1:0);
-
-        // mobile dash points toward tap
-        if (input.mobileDash && input.mobileDash.t > 0){
-          const nx = input.mobileDash.x * 2 - 1;
-          const ny = input.mobileDash.y * 2 - 1;
-          dx = nx;
-          dy = ny;
-        }
-
-        // normalize
-        const mag = Math.hypot(dx, dy) || 1;
-        dx /= mag; dy /= mag;
-        return { x: dx, y: dy };
-      }
-
-      function doDash(dx, dy){
-        player.dashAvail -= 1;
-        player.dashing = CFG.dashTime;
-        player.dashLock = 0.08;
-        player.dashVX = dx * CFG.dashSpeed;
-        player.dashVY = dy * CFG.dashSpeed;
-        // cancel feather
-        player.feather = 0;
-
-        // clear mobile dash
-        if (input.mobileDash) input.mobileDash.t = 0;
-
-        boomfetti({ particleCount: 18, spread: 45, origin: { y: 0.75 } });
-      }
-
-      // ------------------------------
-      // Entity interactions
-      // ------------------------------
-      function entityRect(e){
-        return { x: px(e.x) + 2, y: py(e.y) + 2, w: TILE-4, h: TILE-4 };
-      }
-
-      function updateEntities(dt){
-        // update crumble timers
-        for (const c of crumble) c.t += dt;
-        // remove fully gone after some time
-        crumble = crumble.filter(c => c.t < 1.15);
-
-        // update movers
-        for (const m of movers){
-          const a = m.path[m.idx];
-          const b = m.path[(m.idx+1) % m.path.length];
-          const ax = px(a.x), ay = py(a.y);
-          const bx = px(b.x), by = py(b.y);
-
-          m.p += dt * m.speed;
-          if (m.p >= 1){
-            m.p = 0;
-            m.idx = (m.idx + 1) % m.path.length;
-          }
-          const nx = ax + (bx - ax) * m.p;
-          const ny = ay + (by - ay) * m.p;
-
-          m.vx = nx - m.x;
-          m.vy = ny - m.y;
-          m.x = nx;
-          m.y = ny;
-
-          // carry player if standing on mover
-          const onTop = rectOverlap(
-            player.x, player.y + player.h, player.w, 2,
-            m.x, m.y - 2, m.w * TILE, m.h * TILE + 2
-          );
-          const withinX = rectOverlap(
-            player.x, player.y, player.w, player.h,
-            m.x, m.y, m.w * TILE, m.h * TILE
-          );
-          if (onTop && player.vy >= 0 && player.dashing <= 0){
-            player.x += m.vx;
-            player.y += m.vy;
-            player.onGround = true;
-            player.coyote = CFG.coyoteTime;
-          } else if (withinX){
-            // if inside, push out gently (C-side mean)
-            player.x += Math.sign(player.x - (m.x + (m.w*TILE)/2)) * 0.8;
-          }
-        }
-
-        // dream pop
-        for (const p of dreamPop) p.t += dt;
-        dreamPop = dreamPop.filter(p => p.t < 0.22);
-
-        // feather tick
-        if (player.feather > 0) player.feather -= dt;
-
-        // mobile inputs decay
-        input.mobileLeft = Math.max(0, input.mobileLeft - dt);
-        input.mobileRight = Math.max(0, input.mobileRight - dt);
-        input.mobileJump = Math.max(0, input.mobileJump - dt);
-        if (input.mobileDash) input.mobileDash.t = Math.max(0, input.mobileDash.t - dt);
-
-        // entity pickups
-        const room = ROOMS[run.room - 1];
-        for (const e of entities){
-          if (e.taken) continue;
-
-          if (e.kind === "mover") continue; // handled separately
-
-          const r = entityRect(e);
-          const hit = rectOverlap(player.x, player.y, player.w, player.h, r.x, r.y, r.w, r.h);
-          if (!hit) continue;
-
-          if (e.kind === "heart"){
-            e.taken = true;
-            reward("heart");
-          }
-          else if (e.kind === "crystal"){
-            e.taken = true;
-            player.dashAvail = 1;
-            boomfetti({ particleCount: 14, spread: 45, origin: { y: 0.75 } });
-            msg.textContent = "🔷 Dash refilled!";
-          }
-          else if (e.kind === "candle"){
-            // checkpoint + dash refill
-            e.lit = true;
-            player.dashAvail = 1;
-            player.spawn.x = px(e.x);
-            player.spawn.y = py(e.y) - 6;
-            reward("candle");
-          }
-          else if (e.kind === "note"){
-            e.taken = true;
-            run.notes++;
-            reward("note");
-            msg.textContent = e.text || "💌";
-          }
-          else if (e.kind === "key"){
-            e.taken = true;
-            player.hasKey = true;
-            msg.textContent = "🔑 Key acquired! The dinner gate will open.";
-            boomfetti({ particleCount: 55, spread: 80, origin: { y: 0.7 } });
-          }
-          else if (e.kind === "feather"){
-            e.taken = true;
-            player.feather = e.duration ?? 3.0;
-            player.dashAvail = 1;
-            msg.textContent = "🪶 Feather! Glide through the candlelight.";
-            boomfetti({ particleCount: 60, spread: 85, origin: { y: 0.65 } });
-          }
-          else if (e.kind === "goal"){
-            // door to next room
-            if (e.requires === "key" && !player.hasKey){
-              msg.textContent = "🚪 Locked. Bring the key 🔑";
-            } else {
-              enterRoom(e.next);
-              respawn();
-              return;
-            }
-          }
-          else if (e.kind === "dinner"){
-            if (e.requires === "key" && !player.hasKey){
-              msg.textContent = "🍽️ The table is set… but the gate is locked 🔑";
-            } else {
-              finishRun();
-              run.active = false;
-              startBtn.style.opacity = "1";
-              startBtn.style.pointerEvents = "auto";
-              startBtn.textContent = "Play Again (you maniac 💘)";
-              overlay.style.opacity = "0";
-            }
-          }
-        }
-
-        // gate collision (simple)
-        for (const e of entities){
-          if (e.kind !== "gate") continue;
-          const gx = px(e.x), gy = py(e.y);
-          const gw = TILE, gh = TILE*2;
-          const locked = !player.hasKey;
-          if (!locked) continue;
-          if (rectOverlap(player.x, player.y, player.w, player.h, gx, gy-gh+TILE, gw, gh)){
-            // push back
-            if (player.x + player.w/2 < gx + gw/2) player.x -= 1.2;
-            else player.x += 1.2;
-            msg.textContent = "🔒 Gate won’t budge without the key.";
-          }
-        }
-      }
-
-      // ------------------------------
-      // Draw
-      // ------------------------------
-      function draw(room){
+      // -----------------------------
+      // Draw (romantic candle vibe)
+      // -----------------------------
+      function draw(){
         const w = canvas.getBoundingClientRect().width;
         const h = canvas.getBoundingClientRect().height;
 
-        // soft romantic vignette
+        ctx.clearRect(0,0,w,h);
+
+        // dreamy candlelit gradient
         const g = ctx.createLinearGradient(0,0,0,h);
-        g.addColorStop(0, "rgba(255,241,242,0.10)");
-        g.addColorStop(1, "rgba(30,41,59,0.08)");
+        g.addColorStop(0,"rgba(255, 228, 230, 0.55)");
+        g.addColorStop(0.45,"rgba(30, 41, 59, 0.35)");
+        g.addColorStop(1,"rgba(2, 6, 23, 0.55)");
         ctx.fillStyle = g;
         ctx.fillRect(0,0,w,h);
 
-        // draw tiles
+        // subtle “sparkle dust”
+        ctx.globalAlpha = 0.12;
+        for (let i=0;i<80;i++){
+          const x = (i*97)%w;
+          const y = (i*53)%h;
+          ctx.fillRect(x,y,1,1);
+        }
+        ctx.globalAlpha = 1;
+
+        // tiles
+        const grid = currentGrid();
         for (let y=0;y<H;y++){
           for (let x=0;x<W;x++){
-            const id = room.grid[y][x];
-            if (id === T.EMPTY) continue;
+            const cell = grid[y][x];
+            const px = x*TILE, py=y*TILE;
 
-            const X = x*TILE, Y=y*TILE;
-
-            if (id === T.SOLID){
-              ctx.fillStyle = "rgba(255,255,255,0.74)";
-              ctx.fillRect(X, Y, TILE, TILE);
-            }
-            else if (id === T.SPIKE){
-              ctx.fillStyle = "rgba(244,63,94,0.85)";
-              ctx.beginPath();
-              ctx.moveTo(X, Y+TILE);
-              ctx.lineTo(X+TILE/2, Y);
-              ctx.lineTo(X+TILE, Y+TILE);
-              ctx.closePath();
-              ctx.fill();
-            }
-            else if (id === T.CRUMBLE){
-              const gone = isCrumbleGone(x, y);
-              if (!gone){
-                const t = crumble.find(c => c.tx===x && c.ty===y)?.t ?? 0;
-                const a = clamp(1 - t*1.2, 0.15, 1);
-                ctx.fillStyle = `rgba(251,113,133,${0.22 + 0.45*a})`;
-                ctx.fillRect(X, Y, TILE, TILE);
-                ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.35*a})`;
-                ctx.fillRect(X+2, Y+2, TILE-4, TILE-4);
-              }
-            }
-            else if (id === T.ONEWAY){
-              ctx.fillStyle = "rgba(99,102,241,0.30)";
-              ctx.fillRect(X, Y+TILE-4, TILE, 4);
-            }
-            else if (id === T.DREAM){
-              ctx.fillStyle = "rgba(167,139,250,0.18)";
-              ctx.fillRect(X, Y, TILE, TILE);
-              ctx.fillStyle = "rgba(236,72,153,0.18)";
-              ctx.fillRect(X+3, Y+3, TILE-6, TILE-6);
-            }
-            else if (id === T.GLASS){
-              ctx.fillStyle = "rgba(147,197,253,0.35)";
-              ctx.fillRect(X, Y, TILE, TILE);
-            }
-          }
-        }
-
-        // movers
-        for (const m of movers){
-          ctx.fillStyle = "rgba(255,255,255,0.72)";
-          ctx.fillRect(m.x, m.y, m.w*TILE, m.h*TILE);
-          ctx.fillStyle = "rgba(236,72,153,0.22)";
-          ctx.fillRect(m.x+2, m.y+2, m.w*TILE-4, m.h*TILE-4);
-        }
-
-        // dream pop
-        for (const p of dreamPop){
-          const a = 1 - (p.t/0.22);
-          ctx.globalAlpha = clamp(a,0,1);
-          ctx.fillStyle = "rgba(236,72,153,0.22)";
-          ctx.fillRect(p.x-6, p.y-6, player.w+12, player.h+12);
-          ctx.globalAlpha = 1;
-        }
-
-        // entities
-        ctx.font = "14px system-ui, Apple Color Emoji, Segoe UI Emoji";
-        for (const e of entities){
-          if (e.kind === "mover") continue;
-          if (e.taken && e.kind !== "candle") continue;
-
-          const X = px(e.x), Y = py(e.y);
-
-          if (e.kind === "heart"){
-            ctx.fillText("💖", X, Y+TILE);
-          } else if (e.kind === "crystal"){
-            ctx.fillText("🔷", X, Y+TILE);
-          } else if (e.kind === "candle"){
-            ctx.fillText(e.lit ? "🕯️" : "🕯️", X, Y+TILE);
-            if (e.lit){
-              ctx.globalAlpha = 0.25;
-              ctx.fillStyle = "rgba(251,113,133,1)";
-              ctx.beginPath();
-              ctx.arc(X+8, Y+8, 18, 0, Math.PI*2);
-              ctx.fill();
+            if (cell.t === "solid"){
+              ctx.globalAlpha = 0.92;
+              ctx.fillStyle = "rgba(255,255,255,0.78)";
+              ctx.fillRect(px,py,TILE,TILE);
               ctx.globalAlpha = 1;
+            } else if (cell.t === "spike"){
+              ctx.globalAlpha = 0.95;
+              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+              ctx.fillText("💔", px+2, py+18);
+              ctx.globalAlpha = 1;
+            } else if (cell.t === "crystal"){
+              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+              ctx.fillText("🔷", px+2, py+18);
+            } else if (cell.t === "heart"){
+              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+              ctx.fillText("💖", px+2, py+18);
+            } else if (cell.t === "spring"){
+              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+              ctx.fillText("🪄", px+2, py+18);
+            } else if (cell.t === "flame"){
+              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+              ctx.fillText("🕯️", px+2, py+18);
+            } else if (cell.t === "exit"){
+              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
+              ctx.fillText("🍽️", px+2, py+18);
             }
-          } else if (e.kind === "note"){
-            ctx.fillText("💌", X, Y+TILE);
-          } else if (e.kind === "key"){
-            ctx.fillText("🔑", X, Y+TILE);
-          } else if (e.kind === "gate"){
-            // gate drawn as a tall candlelit arch
-            const locked = !player.hasKey;
-            ctx.fillText(locked ? "🔒" : "🔓", X, Y+TILE);
-            ctx.fillText("🕯️", X, Y);
-          } else if (e.kind === "feather"){
-            ctx.fillText("🪶", X, Y+TILE);
-          } else if (e.kind === "goal"){
-            ctx.fillText("🚪", X, Y+TILE);
-          } else if (e.kind === "dinner"){
-            ctx.fillText("🍽️", X, Y+TILE);
-            ctx.fillText("🕯️", X-14, Y+TILE);
-            ctx.fillText("🕯️", X+14, Y+TILE);
           }
         }
 
         // player
-        const blink = player.dashing > 0 ? (Math.floor(performance.now()/70)%2 ? 0.45 : 1) : 1;
-        ctx.globalAlpha = blink;
-        ctx.font = "16px system-ui, Apple Color Emoji, Segoe UI Emoji";
-        ctx.fillText(player.feather > 0 ? "🪶" : "🫶", player.x - 2, player.y + player.h);
+        ctx.globalAlpha = PLAYER.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
+        ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        ctx.fillText("🫶", PLAYER.x-2, PLAYER.y+PLAYER.h);
         ctx.globalAlpha = 1;
 
-        // HUD tiny: dash indicator
-        ctx.font = "12px system-ui, Apple Color Emoji, Segoe UI Emoji";
-        ctx.fillStyle = "rgba(15,23,42,0.65)";
-        ctx.fillText(`Dash: ${player.dashAvail}`, 8, 14);
-        if (player.hasKey) ctx.fillText("🔑", 66, 14);
+        // HUD hint in-canvas
+        ctx.globalAlpha = 0.9;
+        ctx.font = "12px ui-sans-serif, system-ui";
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fillText(`${ROOMS[RUN.room-1].name}  •  Dash: ${PLAYER.dash}`, 10, 18);
+        ctx.globalAlpha = 1;
       }
 
-      // ------------------------------
-      // Loop
-      // ------------------------------
+      // -----------------------------
+      // Main loop
+      // -----------------------------
       let raf = null;
       let last = 0;
 
       function loop(ts){
-        if (!run.active) return;
+        if (!RUN.active) return;
         if (!last) last = ts;
         const dt = Math.min(0.033, (ts-last)/1000);
         last = ts;
 
-        const room = ROOMS[run.room - 1];
+        if (PLAYER.inv > 0) PLAYER.inv -= dt;
+        if (PLAYER.dashLock > 0) PLAYER.dashLock -= dt;
 
-        // dash refill on ground (Celeste-ish: only once you land and not dashing)
-        if (player.onGround && player.dashing <= 0 && player.feather <= 0){
-          player.dashAvail = 1;
+        // Inputs
+        const left  = KEYS.has("ArrowLeft") || KEYS.has("a");
+        const right = KEYS.has("ArrowRight") || KEYS.has("d");
+        const up    = KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has(" ");
+        const dashK = KEYS.has("Shift") || KEYS.has("k") || KEYS.has("K");
+        const grabK = KEYS.has("j") || KEYS.has("J");
+
+        PLAYER.grab = !!grabK;
+
+        // Dash direction from input
+        const dx = (right?1:0) + (left?-1:0);
+        const dy = ( (KEYS.has("ArrowDown")||KEYS.has("s")) ? 1 : 0 ) + (up ? -1 : 0);
+
+        // Jump (edge detect)
+        if (up && !PLAYER.__jumpHeld){
+          jump();
+        }
+        PLAYER.__jumpHeld = up;
+
+        // Dash (edge detect)
+        if (dashK && !PLAYER.__dashHeld){
+          tryDash(dx,dy);
+          confetti({ particleCount: 8, spread: 40, origin: { y: 0.8 } });
+        }
+        PLAYER.__dashHeld = dashK;
+
+        // Apply dash
+        if (PLAYER.dashTime > 0){
+          PLAYER.dashTime -= dt;
+          PLAYER.vx = PLAYER.dashVX;
+          PLAYER.vy = PLAYER.dashVY;
+        } else {
+          // Normal physics
+          const accel = 55;
+          const maxVx = 6.0;
+
+          let ax = 0;
+          if (left) ax -= 1;
+          if (right) ax += 1;
+
+          PLAYER.vx += ax * accel * dt;
+
+          // friction
+          const fric = PLAYER.onGround ? 0.00004 : 0.00045;
+          PLAYER.vx *= Math.pow(fric, dt);
+
+          PLAYER.vx = clamp(PLAYER.vx, -maxVx, maxVx);
+
+          // gravity
+          PLAYER.vy += 28 * dt;
+          PLAYER.vy = clamp(PLAYER.vy, -18, 15);
+
+          // wall slide + grab (very “C-side” useful)
+          if (PLAYER.wallDir !== 0 && !PLAYER.onGround){
+            const slideCap = PLAYER.grab && PLAYER.stamina > 0 ? 1.5 : 5.8;
+            PLAYER.vy = Math.min(PLAYER.vy, slideCap);
+
+            if (PLAYER.grab){
+              PLAYER.stamina = clamp(PLAYER.stamina - 0.35*dt, 0, 1);
+              // little stamina regen if you stop grabbing
+            }
+          } else {
+            PLAYER.stamina = clamp(PLAYER.stamina + 0.20*dt, 0, 1);
+          }
         }
 
-        // mobile directional
-        if (input.mobileLeft > 0 && input.mobileRight <= 0) player.vx -= 18;
-        if (input.mobileRight > 0 && input.mobileLeft <= 0) player.vx += 18;
-
-        // crumble activation if standing on crumble tiles
-        if (player.onGround){
-          const tx = Math.floor((player.x + player.w/2) / TILE);
-          const ty = Math.floor((player.y + player.h + 1) / TILE);
-          if (inBounds(tx,ty) && room.grid[ty][tx] === T.CRUMBLE) touchCrumble(tx,ty);
-        }
-
-        // update physics
-        if (!player.dead){
-          resolve(room, dt);
-          updateEntities(dt);
-        }
-
-        // if fall out of world
-        if (player.y > py(H+2)) die("💔 Fell into the void");
-
-        // draw
-        ctx.clearRect(0,0,canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
-        draw(room);
-
-        // stats
-        setStatsUI();
+        resolveCollisions();
+        interactTiles();
+        draw();
 
         raf = requestAnimationFrame(loop);
       }
 
-      function start(){
-        run.active = true;
+      function startRun(){
+        RUN.active = true;
+        RUN.hearts = 0;
+        RUN.deaths = 0;
+        enterRoom(1);
+
         overlay.style.opacity = "0";
         startBtn.style.opacity = "0";
         startBtn.style.pointerEvents = "none";
-        startBtn.textContent = "Running…";
 
-        run.room = 1;
-        run.hearts = 0;
-        run.notes = 0;
-        run.deaths = 0;
-
-        enterRoom(1);
-        respawn();
+        msgEl.textContent = "Go. For love. 🕯️💘";
+        setUI();
         last = 0;
-
-        msg.textContent = "🕯️ Candlelight C-Side begins. Don’t blink.";
-        setStatsUI();
-
         raf = requestAnimationFrame(loop);
       }
 
-      startBtn.addEventListener("click", start);
-      resetBtn.addEventListener("click", doRoomReset);
+      startBtn.addEventListener("click", startRun);
+      resetBtn.addEventListener("click", resetRun);
 
-      // init UI
-      setStatsUI();
-      enterRoom(1);
-      respawn();
+      // ESC safety: stop run (optional)
+      window.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (!RUN.active) return;
+        RUN.active = false;
+        msgEl.textContent = "Paused (Escape). Click Start to try again.";
+        startBtn.style.opacity = "1";
+        startBtn.style.pointerEvents = "auto";
+        startBtn.textContent = "Resume / Restart";
+        overlay.style.opacity = "1";
+      });
+
+      // initial paint
+      setUI();
+      draw();
     })();
   </script>
 </section>
+
 
   <!-- Spellbook Modal -->
   <div id="dateModal" class="modal hidden" aria-hidden="true">
