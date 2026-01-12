@@ -91,7 +91,7 @@ file<html lang="en">
       background-size: 180px 180px;
     }
 
-    /* ✅ Grid background replaced with your black hole GIF */
+    /* Grid background replaced with your black hole GIF */
     .pixel-grid{
       position:absolute;
       inset:0;
@@ -133,7 +133,7 @@ file<html lang="en">
       100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity: 0; }
     }
 
-    /* ✅ Pixel clouds layer (pixel-art SVG) */
+    /* Pixel clouds layer (pixel-art SVG) */
     #pixelClouds{
       position: fixed;
       inset: 0;
@@ -198,10 +198,56 @@ file<html lang="en">
     .mascot-bounce { animation: mascotBounce 1.8s ease-in-out infinite; }
     @keyframes mascotBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
 
-    /* Heart buttons */
+    <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Runaway NO Heart Button</title>
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 500px at 20% 20%, rgba(255,105,180,.18), transparent 55%),
+                  radial-gradient(900px 450px at 80% 40%, rgba(99,102,241,.14), transparent 60%),
+                  #fff;
+      color: rgba(15,23,42,.85);
+    }
+
+    .card{
+      width:min(680px, calc(100vw - 24px));
+      border-radius:28px;
+      background: rgba(255,255,255,.8);
+      border: 1px solid rgba(255,255,255,.65);
+      box-shadow: 0 40px 90px rgba(2,6,23,.12);
+      padding: 22px;
+      backdrop-filter: blur(8px);
+    }
+    h1{ margin:0; font-size:22px; font-weight: 900; }
+    p{ margin:8px 0 0; font-weight:700; opacity:.75; }
+
+    /* Arena for the hearts */
+    #heartButtons{
+      position: relative;
+      margin-top: 18px;
+      height: 110px;               /* IMPORTANT: gives the NO space to run */
+      border-radius: 22px;
+      background: rgba(255,255,255,.65);
+      border: 1px solid rgba(255,255,255,.65);
+      overflow: hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 22px;
+    }
+
+    /* ========= Your original Heart buttons ========= */
     .svg-heart{
-      width: 56px;
-      height: 50px;
+      width: 58px;
+      height: 54px;
       border: 0;
       background: transparent;
       padding: 0;
@@ -225,6 +271,170 @@ file<html lang="en">
     }
     .svg-heart:hover{ transform: scale(1.06); filter: drop-shadow(0 12px 18px rgba(0,0,0,.18)); }
     .svg-heart:active{ transform: scale(.96); }
+
+    /* ========= NEW: Runaway NO behavior ========= */
+    .svg-heart.no{
+      position: absolute;            /* so we can move it freely */
+      left: 0;
+      top: 0;
+      z-index: 20;
+      --nx: 0px;
+      --ny: 0px;
+      --nscale: 1;
+      transform: translate(var(--nx), var(--ny)) scale(var(--nscale));
+      transition:
+        transform 120ms ease,
+        filter 120ms ease,
+        opacity 120ms ease;
+    }
+    .svg-heart.no.is-running{
+      transition: transform 60ms linear; /* snappier when it flees */
+    }
+    .svg-heart.yes{
+      position: relative;
+      z-index: 10;
+    }
+
+    .status{
+      margin-top: 12px;
+      font-weight: 900;
+      opacity: .8;
+    }
+    .status b{ opacity:1; }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Will you be my Valentine? 💌</h1>
+    <p>Try to click <b>NO</b>. (Good luck.)</p>
+
+    <div id="heartButtons">
+      <!-- YES -->
+      <button class="svg-heart yes" id="yesBtn" aria-label="Yes">
+        <svg viewBox="0 0 64 58" role="img" aria-hidden="true">
+          <path d="M32 54s-20-11.6-27-24C-1.2 18.4 6.2 6 18.3 6c6.1 0 10.2 3.1 13.7 7.4C35.5 9.1 39.6 6 45.7 6 57.8 6 65.2 18.4 59 30c-7 12.4-27 24-27 24z"/>
+        </svg>
+        <span>YES</span>
+      </button>
+
+      <!-- NO -->
+      <button class="svg-heart no" id="noBtn" aria-label="No">
+        <svg viewBox="0 0 64 58" role="img" aria-hidden="true">
+          <path d="M32 54s-20-11.6-27-24C-1.2 18.4 6.2 6 18.3 6c6.1 0 10.2 3.1 13.7 7.4C35.5 9.1 39.6 6 45.7 6 57.8 6 65.2 18.4 59 30c-7 12.4-27 24-27 24z"/>
+        </svg>
+        <span>NO</span>
+      </button>
+    </div>
+
+    <div class="status" id="statusLine">Status: <b>Undecided</b></div>
+  </div>
+
+  <script>
+    // ===== YES button just for demo feedback =====
+    const statusLine = document.getElementById("statusLine");
+    document.getElementById("yesBtn").addEventListener("click", () => {
+      statusLine.innerHTML = 'Status: <b>YES 💖</b>';
+    });
+
+    // ===== Runaway NO logic =====
+    (() => {
+      const noBtn = document.getElementById("noBtn");
+      const arena = document.getElementById("heartButtons");
+      if (!noBtn || !arena) return;
+
+      let noScale = 1;
+      let moveCount = 0;
+
+      // Place NO roughly where it starts (prevents jumping on load)
+      const arenaRect0 = arena.getBoundingClientRect();
+      const noRect0 = noBtn.getBoundingClientRect();
+      let nx = (noRect0.left - arenaRect0.left);
+      let ny = (noRect0.top  - arenaRect0.top);
+
+      noBtn.style.left = "0px";
+      noBtn.style.top = "0px";
+      setNoTransform();
+
+      function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+      function setNoTransform(){
+        noBtn.style.setProperty("--nx", `${nx}px`);
+        noBtn.style.setProperty("--ny", `${ny}px`);
+        noBtn.style.setProperty("--nscale", `${noScale}`);
+      }
+
+      function flee(extraBoost = 0){
+        const arenaRect = arena.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+
+        // Keep button inside arena bounds
+        const bw = btnRect.width;
+        const bh = btnRect.height;
+        const maxX = Math.max(0, arenaRect.width  - bw);
+        const maxY = Math.max(0, arenaRect.height - bh);
+
+        // random direction
+        const dx = (Math.random() * 2 - 1);
+        const dy = (Math.random() * 2 - 1);
+
+        // step gets bigger the more you chase it
+        const step = 120 + extraBoost + Math.min(260, moveCount * 12);
+
+        nx = clamp(nx + dx * step, 0, maxX);
+        ny = clamp(ny + dy * step, 0, maxY);
+
+        moveCount++;
+        noBtn.classList.add("is-running");
+        setNoTransform();
+        setTimeout(() => noBtn.classList.remove("is-running"), 120);
+      }
+
+      // Run away when hovered
+      noBtn.addEventListener("mouseenter", () => flee(90));
+
+      // Run away on touch (mobile)
+      noBtn.addEventListener("touchstart", (e) => {
+        e.preventDefault(); // stops the tap from becoming a click
+        flee(140);
+      }, { passive: false });
+
+      // If it actually gets clicked: it grows + runs farther
+      noBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        statusLine.innerHTML = 'Status: <b>NO?! 😳</b> (it panicked and ran)';
+        noScale = clamp(noScale * 1.18, 1, 2.6); // gets bigger each click
+        setNoTransform();
+        flee(260);
+
+        // tiny shake for drama
+        try {
+          noBtn.animate(
+            [
+              { transform: `translate(${nx}px, ${ny}px) scale(${noScale}) rotate(0deg)` },
+              { transform: `translate(${nx}px, ${ny}px) scale(${noScale}) rotate(7deg)` },
+              { transform: `translate(${nx}px, ${ny}px) scale(${noScale}) rotate(-7deg)` },
+              { transform: `translate(${nx}px, ${ny}px) scale(${noScale}) rotate(0deg)` },
+            ],
+            { duration: 220, easing: "ease-out" }
+          );
+        } catch {}
+      });
+
+      // Keep in bounds if resized
+      window.addEventListener("resize", () => {
+        const arenaRect = arena.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+        nx = clamp(nx, 0, Math.max(0, arenaRect.width  - btnRect.width));
+        ny = clamp(ny, 0, Math.max(0, arenaRect.height - btnRect.height));
+        setNoTransform();
+      });
+    })();
+  </script>
+</body>
+</html>
 
     /* Mana bar */
     #manaWrap{
@@ -383,7 +593,7 @@ file<html lang="en">
   <div class="relative z-[3] px-4 pt-6">
     <div class="max-w-7xl mx-auto">
       <h1 id="bigTitle" class="w-full">
-        <span>Love Beyond the Multiverse 💘</span>
+        <span>Love Beyond the Multiverse, throughout all Universal Singularities 💘</span>
       </h1>
 
       <!-- Mana / shiny -->
@@ -593,194 +803,1451 @@ file<html lang="en">
           </div>
         </section>
 
-        <!-- MTG-STYLE -->
-        <section class="tcg-card">
-          <div class="p-6">
-            <div class="flex items-center justify-between gap-3 mb-4">
-              <div>
-                <div class="text-2xl font-black text-slate-800/80">1) Custom TCG Card: “Be My Valentine”</div>
-                <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                  Hover/click to reveal “alt art” 👀
-                </div>
+<!-- ==================== UPGRADED ROMANTIC / COMPLICATED VERSION (DROP-IN) ==================== -->
+<style>
+  /* ===== Romantic Upgrades (safe add-on) ===== */
+  .tcg-frame{ position:relative; user-select:none; cursor:pointer; transform-style:preserve-3d; }
+  .tcg-foilOverlay{
+    pointer-events:none; position:absolute; inset:0; border-radius:28px;
+    background:
+      radial-gradient(800px 260px at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.45), transparent 60%),
+      linear-gradient(135deg, rgba(255,77,141,0.14), rgba(99,102,241,0.12));
+    mix-blend-mode: screen; opacity:0.95;
+  }
+  .tcg-sparkleOverlay{
+    pointer-events:none; position:absolute; inset:0; border-radius:28px;
+    background-image:
+      radial-gradient(circle at 15% 30%, rgba(255,255,255,0.30) 0 2px, transparent 3px),
+      radial-gradient(circle at 70% 40%, rgba(255,255,255,0.22) 0 2px, transparent 3px),
+      radial-gradient(circle at 45% 70%, rgba(255,255,255,0.18) 0 2px, transparent 3px),
+      radial-gradient(circle at 85% 75%, rgba(255,255,255,0.14) 0 2px, transparent 3px);
+    opacity:0.55; filter: blur(0.2px);
+  }
+  .rarity-gem{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:28px; height:28px; border-radius:999px;
+    background: rgba(255,255,255,0.75);
+    border:1px solid rgba(15,23,42,0.10);
+    box-shadow:0 10px 30px rgba(236,72,153,0.14);
+  }
+  .set-symbol{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:6px;
+    background: rgba(255,255,255,0.72);
+    border:1px solid rgba(15,23,42,0.10);
+    margin-left:6px;
+  }
+  .card-art{
+    background:
+      radial-gradient(600px 120px at 30% 30%, rgba(255,77,141,0.20), transparent 55%),
+      radial-gradient(600px 120px at 80% 60%, rgba(99,102,241,0.14), transparent 55%),
+      rgba(255,255,255,0.62);
+  }
+  .art-caption{
+    position:absolute; left:10px; bottom:10px;
+    padding:6px 10px; border-radius:999px;
+    font-weight:900; font-size:11px;
+    background: rgba(255,255,255,0.78);
+    border:1px solid rgba(15,23,42,0.10);
+    color: rgba(15,23,42,0.70);
+  }
+  .signature{ font-weight:900; font-style:italic; opacity:0.75; }
+
+  .tabbar{ display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .tabbtn{
+    padding:8px 12px; border-radius:999px;
+    font-weight:900; font-size:12px;
+    background: rgba(255,255,255,0.75);
+    border:1px solid rgba(255,255,255,0.65);
+    color: rgba(15,23,42,0.75);
+    transition: transform .12s ease;
+  }
+  .tabbtn:active{ transform: scale(0.98); }
+  .tabbtn.is-active{
+    background: linear-gradient(135deg, rgba(255,77,141,0.90), rgba(99,102,241,0.82));
+    color:white;
+    border-color: rgba(255,255,255,0.35);
+  }
+
+  .hud-row{ display:grid; grid-template-columns: 88px 1fr 56px; align-items:center; gap:10px; }
+  .hud-label{ font-weight:900; color: rgba(15,23,42,0.70); font-size:12px; }
+  .hud-value{ font-weight:900; color: rgba(15,23,42,0.70); font-size:12px; text-align:right; }
+  .hud-bar{
+    height:12px; border-radius:999px; overflow:hidden;
+    background: rgba(255,255,255,0.55);
+    border:1px solid rgba(15,23,42,0.08);
+  }
+  .hud-fill{
+    height:100%; width:0%;
+    background: linear-gradient(135deg, rgba(255,77,141,0.95), rgba(99,102,241,0.86));
+  }
+  .hud-mini{
+    grid-column: 2 / 4;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.65);
+    border: 1px solid rgba(255,255,255,0.60);
+    padding: 10px 12px;
+    font-weight: 900;
+    color: rgba(15,23,42,0.70);
+    font-size: 12px;
+  }
+
+  .modal{
+    position:fixed; inset:0; z-index:50;
+    display:grid; place-items:center;
+  }
+  .modal-backdrop{
+    position:absolute; inset:0;
+    background: rgba(2,6,23,0.45);
+    backdrop-filter: blur(6px);
+  }
+  .modal-panel{
+    position:relative;
+    width: min(980px, calc(100vw - 24px));
+    max-height: min(82vh, 760px);
+    overflow:auto;
+    border-radius: 28px;
+    padding: 18px;
+    background: rgba(255,255,255,0.82);
+    border: 1px solid rgba(255,255,255,0.62);
+    box-shadow: 0 40px 90px rgba(2,6,23,0.25);
+  }
+
+  .cinematic-overlay{
+    position:fixed; inset:0; z-index:60;
+    display:grid; place-items:center;
+    background: rgba(2,6,23,0.62);
+    backdrop-filter: blur(8px);
+  }
+  .cinematic-card{
+    width:min(520px, calc(100vw - 24px));
+    border-radius: 28px;
+    padding: 18px;
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(255,255,255,0.60);
+    box-shadow: 0 40px 90px rgba(2,6,23,0.35);
+    text-align:center;
+  }
+  .cinematic-title{ font-weight:1000; font-size:20px; color: rgba(15,23,42,0.85); }
+  .cinematic-line{ margin-top:10px; font-weight:900; color: rgba(15,23,42,0.78); }
+  .cinematic-sub{ margin-top:10px; font-weight:900; font-size:12px; opacity:0.65; }
+
+  .hidden{ display:none !important; }
+
+  /* tiny bar variant (for affection/nerves) */
+  .hpbar.tiny{ height: 8px; }
+</style>
+
+<!-- MTG-STYLE -->
+<section class="tcg-card">
+  <div class="p-6">
+    <div class="flex items-center justify-between gap-3 mb-4">
+      <div>
+        <div class="text-2xl font-black text-slate-800/80">1) Custom TCG Card: “Be My Valentine”</div>
+        <div class="text-sm font-semibold text-slate-700/80 mt-1">
+          Hover/drag to tilt • Click to “flip vibe” • Reveal Alt Art for a cinematic love moment 💞✨
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="musicBtn"
+          class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
+          style="background: linear-gradient(135deg, #22c55e, #60a5fa);">
+          Music: Off
+        </button>
+
+        <button id="altArtBtn"
+          class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
+          style="background: linear-gradient(135deg, #fb7185, #6366f1);">
+          Reveal Alt Art
+        </button>
+      </div>
+    </div>
+
+    <!-- Cinematic overlay -->
+    <div id="cinematicOverlay" class="cinematic-overlay hidden">
+      <div class="cinematic-card">
+        <div class="cinematic-title">✨ ALT ART UNLOCKED ✨</div>
+        <div id="cinematicLine" class="cinematic-line">“I would choose you in every draft.”</div>
+        <div class="cinematic-sub">Click anywhere to continue</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-4">
+      <!-- Card -->
+      <div class="relative">
+        <div id="tcgCard" class="tcg-frame">
+          <div class="tcg-foilOverlay"></div>
+          <div class="tcg-sparkleOverlay"></div>
+
+          <div class="tcg-titlebar">
+            <div class="flex items-center gap-2">
+              <span class="rarity-gem" title="Mythic Love">💎</span>
+              <div id="cardName">Andrew Getzow, Keeper of My Heart</div>
+            </div>
+            <div class="text-xs font-black text-slate-700/70">
+              Cost:
+              <span class="mana-pip">🍫</span>
+              <span class="mana-pip">❤️</span>
+              <span class="mana-pip">🍿</span>
+              <span class="set-symbol" title="Set: VAL-14">💘</span>
+            </div>
+          </div>
+
+          <div class="tcg-subbar">
+            <div class="text-xs font-black text-slate-700/70">Legendary Creature — Human Nerd</div>
+            <div class="text-xs font-black text-slate-700/70">
+              P/T: <span class="mana-pip">7</span>/<span class="mana-pip">14</span>
+            </div>
+          </div>
+
+          <div class="mt-3 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-3">
+            <div class="rounded-xl overflow-hidden border border-slate-900/10 bg-white/70 relative">
+              <div id="cardArt" class="h-44 flex items-center justify-center font-black text-slate-700/70 card-art">
+                (Put a cute photo here later)
               </div>
-              <button id="altArtBtn"
-                class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
-                style="background: linear-gradient(135deg, #fb7185, #6366f1);">
-                Reveal Alt Art
-              </button>
+              <div class="art-caption"><span id="artCaption">“Dinner Date Foil”</span></div>
             </div>
 
-            <div id="tcgCard" class="tcg-frame">
-              <div class="tcg-titlebar">
-                <div id="cardName">Andrew Getzow, Keeper of My Heart</div>
+            <div class="tcg-rules">
+              <div class="tabbar">
+                <button class="tabbtn is-active" data-tab="rulesTab">Rules</button>
+                <button class="tabbtn" data-tab="loreTab">Lore</button>
+                <button class="tabbtn" data-tab="letterTab">Love Letter</button>
+              </div>
+
+              <div id="rulesTab" class="tabpane">
+                <div class="text-sm font-semibold text-slate-800/80 leading-relaxed">
+                  <div><b>Whenever you smile</b>, create a <b>Heart token</b>.</div>
+                  <div class="mt-1"><b>{T}:</b> Go on a date. If it’s Valentine’s Day, you may also get dessert.</div>
+                  <div class="mt-1"><b>Partner</b> with <b>You, Hopeless Romantic</b>.</div>
+                  <div class="mt-2 text-xs font-black text-slate-700/70">
+                    Reminder: Heart tokens have “{1}: Make me blush. Scry 1.”<br>
+                    <span class="opacity-80">Secret: If your Nerves are low, your compliments have hexproof.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div id="loreTab" class="tabpane hidden">
+                <div class="text-sm font-semibold text-slate-800/80 leading-relaxed">
+                  <div><b>Origin:</b> Summoned from the plane of Cozy Evenings.</div>
+                  <div class="mt-1"><b>Alignment:</b> Chaotic Sweetheart.</div>
+                  <div class="mt-1"><b>Legendary Action:</b> “Make a playlist. Pretend it’s casual. It is not casual.”</div>
+                  <div class="mt-2 text-xs font-black text-slate-700/70">
+                    Fun fact: Candlelight grants +2 devotion (and +1000 butterflies).
+                  </div>
+                </div>
+              </div>
+
+              <div id="letterTab" class="tabpane hidden">
+                <div class="text-sm font-semibold text-slate-800/80 leading-relaxed">
+                  <div id="loveLetterLine">“If love were a format, I’d still pick you first.”</div>
+                  <div class="mt-2 text-xs font-black text-slate-700/70">
+                    Unlock more lines by generating tokens + resolving spells 💌
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 text-xs italic font-bold text-slate-700/70">
+                <span id="flavorQuote">“I’d tap all my mana for you.”</span>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between gap-3">
                 <div class="text-xs font-black text-slate-700/70">
-                  Cost:
-                  <span class="mana-pip">🍫</span>
-                  <span class="mana-pip">❤️</span>
-                  <span class="mana-pip">🍿</span>
+                  Artist: <span class="font-extrabold">Cupid’s Studio</span> • Collector No. <span id="collectorNo">VAL-014</span>
                 </div>
-              </div>
-
-              <div class="tcg-subbar">
-                <div class="text-xs font-black text-slate-700/70">Legendary Creature — Human Nerd</div>
-                <div class="text-xs font-black text-slate-700/70">
-                  P/T: <span class="mana-pip">7</span>/<span class="mana-pip">14</span>
-                </div>
-              </div>
-
-              <div class="mt-3 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-3">
-                <div class="rounded-xl overflow-hidden border border-slate-900/10 bg-white/70">
-                  <div id="cardArt" class="h-44 flex items-center justify-center font-black text-slate-700/70">
-                    (Put a cute photo here later)
-                  </div>
-                </div>
-
-                <div class="tcg-rules">
-                  <div class="text-sm font-semibold text-slate-800/80 leading-relaxed">
-                    <div><b>Whenever you smile</b>, create a <b>Heart token</b>.</div>
-                    <div class="mt-1"><b>{T}:</b> Go on a date. If it’s Valentine’s Day, you may also get dessert.</div>
-                    <div class="mt-1"><b>Partner</b> with <b>You, Hopeless Romantic</b>.</div>
-                    <div class="mt-2 text-xs font-black text-slate-700/70">
-                      Reminder text: Heart tokens have “{1}: Make me blush. Scry 1.”
-                    </div>
-                  </div>
-                  <div class="mt-3 text-xs italic font-bold text-slate-700/70">
-                    “I’d tap all my mana for you.”
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black text-slate-700/70">Flavor</div>
-                  <div class="text-sm font-semibold text-slate-800/80 mt-1">“Turn 1: I fell. Turn 2: I stayed.”</div>
-                </div>
-                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black text-slate-700/70">Synergy</div>
-                  <div class="text-sm font-semibold text-slate-800/80 mt-1">If love is a stack, my feelings have split second.</div>
-                </div>
-                <div class="rounded-xl bg-white/70 border border-white/60 p-3">
-                  <div class="text-xs font-black text-slate-700/70">Inside Joke Slot</div>
-                  <div class="text-sm font-semibold text-slate-800/80 mt-1">“Our first date was basically a turn 1 love play.”</div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        <!-- Choose a Date -->
-        <section class="glass rounded-3xl p-6">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <div class="text-2xl font-black text-slate-800/80">2) Choose a Date (Cast a Spell)</div>
-              <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                Pick a spell — it goes on <b>the stack</b> ✨
-              </div>
-            </div>
-            <button id="openDateModal"
-              class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, #ec4899, #60a5fa);">
-              Open Spellbook
-            </button>
-          </div>
-
-          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div id="chosenDate" class="text-sm font-semibold text-slate-700/80 rounded-2xl bg-white/70 border border-white/60 p-4">
-              Selected spell: <b>None yet</b>
-              <div class="mt-2 text-xs font-black text-slate-700/70">Mana spent: <span id="manaSpent">0</span></div>
-            </div>
-
-            <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
-              <div class="text-xs font-black text-slate-700/70 mb-2">THE STACK</div>
-              <div id="spellStack" class="space-y-2 text-sm font-semibold text-slate-800/80">
-                <div class="opacity-70">— empty —</div>
+                <div class="signature">— Signed: ❤️</div>
               </div>
             </div>
           </div>
-        </section>
 
-        <!-- Token generator -->
-        <section class="glass rounded-3xl p-6">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <div class="text-2xl font-black text-slate-800/80">3) Heart Token Generator</div>
-              <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                Generate love mana. Unlock messages at 5/10/20.
-              </div>
+          <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="rounded-xl bg-white/70 border border-white/60 p-3">
+              <div class="text-xs font-black text-slate-700/70">Flavor</div>
+              <div class="text-sm font-semibold text-slate-800/80 mt-1" id="flavor1">“Turn 1: I fell. Turn 2: I stayed.”</div>
             </div>
-            <button id="tokenBtn"
-              class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
-              style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
-              Create a Heart Token
-            </button>
-          </div>
-
-          <div class="mt-4 grid grid-cols-6 sm:grid-cols-10 gap-2" id="tokenGrid"></div>
-          <div class="mt-4 text-sm font-semibold text-slate-700/80" id="tokenMsg">Tokens: <b id="tokenCount">0</b></div>
-        </section>
-
-        <!-- Pokémon battle -->
-        <section class="encounter">
-          <div class="p-6">
-            <div class="text-2xl font-black text-slate-800/80 mb-3">4) Wild Valentine Appeared!</div>
-
-            <div class="encounter-screen rounded-2xl">
-              <div class="grid grid-cols-2 gap-3 items-start">
-                <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="font-black text-slate-800/80">Valentine (???)
-                      <span class="text-xs font-black text-slate-700/70 ml-2">Lv. 14</span>
-                    </div>
-                    <div class="text-xs font-black text-slate-700/70">Type: 💖/✨</div>
-                  </div>
-                  <div class="mt-2 hpbar"><div id="enemyHPBar"></div></div>
-                  <div class="mt-2 text-4xl text-center select-none" id="enemySprite">💘</div>
-                </div>
-
-                <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="font-black text-slate-800/80">You
-                      <span class="text-xs font-black text-slate-700/70 ml-2">Trainer</span>
-                    </div>
-                    <div class="text-xs font-black text-slate-700/70">Ability: 💬 Charm</div>
-                  </div>
-                  <div class="mt-2 hpbar"><div id="youHPBar"></div></div>
-                  <div class="mt-2 text-4xl text-center select-none">🫶</div>
-                </div>
-              </div>
-
-              <div class="mt-3 text-box" id="battleText">A wild Valentine appeared!</div>
+            <div class="rounded-xl bg-white/70 border border-white/60 p-3">
+              <div class="text-xs font-black text-slate-700/70">Synergy</div>
+              <div class="text-sm font-semibold text-slate-800/80 mt-1" id="synergy1">If love is a stack, my feelings have split second.</div>
             </div>
-
-            <div class="mt-4">
-              <div id="battleMenuMain" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                  id="btnFight">FIGHT</button>
-                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                  id="btnBag">BAG</button>
-                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                  id="btnTeam">TEAM</button>
-                <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
-                  id="btnRun">RUN</button>
-              </div>
-
-              <div id="battleMenuFight" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #fb7185, #ec4899);" data-move="Compliment Beam">Compliment Beam</button>
-                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #60a5fa, #22c55e);" data-move="Snack Shield">Snack Shield</button>
-                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #f59e0b, #fb7185);" data-move="Laugh Attack">Laugh Attack</button>
-                <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                  style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy Aura</button>
-
-                <button class="sm:col-span-2 rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/85 border border-white/60 shadow active:scale-95 transition"
-                  id="btnBack">BACK</button>
-              </div>
+            <div class="rounded-xl bg-white/70 border border-white/60 p-3">
+              <div class="text-xs font-black text-slate-700/70">Inside Joke Slot</div>
+              <div class="text-sm font-semibold text-slate-800/80 mt-1" id="joke1">“Our first date was basically a turn 1 love play.”</div>
             </div>
           </div>
-        </section>
+        </div>
+      </div>
+
+      <!-- Romance HUD -->
+      <div class="glass rounded-3xl p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xl font-black text-slate-800/80">Romance HUD</div>
+            <div class="text-sm font-semibold text-slate-700/80 mt-1">Tokens + spells affect battle + unlocks.</div>
+          </div>
+          <div class="text-xs font-black text-slate-700/70">
+            Phase: <span id="romancePhase" class="mana-pip">I</span>
+          </div>
+        </div>
+
+        <div class="mt-4 space-y-3">
+          <div class="hud-row">
+            <div class="hud-label">Affection</div>
+            <div class="hud-bar"><div id="affectionFill" class="hud-fill"></div></div>
+            <div id="affectionText" class="hud-value">0%</div>
+          </div>
+
+          <div class="hud-row">
+            <div class="hud-label">Nerves</div>
+            <div class="hud-bar"><div id="nervesFill" class="hud-fill"></div></div>
+            <div id="nervesText" class="hud-value">25%</div>
+          </div>
+
+          <div class="hud-row">
+            <div class="hud-label">Mana</div>
+            <div class="hud-mini" id="manaPoolMini">🍫0 ❤️0 🍿0 ✨0</div>
+          </div>
+
+          <div class="hud-row">
+            <div class="hud-label">Achv</div>
+            <div class="hud-mini" id="achievementsMini">— none yet —</div>
+          </div>
+
+          <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+            <div class="text-xs font-black text-slate-700/70 mb-2">Unlocked Love Lines</div>
+            <div class="text-sm font-semibold text-slate-800/80" id="loveLineUnlocks">0/8 unlocked 💌</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Choose a Date -->
+<section class="glass rounded-3xl p-6">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <div class="text-2xl font-black text-slate-800/80">2) Choose a Date (Cast a Spell)</div>
+      <div class="text-sm font-semibold text-slate-700/80 mt-1">
+        Pick spells — they go on <b>the stack</b> ✨ Resolve for romance buffs.
+      </div>
+    </div>
+    <button id="openDateModal"
+      class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+      style="background: linear-gradient(135deg, #ec4899, #60a5fa);">
+      Open Spellbook
+    </button>
+  </div>
+
+  <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div id="chosenDate" class="text-sm font-semibold text-slate-700/80 rounded-2xl bg-white/70 border border-white/60 p-4">
+      Selected spell: <b>None yet</b>
+      <div class="mt-2 text-xs font-black text-slate-700/70">Mana pool: <span id="manaSpent">🍫0 ❤️0 🍿0 ✨0</span></div>
+      <div class="mt-2 text-xs font-black text-slate-700/70">Combo bonus: <span id="comboBonus">None</span></div>
+    </div>
+
+    <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+      <div class="flex items-center justify-between">
+        <div class="text-xs font-black text-slate-700/70 mb-2">THE STACK</div>
+        <button id="resolveStack"
+          class="rounded-full px-3 py-2 text-xs font-black text-white shadow active:scale-95 transition"
+          style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
+          Resolve ✨
+        </button>
+      </div>
+      <div id="spellStack" class="space-y-2 text-sm font-semibold text-slate-800/80">
+        <div class="opacity-70">— empty —</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spellbook Modal -->
+  <div id="dateModal" class="modal hidden">
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-panel">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="text-xl font-black text-slate-800/80">Spellbook of Dates</div>
+          <div class="text-sm font-semibold text-slate-700/80 mt-1">
+            Build combos like <b>Playlist → Candlelight → Stargaze</b> for huge romance buffs.
+          </div>
+        </div>
+        <button id="closeDateModal"
+          class="rounded-full px-3 py-2 font-black bg-white/80 border border-white/60 active:scale-95 transition">
+          Close
+        </button>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-3">
+        <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+          <div class="text-xs font-black text-slate-700/70 mb-3">SPELL LIST</div>
+          <div id="spellList" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        </div>
+
+        <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+          <div class="text-xs font-black text-slate-700/70 mb-2">CURRENT SYNERGY</div>
+          <div id="synergyPanel" class="text-sm font-semibold text-slate-800/80">
+            Add spells to see combo effects.
+          </div>
+
+          <div class="mt-4 text-xs font-black text-slate-700/70 mb-2">STACK CONTROLS</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="stackUndo" class="rounded-xl px-3 py-2 font-black bg-white/85 border border-white/60 active:scale-95 transition">Undo</button>
+            <button id="stackClear" class="rounded-xl px-3 py-2 font-black bg-white/85 border border-white/60 active:scale-95 transition">Clear</button>
+          </div>
+
+          <div class="mt-4 text-xs font-black text-slate-700/70 mb-2">ROMANTIC CONSEQUENCE</div>
+          <div class="text-sm font-semibold text-slate-800/80">
+            Resolving the stack can:
+            <ul class="list-disc ml-5 mt-2 opacity-90">
+              <li>Increase <b>Affection</b></li>
+              <li>Reduce <b>Nerves</b></li>
+              <li>Grant battle buffs (Cozy / Confident / Starry-eyed)</li>
+              <li>Unlock <b>Love Letter lines</b></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Token generator -->
+<section class="glass rounded-3xl p-6">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <div class="text-2xl font-black text-slate-800/80">3) Heart Token Atelier</div>
+      <div class="text-sm font-semibold text-slate-700/80 mt-1">
+        Generate tokens with rarity • Craft gifts • Buff the romance battle • Unlock letters 💝
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="craftBtn"
+        class="rounded-full px-4 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+        style="background: linear-gradient(135deg, #6366f1, #ec4899);">
+        Craft Gift
+      </button>
+      <button id="tokenBtn"
+        class="rounded-full px-5 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+        style="background: linear-gradient(135deg, #fb7185, #f59e0b);">
+        Create Token
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-3">
+    <div>
+      <div class="mt-2 grid grid-cols-6 sm:grid-cols-10 gap-2" id="tokenGrid"></div>
+      <div class="mt-4 text-sm font-semibold text-slate-700/80" id="tokenMsg">
+        Tokens: <b id="tokenCount">0</b> • Crafted gifts: <b id="giftCount">0</b>
+      </div>
+      <div class="mt-2 text-xs font-black text-slate-700/70" id="tokenLootLog">
+        Loot log: — —
+      </div>
+    </div>
+
+    <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+      <div class="text-xs font-black text-slate-700/70 mb-2">CRAFTING RECIPE</div>
+      <div class="text-sm font-semibold text-slate-800/80">
+        <div><b>💐 Bouquet</b> = 🌹 + 🌹 + ✨</div>
+        <div class="mt-1"><b>🍫 Chocolate Box</b> = 🍫 + 🍫 + ❤️</div>
+        <div class="mt-1"><b>🕯️ Candle Kit</b> = 🕯️ + ✨ + ❤️</div>
+        <div class="mt-1"><b>🎟️ Date Ticket</b> = 🍿 + 🍿 + ❤️</div>
+      </div>
+
+      <div class="mt-4">
+        <div class="text-xs font-black text-slate-700/70 mb-2">INVENTORY</div>
+        <div id="inventoryPanel" class="text-sm font-semibold text-slate-800/80 opacity-90">
+          — empty —
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pokémon battle -->
+<section class="encounter">
+  <div class="p-6">
+    <div class="flex items-center justify-between gap-3 mb-3">
+      <div>
+        <div class="text-2xl font-black text-slate-800/80">4) Wild Valentine Appeared!</div>
+        <div class="text-sm font-semibold text-slate-700/80 mt-1">
+          Raise Affection, calm Nerves, and unlock the Proposal finisher. 💍
+        </div>
+      </div>
+      <div class="text-xs font-black text-slate-700/70">Status: <span id="battleStatus">Neutral</span></div>
+    </div>
+
+    <div class="encounter-screen rounded-2xl">
+      <div class="grid grid-cols-2 gap-3 items-start">
+        <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="font-black text-slate-800/80">Valentine (???)
+              <span class="text-xs font-black text-slate-700/70 ml-2">Lv. 14</span>
+            </div>
+            <div class="text-xs font-black text-slate-700/70">Type: 💖/✨</div>
+          </div>
+          <div class="mt-2 hpbar"><div id="enemyHPBar"></div></div>
+
+          <div class="mt-2 text-xs font-black text-slate-700/70 flex items-center justify-between">
+            <span>Affection</span><span id="enemyAff">0%</span>
+          </div>
+          <div class="mt-1 hpbar tiny"><div id="enemyAffBar"></div></div>
+
+          <div class="mt-2 text-4xl text-center select-none" id="enemySprite">💘</div>
+        </div>
+
+        <div class="rounded-2xl bg-white/70 border border-white/60 p-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="font-black text-slate-800/80">You
+              <span class="text-xs font-black text-slate-700/70 ml-2">Trainer</span>
+            </div>
+            <div class="text-xs font-black text-slate-700/70">Ability: 💬 Charm</div>
+          </div>
+          <div class="mt-2 hpbar"><div id="youHPBar"></div></div>
+
+          <div class="mt-2 text-xs font-black text-slate-700/70 flex items-center justify-between">
+            <span>Nerves</span><span id="youNerves">25%</span>
+          </div>
+          <div class="mt-1 hpbar tiny"><div id="youNervesBar"></div></div>
+
+          <div class="mt-2 text-4xl text-center select-none">🫶</div>
+        </div>
+      </div>
+
+      <div class="mt-3 text-box" id="battleText">A wild Valentine appeared!</div>
+    </div>
+
+    <div class="mt-4">
+      <div id="battleMenuMain" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
+          id="btnFight">FIGHT</button>
+        <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
+          id="btnBag">BAG</button>
+        <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
+          id="btnTeam">TEAM</button>
+        <button class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition"
+          id="btnRun">RUN</button>
+      </div>
+
+      <div id="battleMenuFight" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+          style="background: linear-gradient(135deg, #fb7185, #ec4899);" data-move="Compliment Beam">Compliment Beam</button>
+        <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+          style="background: linear-gradient(135deg, #60a5fa, #22c55e);" data-move="Snack Shield">Snack Shield</button>
+        <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+          style="background: linear-gradient(135deg, #f59e0b, #fb7185);" data-move="Laugh Attack">Laugh Attack</button>
+        <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+          style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy Aura</button>
+
+        <button id="btnProposal"
+          class="sm:col-span-2 rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition opacity-50 pointer-events-none"
+          style="background: linear-gradient(135deg, #22c55e, #ec4899);">
+          💍 Proposal (Locked)
+        </button>
+
+        <button class="sm:col-span-2 rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/85 border border-white/60 shadow active:scale-95 transition"
+          id="btnBack">BACK</button>
+      </div>
+
+      <div id="battleMenuBag" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3"></div>
+
+      <div id="battleMenuTeam" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+        <div class="rounded-2xl bg-white/80 border border-white/60 p-4">
+          <div class="text-xs font-black text-slate-700/70">Partner Slot A</div>
+          <div class="text-sm font-semibold text-slate-800/80 mt-1">You, Hopeless Romantic 🫶</div>
+          <div class="text-xs font-black text-slate-700/70 mt-2">Trait: After a successful combo, affection gains are boosted.</div>
+        </div>
+        <div class="rounded-2xl bg-white/80 border border-white/60 p-4">
+          <div class="text-xs font-black text-slate-700/70">Partner Slot B</div>
+          <div class="text-sm font-semibold text-slate-800/80 mt-1">Andrew, Keeper of My Heart 💘</div>
+          <div class="text-xs font-black text-slate-700/70 mt-2">Trait: Candlelight reduces nerves over time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  // ==================== ROMANCE ARCADE LOGIC (drop-in) ====================
+
+  // --- Grab elements (safe) ---
+  const $ = (id) => document.getElementById(id);
+
+  const tcgCard = $("tcgCard");
+  const altArtBtn = $("altArtBtn");
+  const cardArt = $("cardArt");
+  const artCaption = $("artCaption");
+  const flavorQuote = $("flavorQuote");
+  const loveLetterLine = $("loveLetterLine");
+
+  const cinematicOverlay = $("cinematicOverlay");
+  const cinematicLine = $("cinematicLine");
+  const musicBtn = $("musicBtn");
+
+  const affectionFill = $("affectionFill");
+  const nervesFill = $("nervesFill");
+  const affectionText = $("affectionText");
+  const nervesText = $("nervesText");
+  const manaPoolMini = $("manaPoolMini");
+  const achievementsMini = $("achievementsMini");
+  const loveLineUnlocks = $("loveLineUnlocks");
+  const romancePhaseEl = $("romancePhase");
+
+  const openDateModal = $("openDateModal");
+  const dateModal = $("dateModal");
+  const closeDateModal = $("closeDateModal");
+  const spellList = $("spellList");
+  const spellStack = $("spellStack");
+  const chosenDate = $("chosenDate");
+  const manaSpent = $("manaSpent");
+  const comboBonus = $("comboBonus");
+  const synergyPanel = $("synergyPanel");
+  const resolveStackBtn = $("resolveStack");
+  const stackUndo = $("stackUndo");
+  const stackClear = $("stackClear");
+
+  const tokenBtn = $("tokenBtn");
+  const craftBtn = $("craftBtn");
+  const tokenGrid = $("tokenGrid");
+  const tokenCount = $("tokenCount");
+  const giftCount = $("giftCount");
+  const tokenLootLog = $("tokenLootLog");
+  const inventoryPanel = $("inventoryPanel");
+
+  const battleText = $("battleText");
+  const battleStatus = $("battleStatus");
+  const enemyHPBar = $("enemyHPBar");
+  const youHPBar = $("youHPBar");
+  const enemyAff = $("enemyAff");
+  const enemyAffBar = $("enemyAffBar");
+  const youNerves = $("youNerves");
+  const youNervesBar = $("youNervesBar");
+
+  const btnFight = $("btnFight");
+  const btnBag = $("btnBag");
+  const btnTeam = $("btnTeam");
+  const btnRun = $("btnRun");
+  const btnBack = $("btnBack");
+  const btnProposal = $("btnProposal");
+
+  const menuMain = $("battleMenuMain");
+  const menuFight = $("battleMenuFight");
+  const menuBag = $("battleMenuBag");
+  const menuTeam = $("battleMenuTeam");
+
+  // If any major element missing, stop quietly
+  if (!tcgCard || !altArtBtn || !openDateModal || !tokenBtn || !btnFight) return;
+
+  // ---- Audio (very simple, optional) ----
+  let audioCtx = null;
+  let musicOn = false;
+  let musicOsc = null;
+
+  function startMusic(){
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 220;
+      gain.gain.value = 0.02;
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      musicOsc = { osc, gain };
+
+      let step = 0;
+      const chord = [220, 277.18, 329.63, 392.00];
+      const timer = setInterval(() => {
+        if (!musicOn || !musicOsc) { clearInterval(timer); return; }
+        step = (step + 1) % chord.length;
+        musicOsc.osc.frequency.setTargetAtTime(chord[step], audioCtx.currentTime, 0.08);
+      }, 900);
+    } catch {}
+  }
+  function stopMusic(){
+    try{
+      if (musicOsc){
+        musicOsc.gain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.05);
+        setTimeout(() => {
+          try { musicOsc.osc.stop(); } catch {}
+          musicOsc = null;
+        }, 120);
+      }
+    } catch {}
+  }
+
+  // ---- State ----
+  const state = {
+    affection: 0,   // 0..100
+    nerves: 25,     // 0..100
+    phase: 1,
+
+    mana: { choc: 0, heart: 0, popcorn: 0, sparkle: 0 },
+
+    loveLinesUnlocked: 0,
+    achievements: new Set(),
+
+    stack: [],
+
+    tokens: [],
+    gifts: { bouquet: 0, chocoBox: 0, candleKit: 0, dateTicket: 0 },
+
+    enemyHP: 100,
+    youHP: 100,
+    enemyAffection: 0,
+    status: { cozy: 0, confident: 0, starry: 0 },
+    turnLock: false
+  };
+
+  const LOVE_LINES = [
+    "“If love were a format, I’d still pick you first.”",
+    "“Your laugh is my favorite soundtrack.”",
+    "“I brought dessert… but you’re the sweetest part.”",
+    "“If my heart had a commander, it’d be you.”",
+    "“Tonight’s forecast: 100% chance of me adoring you.”",
+    "“I’d shuffle the universe just to draw you.”",
+    "“Your kindness is the rarest pull.”",
+    "“No matter the matchup, I’m on your team.”"
+  ];
+
+  const ALT_ARTS = [
+    { caption: "“Dinner Date Foil”", art: "🕯️🌹🍷✨" },
+    { caption: "“Stargaze Promo”", art: "🌙✨💫💖" },
+    { caption: "“Cozy Couch Secret Rare”", art: "🛋️🍿💞🧸" },
+    { caption: "“Chocolate Edition”", art: "🍫💝🍓💗" }
+  ];
+
+  const QUOTES = [
+    "“I would choose you in every draft.”",
+    "“You’re my favorite top-deck.”",
+    "“I’m not bluffing. I like you.”",
+    "“Let’s resolve this into forever.”",
+    "“You’re the only combo I need.”"
+  ];
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+  function fmtMana(m){ return `🍫${m.choc} ❤️${m.heart} 🍿${m.popcorn} ✨${m.sparkle}`; }
+
+  function addAchievement(name){
+    if (state.achievements.has(name)) return;
+    state.achievements.add(name);
+    achievementsMini.textContent = [...state.achievements].slice(-3).join(" • ") || "— none yet —";
+  }
+
+  function unlockLoveLine(){
+    if (state.loveLinesUnlocked >= LOVE_LINES.length) return;
+    state.loveLinesUnlocked += 1;
+    loveLetterLine.textContent = LOVE_LINES[state.loveLinesUnlocked - 1];
+    loveLineUnlocks.textContent = `${state.loveLinesUnlocked}/${LOVE_LINES.length} unlocked 💌`;
+  }
+
+  function updateHUD(){
+    affectionFill.style.width = `${state.affection}%`;
+    nervesFill.style.width = `${state.nerves}%`;
+    affectionText.textContent = `${Math.round(state.affection)}%`;
+    nervesText.textContent = `${Math.round(state.nerves)}%`;
+    manaPoolMini.textContent = fmtMana(state.mana);
+
+    let newPhase = 1;
+    if (state.affection >= 66) newPhase = 3;
+    else if (state.affection >= 33) newPhase = 2;
+
+    if (newPhase !== state.phase){
+      state.phase = newPhase;
+      romancePhaseEl.textContent = newPhase === 1 ? "I" : (newPhase === 2 ? "II" : "III");
+      addAchievement(`Phase ${romancePhaseEl.textContent}`);
+      unlockLoveLine();
+    }
+
+    const proposalReady = (state.enemyAffection >= 85 && state.affection >= 70 && state.nerves <= 25);
+    if (proposalReady){
+      btnProposal.classList.remove("opacity-50","pointer-events-none");
+      btnProposal.textContent = "💍 Proposal (Ready!)";
+    } else {
+      btnProposal.classList.add("opacity-50","pointer-events-none");
+      btnProposal.textContent = "💍 Proposal (Locked)";
+    }
+  }
+
+  // ---- Card tilt + click flip vibe ----
+  function setCardTiltFromEvent(e){
+    const r = tcgCard.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    const rx = (py - 0.5) * -10;
+    const ry = (px - 0.5) * 12;
+
+    tcgCard.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    tcgCard.style.setProperty("--mx", `${px*100}%`);
+    tcgCard.style.setProperty("--my", `${py*100}%`);
+  }
+  tcgCard.addEventListener("mousemove", setCardTiltFromEvent);
+  tcgCard.addEventListener("mouseleave", () => {
+    tcgCard.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
+    tcgCard.style.setProperty("--mx", "50%");
+    tcgCard.style.setProperty("--my", "50%");
+  });
+
+  let flipped = false;
+  tcgCard.addEventListener("click", (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains("tabbtn")) return;
+    flipped = !flipped;
+    flavorQuote.textContent = flipped
+      ? "“Tonight I’m casting ‘Hold Hands’ with kicker: never let go.”"
+      : "“I’d tap all my mana for you.”";
+    addAchievement("Card flip vibe");
+  });
+
+  // Tabs
+  document.querySelectorAll(".tabbtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tabbtn").forEach(b => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+
+      const target = btn.getAttribute("data-tab");
+      document.querySelectorAll(".tabpane").forEach(p => p.classList.add("hidden"));
+      const pane = document.getElementById(target);
+      if (pane) pane.classList.remove("hidden");
+    });
+  });
+
+  // Cinematic
+  function showCinematic(line){
+    cinematicLine.textContent = line;
+    cinematicOverlay.classList.remove("hidden");
+  }
+  function hideCinematic(){ cinematicOverlay.classList.add("hidden"); }
+  cinematicOverlay.addEventListener("click", hideCinematic);
+
+  let altIndex = 0;
+  altArtBtn.addEventListener("click", () => {
+    showCinematic(QUOTES[Math.floor(Math.random()*QUOTES.length)]);
+
+    altIndex = (altIndex + 1) % ALT_ARTS.length;
+    const alt = ALT_ARTS[altIndex];
+    cardArt.textContent = alt.art;
+    artCaption.textContent = alt.caption;
+
+    state.affection = clamp(state.affection + 2.5, 0, 100);
+    state.nerves = clamp(state.nerves - 1.0, 0, 100);
+    unlockLoveLine();
+    updateHUD();
+
+    try { confetti({ particleCount: 80, spread: 70, origin: { y: 0.4 } }); } catch {}
+  });
+
+  // Music toggle
+  musicBtn.addEventListener("click", () => {
+    musicOn = !musicOn;
+    musicBtn.textContent = `Music: ${musicOn ? "On" : "Off"}`;
+    if (musicOn) startMusic();
+    else stopMusic();
+  });
+
+  // ==================== SPELLBOOK ====================
+  const SPELLS = [
+    { name:"Playlist of Us", rarity:"Uncommon", cost:{ sparkle:1 }, tags:["playlist","cozy"],
+      text:"Reduce Nerves and make your next move ‘Confident’.",
+      onResolve:(ctx)=>{ state.nerves=clamp(state.nerves-8,0,100); state.status.confident+=2; state.affection+=4; } },
+    { name:"Candlelight Ritual", rarity:"Rare", cost:{ heart:1, sparkle:1 }, tags:["candle","cozy"],
+      text:"Cozy buff. Extra affection if resolved after Playlist.",
+      onResolve:(ctx)=>{ state.status.cozy+=3; state.affection+=ctx.hasTag("playlist")?10:6; state.nerves=clamp(state.nerves-4,0,100);} },
+    { name:"Stargaze (Two Player)", rarity:"Mythic", cost:{ sparkle:2 }, tags:["stars"],
+      text:"Big affection. If resolved after Candlelight, unlock a love line.",
+      onResolve:(ctx)=>{ state.affection+=ctx.hasTag("candle")?14:10; state.status.starry+=3; if(ctx.hasTag("candle")) unlockLoveLine(); } },
+    { name:"Shared Dessert", rarity:"Common", cost:{ choc:1 }, tags:["dessert"],
+      text:"Heal you a little and calm nerves.",
+      onResolve:(ctx)=>{ state.youHP=clamp(state.youHP+8,0,100); state.nerves=clamp(state.nerves-3,0,100); state.affection+=3; } },
+    { name:"Movie Night (Kicker: Blankets)", rarity:"Uncommon", cost:{ popcorn:1, heart:1 }, tags:["movie","cozy"],
+      text:"Cozy buff. If you crafted Candle Kit, double the cozy.",
+      onResolve:(ctx)=>{ const bonus=(state.gifts.candleKit>0)?2:1; state.status.cozy+=2*bonus; state.affection+=5; state.nerves=clamp(state.nerves-2,0,100);} },
+    { name:"Handhold (Split Second)", rarity:"Rare", cost:{ heart:2 }, tags:["handhold"],
+      text:"Huge Nerves reduction. Cannot be ‘interrupted’ (lol).",
+      onResolve:(ctx)=>{ state.nerves=clamp(state.nerves-14,0,100); state.affection+=6; } },
+    { name:"Compliment Copy", rarity:"Uncommon", cost:{ sparkle:1, heart:1 }, tags:["copy"],
+      text:"Copies the last spell’s affection gain (partially).",
+      onResolve:(ctx)=>{ state.affection += Math.max(0, ctx.lastAffGain) * 0.8; } },
+    { name:"Surprise Flower Drop", rarity:"Common", cost:{ heart:1 }, tags:["flowers"],
+      text:"Small affection now; extra love line if you crafted a Bouquet.",
+      onResolve:(ctx)=>{ state.affection+=4; if(state.gifts.bouquet>0) unlockLoveLine(); } },
+  ];
+
+  function spellCostText(cost){
+    const parts=[];
+    if (cost.choc) parts.push(`🍫${cost.choc}`);
+    if (cost.heart) parts.push(`❤️${cost.heart}`);
+    if (cost.popcorn) parts.push(`🍿${cost.popcorn}`);
+    if (cost.sparkle) parts.push(`✨${cost.sparkle}`);
+    return parts.join(" ");
+  }
+  function manaEnough(cost){
+    return state.mana.choc >= (cost.choc||0) &&
+           state.mana.heart >= (cost.heart||0) &&
+           state.mana.popcorn >= (cost.popcorn||0) &&
+           state.mana.sparkle >= (cost.sparkle||0);
+  }
+  function spendMana(cost){
+    state.mana.choc -= (cost.choc||0);
+    state.mana.heart -= (cost.heart||0);
+    state.mana.popcorn -= (cost.popcorn||0);
+    state.mana.sparkle -= (cost.sparkle||0);
+  }
+
+  function computeComboName(){
+    const tags = new Set(state.stack.flatMap(s => s.tags));
+    const has = (t)=>tags.has(t);
+    if (has("playlist") && has("candle") && has("stars")) return "✨ Perfect Date Combo (Big Buff)";
+    if (has("movie") && has("cozy")) return "🛋️ Cozy Combo";
+    if (has("dessert") && has("handhold")) return "🍰 Brave Sweetheart Combo";
+    return "";
+  }
+
+  function updateSynergy(){
+    const combo = computeComboName();
+    if (!combo){ synergyPanel.textContent="Add spells to see combo effects."; return; }
+    if (combo.includes("Perfect Date")){
+      synergyPanel.innerHTML = `<div><b>${combo}</b></div>
+        <div class="mt-2 opacity-90">On resolve: +Affection, -Nerves, grants Starry-eyed + Cozy + Confident.</div>
+        <div class="mt-2 text-xs font-black text-slate-700/70">Bonus: unlocks an extra love line 💌</div>`;
+    } else if (combo.includes("Cozy")){
+      synergyPanel.innerHTML = `<div><b>${combo}</b></div>
+        <div class="mt-2 opacity-90">On resolve: Cozy stacks last longer, battle pressure reduced.</div>`;
+    } else {
+      synergyPanel.innerHTML = `<div><b>${combo}</b></div>
+        <div class="mt-2 opacity-90">On resolve: big nerves drop + affection spike.</div>`;
+    }
+  }
+
+  function renderSpellList(){
+    spellList.innerHTML="";
+    SPELLS.forEach(sp=>{
+      const btn=document.createElement("button");
+      btn.className="rounded-2xl p-4 bg-white/85 border border-white/60 shadow active:scale-95 transition text-left";
+      btn.innerHTML=`
+        <div class="flex items-center justify-between gap-2">
+          <div class="font-black text-slate-800/80">${sp.name}</div>
+          <div class="text-xs font-black text-slate-700/70">${sp.rarity}</div>
+        </div>
+        <div class="mt-1 text-xs font-black text-slate-700/70">Cost: ${spellCostText(sp.cost) || "Free"}</div>
+        <div class="mt-2 text-sm font-semibold text-slate-800/80">${sp.text}</div>
+        <div class="mt-2 text-xs font-black text-slate-700/70">Tags: ${sp.tags.join(", ")}</div>
+      `;
+      btn.addEventListener("click", ()=>{
+        if(!manaEnough(sp.cost)){
+          battleText.textContent="Not enough mana 💔 (Create tokens first!)";
+          return;
+        }
+        spendMana(sp.cost);
+        state.stack.push(sp);
+        addAchievement("Added to stack");
+        renderStack();
+        updateSynergy();
+        updateHUD();
+      });
+      spellList.appendChild(btn);
+    });
+  }
+
+  function renderStack(){
+    if(state.stack.length===0){
+      spellStack.innerHTML=`<div class="opacity-70">— empty —</div>`;
+      if (manaSpent) manaSpent.textContent = fmtMana(state.mana);
+      if (comboBonus) comboBonus.textContent = "None";
+      chosenDate.innerHTML = `
+        Selected spell: <b>None yet</b>
+        <div class="mt-2 text-xs font-black text-slate-700/70">Mana pool: <span id="manaSpent">${fmtMana(state.mana)}</span></div>
+        <div class="mt-2 text-xs font-black text-slate-700/70">Combo bonus: <span id="comboBonus">None</span></div>
+      `;
+      return;
+    }
+
+    spellStack.innerHTML="";
+    state.stack.slice().reverse().forEach((sp, idx)=>{
+      const row=document.createElement("div");
+      row.className="rounded-xl bg-white/85 border border-white/60 p-3 shadow flex items-center justify-between gap-2";
+      row.innerHTML=`
+        <div>
+          <div class="font-black">${sp.name}</div>
+          <div class="text-xs font-black text-slate-700/70">${sp.rarity} • ${spellCostText(sp.cost) || "Free"}</div>
+        </div>
+        <div class="text-xs font-black text-slate-700/70">#${state.stack.length - idx}</div>
+      `;
+      spellStack.appendChild(row);
+    });
+
+    const top = state.stack[state.stack.length-1];
+    chosenDate.innerHTML=`
+      Selected spell: <b>${top.name}</b>
+      <div class="mt-2 text-xs font-black text-slate-700/70">Mana pool: <span id="manaSpent">${fmtMana(state.mana)}</span></div>
+      <div class="mt-2 text-xs font-black text-slate-700/70">Combo bonus: <span id="comboBonus">${computeComboName() || "None"}</span></div>
+    `;
+  }
+
+  function resolveStack(){
+    if (state.stack.length===0 || state.turnLock) return;
+    state.turnLock=true;
+    battleText.textContent="Resolving the stack… ✨";
+    addAchievement("Resolved stack");
+
+    const ctx = {
+      tags: new Set(state.stack.flatMap(s=>s.tags)),
+      hasTag: (t)=>ctx.tags.has(t),
+      lastAffGain: 0
+    };
+
+    let i = state.stack.length - 1;
+    const tick = () => {
+      if (i < 0){
+        const combo = computeComboName();
+        if (combo.includes("Perfect Date")){
+          state.affection += 8;
+          state.nerves = clamp(state.nerves - 6, 0, 100);
+          state.status.cozy += 2;
+          state.status.confident += 2;
+          state.status.starry += 2;
+          unlockLoveLine();
+        }
+
+        state.stack = [];
+        renderStack();
+        updateSynergy();
+        state.affection = clamp(state.affection,0,100);
+        state.nerves = clamp(state.nerves,0,100);
+        updateHUD();
+
+        battleText.textContent="Stack resolved 💖 Your aura is dangerously charming.";
+        try { confetti({ particleCount: 120, spread: 90, origin: { y: 0.7 } }); } catch {}
+        state.turnLock=false;
+        return;
+      }
+
+      const sp = state.stack[i];
+      const before = state.affection;
+      battleText.textContent = `✨ Resolving: ${sp.name}`;
+      sp.onResolve(ctx);
+
+      ctx.lastAffGain = Math.max(0, state.affection - before);
+      state.affection = clamp(state.affection,0,100);
+      state.nerves = clamp(state.nerves,0,100);
+      updateHUD();
+
+      i -= 1;
+      setTimeout(tick, 520);
+    };
+    tick();
+  }
+
+  openDateModal.addEventListener("click", ()=>{
+    dateModal.classList.remove("hidden");
+    renderSpellList();
+    renderStack();
+    updateSynergy();
+  });
+  closeDateModal.addEventListener("click", ()=> dateModal.classList.add("hidden"));
+  dateModal.addEventListener("click", (e)=>{ if(e.target && e.target.dataset && e.target.dataset.close) dateModal.classList.add("hidden"); });
+
+  stackUndo.addEventListener("click", ()=>{
+    if(state.stack.length===0) return;
+    const sp = state.stack.pop();
+    state.mana.choc += (sp.cost.choc||0);
+    state.mana.heart += (sp.cost.heart||0);
+    state.mana.popcorn += (sp.cost.popcorn||0);
+    state.mana.sparkle += (sp.cost.sparkle||0);
+    renderStack(); updateSynergy(); updateHUD();
+  });
+  stackClear.addEventListener("click", ()=>{
+    while(state.stack.length){
+      const sp = state.stack.pop();
+      state.mana.choc += (sp.cost.choc||0);
+      state.mana.heart += (sp.cost.heart||0);
+      state.mana.popcorn += (sp.cost.popcorn||0);
+      state.mana.sparkle += (sp.cost.sparkle||0);
+    }
+    renderStack(); updateSynergy(); updateHUD();
+  });
+  resolveStackBtn.addEventListener("click", resolveStack);
+
+  // ==================== TOKENS + CRAFTING ====================
+  const TOKEN_TABLE = [
+    { emoji:"🌹", type:"rose",    mana:{ heart:1 },   w:30 },
+    { emoji:"🍫", type:"choc",    mana:{ choc:1 },    w:26 },
+    { emoji:"🍿", type:"popcorn", mana:{ popcorn:1 }, w:18 },
+    { emoji:"✨", type:"sparkle", mana:{ sparkle:1 }, w:22 },
+    { emoji:"🕯️", type:"candle", mana:{ sparkle:1 }, w:12 },
+  ];
+  const RARITIES = [
+    { name:"Common", chance:0.70, glow:"none" },
+    { name:"Uncommon", chance:0.22, glow:"0 10px 30px rgba(99,102,241,0.20)" },
+    { name:"Rare", chance:0.07, glow:"0 12px 38px rgba(236,72,153,0.22)" },
+    { name:"Mythic", chance:0.01, glow:"0 16px 55px rgba(34,197,94,0.22)" },
+  ];
+  function rollRarity(){
+    const r=Math.random(); let acc=0;
+    for(const rr of RARITIES){ acc+=rr.chance; if(r<=acc) return rr; }
+    return RARITIES[0];
+  }
+  function weightedPick(items){
+    const total = items.reduce((a,i)=>a+i.w,0);
+    let r = Math.random()*total;
+    for(const it of items){ r-=it.w; if(r<=0) return it; }
+    return items[0];
+  }
+  function addManaFromToken(tok){
+    if(tok.mana.choc) state.mana.choc += tok.mana.choc;
+    if(tok.mana.heart) state.mana.heart += tok.mana.heart;
+    if(tok.mana.popcorn) state.mana.popcorn += tok.mana.popcorn;
+    if(tok.mana.sparkle) state.mana.sparkle += tok.mana.sparkle;
+  }
+  function logLoot(msg){ tokenLootLog.textContent = `Loot log: ${msg}`; }
+
+  function renderInventory(){
+    const counts = {};
+    for(const t of state.tokens) counts[t.type]=(counts[t.type]||0)+1;
+
+    const lines = Object.keys(counts).map(k=>{
+      const emoji = (TOKEN_TABLE.find(x=>x.type===k)?.emoji) || "💖";
+      return `${emoji} ${k}: <b>${counts[k]}</b>`;
+    });
+
+    const g = state.gifts;
+    const giftsLine = [
+      `💐 Bouquet: <b>${g.bouquet}</b>`,
+      `🍫 Chocolate Box: <b>${g.chocoBox}</b>`,
+      `🕯️ Candle Kit: <b>${g.candleKit}</b>`,
+      `🎟️ Date Ticket: <b>${g.dateTicket}</b>`
+    ].join(" • ");
+
+    inventoryPanel.innerHTML = `
+      <div>${lines.length ? lines.join(" • ") : "— empty —"}</div>
+      <div class="mt-2 opacity-90">${giftsLine}</div>
+    `;
+  }
+  function pushTokenToGrid(tok){
+    const el=document.createElement("div");
+    el.className="rounded-xl bg-white/80 border border-white/60 shadow flex items-center justify-center text-xl select-none";
+    el.style.boxShadow = tok.rarity.glow;
+    el.title = `${tok.emoji} ${tok.rarity.name}`;
+    el.textContent = tok.emoji;
+    tokenGrid.appendChild(el);
+  }
+
+  tokenBtn.addEventListener("click", ()=>{
+    const rarity = rollRarity();
+    const base = weightedPick(TOKEN_TABLE);
+    const mult = rarity.name==="Mythic"?3:(rarity.name==="Rare"?2:1);
+
+    const tok = {
+      emoji: base.emoji,
+      type: base.type,
+      mana: {
+        choc: (base.mana.choc||0)*mult,
+        heart: (base.mana.heart||0)*mult,
+        popcorn: (base.mana.popcorn||0)*mult,
+        sparkle: (base.mana.sparkle||0)*mult
+      },
+      rarity
+    };
+
+    state.tokens.push(tok);
+    addManaFromToken(tok);
+
+    tokenCount.textContent = String(state.tokens.length);
+    pushTokenToGrid(tok);
+    renderInventory();
+
+    state.affection = clamp(state.affection + (rarity.name==="Mythic"?4:1.5), 0, 100);
+    state.nerves = clamp(state.nerves - 0.6, 0, 100);
+
+    if (state.tokens.length >= 10) addAchievement("Token hoarder");
+    if (rarity.name==="Mythic"){ addAchievement("Mythic pull"); unlockLoveLine(); }
+
+    logLoot(`${tok.rarity.name} ${tok.emoji} (+${fmtMana(tok.mana)})`);
+    updateHUD();
+
+    try { confetti({ particleCount: 40, spread: 65, origin: { y: 0.75 } }); } catch {}
+  });
+
+  function consumeTokens(req){
+    const needed = { ...req };
+    const remaining=[];
+    for(const t of state.tokens){
+      if(needed[t.type] > 0) needed[t.type] -= 1;
+      else remaining.push(t);
+    }
+    const ok = Object.values(needed).every(v=>v<=0);
+    if(!ok) return false;
+
+    state.tokens = remaining;
+    tokenGrid.innerHTML="";
+    state.tokens.forEach(pushTokenToGrid);
+    tokenCount.textContent = String(state.tokens.length);
+    renderInventory();
+    return true;
+  }
+
+  function totalGifts(){ return Object.values(state.gifts).reduce((a,b)=>a+b,0); }
+
+  craftBtn.addEventListener("click", ()=>{
+    const recipes = [
+      { name:"Bouquet", key:"bouquet", req:{ rose:2, sparkle:1 } },
+      { name:"Chocolate Box", key:"chocoBox", req:{ choc:2, heart:1 } },
+      { name:"Candle Kit", key:"candleKit", req:{ candle:1, sparkle:1, heart:1 } },
+      { name:"Date Ticket", key:"dateTicket", req:{ popcorn:2, heart:1 } },
+    ];
+
+    for(const r of recipes){
+      if(consumeTokens(r.req)){
+        state.gifts[r.key] += 1;
+        giftCount.textContent = String(totalGifts());
+
+        state.affection = clamp(state.affection + 6, 0, 100);
+        state.nerves = clamp(state.nerves - 5, 0, 100);
+        addAchievement(`Crafted ${r.name}`);
+        unlockLoveLine();
+        updateHUD();
+
+        logLoot(`Crafted: ${r.name} 💝`);
+        battleText.textContent = `You crafted ${r.name} 💝 (BAG updated!)`;
+
+        try { confetti({ particleCount: 120, spread: 90, origin: { y: 0.7 } }); } catch {}
+        renderBagMenu();
+        return;
+      }
+    }
+    battleText.textContent="Not enough ingredients 💔 (Create more tokens!)";
+  });
+
+  // ==================== ROMANCE BATTLE ====================
+  function setBars(){
+    enemyHPBar.style.width = `${state.enemyHP}%`;
+    youHPBar.style.width = `${state.youHP}%`;
+    enemyAff.textContent = `${Math.round(state.enemyAffection)}%`;
+    enemyAffBar.style.width = `${state.enemyAffection}%`;
+    youNerves.textContent = `${Math.round(state.nerves)}%`;
+    youNervesBar.style.width = `${state.nerves}%`;
+  }
+
+  function setMenu(which){
+    menuMain.classList.toggle("hidden", which !== "main");
+    menuFight.classList.toggle("hidden", which !== "fight");
+    menuBag.classList.toggle("hidden", which !== "bag");
+    menuTeam.classList.toggle("hidden", which !== "team");
+  }
+
+  function tickStatus(){
+    for(const k of Object.keys(state.status)){
+      state.status[k] = Math.max(0, state.status[k]-1);
+    }
+  }
+
+  function enemyTurn(){
+    let nervUp = 6;
+    let txt = "Valentine tilts their head… judging your vibe. 😳";
+
+    if (state.status.cozy > 0){ nervUp -= 2; txt = "Valentine smiles softly… cozy aura is working. 🕯️"; }
+    if (state.status.confident > 0){ nervUp -= 2; txt = "Valentine looks impressed. Your confidence is *dangerous*. ✨"; }
+
+    state.nerves = clamp(state.nerves + nervUp, 0, 100);
+    state.youHP = clamp(state.youHP - Math.max(0, nervUp - 2), 0, 100);
+    battleText.textContent = txt;
+
+    if (state.nerves >= 95) battleText.textContent = "You panic a little 💔 (Try Cozy Aura, Handhold, or items!)";
+
+    tickStatus();
+    setBars();
+    updateHUD();
+  }
+
+  function applyMove(move){
+    let affGain=0, nervDown=0, heal=0;
+
+    if(move==="Compliment Beam"){
+      affGain=14; nervDown=4;
+      if(state.status.confident>0) affGain+=6;
+      if(state.status.starry>0) affGain+=4;
+      battleText.textContent="You fire a Compliment Beam 💞 It lands perfectly.";
+    }
+    if(move==="Snack Shield"){
+      affGain=6; nervDown=10; heal=8;
+      if(state.gifts.chocoBox>0){ affGain+=4; heal+=4; }
+      battleText.textContent="You deploy Snack Shield 🍫 Comfort increases dramatically.";
+    }
+    if(move==="Laugh Attack"){
+      affGain=10; nervDown=8;
+      if(state.status.cozy>0) affGain+=3;
+      battleText.textContent="You use Laugh Attack 😂 The tension melts.";
+    }
+    if(move==="Cozy Aura"){
+      affGain=7; nervDown=12;
+      state.status.cozy += 3;
+      if(state.gifts.candleKit>0){ state.status.cozy+=2; affGain+=3; }
+      battleText.textContent="Cozy Aura activates 🕯️ Everything feels warm and safe.";
+    }
+
+    state.enemyAffection = clamp(state.enemyAffection + affGain, 0, 100);
+    state.nerves = clamp(state.nerves - nervDown, 0, 100);
+    state.youHP = clamp(state.youHP + heal, 0, 100);
+
+    state.affection = clamp(state.affection + (affGain*0.25), 0, 100);
+
+    if(state.enemyAffection >= 50) addAchievement("Halfway to love");
+    if(state.nerves <= 15) addAchievement("Ice-cold rizz");
+    if(state.status.cozy >= 4) addAchievement("Cozy build");
+
+    battleStatus.textContent = state.enemyAffection >= 70 ? "Blushing" : "Neutral";
+    if(state.enemyAffection >= 100){
+      battleStatus.textContent="Smitten";
+      battleText.textContent="Valentine is completely smitten 💘 The moment feels… inevitable.";
+      try { confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } }); } catch {}
+    }
+
+    setBars();
+    updateHUD();
+  }
+
+  function doProposal(){
+    battleText.textContent="You take a breath… and choose courage. 💍";
+    state.turnLock=true;
+
+    setTimeout(()=>{
+      state.enemyAffection = clamp(state.enemyAffection + 30, 0, 100);
+      state.nerves = clamp(state.nerves - 18, 0, 100);
+      state.affection = clamp(state.affection + 12, 0, 100);
+
+      unlockLoveLine();
+      unlockLoveLine();
+
+      battleStatus.textContent="Forever";
+      battleText.textContent="Proposal resolves. The room is warm. The world is quiet. 💖";
+      setBars();
+      updateHUD();
+
+      try { confetti({ particleCount: 260, spread: 110, origin: { y: 0.65 } }); } catch {}
+      state.turnLock=false;
+    }, 900);
+  }
+
+  function renderBagMenu(){
+    menuBag.innerHTML = "";
+
+    const items = [
+      {
+        label:`💐 Bouquet (${state.gifts.bouquet})`,
+        enabled: state.gifts.bouquet > 0,
+        use: ()=>{ state.gifts.bouquet--; state.enemyAffection=clamp(state.enemyAffection+18,0,100); state.nerves=clamp(state.nerves-6,0,100);
+          battleText.textContent="You present a bouquet 💐 It’s devastatingly sweet."; }
+      },
+      {
+        label:`🍫 Chocolate Box (${state.gifts.chocoBox})`,
+        enabled: state.gifts.chocoBox > 0,
+        use: ()=>{ state.gifts.chocoBox--; state.youHP=clamp(state.youHP+16,0,100); state.nerves=clamp(state.nerves-8,0,100);
+          battleText.textContent="Chocolate Box 🍫 Comfort + confidence restored."; }
+      },
+      {
+        label:`🕯️ Candle Kit (${state.gifts.candleKit})`,
+        enabled: state.gifts.candleKit > 0,
+        use: ()=>{ state.gifts.candleKit--; state.status.cozy+=4; state.enemyAffection=clamp(state.enemyAffection+10,0,100);
+          battleText.textContent="Candle Kit 🕯️ Cozy status intensified."; }
+      },
+      {
+        label:`🎟️ Date Ticket (${state.gifts.dateTicket})`,
+        enabled: state.gifts.dateTicket > 0,
+        use: ()=>{ state.gifts.dateTicket--; state.status.confident+=3; state.status.starry+=2; state.enemyAffection=clamp(state.enemyAffection+12,0,100);
+          battleText.textContent="Date Ticket 🎟️ The vibe becomes cinematic."; }
+      },
+    ];
+
+    items.forEach(it=>{
+      const b=document.createElement("button");
+      b.className="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/85 border border-white/60 shadow active:scale-95 transition";
+      b.style.opacity = it.enabled ? "1" : "0.5";
+      b.style.pointerEvents = it.enabled ? "auto" : "none";
+      b.textContent = it.label;
+
+      b.addEventListener("click", ()=>{
+        if(state.turnLock) return;
+        it.use();
+        addAchievement("Used an item");
+        giftCount.textContent = String(totalGifts());
+        renderInventory();
+        setBars();
+        updateHUD();
+        renderBagMenu();
+        enemyTurn();
+      });
+
+      menuBag.appendChild(b);
+    });
+
+    const back=document.createElement("button");
+    back.className="sm:col-span-2 rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/85 border border-white/60 shadow active:scale-95 transition";
+    back.textContent="BACK";
+    back.addEventListener("click", ()=> setMenu("main"));
+    menuBag.appendChild(back);
+  }
+
+  // Battle menu events
+  btnFight.addEventListener("click", ()=> setMenu("fight"));
+  btnBag.addEventListener("click", ()=> { renderBagMenu(); setMenu("bag"); });
+  btnTeam.addEventListener("click", ()=> setMenu("team"));
+  btnRun.addEventListener("click", ()=> { battleText.textContent="You try to run… but love has trample. 💘"; enemyTurn(); });
+  btnBack.addEventListener("click", ()=> setMenu("main"));
+
+  menuFight.querySelectorAll("button[data-move]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(state.turnLock) return;
+      state.turnLock=true;
+      applyMove(btn.dataset.move);
+      setTimeout(()=>{
+        enemyTurn();
+        state.turnLock=false;
+      }, 550);
+    });
+  });
+
+  btnProposal.addEventListener("click", ()=>{
+    if(state.turnLock) return;
+    doProposal();
+  });
+
+  // Cinematic overlay click already hides it; tiny romance freebies:
+  cinematicOverlay.addEventListener("click", ()=>{
+    state.affection = clamp(state.affection + 1.2, 0, 100);
+    state.nerves = clamp(state.nerves - 0.6, 0, 100);
+    updateHUD();
+  });
+
+  // Init
+  function initBattle(){
+    state.enemyHP = 100;
+    state.youHP = 100;
+    state.enemyAffection = 0;
+    battleStatus.textContent = "Neutral";
+    battleText.textContent = "A wild Valentine appeared!";
+    setBars();
+    updateHUD();
+    renderInventory();
+    renderStack();
+    updateSynergy();
+    giftCount.textContent = "0";
+    tokenCount.textContent = "0";
+  }
+  initBattle();
+
+  // Close modal on escape (nice touch)
+  window.addEventListener("keydown", (e)=>{
+    if(e.key === "Escape"){
+      if(!dateModal.classList.contains("hidden")) dateModal.classList.add("hidden");
+      if(!cinematicOverlay.classList.contains("hidden")) cinematicOverlay.classList.add("hidden");
+    }
+  });
+})();
+</script>
+
 
         <!-- Pokedex -->
         <section class="glass rounded-3xl p-6">
