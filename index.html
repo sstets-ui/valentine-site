@@ -782,15 +782,14 @@
           </div>
 
  <!-- =========================================================
-     PLATFORMER MODULE v2 — "Candlelit C-Side: Dinner Date Gauntlet"
+     PLATFORMER MODULE — "Candle Dinner C-Side" (no emojis)
      Replace your existing platformer section with this whole block.
-     (Standalone; safe even if your main script changes.)
 ========================================================= -->
 <section class="glass rounded-3xl overflow-hidden" id="platformerModule">
   <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-    <div class="font-black text-slate-800/80">🕯️💘 Platformer: Candlelit C-Side (Dinner Date)</div>
+    <div class="font-black text-slate-800/80">Platformer: Candle Dinner C-Side</div>
     <div class="text-xs font-black text-slate-700/70">
-      Move: A/D or ←/→ • Jump: W/↑/Space • Dash: Shift / K • Grab: Hold J • Reset: R
+      Move: A/D or Left/Right • Jump: W/Up/Space • Dash: Shift • Reset: R
     </div>
   </div>
 
@@ -802,17 +801,17 @@
         <button id="pfStart"
           class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
           style="background: linear-gradient(135deg, #fb7185, #6366f1);">
-          Start C-Side
+          Start
         </button>
 
         <div id="pfOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
           <div class="text-slate-800/80">
-            <div class="text-3xl font-extrabold">🕯️ Candlelit C-Side</div>
+            <div class="text-3xl font-extrabold">A Hard Date Night</div>
             <div class="text-sm font-semibold mt-2">
-              Dash through tight spike corridors • chain wall-jumps • reach the dinner table 🍷
+              Precision jumps, tight dashes, and candlelit landings.
             </div>
             <div class="mt-2 text-xs font-black text-slate-700/70">
-              💖 hearts: +Affection +Mana • 🔷 crystals refill dash • 🕯️ flames hurt • 💔 spikes are instant bonk
+              Collect hearts to earn rewards. Avoid flames and thorns. Reach the table for two.
             </div>
           </div>
         </div>
@@ -827,10 +826,12 @@
           <div>Best: <span id="pfBest">—</span></div>
         </div>
 
-        <div class="mt-4 text-xs font-black text-slate-700/70">THEME</div>
+        <div class="mt-4 text-xs font-black text-slate-700/70">MECHANICS</div>
         <div class="mt-2 text-sm font-semibold text-slate-800/80">
-          A brutal “C-side” date night: candles, velvet, and impossible jumps.<br/>
-          Finish = 🥂 “Dinner is served.”
+          • Jump buffer + coyote time (for fair “almost” saves)<br/>
+          • Variable jump height (hold jump longer to go higher)<br/>
+          • Dash with refill crystals + ground refill<br/>
+          • Wall slide and wall jump (Celeste-like timing)
         </div>
 
         <div class="mt-4">
@@ -841,848 +842,928 @@
           </button>
         </div>
 
-        <div id="pfMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
-          Ready when you are.
-        </div>
+        <div id="pfMsg" class="mt-3 text-sm font-semibold text-slate-700/80">Ready.</div>
       </div>
     </div>
   </div>
 
   <style>
-    /* Crisp pixels + stable layout */
     #pfCanvas { image-rendering: pixelated; touch-action: none; }
+
+    /* Romantic dinner palette (no emojis) */
+    .pf-badge {
+      display:inline-block; padding:.2rem .6rem; border-radius:999px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(255,255,255,.6);
+      font-weight: 900; font-size: 12px;
+    }
   </style>
 
   <script>
-    (() => {
-      "use strict";
-      // Prevent double-init if pasted twice
-      if (window.__CandlelitCSidePlatformer) return;
-      window.__CandlelitCSidePlatformer = true;
+  (() => {
+    "use strict";
 
-      // -----------------------------
-      // Soft integration hooks
-      // -----------------------------
-      const safe = (fn) => { try { fn(); } catch {} };
+    // Prevent double-init if user pastes twice
+    if (window.__PF_CANDLE_DINNER_CSIDE__) return;
+    window.__PF_CANDLE_DINNER_CSIDE__ = true;
 
-      // Prefer your existing STATE/updateHUD/setBars/unlockLoveLine/safeConfetti if you’ve exposed them.
-      // Otherwise, create a minimal STATE so rewards won’t crash.
-      if (typeof window.STATE !== "object" || !window.STATE) {
-        window.STATE = { affection: 0, nerves: 25, youHP: 100, mana: { choc:0, heart:0, popcorn:0, sparkle:0 } };
+    // -----------------------------
+    // Soft integrate with your page
+    // -----------------------------
+    if (typeof window.STATE !== "object" || !window.STATE) {
+      window.STATE = { affection: 0, nerves: 25, youHP: 100, mana: { choc:0, heart:0, popcorn:0, sparkle:0 } };
+    }
+    const STATE = window.STATE;
+    const safe = (fn) => { try { fn(); } catch {} };
+    const updateHUD = () => safe(() => window.updateHUD && window.updateHUD());
+    const setBars   = () => safe(() => window.setBars && window.setBars());
+    const safeConfetti = (opts) => safe(() => window.safeConfetti && window.safeConfetti(opts));
+    const unlockLoveLine = () => safe(() => window.unlockLoveLine && window.unlockLoveLine());
+    const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+    // -----------------------------
+    // DOM
+    // -----------------------------
+    const canvas  = document.getElementById("pfCanvas");
+    const ctx     = canvas.getContext("2d");
+    const startBtn = document.getElementById("pfStart");
+    const resetBtn = document.getElementById("pfReset");
+    const overlay  = document.getElementById("pfOverlay");
+    const msgEl    = document.getElementById("pfMsg");
+
+    const pfRoom    = document.getElementById("pfRoom");
+    const pfRoomMax = document.getElementById("pfRoomMax");
+    const pfHearts  = document.getElementById("pfHearts");
+    const pfDeaths  = document.getElementById("pfDeaths");
+    const pfBest    = document.getElementById("pfBest");
+
+    function fitCanvas() {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width  = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    fitCanvas();
+    window.addEventListener("resize", fitCanvas);
+
+    // -----------------------------
+    // Input (Unity-ish: cached state)
+    // -----------------------------
+    const KEYS = new Set();
+    const isDown = (k) => KEYS.has(k);
+
+    window.addEventListener("keydown", (e) => {
+      const k = e.key;
+      const allowed = ["ArrowLeft","ArrowRight","ArrowUp","a","d","w"," ","Shift","r","R"];
+      if (!allowed.includes(k)) return;
+      KEYS.add(k);
+      if (k === " " || k === "ArrowUp") e.preventDefault();
+      if (k.toLowerCase() === "r") resetRun();
+    }, { passive:false });
+
+    window.addEventListener("keyup", (e) => KEYS.delete(e.key));
+
+    // Mobile: tap to jump, double tap to dash
+    let lastTap = 0;
+    canvas.addEventListener("pointerdown", () => {
+      if (!game.running) return;
+      const now = performance.now();
+      if (now - lastTap < 240) input.wantDash = true;
+      else input.wantJump = true;
+      lastTap = now;
+    });
+
+    const input = {
+      axisX: 0,
+      wantJump: false,
+      jumpHeld: false,
+      wantDash: false
+    };
+
+    function sampleInput() {
+      input.axisX = 0;
+      if (isDown("ArrowLeft") || isDown("a")) input.axisX -= 1;
+      if (isDown("ArrowRight") || isDown("d")) input.axisX += 1;
+
+      const jumpKey = (isDown("ArrowUp") || isDown("w") || isDown(" "));
+      // buffer edge: if jump is held, keep it true
+      input.jumpHeld = jumpKey;
+
+      if (jumpKey) input.wantJump = true;
+      if (isDown("Shift")) input.wantDash = true;
+    }
+
+    // -----------------------------
+    // Tile world
+    // -----------------------------
+    const TILE = 18;
+    const W = 40;
+    const H = 22;
+
+    // Legend:
+    // # = solid
+    // ^ = thorn (instant death)
+    // f = flame (damage + knock)
+    // h = heart pickup
+    // c = crystal (dash refill)
+    // s = spawn
+    // t = table/exit
+    const ROOMS = [
+      {
+        name: "Arrival",
+        map: [
+"########################################",
+"#......................................#",
+"#......................................#",
+"#....................h.................#",
+"#...................###................#",
+"#..........................c...........#",
+"#....................f.................#",
+"#...............######.................#",
+"#......................................#",
+"#.....s................................#",
+"##########......................#######",
+"#......................................#",
+"#....................h.................#",
+"#...................###................#",
+"#......................................#",
+"#.........................c............#",
+"#....................######............#",
+"#......................................#",
+"#..................................t...#",
+"#......................................#",
+"#......................................#",
+"########################################",
+        ]
+      },
+      {
+        name: "Candle Corridor",
+        map: [
+"########################################",
+"#......................................#",
+"#.............^^^^^^^..................#",
+"#.............#.....#..................#",
+"#.....s.......#..c..#.............f....#",
+"##########....#.....#..................#",
+"#.............#######..................#",
+"#......................................#",
+"#.............h........................#",
+"#............###.......................#",
+"#......................................#",
+"#...............^^^^^..................#",
+"#...............#...#...........c......#",
+"#...............#...#..................#",
+"#...............#...#..................#",
+"#...............#####..................#",
+"#......................................#",
+"#..................................t...#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"########################################",
+        ]
+      },
+      {
+        name: "Velvet Wall-Jumps",
+        map: [
+"########################################",
+"#......................^^^^^^^.........#",
+"#......................#.....#.........#",
+"#.....s................#..c..#.........#",
+"##########.............#.....#.........#",
+"#......................#..^^^^.........#",
+"#......................#..#............#",
+"#.............h........#..#............#",
+"#............###.......#..#............#",
+"#......................#..#............#",
+"#......^^^^^...........#..#............#",
+"#......#...#...........#..#....f.......#",
+"#..c...#...#..^^^^^....#..#............#",
+"#......#...#..#...#....#..#............#",
+"#......#...#..#...#....#..#............#",
+"#......#####..#...#....#..#.......t....#",
+"#..............#####....####...........#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"########################################",
+        ]
+      },
+      {
+        name: "Thorn Timing",
+        map: [
+"########################################",
+"#......................................#",
+"#....^^^^^^............................#",
+"#....#....#.............c..............#",
+"#..s.#....#............................#",
+"#####....^#..............f.............#",
+"#........##............................#",
+"#..................h...................#",
+"#.................###..................#",
+"#......................................#",
+"#...........^^^^^......................#",
+"#...........#...#...........c..........#",
+"#...........#...#......................#",
+"#.....c.....#...#....^^^^^........t....#",
+"#...........#####....#...#.............#",
+"#.....................###..............#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"########################################",
+        ]
+      },
+      {
+        name: "Dinner Rush",
+        map: [
+"########################################",
+"#......................................#",
+"#.............c........................#",
+"#.............#........................#",
+"#.....s.......#...........^^^^^^.......#",
+"##########....#...........#....#.......#",
+"#.............#...........#..f.#.......#",
+"#.............#...........#....#.......#",
+"#.............#...........######.......#",
+"#.............#........................#",
+"#.............#............h...........#",
+"#.............#...........###..........#",
+"#.............#........................#",
+"#.............#.....c..................#",
+"#.............######...................#",
+"#..........................^^^^^.......#",
+"#..........................#...#...t...#",
+"#....................c.....#...#.......#",
+"#..........................#####.......#",
+"#......................................#",
+"#......................................#",
+"########################################",
+        ]
+      },
+      {
+        name: "Final Table for Two",
+        map: [
+"########################################",
+"#......................................#",
+"#.............^^^^^^^..................#",
+"#.............#.....#..................#",
+"#.....s.......#..c..#.............f....#",
+"##########....#.....#..................#",
+"#.............#######..................#",
+"#......................................#",
+"#.............h........................#",
+"#............###.......................#",
+"#......................................#",
+"#...........^^^^^............^^^^^.....#",
+"#...........#...#....c.......#...#.....#",
+"#...........#...#............#...#.....#",
+"#...........#...#....^^^^^...#...#.....#",
+"#...........#####....#...#...#####.....#",
+"#.....................###..............#",
+"#.................................t....#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"########################################",
+        ]
+      },
+      {
+        // A short “victory vignette”
+        name: "Candlelight",
+        map: [
+"########################################",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#..............t.......................#",
+"#......................................#",
+"#.............##########...............#",
+"#......................................#",
+"#...............h......................#",
+"#......................................#",
+"#.....s................................#",
+"########################################",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"#......................................#",
+"########################################",
+        ]
       }
-      const STATE = window.STATE;
+    ];
 
-      const updateHUD = () => safe(() => window.updateHUD && window.updateHUD());
-      const setBars   = () => safe(() => window.setBars && window.setBars());
-      const confetti  = (opts) => safe(() => window.safeConfetti && window.safeConfetti(opts));
-      const unlockLoveLine = () => safe(() => window.unlockLoveLine && window.unlockLoveLine());
+    const ROOM_COUNT = ROOMS.length;
+    pfRoomMax.textContent = String(ROOM_COUNT);
 
-      const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+    function parseRoom(room) {
+      const solids = [];
+      const thorns = [];
+      const flames = [];
+      const hearts = [];
+      const crystals = [];
+      let spawn = { x: 2*TILE, y: 10*TILE };
+      let table = { x: (W-3)*TILE, y: (H-3)*TILE, r: 14 };
 
-      // -----------------------------
-      // DOM
-      // -----------------------------
-      const canvas   = document.getElementById("pfCanvas");
-      const ctx      = canvas.getContext("2d");
-
-      const startBtn = document.getElementById("pfStart");
-      const resetBtn = document.getElementById("pfReset");
-      const overlay  = document.getElementById("pfOverlay");
-      const msgEl    = document.getElementById("pfMsg");
-
-      const roomEl   = document.getElementById("pfRoom");
-      const roomMaxEl= document.getElementById("pfRoomMax");
-      const heartsEl = document.getElementById("pfHearts");
-      const deathsEl = document.getElementById("pfDeaths");
-      const bestEl   = document.getElementById("pfBest");
-
-      // -----------------------------
-      // Canvas fit
-      // -----------------------------
-      function fitCanvas() {
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        const rect = canvas.getBoundingClientRect();
-        canvas.width  = Math.floor(rect.width * dpr);
-        canvas.height = Math.floor(rect.height * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-      fitCanvas();
-      window.addEventListener("resize", fitCanvas);
-
-      // -----------------------------
-      // Controls
-      // -----------------------------
-      const KEYS = new Set();
-      window.addEventListener("keydown", (e) => {
-        const k = e.key;
-        if (["ArrowLeft","ArrowRight","ArrowUp","a","d","w"," ","Shift","k","K","j","J","r","R"].includes(k)) {
-          KEYS.add(k);
-          if (k === " " || k === "ArrowUp") e.preventDefault();
-          if (k.toLowerCase() === "r") resetRun();
-        }
-      }, { passive:false });
-      window.addEventListener("keyup", (e) => KEYS.delete(e.key));
-
-      // mobile: tap canvas to jump; double-tap to dash
-      let lastTap = 0;
-      canvas.addEventListener("pointerdown", (e) => {
-        if (!RUN.active) return;
-        const now = performance.now();
-        const dt = now - lastTap;
-        lastTap = now;
-        if (dt < 260) {
-          // dash toward tap direction
-          const rect = canvas.getBoundingClientRect();
-          const tx = e.clientX - rect.left;
-          const ty = e.clientY - rect.top;
-          const dx = tx - (PLAYER.x + PLAYER.w/2);
-          const dy = ty - (PLAYER.y + PLAYER.h/2);
-          const mag = Math.hypot(dx,dy) || 1;
-          tryDash(dx/mag, dy/mag);
-        } else {
-          if (PLAYER.onGround || PLAYER.wallDir !== 0) jump();
-        }
-      });
-
-      // -----------------------------
-      // Level format (ASCII → tiles)
-      // Tiles:
-      //  # = solid
-      //  ^ v < > = spikes
-      //  * = dash crystal (refill)
-      //  H = heart pickup
-      //  S = spring
-      //  F = candle flame hazard (hurts, not instant)
-      //  D = dinner exit (room end)
-      // -----------------------------
-      const TILE = 20;
-      const W = 32;  // columns
-      const H = 18;  // rows
-
-      const ROOMS = [
-        {
-          name: "Aperitif Alley",
-          map: [
-"################################",
-"#..............................#",
-"#..............................#",
-"#..............H...............#",
-"#.............###..............#",
-"#.................*............#",
-"#..............#####...........#",
-"#..............................#",
-"#....S.........................#",
-"#...###..............F.........#",
-"#...........####...............#",
-"#......................###.....#",
-"#...........H..................#",
-"#...........###..........*.....#",
-"#..............................#",
-"#..................####........#",
-"#.........................D....#",
-"################################",
-          ],
-        },
-        {
-          name: "Candle Corridor",
-          map: [
-"################################",
-"#..............................#",
-"#...........^^^^^^^............#",
-"#...........#.....#............#",
-"#.....*.....#..H..#.....F......#",
-"#..........##.....##...........#",
-"#..........#.......#...........#",
-"#..S.......#..^^^^.#...........#",
-"#####......#..#..#.#...........#",
-"#..........#..#..#.#....*......#",
-"#..........#..#..#.#...........#",
-"#..........#..#..#.#...........#",
-"#..........#..#..#.#...........#",
-"#..........#..#..#.#...........#",
-"#..........#..#..#.#...........#",
-"#..........#..#..#.#......D....#",
-"#..........#########...........#",
-"################################",
-          ],
-        },
-        {
-          // This is the “7C screen 3 energy”: long, precise, spike-tight, dash refill rhythm.
-          // Original layout (not copied), same *feel*.
-          name: "Velvet Wallbounce Waltz",
-          map: [
-"################################",
-"#....................^^^^^^^...#",
-"#....................#.....#...#",
-"#..S.................#..*..#...#",
-"#####................#.....#...#",
-"#....................#..^^^#...#",
-"#....................#..#..#...#",
-"#.............H......#..#..#...#",
-"#.............###....#..#..#...#",
-"#....................#..#..#...#",
-"#.....^^^^^..........#..#..#...#",
-"#.....#...#..........#..#..#...#",
-"#..*..#...#..^^^^^...#..#..#...#",
-"#.....#...#..#...#...#..#..#...#",
-"#.....#...#..#...#...#..#..#...#",
-"#.....#...#..#...#...#..#..#D..#",
-"#.....#####..#####...#..####...#",
-"################################",
-          ],
-        },
-        {
-          name: "Table-for-Two Timing",
-          map: [
-"################################",
-"#..............................#",
-"#....^^^^^.....................#",
-"#....#...#..........H..........#",
-"#..S.#...#.........###.........#",
-"#####...^#.....................#",
-"#.......##....*................#",
-"#..............####............#",
-"#..................#...........#",
-"#....F.............#...........#",
-"#.............H....#...........#",
-"#............###...#...........#",
-"#..................#...........#",
-"#..^^^^^^..........#....*......#",
-"#..#....#..........#...........#",
-"#..#....#..........######..D...#",
-"#..######......................#",
-"################################",
-          ],
-        },
-        {
-          name: "Rose Petal Razorline",
-          map: [
-"################################",
-"#.....................^^^^^^...#",
-"#.....................#....#...#",
-"#..S..................#.*..#...#",
-"#####.................#....#...#",
-"#..........H..........######...#",
-"#.........###..................#",
-"#..............................#",
-"#..^^^^^^......................#",
-"#..#....#...........F..........#",
-"#..#....#......................#",
-"#..#....#....^^^^^.............#",
-"#..#....#....#...#.....*.......#",
-"#..######....#...#.............#",
-"#............#...#.............#",
-"#............#####.......D.....#",
-"#..............................#",
-"################################",
-          ],
-        },
-        {
-          name: "Dessert Dash (No Chill)",
-          map: [
-"################################",
-"#..................^^^^^.......#",
-"#..................#...#.......#",
-"#..S...............#.*.#.......#",
-"#####..............#...#.......#",
-"#..................#####.......#",
-"#........H.....................#",
-"#.......###..........F.........#",
-"#..............................#",
-"#....^^^^^^^...................#",
-"#....#.....#.....^^^^^.........#",
-"#....#..*..#.....#...#.........#",
-"#....#.....#.....#...#.........#",
-"#....#######.....#...#.........#",
-"#................#...#.........#",
-"#................#####....D....#",
-"#..............................#",
-"################################",
-          ],
-        },
-        {
-          name: "Dinner Is Served 🥂",
-          map: [
-"################################",
-"#..............................#",
-"#.............🍷🍝🕯️...............#",
-"#..............................#",
-"#....H.........................#",
-"#....###.......................#",
-"#...................*..........#",
-"#..................###.........#",
-"#..............................#",
-"#.............F................#",
-"#..............................#",
-"#..S...........................#",
-"#####....................^^^^..#",
-"#........................#..#..#",
-"#........................#..#..#",
-"#........................#..#D.#",
-"#........................####..#",
-"################################",
-          ],
-        },
-      ];
-
-      // NOTE: The last room contains emoji in the map lines; we’ll treat unknown chars as empty.
-
-      const ROOM_COUNT = ROOMS.length;
-      roomMaxEl.textContent = String(ROOM_COUNT);
-
-      function tileOf(ch){
-        if (ch === "#") return { t:"solid" };
-        if (ch === "^" || ch === "v" || ch === "<" || ch === ">") return { t:"spike", d:ch };
-        if (ch === "*") return { t:"crystal" };
-        if (ch === "H") return { t:"heart" };
-        if (ch === "S") return { t:"spring" };
-        if (ch === "F") return { t:"flame" };
-        if (ch === "D") return { t:"exit" };
-        return { t:"empty" };
-      }
-
-      function parseRoom(roomDef){
-        const grid = Array.from({length:H}, (_,y)=>{
-          const row = roomDef.map[y] || "";
-          return Array.from({length:W}, (_,x)=>{
-            const ch = row[x] || ".";
-            return tileOf(ch);
-          });
-        });
-        return grid;
-      }
-
-      const GRIDS = ROOMS.map(parseRoom);
-
-      // -----------------------------
-      // Player / Physics (Celeste-ish)
-      // -----------------------------
-      const PLAYER = {
-        x: 2*TILE, y: 13*TILE,
-        w: 14, h: 18,
-        vx: 0, vy: 0,
-        onGround: false,
-        wallDir: 0,          // -1 left wall, +1 right wall
-        dash: 1,
-        dashLock: 0,
-        dashTime: 0,
-        dashVX: 0,
-        dashVY: 0,
-        grab: false,
-        stamina: 1.0,        // simple climb stamina (0..1)
-        inv: 0
-      };
-
-      const RUN = {
-        active: false,
-        room: 1,
-        hearts: 0,
-        deaths: 0,
-        best: null
-      };
-
-      function setUI(){
-        roomEl.textContent = String(RUN.room);
-        heartsEl.textContent = String(RUN.hearts);
-        deathsEl.textContent = String(RUN.deaths);
-        bestEl.textContent = RUN.best ? `${RUN.best.hearts}💖 / ${RUN.best.deaths} deaths` : "—";
-      }
-
-      function rectOverlap(ax,ay,aw,ah,bx,by,bw,bh){
-        return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
-      }
-
-      function currentGrid(){ return GRIDS[RUN.room-1]; }
-
-      function solidAt(px,py){
-        const tx = Math.floor(px / TILE);
-        const ty = Math.floor(py / TILE);
-        if (tx<0 || ty<0 || tx>=W || ty>=H) return true; // out of bounds = solid
-        return currentGrid()[ty][tx].t === "solid";
-      }
-
-      function tileAt(px,py){
-        const tx = Math.floor(px / TILE);
-        const ty = Math.floor(py / TILE);
-        if (tx<0 || ty<0 || tx>=W || ty>=H) return { t:"solid" };
-        return currentGrid()[ty][tx];
-      }
-
-      function respawn(){
-        RUN.deaths++;
-        // romantic penalty/reward: nerves up a touch, but you get a tiny “try again 💞”
-        STATE.nerves = clamp((STATE.nerves ?? 25) + 2, 0, 100);
-        STATE.youHP = clamp((STATE.youHP ?? 100) - 2, 0, 100);
-        updateHUD(); setBars();
-
-        PLAYER.x = 2*TILE;
-        PLAYER.y = 13*TILE;
-        PLAYER.vx = 0; PLAYER.vy = 0;
-        PLAYER.onGround = false;
-        PLAYER.wallDir = 0;
-        PLAYER.dash = 1;
-        PLAYER.dashLock = 0;
-        PLAYER.dashTime = 0;
-        PLAYER.stamina = 1.0;
-        PLAYER.inv = 0.35;
-
-        msgEl.textContent = "Bonked 💔 Breathe… then dash again.";
-        setUI();
-      }
-
-      function enterRoom(n){
-        RUN.room = clamp(n, 1, ROOM_COUNT);
-        PLAYER.x = 2*TILE;
-        PLAYER.y = 13*TILE;
-        PLAYER.vx = 0; PLAYER.vy = 0;
-        PLAYER.onGround = false;
-        PLAYER.wallDir = 0;
-        PLAYER.dash = 1;
-        PLAYER.dashLock = 0;
-        PLAYER.dashTime = 0;
-        PLAYER.stamina = 1.0;
-        msgEl.textContent = `Room ${RUN.room}: ${ROOMS[RUN.room-1].name}`;
-        setUI();
-      }
-
-      function finishRun(){
-        const score = { hearts: RUN.hearts, deaths: RUN.deaths };
-        const better = !RUN.best
-          || score.hearts > RUN.best.hearts
-          || (score.hearts === RUN.best.hearts && score.deaths < RUN.best.deaths);
-        if (better) RUN.best = score;
-
-        msgEl.textContent = "🥂 Dinner is served. (You’re insane. I love it.)";
-        confetti({ particleCount: 180, spread: 95, origin: { y: 0.6 } });
-
-        STATE.affection = clamp((STATE.affection ?? 0) + 8, 0, 100);
-        STATE.nerves = clamp((STATE.nerves ?? 25) - 6, 0, 100);
-        STATE.mana.sparkle = (STATE.mana?.sparkle ?? 0) + 2;
-        unlockLoveLine();
-        updateHUD(); setBars();
-
-        setUI();
-        RUN.active = false;
-        startBtn.style.opacity = "1";
-        startBtn.style.pointerEvents = "auto";
-        startBtn.textContent = "Run Again (for love)";
-        overlay.style.opacity = "1";
-      }
-
-      function resetRun(){
-        if (!RUN.active) return;
-        RUN.hearts = 0;
-        RUN.deaths = 0;
-        enterRoom(1);
-        msgEl.textContent = "Reset. Candle’s still lit. Try again 😤🕯️";
-        setUI();
-      }
-
-      // -----------------------------
-      // Moves: jump / dash
-      // -----------------------------
-      function jump(){
-        // ground jump
-        if (PLAYER.onGround){
-          PLAYER.vy = -9.2;
-          PLAYER.onGround = false;
-          return;
-        }
-        // wall jump
-        if (PLAYER.wallDir !== 0){
-          PLAYER.vy = -9.0;
-          PLAYER.vx = -PLAYER.wallDir * 5.2;
-          PLAYER.wallDir = 0;
-          PLAYER.stamina = clamp(PLAYER.stamina - 0.10, 0, 1);
+      for (let y=0; y<room.map.length; y++){
+        const row = room.map[y];
+        for (let x=0; x<row.length; x++){
+          const ch = row[x];
+          const wx = x*TILE, wy = y*TILE;
+          if (ch === "#") solids.push({ x:wx, y:wy, w:TILE, h:TILE });
+          else if (ch === "^") thorns.push({ x:wx, y:wy, w:TILE, h:TILE });
+          else if (ch === "f") flames.push({ x:wx, y:wy, w:TILE, h:TILE });
+          else if (ch === "h") hearts.push({ x:wx+TILE/2, y:wy+TILE/2, r: 8, taken:false });
+          else if (ch === "c") crystals.push({ x:wx+TILE/2, y:wy+TILE/2, r: 9, used:false });
+          else if (ch === "s") spawn = { x:wx+2, y:wy-2 };
+          else if (ch === "t") table = { x:wx+TILE/2, y:wy+TILE/2, r: 16 };
         }
       }
 
-      function tryDash(dx,dy){
-        if (PLAYER.dash <= 0) return;
-        if (PLAYER.dashLock > 0) return;
+      return { solids, thorns, flames, hearts, crystals, spawn, table, name: room.name };
+    }
 
-        // normalize, allow “neutral dash” to go right
-        let mag = Math.hypot(dx,dy);
-        if (mag < 0.2){ dx = 1; dy = 0; mag = 1; }
-        dx /= mag; dy /= mag;
+    const compiled = ROOMS.map(parseRoom);
 
-        PLAYER.dash -= 1;
-        PLAYER.dashTime = 0.13;     // dash duration
-        PLAYER.dashVX = dx * 10.5;
-        PLAYER.dashVY = dy * 10.5;
-        PLAYER.vx = PLAYER.dashVX;
-        PLAYER.vy = PLAYER.dashVY;
-        PLAYER.dashLock = 0.05;
+    // -----------------------------
+    // Core “Unity style” components
+    // -----------------------------
+    class PlayerController {
+      constructor(){
+        this.w = 14;
+        this.h = 18;
 
-        msgEl.textContent = "💫 dash!";
+        this.x = 0;
+        this.y = 0;
+        this.vx = 0;
+        this.vy = 0;
+
+        this.facing = 1;
+
+        this.onGround = false;
+        this.onWall = 0; // -1 left, +1 right
+        this.wallSlide = false;
+
+        // Celeste-like “feel” helpers
+        this.coyote = 0;        // seconds
+        this.jumpBuffer = 0;    // seconds
+        this.dashTime = 0;      // seconds remaining
+        this.dashCooldown = 0;  // seconds
+        this.hasDash = true;
+
+        this.inv = 0;
       }
 
-      // -----------------------------
-      // Interactions
-      // -----------------------------
-      function grantHeart(){
-        RUN.hearts += 1;
-        STATE.affection = clamp((STATE.affection ?? 0) + 2.0, 0, 100);
-        STATE.nerves = clamp((STATE.nerves ?? 25) - 1.2, 0, 100);
+      spawn(at){
+        this.x = at.x;
+        this.y = at.y;
+        this.vx = 0;
+        this.vy = 0;
+        this.onGround = false;
+        this.onWall = 0;
+        this.wallSlide = false;
+        this.coyote = 0;
+        this.jumpBuffer = 0;
+        this.dashTime = 0;
+        this.dashCooldown = 0;
+        this.hasDash = true;
+        this.inv = 0;
+      }
+    }
 
-        // random mana (date-night loot)
+    class GameManager {
+      constructor(){
+        this.running = false;
+        this.roomIndex = 0;
+        this.hearts = 0;
+        this.deaths = 0;
+        this.best = null;
+        this.msg = "Ready.";
+      }
+
+      setRoom(i){
+        this.roomIndex = clamp(i, 0, ROOM_COUNT-1);
+        const rm = compiled[this.roomIndex];
+        player.spawn(rm.spawn);
+        this.msg = rm.name + " — reach the table.";
+        // room reset collectibles
+        rm.hearts.forEach(h => h.taken = false);
+        rm.crystals.forEach(c => c.used = false);
+        ui.sync();
+      }
+
+      die(reason){
+        this.deaths += 1;
+        this.msg = reason || "Try again.";
+        const rm = compiled[this.roomIndex];
+        player.spawn(rm.spawn);
+        ui.sync();
+      }
+
+      addHeart(){
+        this.hearts += 1;
+
+        // Romantic rewards: gentle boosts
+        STATE.affection += 2.0;
+        STATE.nerves = clamp(STATE.nerves - 1.0, 0, 100);
+
+        // Mana trickle: like Unity pickup events
         const r = Math.random();
         if (r < 0.30) STATE.mana.heart += 1;
         else if (r < 0.55) STATE.mana.choc += 1;
         else if (r < 0.78) STATE.mana.popcorn += 1;
         else STATE.mana.sparkle += 1;
 
-        if (RUN.hearts % 4 === 0) unlockLoveLine();
+        if (this.hearts % 5 === 0) unlockLoveLine();
 
         updateHUD(); setBars();
-        confetti({ particleCount: 40, spread: 70, origin: { y: 0.75 } });
-        msgEl.textContent = "💖 collected. (Romantic AND cracked at platformers.)";
-        setUI();
+        safeConfetti({ particleCount: 30, spread: 55, origin: { y: 0.75 } });
+
+        this.msg = "A small kindness lands perfectly.";
+        ui.sync();
       }
 
-      function refillDash(){
-        PLAYER.dash = 1;
-        msgEl.textContent = "🔷 dash refilled!";
+      refillDash(){
+        player.hasDash = true;
+        player.dashCooldown = 0;
+        this.msg = "You catch your breath.";
+        ui.sync();
       }
 
-      function flameHit(){
-        if (PLAYER.inv > 0) return;
-        PLAYER.inv = 0.5;
-        STATE.nerves = clamp((STATE.nerves ?? 25) + 6, 0, 100);
-        STATE.youHP = clamp((STATE.youHP ?? 100) - 6, 0, 100);
+      reachTable(){
+        if (this.roomIndex < ROOM_COUNT-1){
+          this.setRoom(this.roomIndex + 1);
+          return;
+        }
+
+        // Finish run
+        const score = { hearts: this.hearts, deaths: this.deaths };
+        const better =
+          !this.best ||
+          score.hearts > this.best.hearts ||
+          (score.hearts === this.best.hearts && score.deaths < this.best.deaths);
+
+        if (better) this.best = score;
+
+        // Victory buffs
+        STATE.affection += 12;
+        STATE.nerves = clamp(STATE.nerves - 8, 0, 100);
+        STATE.mana.sparkle += 2;
+
         updateHUD(); setBars();
-        msgEl.textContent = "🕯️ too hot! careful around the candles…";
+        safeConfetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } });
+
+        this.msg = "You made it. A candlelit table waits.";
+        ui.sync();
       }
+    }
 
-      // -----------------------------
-      // Collision & step
-      // -----------------------------
-      function resolveCollisions(){
-        const steps = 3;
+    const player = new PlayerController();
+    const game = new GameManager();
 
-        for (let s=0; s<steps; s++){
-          // X
-          PLAYER.x += PLAYER.vx / steps;
+    // -----------------------------
+    // UI Manager (Unity-ish)
+    // -----------------------------
+    const ui = {
+      sync(){
+        pfRoom.textContent = String(game.roomIndex + 1);
+        pfHearts.textContent = String(game.hearts);
+        pfDeaths.textContent = String(game.deaths);
+        pfBest.textContent = game.best ? (game.best.hearts + " hearts / " + game.best.deaths + " deaths") : "—";
+        msgEl.textContent = game.msg;
+      }
+    };
 
-          if (PLAYER.vx !== 0){
-            const left = PLAYER.x;
-            const right = PLAYER.x + PLAYER.w;
-            const top = PLAYER.y + 2;
-            const bottom = PLAYER.y + PLAYER.h - 2;
-            const checkX = (PLAYER.vx > 0) ? right : left;
+    // -----------------------------
+    // Physics + collisions
+    // -----------------------------
+    const rectOverlap = (ax,ay,aw,ah,bx,by,bw,bh) =>
+      ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 
-            for (let yy = top; yy <= bottom; yy += 6){
-              if (solidAt(checkX, yy)){
-                if (PLAYER.vx > 0) PLAYER.x = Math.floor(checkX / TILE) * TILE - PLAYER.w - 0.01;
-                else PLAYER.x = (Math.floor(checkX / TILE) + 1) * TILE + 0.01;
-                PLAYER.vx = 0;
-                break;
-              }
-            }
-          }
+    function moveAndCollide(rm, dt){
+      const solids = rm.solids;
+      const px0 = player.x, py0 = player.y;
 
-          // Y
-          PLAYER.y += PLAYER.vy / steps;
-          PLAYER.onGround = false;
-
-          if (PLAYER.vy !== 0){
-            const left = PLAYER.x + 2;
-            const right = PLAYER.x + PLAYER.w - 2;
-            const top = PLAYER.y;
-            const bottom = PLAYER.y + PLAYER.h;
-            const checkY = (PLAYER.vy > 0) ? bottom : top;
-
-            for (let xx = left; xx <= right; xx += 6){
-              if (solidAt(xx, checkY)){
-                if (PLAYER.vy > 0){
-                  PLAYER.y = Math.floor(checkY / TILE) * TILE - PLAYER.h - 0.01;
-                  PLAYER.onGround = true;
-                  // tiny dash refresh on landing like “reset your hands”
-                  PLAYER.dashLock = 0;
-                } else {
-                  PLAYER.y = (Math.floor(checkY / TILE) + 1) * TILE + 0.01;
-                }
-                PLAYER.vy = 0;
-                break;
-              }
-            }
+      // Split steps for stability
+      const steps = 2;
+      for (let s=0; s<steps; s++){
+        // X
+        player.x += (player.vx * dt) / steps;
+        let hitWall = 0;
+        for (const t of solids){
+          if (rectOverlap(player.x, player.y, player.w, player.h, t.x, t.y, t.w, t.h)){
+            if (player.vx > 0) { player.x = t.x - player.w - 0.01; hitWall = 1; }
+            else if (player.vx < 0) { player.x = t.x + t.w + 0.01; hitWall = -1; }
+            player.vx = 0;
           }
         }
 
-        // Wall detection (for wall slides / wall jumps)
-        PLAYER.wallDir = 0;
-        const midY = PLAYER.y + PLAYER.h*0.5;
-        if (!PLAYER.onGround){
-          if (solidAt(PLAYER.x - 1, midY)) PLAYER.wallDir = -1;
-          else if (solidAt(PLAYER.x + PLAYER.w + 1, midY)) PLAYER.wallDir = 1;
-        }
-      }
-
-      function deadlySpikeTouch(){
-        // check a few sample points around player against spike tiles
-        const samples = [
-          [PLAYER.x+2, PLAYER.y+2],
-          [PLAYER.x+PLAYER.w-2, PLAYER.y+2],
-          [PLAYER.x+2, PLAYER.y+PLAYER.h-2],
-          [PLAYER.x+PLAYER.w-2, PLAYER.y+PLAYER.h-2],
-          [PLAYER.x+PLAYER.w/2, PLAYER.y+PLAYER.h/2],
-        ];
-        for (const [sx,sy] of samples){
-          const t = tileAt(sx,sy);
-          if (t.t === "spike") return true;
-        }
-        return false;
-      }
-
-      function interactTiles(){
-        // scan a small neighborhood around player for pickups/hazards
-        const minX = Math.floor((PLAYER.x-2) / TILE);
-        const maxX = Math.floor((PLAYER.x+PLAYER.w+2) / TILE);
-        const minY = Math.floor((PLAYER.y-2) / TILE);
-        const maxY = Math.floor((PLAYER.y+PLAYER.h+2) / TILE);
-
-        for (let ty=minY; ty<=maxY; ty++){
-          for (let tx=minX; tx<=maxX; tx++){
-            if (tx<0||ty<0||tx>=W||ty>=H) continue;
-            const cell = currentGrid()[ty][tx];
-
-            const bx = tx*TILE, by=ty*TILE;
-            const hit = rectOverlap(PLAYER.x,PLAYER.y,PLAYER.w,PLAYER.h, bx,by, TILE,TILE);
-            if (!hit) continue;
-
-            if (cell.t === "heart"){
-              cell.t = "empty";
-              grantHeart();
+        // Y
+        player.y += (player.vy * dt) / steps;
+        player.onGround = false;
+        for (const t of solids){
+          if (rectOverlap(player.x, player.y, player.w, player.h, t.x, t.y, t.w, t.h)){
+            if (player.vy > 0){
+              player.y = t.y - player.h - 0.01;
+              player.onGround = true;
+            } else if (player.vy < 0){
+              player.y = t.y + t.h + 0.01;
             }
-            if (cell.t === "crystal"){
-              cell.t = "empty";
-              refillDash();
-              confetti({ particleCount: 18, spread: 55, origin: { y: 0.7 } });
-            }
-            if (cell.t === "spring"){
-              // bounce up
-              PLAYER.vy = -12.0;
-              PLAYER.dashLock = 0;
-              msgEl.textContent = "Sproing 💞";
-            }
-            if (cell.t === "flame"){
-              flameHit();
-            }
-            if (cell.t === "exit"){
-              if (RUN.room < ROOM_COUNT) enterRoom(RUN.room + 1);
-              else finishRun();
-              return;
-            }
+            player.vy = 0;
           }
         }
 
-        // spikes = instant death
-        if (deadlySpikeTouch()){
-          respawn();
+        // wall detect after resolution
+        player.onWall = 0;
+        if (!player.onGround){
+          const pad = 2;
+          for (const t of solids){
+            if (rectOverlap(player.x+pad, player.y, player.w, player.h, t.x, t.y, t.w, t.h)) { player.onWall = -1; break; }
+            if (rectOverlap(player.x-pad, player.y, player.w, player.h, t.x, t.y, t.w, t.h)) { player.onWall = 1; break; }
+          }
         }
       }
 
-      // -----------------------------
-      // Draw (romantic candle vibe)
-      // -----------------------------
-      function draw(){
-        const w = canvas.getBoundingClientRect().width;
-        const h = canvas.getBoundingClientRect().height;
+      // If you land, refill dash (Celeste-ish)
+      if (player.onGround){
+        player.coyote = 0.10;
+        player.hasDash = true;
+      } else {
+        player.coyote = Math.max(0, player.coyote - dt);
+      }
 
-        ctx.clearRect(0,0,w,h);
+      // Safety: keep in bounds
+      player.x = clamp(player.x, 0, W*TILE - player.w);
+      player.y = clamp(player.y, -40, H*TILE + 60);
 
-        // dreamy candlelit gradient
-        const g = ctx.createLinearGradient(0,0,0,h);
-        g.addColorStop(0,"rgba(255, 228, 230, 0.55)");
-        g.addColorStop(0.45,"rgba(30, 41, 59, 0.35)");
-        g.addColorStop(1,"rgba(2, 6, 23, 0.55)");
-        ctx.fillStyle = g;
-        ctx.fillRect(0,0,w,h);
+      player.facing = (player.vx !== 0) ? Math.sign(player.vx) : player.facing;
+    }
 
-        // subtle “sparkle dust”
-        ctx.globalAlpha = 0.12;
-        for (let i=0;i<80;i++){
-          const x = (i*97)%w;
-          const y = (i*53)%h;
-          ctx.fillRect(x,y,1,1);
+    // -----------------------------
+    // Gameplay update (Celeste feel)
+    // -----------------------------
+    function update(dt){
+      const rm = compiled[game.roomIndex];
+
+      // update timers
+      player.inv = Math.max(0, player.inv - dt);
+      player.jumpBuffer = Math.max(0, player.jumpBuffer - dt);
+      player.dashCooldown = Math.max(0, player.dashCooldown - dt);
+
+      sampleInput();
+
+      // Jump buffering
+      if (input.wantJump) player.jumpBuffer = 0.12;
+
+      // Dash
+      if (input.wantDash && player.hasDash && player.dashCooldown <= 0){
+        // 8-way dash with simple “up if holding jump”
+        let dx = input.axisX;
+        let dy = (input.jumpHeld ? -1 : 0);
+        if (dx === 0 && dy === 0) dx = player.facing;
+
+        const mag = Math.hypot(dx,dy) || 1;
+        dx /= mag; dy /= mag;
+
+        player.hasDash = false;
+        player.dashTime = 0.14;
+        player.dashCooldown = 0.20;
+
+        player.vx = dx * 260;
+        player.vy = dy * 260;
+
+        game.msg = "A decisive move.";
+        ui.sync();
+      }
+
+      // When dashing, reduce gravity and ignore wall slide
+      if (player.dashTime > 0){
+        player.dashTime -= dt;
+        // slight damping for consistency
+        player.vx *= Math.pow(0.10, dt);
+        player.vy *= Math.pow(0.10, dt);
+      } else {
+        // Horizontal movement (tight)
+        const accel = player.onGround ? 2300 : 1800;
+        const maxV  = player.onGround ? 125 : 115;
+        const friction = player.onGround ? 15 : 6;
+
+        // accelerate toward target
+        const target = input.axisX * maxV;
+        player.vx += (target - player.vx) * (1 - Math.exp(-accel * dt / 2000));
+
+        // friction when no input
+        if (input.axisX === 0){
+          player.vx *= Math.exp(-friction * dt);
+          if (Math.abs(player.vx) < 3) player.vx = 0;
         }
-        ctx.globalAlpha = 1;
 
-        // tiles
-        const grid = currentGrid();
-        for (let y=0;y<H;y++){
-          for (let x=0;x<W;x++){
-            const cell = grid[y][x];
-            const px = x*TILE, py=y*TILE;
+        // Wall slide (Celeste-ish)
+        player.wallSlide = (!player.onGround && player.onWall !== 0 && player.vy > 0);
+        const grav = player.wallSlide ? 820 : 1550;
+        const maxFall = player.wallSlide ? 85 : 220;
+        player.vy = clamp(player.vy + grav * dt, -600, maxFall);
 
-            if (cell.t === "solid"){
-              ctx.globalAlpha = 0.92;
-              ctx.fillStyle = "rgba(255,255,255,0.78)";
-              ctx.fillRect(px,py,TILE,TILE);
-              ctx.globalAlpha = 1;
-            } else if (cell.t === "spike"){
-              ctx.globalAlpha = 0.95;
-              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-              ctx.fillText("💔", px+2, py+18);
-              ctx.globalAlpha = 1;
-            } else if (cell.t === "crystal"){
-              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-              ctx.fillText("🔷", px+2, py+18);
-            } else if (cell.t === "heart"){
-              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-              ctx.fillText("💖", px+2, py+18);
-            } else if (cell.t === "spring"){
-              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-              ctx.fillText("🪄", px+2, py+18);
-            } else if (cell.t === "flame"){
-              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-              ctx.fillText("🕯️", px+2, py+18);
-            } else if (cell.t === "exit"){
-              ctx.font = "18px system-ui, Apple Color Emoji, Segoe UI Emoji";
-              ctx.fillText("🍽️", px+2, py+18);
-            }
+        // Variable jump height
+        const canJump = (player.onGround || player.coyote > 0);
+        if (player.jumpBuffer > 0 && canJump){
+          player.jumpBuffer = 0;
+          player.coyote = 0;
+          player.vy = -310;
+          game.msg = "You commit.";
+          ui.sync();
+        }
+
+        // Wall jump if buffered and on wall
+        if (player.jumpBuffer > 0 && player.onWall !== 0 && !player.onGround){
+          player.jumpBuffer = 0;
+          const dir = -player.onWall;
+          player.vx = dir * 150;
+          player.vy = -300;
+          player.hasDash = true; // like Celeste: wall interactions feel generous
+          game.msg = "You push off the wall.";
+          ui.sync();
+        }
+
+        // If jump not held, cut jump (tap jump)
+        if (!input.jumpHeld && player.vy < -160){
+          player.vy = -160;
+        }
+      }
+
+      // Apply movement
+      moveAndCollide(rm, dt);
+
+      // Hazards & pickups
+      // Thorns: instant death
+      for (const t of rm.thorns){
+        if (rectOverlap(player.x,player.y,player.w,player.h, t.x,t.y,t.w,t.h)){
+          game.die("A sharp mistake. Reset.");
+          break;
+        }
+      }
+
+      // Flames: damage + knockback + brief inv
+      for (const f of rm.flames){
+        if (rectOverlap(player.x,player.y,player.w,player.h, f.x,f.y,f.w,f.h)){
+          if (player.inv <= 0){
+            player.inv = 0.55;
+            STATE.nerves = clamp(STATE.nerves + 5, 0, 100);
+            STATE.youHP = clamp((STATE.youHP ?? 100) - 4, 0, 100);
+            player.vx = -player.facing * 120;
+            player.vy = -180;
+            updateHUD(); setBars();
+            game.msg = "Too close to the flame.";
+            ui.sync();
           }
         }
+      }
 
-        // player
-        ctx.globalAlpha = PLAYER.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
-        ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-        ctx.fillText("🫶", PLAYER.x-2, PLAYER.y+PLAYER.h);
-        ctx.globalAlpha = 1;
+      // Hearts
+      for (const h of rm.hearts){
+        if (h.taken) continue;
+        const hit = rectOverlap(player.x,player.y,player.w,player.h, h.x-h.r,h.y-h.r, h.r*2,h.r*2);
+        if (hit){
+          h.taken = true;
+          game.addHeart();
+        }
+      }
 
-        // HUD hint in-canvas
+      // Dash crystals
+      for (const c of rm.crystals){
+        if (c.used) continue;
+        const hit = rectOverlap(player.x,player.y,player.w,player.h, c.x-c.r,c.y-c.r, c.r*2,c.r*2);
+        if (hit){
+          c.used = true;
+          game.refillDash();
+        }
+      }
+
+      // Table exit
+      const table = rm.table;
+      const atExit = rectOverlap(player.x,player.y,player.w,player.h, table.x-table.r,table.y-table.r, table.r*2,table.r*2);
+      if (atExit){
+        game.reachTable();
+      }
+
+      // Clear one-frame intents
+      input.wantJump = false;
+      input.wantDash = false;
+    }
+
+    // -----------------------------
+    // Render (romantic candle dinner)
+    // -----------------------------
+    function draw(){
+      const w = canvas.getBoundingClientRect().width;
+      const h = canvas.getBoundingClientRect().height;
+      ctx.clearRect(0,0,w,h);
+
+      // soft candlelit gradient
+      const g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, "rgba(30, 41, 59, 0.30)");
+      g.addColorStop(0.5, "rgba(255, 228, 230, 0.20)");
+      g.addColorStop(1, "rgba(255, 247, 237, 0.35)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,w,h);
+
+      // subtle bokeh lights
+      for (let i=0;i<14;i++){
+        const x = (i*97 % 900) % w;
+        const y = (i*57 % 600) % h;
+        ctx.globalAlpha = 0.10;
+        ctx.beginPath();
+        ctx.arc(x, y, 18 + (i%5)*8, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(251, 113, 133, 1)";
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      const rm = compiled[game.roomIndex];
+
+      // tiles
+      for (const t of rm.solids){
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.fillRect(t.x, t.y, t.w, t.h);
+      }
+      ctx.globalAlpha = 1;
+
+      // thorns (no emoji: draw sharp triangles)
+      ctx.fillStyle = "rgba(244, 63, 94, 0.85)";
+      for (const s of rm.thorns){
+        const x = s.x, y = s.y;
+        ctx.beginPath();
+        ctx.moveTo(x, y + TILE);
+        ctx.lineTo(x + TILE/2, y);
+        ctx.lineTo(x + TILE, y + TILE);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // flames (no emoji: candle flames)
+      for (const f of rm.flames){
+        const cx = f.x + TILE/2, cy = f.y + TILE/2;
         ctx.globalAlpha = 0.9;
-        ctx.font = "12px ui-sans-serif, system-ui";
-        ctx.fillStyle = "rgba(255,255,255,0.85)";
-        ctx.fillText(`${ROOMS[RUN.room-1].name}  •  Dash: ${PLAYER.dash}`, 10, 18);
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 5, 9, 0, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(245, 158, 11, 0.85)";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(cx, cy+3, 7, 6, 0, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(251, 113, 133, 0.35)";
+        ctx.fill();
         ctx.globalAlpha = 1;
       }
 
-      // -----------------------------
-      // Main loop
-      // -----------------------------
-      let raf = null;
-      let last = 0;
-
-      function loop(ts){
-        if (!RUN.active) return;
-        if (!last) last = ts;
-        const dt = Math.min(0.033, (ts-last)/1000);
-        last = ts;
-
-        if (PLAYER.inv > 0) PLAYER.inv -= dt;
-        if (PLAYER.dashLock > 0) PLAYER.dashLock -= dt;
-
-        // Inputs
-        const left  = KEYS.has("ArrowLeft") || KEYS.has("a");
-        const right = KEYS.has("ArrowRight") || KEYS.has("d");
-        const up    = KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has(" ");
-        const dashK = KEYS.has("Shift") || KEYS.has("k") || KEYS.has("K");
-        const grabK = KEYS.has("j") || KEYS.has("J");
-
-        PLAYER.grab = !!grabK;
-
-        // Dash direction from input
-        const dx = (right?1:0) + (left?-1:0);
-        const dy = ( (KEYS.has("ArrowDown")||KEYS.has("s")) ? 1 : 0 ) + (up ? -1 : 0);
-
-        // Jump (edge detect)
-        if (up && !PLAYER.__jumpHeld){
-          jump();
-        }
-        PLAYER.__jumpHeld = up;
-
-        // Dash (edge detect)
-        if (dashK && !PLAYER.__dashHeld){
-          tryDash(dx,dy);
-          confetti({ particleCount: 8, spread: 40, origin: { y: 0.8 } });
-        }
-        PLAYER.__dashHeld = dashK;
-
-        // Apply dash
-        if (PLAYER.dashTime > 0){
-          PLAYER.dashTime -= dt;
-          PLAYER.vx = PLAYER.dashVX;
-          PLAYER.vy = PLAYER.dashVY;
-        } else {
-          // Normal physics
-          const accel = 55;
-          const maxVx = 6.0;
-
-          let ax = 0;
-          if (left) ax -= 1;
-          if (right) ax += 1;
-
-          PLAYER.vx += ax * accel * dt;
-
-          // friction
-          const fric = PLAYER.onGround ? 0.00004 : 0.00045;
-          PLAYER.vx *= Math.pow(fric, dt);
-
-          PLAYER.vx = clamp(PLAYER.vx, -maxVx, maxVx);
-
-          // gravity
-          PLAYER.vy += 28 * dt;
-          PLAYER.vy = clamp(PLAYER.vy, -18, 15);
-
-          // wall slide + grab (very “C-side” useful)
-          if (PLAYER.wallDir !== 0 && !PLAYER.onGround){
-            const slideCap = PLAYER.grab && PLAYER.stamina > 0 ? 1.5 : 5.8;
-            PLAYER.vy = Math.min(PLAYER.vy, slideCap);
-
-            if (PLAYER.grab){
-              PLAYER.stamina = clamp(PLAYER.stamina - 0.35*dt, 0, 1);
-              // little stamina regen if you stop grabbing
-            }
-          } else {
-            PLAYER.stamina = clamp(PLAYER.stamina + 0.20*dt, 0, 1);
-          }
-        }
-
-        resolveCollisions();
-        interactTiles();
-        draw();
-
-        raf = requestAnimationFrame(loop);
+      // hearts (pickup: simple heart shape)
+      function drawHeart(x,y,sz){
+        ctx.save();
+        ctx.translate(x,y);
+        ctx.beginPath();
+        ctx.moveTo(0, sz*0.25);
+        ctx.bezierCurveTo(-sz, -sz*0.35, -sz*0.6, -sz, 0, -sz*0.45);
+        ctx.bezierCurveTo(sz*0.6, -sz, sz, -sz*0.35, 0, sz*0.25);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(244, 63, 94, 0.85)";
+        ctx.fill();
+        ctx.restore();
+      }
+      for (const p of rm.hearts){
+        if (p.taken) continue;
+        drawHeart(p.x, p.y, 8);
       }
 
-      function startRun(){
-        RUN.active = true;
-        RUN.hearts = 0;
-        RUN.deaths = 0;
-        enterRoom(1);
-
-        overlay.style.opacity = "0";
-        startBtn.style.opacity = "0";
-        startBtn.style.pointerEvents = "none";
-
-        msgEl.textContent = "Go. For love. 🕯️💘";
-        setUI();
-        last = 0;
-        raf = requestAnimationFrame(loop);
+      // crystals (dash refill)
+      for (const c of rm.crystals){
+        if (c.used) continue;
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle = "rgba(99, 102, 241, 0.85)";
+        ctx.beginPath();
+        ctx.moveTo(c.x, c.y - 9);
+        ctx.lineTo(c.x + 9, c.y);
+        ctx.lineTo(c.x, c.y + 9);
+        ctx.lineTo(c.x - 9, c.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
       }
 
-      startBtn.addEventListener("click", startRun);
-      resetBtn.addEventListener("click", resetRun);
+      // table (exit)
+      const tb = rm.table;
+      ctx.globalAlpha = 0.95;
+      ctx.fillStyle = "rgba(15, 23, 42, 0.40)";
+      ctx.beginPath();
+      ctx.roundRect(tb.x-20, tb.y-14, 40, 28, 8);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.70)";
+      ctx.beginPath();
+      ctx.roundRect(tb.x-18, tb.y-12, 36, 24, 8);
+      ctx.fill();
 
-      // ESC safety: stop run (optional)
-      window.addEventListener("keydown", (e) => {
-        if (e.key !== "Escape") return;
-        if (!RUN.active) return;
-        RUN.active = false;
-        msgEl.textContent = "Paused (Escape). Click Start to try again.";
-        startBtn.style.opacity = "1";
-        startBtn.style.pointerEvents = "auto";
-        startBtn.textContent = "Resume / Restart";
-        overlay.style.opacity = "1";
-      });
+      // two candle sticks on table
+      ctx.fillStyle = "rgba(30, 41, 59, 0.55)";
+      ctx.fillRect(tb.x-10, tb.y-10, 6, 14);
+      ctx.fillRect(tb.x+4,  tb.y-10, 6, 14);
+      // flames
+      ctx.fillStyle = "rgba(245, 158, 11, 0.85)";
+      ctx.beginPath(); ctx.ellipse(tb.x-7, tb.y-12, 3, 6, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(tb.x+7, tb.y-12, 3, 6, 0, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
 
-      // initial paint
-      setUI();
+      // player (no emoji: small silhouette + heart glow)
+      const blink = player.inv > 0 ? (Math.floor(performance.now()/90)%2 ? 0.35 : 1) : 1;
+      ctx.globalAlpha = blink;
+
+      // glow
+      ctx.globalAlpha = 0.25 * blink;
+      ctx.beginPath();
+      ctx.arc(player.x + player.w/2, player.y + player.h/2, 16, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(244, 63, 94, 1)";
+      ctx.fill();
+
+      // body
+      ctx.globalAlpha = blink;
+      ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+      ctx.beginPath();
+      ctx.roundRect(player.x, player.y, player.w, player.h, 5);
+      ctx.fill();
+
+      // tiny “lapel” highlight
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.fillRect(player.x+3, player.y+5, 3, 6);
+
+      ctx.globalAlpha = 1;
+
+      // title text
+      ctx.fillStyle = "rgba(15, 23, 42, 0.55)";
+      ctx.font = "bold 12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText(ROOMS[game.roomIndex].name, 10, 18);
+    }
+
+    // -----------------------------
+    // Loop
+    // -----------------------------
+    let raf = null;
+    let last = 0;
+
+    function loop(ts){
+      if (!game.running) return;
+      if (!last) last = ts;
+      const dt = Math.min(0.033, (ts - last)/1000);
+      last = ts;
+
+      update(dt);
       draw();
-    })();
+
+      raf = requestAnimationFrame(loop);
+    }
+
+    // -----------------------------
+    // Start / Reset
+    // -----------------------------
+    function start(){
+      game.running = true;
+      overlay.style.opacity = "0";
+      startBtn.style.opacity = "0";
+      startBtn.style.pointerEvents = "none";
+
+      game.hearts = 0;
+      game.deaths = 0;
+      game.setRoom(0);
+
+      last = 0;
+      raf = requestAnimationFrame(loop);
+    }
+
+    function resetRun(){
+      if (!game.running) return;
+      game.deaths += 1; // reset counts as “try again”
+      game.hearts = 0;
+      game.setRoom(0);
+      game.msg = "Reset. Breathe. Try again.";
+      ui.sync();
+    }
+
+    startBtn.addEventListener("click", start);
+    resetBtn.addEventListener("click", resetRun);
+
+    // Init UI
+    ui.sync();
+    draw();
+  })();
   </script>
 </section>
+
 
 
   <!-- Spellbook Modal -->
