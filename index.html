@@ -198,7 +198,53 @@ file<html lang="en">
     .mascot-bounce { animation: mascotBounce 1.8s ease-in-out infinite; }
     @keyframes mascotBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } }
 
-    /* Heart buttons */
+    <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Runaway NO Heart Button</title>
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 500px at 20% 20%, rgba(255,105,180,.18), transparent 55%),
+                  radial-gradient(900px 450px at 80% 40%, rgba(99,102,241,.14), transparent 60%),
+                  #fff;
+      color: rgba(15,23,42,.85);
+    }
+
+    .card{
+      width:min(680px, calc(100vw - 24px));
+      border-radius:28px;
+      background: rgba(255,255,255,.8);
+      border: 1px solid rgba(255,255,255,.65);
+      box-shadow: 0 40px 90px rgba(2,6,23,.12);
+      padding: 22px;
+      backdrop-filter: blur(8px);
+    }
+    h1{ margin:0; font-size:22px; font-weight: 900; }
+    p{ margin:8px 0 0; font-weight:700; opacity:.75; }
+
+    /* Arena for the hearts */
+    #heartButtons{
+      position: relative;
+      margin-top: 18px;
+      height: 110px;               /* IMPORTANT: gives the NO space to run */
+      border-radius: 22px;
+      background: rgba(255,255,255,.65);
+      border: 1px solid rgba(255,255,255,.65);
+      overflow: hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 22px;
+    }
+
+    /* ========= Your original Heart buttons ========= */
     .svg-heart{
       width: 58px;
       height: 54px;
@@ -225,6 +271,170 @@ file<html lang="en">
     }
     .svg-heart:hover{ transform: scale(1.06); filter: drop-shadow(0 12px 18px rgba(0,0,0,.18)); }
     .svg-heart:active{ transform: scale(.96); }
+
+    /* ========= NEW: Runaway NO behavior ========= */
+    .svg-heart.no{
+      position: absolute;            /* so we can move it freely */
+      left: 0;
+      top: 0;
+      z-index: 20;
+      --nx: 0px;
+      --ny: 0px;
+      --nscale: 1;
+      transform: translate(var(--nx), var(--ny)) scale(var(--nscale));
+      transition:
+        transform 120ms ease,
+        filter 120ms ease,
+        opacity 120ms ease;
+    }
+    .svg-heart.no.is-running{
+      transition: transform 60ms linear; /* snappier when it flees */
+    }
+    .svg-heart.yes{
+      position: relative;
+      z-index: 10;
+    }
+
+    .status{
+      margin-top: 12px;
+      font-weight: 900;
+      opacity: .8;
+    }
+    .status b{ opacity:1; }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Will you be my Valentine? 💌</h1>
+    <p>Try to click <b>NO</b>. (Good luck.)</p>
+
+    <div id="heartButtons">
+      <!-- YES -->
+      <button class="svg-heart yes" id="yesBtn" aria-label="Yes">
+        <svg viewBox="0 0 64 58" role="img" aria-hidden="true">
+          <path d="M32 54s-20-11.6-27-24C-1.2 18.4 6.2 6 18.3 6c6.1 0 10.2 3.1 13.7 7.4C35.5 9.1 39.6 6 45.7 6 57.8 6 65.2 18.4 59 30c-7 12.4-27 24-27 24z"/>
+        </svg>
+        <span>YES</span>
+      </button>
+
+      <!-- NO -->
+      <button class="svg-heart no" id="noBtn" aria-label="No">
+        <svg viewBox="0 0 64 58" role="img" aria-hidden="true">
+          <path d="M32 54s-20-11.6-27-24C-1.2 18.4 6.2 6 18.3 6c6.1 0 10.2 3.1 13.7 7.4C35.5 9.1 39.6 6 45.7 6 57.8 6 65.2 18.4 59 30c-7 12.4-27 24-27 24z"/>
+        </svg>
+        <span>NO</span>
+      </button>
+    </div>
+
+    <div class="status" id="statusLine">Status: <b>Undecided</b></div>
+  </div>
+
+  <script>
+    // ===== YES button just for demo feedback =====
+    const statusLine = document.getElementById("statusLine");
+    document.getElementById("yesBtn").addEventListener("click", () => {
+      statusLine.innerHTML = 'Status: <b>YES 💖</b>';
+    });
+
+    // ===== Runaway NO logic =====
+    (() => {
+      const noBtn = document.getElementById("noBtn");
+      const arena = document.getElementById("heartButtons");
+      if (!noBtn || !arena) return;
+
+      let noScale = 1;
+      let moveCount = 0;
+
+      // Place NO roughly where it starts (prevents jumping on load)
+      const arenaRect0 = arena.getBoundingClientRect();
+      const noRect0 = noBtn.getBoundingClientRect();
+      let nx = (noRect0.left - arenaRect0.left);
+      let ny = (noRect0.top  - arenaRect0.top);
+
+      noBtn.style.left = "0px";
+      noBtn.style.top = "0px";
+      setNoTransform();
+
+      function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+      function setNoTransform(){
+        noBtn.style.setProperty("--nx", `${nx}px`);
+        noBtn.style.setProperty("--ny", `${ny}px`);
+        noBtn.style.setProperty("--nscale", `${noScale}`);
+      }
+
+      function flee(extraBoost = 0){
+        const arenaRect = arena.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+
+        // Keep button inside arena bounds
+        const bw = btnRect.width;
+        const bh = btnRect.height;
+        const maxX = Math.max(0, arenaRect.width  - bw);
+        const maxY = Math.max(0, arenaRect.height - bh);
+
+        // random direction
+        const dx = (Math.random() * 2 - 1);
+        const dy = (Math.random() * 2 - 1);
+
+        // step gets bigger the more you chase it
+        const step = 120 + extraBoost + Math.min(260, moveCount * 12);
+
+        nx = clamp(nx + dx * step, 0, maxX);
+        ny = clamp(ny + dy * step, 0, maxY);
+
+        moveCount++;
+        noBtn.classList.add("is-running");
+        setNoTransform();
+        setTimeout(() => noBtn.classList.remove("is-running"), 120);
+      }
+
+      // Run away when hovered
+      noBtn.addEventListener("mouseenter", () => flee(90));
+
+      // Run away on touch (mobile)
+      noBtn.addEventListener("touchstart", (e) => {
+        e.preventDefault(); // stops the tap from becoming a click
+        flee(140);
+      }, { passive: false });
+
+      // If it actually gets clicked: it grows + runs farther
+      noBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        statusLine.innerHTML = 'Status: <b>NO?! 😳</b> (it panicked and ran)';
+        noScale = clamp(noScale * 1.18, 1, 2.6); // gets bigger each click
+        setNoTransform();
+        flee(260);
+
+        // tiny shake for drama
+        try {
+          noBtn.animate(
+            [
+              { transform: `translate(${nx}px, ${ny}px) scale(${noScale}) rotate(0deg)` },
+              { transform: `translate(${nx}px, ${ny}px) scale(${noScale}) rotate(7deg)` },
+              { transform: `translate(${nx}px, ${ny}px) scale(${noScale}) rotate(-7deg)` },
+              { transform: `translate(${nx}px, ${ny}px) scale(${noScale}) rotate(0deg)` },
+            ],
+            { duration: 220, easing: "ease-out" }
+          );
+        } catch {}
+      });
+
+      // Keep in bounds if resized
+      window.addEventListener("resize", () => {
+        const arenaRect = arena.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+        nx = clamp(nx, 0, Math.max(0, arenaRect.width  - btnRect.width));
+        ny = clamp(ny, 0, Math.max(0, arenaRect.height - btnRect.height));
+        setNoTransform();
+      });
+    })();
+  </script>
+</body>
+</html>
 
     /* Mana bar */
     #manaWrap{
