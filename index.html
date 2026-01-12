@@ -2304,7 +2304,526 @@
       btn.addEventListener("click", () => applyMove(btn.dataset.move));
     });
 
-    // init
+    <!-- =========================================================
+     PLATFORMER MODULE (PASTE ONCE)
+     - Includes HTML + CSS + JS in one block
+     - Collect 💖 for affection + mana tokens
+     - Avoid 💔 hazards (adds nerves + small HP ding)
+========================================================= -->
+<section class="glass rounded-3xl overflow-hidden" id="platformerModule">
+  <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
+    <div class="font-black text-slate-800/80">🕹️ Platformer: Rooms of Romance</div>
+    <div class="text-xs font-black text-slate-700/70">Move: A/D or ←/→ • Jump: W/↑/Space • Reset: R</div>
+  </div>
+
+  <div class="px-6 py-5">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 items-start">
+      <div class="relative rounded-2xl border border-white/60 bg-white/55 overflow-hidden">
+        <canvas id="pfCanvas" class="w-full block h-[420px]"></canvas>
+
+        <button id="pfStart"
+          class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+          style="background: linear-gradient(135deg, #fb7185, #6366f1);">
+          Start Platformer
+        </button>
+
+        <div id="pfOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
+          <div class="text-slate-800/80">
+            <div class="text-3xl font-extrabold">Collect 💖, avoid 💔</div>
+            <div class="text-sm font-semibold mt-2">Pickups reward tokens + affection.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+        <div class="text-xs font-black text-slate-700/70">RUN STATS</div>
+        <div class="mt-2 text-sm font-extrabold text-slate-800/80 space-y-1">
+          <div>Room: <span id="pfRoom">1</span>/<span id="pfRoomMax">12</span></div>
+          <div>Hearts: <span id="pfHearts">0</span></div>
+          <div>Hits: <span id="pfHits">0</span></div>
+          <div>Best: <span id="pfBest">—</span></div>
+        </div>
+
+        <div class="mt-4 text-xs font-black text-slate-700/70">REWARDS</div>
+        <div class="mt-2 text-sm font-semibold text-slate-800/80">
+          💖 pickup: +Affection, -Nerves, +Random mana token<br/>
+          💔 hazard: +Nerves, small HP ding
+        </div>
+
+        <div class="mt-4">
+          <button id="pfReset"
+            class="w-full rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+            style="background: linear-gradient(135deg, #f59e0b, #fb7185);">
+            Reset Run (R)
+          </button>
+        </div>
+
+        <div id="pfMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
+          Ready when you are.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Platformer crisp pixels + stable layout */
+    #pfCanvas { image-rendering: pixelated; touch-action: none; }
+  </style>
+
+  <script>
+    (() => {
+      "use strict";
+
+      // ------------------------------
+      // Safe hooks into your main game
+      // ------------------------------
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+      // If your main code has STATE/updateHUD/setBars/safeConfetti, we’ll use them.
+      // If not, we fall back to harmless no-ops so the platformer still runs.
+      const getSTATE = () => (typeof window.STATE === "object" && window.STATE) ? window.STATE : null;
+      const updateHUD = () => { try { window.updateHUD?.(); } catch {} };
+      const setBars   = () => { try { window.setBars?.(); } catch {} };
+      const confetti  = (opts) => { try { window.safeConfetti?.(opts); } catch {} };
+      const unlockLoveLine = () => { try { window.unlockLoveLine?.(); } catch {} };
+
+      // If no STATE exists, create a minimal one so rewards don’t error.
+      if (!getSTATE()) {
+        window.STATE = {
+          affection: 0,
+          nerves: 0,
+          youHP: 100,
+          mana: { heart: 0, choc: 0, popcorn: 0, sparkle: 0 }
+        };
+      }
+
+      // ------------------------------
+      // DOM
+      // ------------------------------
+      const canvas  = document.getElementById("pfCanvas");
+      const ctx     = canvas.getContext("2d");
+
+      const startBtn = document.getElementById("pfStart");
+      const resetBtn = document.getElementById("pfReset");
+      const overlay  = document.getElementById("pfOverlay");
+      const msg      = document.getElementById("pfMsg");
+
+      const pfRoom    = document.getElementById("pfRoom");
+      const pfRoomMax = document.getElementById("pfRoomMax");
+      const pfHearts  = document.getElementById("pfHearts");
+      const pfHits    = document.getElementById("pfHits");
+      const pfBest    = document.getElementById("pfBest");
+
+      // ------------------------------
+      // Canvas fit (self-contained)
+      // ------------------------------
+      function fitCanvas() {
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const rect = canvas.getBoundingClientRect();
+        canvas.width  = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      fitCanvas();
+      window.addEventListener("resize", fitCanvas);
+
+      // ------------------------------
+      // Controls
+      // ------------------------------
+      const KEYS = new Set();
+      window.addEventListener("keydown", (e) => {
+        const k = e.key;
+        if (["ArrowLeft","ArrowRight","ArrowUp","a","d","w"," ","r","R"].includes(k)) {
+          KEYS.add(k);
+          if (k === " ") e.preventDefault();
+          if (k.toLowerCase() === "r") doReset();
+        }
+      }, { passive: false });
+
+      window.addEventListener("keyup", (e) => KEYS.delete(e.key));
+
+      // Tap/click canvas to jump (mobile-friendly)
+      canvas.addEventListener("pointerdown", () => {
+        if (!run.active) return;
+        if (player.onGround) player.vy = -8.6;
+      });
+
+      // ------------------------------
+      // World
+      // ------------------------------
+      const ROOM_COUNT = 12;
+      pfRoomMax.textContent = String(ROOM_COUNT);
+
+      const TILE = 24;
+      const W_TILES = 26;
+      const H_TILES = 16;
+
+      function makeRoom(i) {
+        const grid = Array.from({ length: H_TILES }, () => Array(W_TILES).fill(0));
+        // floor
+        for (let x = 0; x < W_TILES; x++) grid[H_TILES - 1][x] = 1;
+
+        const p = (x, y, len) => {
+          for (let k = 0; k < len; k++) {
+            const xx = x + k;
+            if (xx >= 0 && xx < W_TILES && y >= 0 && y < H_TILES) grid[y][xx] = 1;
+          }
+        };
+
+        const seed = i * 7;
+        p(2 + (seed % 6), 11, 6);
+        p(10 + (seed % 5), 9, 5);
+        p(5 + (seed % 4), 7, 4);
+        if (i % 3 === 0) p(16, 6, 6);
+        if (i % 4 === 0) p(8, 5, 3);
+
+        const pickups = [];
+        const hazards = [];
+        const place = (arr, kind, tx, ty) => arr.push({
+          kind,
+          x: tx * TILE + TILE / 2,
+          y: ty * TILE + TILE / 2,
+          r: 10,
+          taken: false
+        });
+
+        const heartsN = 2 + (i % 3);
+        for (let k = 0; k < heartsN; k++) {
+          const tx = 3 + ((seed + k * 5) % (W_TILES - 6));
+          const ty = 4 + ((seed + k * 3) % 8);
+          place(pickups, "heart", tx, ty);
+        }
+
+        const hazN = 1 + (i % 2);
+        for (let k = 0; k < hazN; k++) {
+          const tx = 6 + ((seed + k * 9) % (W_TILES - 10));
+          const ty = 10 - ((seed + k * 2) % 6);
+          place(hazards, "break", tx, ty);
+        }
+
+        const exit = { x: (W_TILES - 2) * TILE + TILE / 2, y: (H_TILES - 2) * TILE + TILE / 2, r: 12 };
+        return { grid, pickups, hazards, exit };
+      }
+
+      const ROOMS = Array.from({ length: ROOM_COUNT }, (_, idx) => makeRoom(idx + 1));
+
+      // ------------------------------
+      // Player + run state
+      // ------------------------------
+      const player = {
+        x: 2 * TILE,
+        y: 10 * TILE,
+        w: 16,
+        h: 20,
+        vx: 0,
+        vy: 0,
+        onGround: false,
+        inv: 0
+      };
+
+      const run = {
+        active: false,
+        room: 1,
+        hearts: 0,
+        hits: 0,
+        best: null
+      };
+
+      function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+        return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+      }
+
+      function tileAt(room, px, py) {
+        const tx = Math.floor(px / TILE);
+        const ty = Math.floor(py / TILE);
+        if (tx < 0 || ty < 0 || tx >= W_TILES || ty >= H_TILES) return 0;
+        return room.grid[ty][tx];
+      }
+
+      function resolveCollisions(room) {
+        const steps = 2;
+        for (let s = 0; s < steps; s++) {
+          // X
+          player.x += player.vx / steps;
+          if (player.vx !== 0) {
+            const left = player.x;
+            const right = player.x + player.w;
+            const top = player.y;
+            const bottom = player.y + player.h;
+            const checkX = player.vx > 0 ? right : left;
+
+            for (let yy = top; yy <= bottom; yy += 6) {
+              if (tileAt(room, checkX, yy) === 1) {
+                if (player.vx > 0) player.x = Math.floor(checkX / TILE) * TILE - player.w - 0.01;
+                else player.x = Math.floor(checkX / TILE + 1) * TILE + 0.01;
+                player.vx = 0;
+                break;
+              }
+            }
+          }
+
+          // Y
+          player.y += player.vy / steps;
+          player.onGround = false;
+          if (player.vy !== 0) {
+            const left = player.x;
+            const right = player.x + player.w;
+            const top = player.y;
+            const bottom = player.y + player.h;
+            const checkY = player.vy > 0 ? bottom : top;
+
+            for (let xx = left; xx <= right; xx += 6) {
+              if (tileAt(room, xx, checkY) === 1) {
+                if (player.vy > 0) {
+                  player.y = Math.floor(checkY / TILE) * TILE - player.h - 0.01;
+                  player.onGround = true;
+                } else {
+                  player.y = Math.floor(checkY / TILE + 1) * TILE + 0.01;
+                }
+                player.vy = 0;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      // ------------------------------
+      // Rewards + damage
+      // ------------------------------
+      function rewardHeart() {
+        const STATE = getSTATE();
+        run.hearts += 1;
+
+        STATE.affection += 2.2;
+        STATE.nerves -= 1.2;
+
+        const roll = Math.random();
+        if (roll < 0.30) STATE.mana.heart += 1;
+        else if (roll < 0.55) STATE.mana.choc += 1;
+        else if (roll < 0.78) STATE.mana.popcorn += 1;
+        else STATE.mana.sparkle += 1;
+
+        if (run.hearts % 5 === 0) unlockLoveLine();
+
+        updateHUD();
+        setBars();
+        confetti({ particleCount: 40, spread: 70, origin: { y: 0.7 } });
+      }
+
+      function takeHit() {
+        if (player.inv > 0) return;
+        const STATE = getSTATE();
+
+        player.inv = 0.9;
+        run.hits += 1;
+
+        STATE.nerves += 6;
+        STATE.youHP = Math.max(0, (STATE.youHP ?? 100) - 6);
+
+        updateHUD();
+        setBars();
+      }
+
+      // ------------------------------
+      // UI + room flow
+      // ------------------------------
+      function setStatsUI() {
+        pfRoom.textContent = String(run.room);
+        pfHearts.textContent = String(run.hearts);
+        pfHits.textContent = String(run.hits);
+        pfBest.textContent = run.best ? `${run.best.hearts}💖 / ${run.best.hits} hits` : "—";
+      }
+
+      function enterRoom(n) {
+        run.room = clamp(n, 1, ROOM_COUNT);
+        player.x = 1.5 * TILE;
+        player.y = 10 * TILE;
+        player.vx = 0;
+        player.vy = 0;
+        setStatsUI();
+        msg.textContent = `Room ${run.room}: find the hearts 💖`;
+      }
+
+      function finishRun() {
+        const STATE = getSTATE();
+        const score = { hearts: run.hearts, hits: run.hits };
+        const better =
+          !run.best ||
+          score.hearts > run.best.hearts ||
+          (score.hearts === run.best.hearts && score.hits < run.best.hits);
+
+        if (better) run.best = score;
+
+        msg.textContent = `RUN COMPLETE 💘 Hearts: ${score.hearts}, Hits: ${score.hits}`;
+        confetti({ particleCount: 160, spread: 95, origin: { y: 0.55 } });
+
+        STATE.affection += 10;
+        STATE.nerves -= 8;
+        STATE.mana.sparkle += 2;
+
+        updateHUD();
+        setBars();
+        setStatsUI();
+      }
+
+      function doReset() {
+        if (!run.active) return;
+        run.hearts = 0;
+        run.hits = 0;
+        enterRoom(1);
+        for (const rm of ROOMS) rm.pickups.forEach(p => p.taken = false);
+        msg.textContent = "Run reset. Go again 😤💖";
+      }
+
+      // ------------------------------
+      // Draw
+      // ------------------------------
+      function drawRoom(room) {
+        const w = canvas.getBoundingClientRect().width;
+        const h = canvas.getBoundingClientRect().height;
+
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, "rgba(255,255,255,0.00)");
+        g.addColorStop(1, "rgba(255,255,255,0.25)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+
+        // tiles
+        for (let y = 0; y < H_TILES; y++) {
+          for (let x = 0; x < W_TILES; x++) {
+            if (room.grid[y][x] === 1) {
+              ctx.globalAlpha = 0.95;
+              ctx.fillStyle = "rgba(255,255,255,0.70)";
+              ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+              ctx.globalAlpha = 1;
+            }
+          }
+        }
+
+        // exit
+        ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        ctx.fillText("🚪", room.exit.x - 10, room.exit.y + 10);
+
+        // pickups
+        for (const p of room.pickups) {
+          if (p.taken) continue;
+          ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+          ctx.fillText("💖", p.x - 10, p.y + 10);
+        }
+
+        // hazards
+        for (const hz of room.hazards) {
+          ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+          ctx.fillText("💔", hz.x - 10, hz.y + 10);
+        }
+
+        // player
+        ctx.globalAlpha = player.inv > 0 ? (Math.floor(performance.now() / 90) % 2 ? 0.35 : 1) : 1;
+        ctx.font = "24px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        ctx.fillText("🫶", player.x - 6, player.y + player.h);
+        ctx.globalAlpha = 1;
+      }
+
+      // ------------------------------
+      // Main loop
+      // ------------------------------
+      let raf = null;
+      let last = 0;
+
+      function loop(ts) {
+        if (!run.active) return;
+        if (!last) last = ts;
+        const dt = Math.min(0.033, (ts - last) / 1000);
+        last = ts;
+
+        const room = ROOMS[run.room - 1];
+
+        // input
+        let ax = 0;
+        if (KEYS.has("ArrowLeft") || KEYS.has("a")) ax -= 1;
+        if (KEYS.has("ArrowRight") || KEYS.has("d")) ax += 1;
+
+        const accel = 26;
+        const maxV = 5.0;
+        player.vx += ax * accel * dt;
+        player.vx *= Math.pow(0.0008, dt); // friction
+        player.vx = clamp(player.vx, -maxV, maxV);
+
+        const wantsJump = KEYS.has("ArrowUp") || KEYS.has("w") || KEYS.has(" ");
+        if (wantsJump && player.onGround) player.vy = -8.6;
+
+        // gravity
+        player.vy += 24 * dt;
+        player.vy = clamp(player.vy, -16, 14);
+
+        if (player.inv > 0) player.inv -= dt;
+
+        resolveCollisions(room);
+
+        // pickups
+        for (const p of room.pickups) {
+          if (p.taken) continue;
+          const hit = rectsOverlap(player.x, player.y, player.w, player.h, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+          if (hit) {
+            p.taken = true;
+            rewardHeart();
+            setStatsUI();
+          }
+        }
+
+        // hazards
+        for (const hz of room.hazards) {
+          const hit = rectsOverlap(player.x, player.y, player.w, player.h, hz.x - hz.r, hz.y - hz.r, hz.r * 2, hz.r * 2);
+          if (hit) {
+            takeHit();
+            setStatsUI();
+          }
+        }
+
+        // exit
+        const atExit = rectsOverlap(
+          player.x, player.y, player.w, player.h,
+          room.exit.x - room.exit.r, room.exit.y - room.exit.r,
+          room.exit.r * 2, room.exit.r * 2
+        );
+
+        if (atExit) {
+          if (run.room < ROOM_COUNT) enterRoom(run.room + 1);
+          else finishRun();
+        }
+
+        // draw
+        ctx.clearRect(0, 0, canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
+        drawRoom(room);
+
+        raf = requestAnimationFrame(loop);
+      }
+
+      function start() {
+        run.active = true;
+        overlay.style.opacity = "0";
+        startBtn.style.opacity = "0";
+        startBtn.style.pointerEvents = "none";
+        msg.textContent = "Go go go 💖";
+        last = 0;
+
+        for (const rm of ROOMS) rm.pickups.forEach(p => p.taken = false);
+        run.hearts = 0;
+        run.hits = 0;
+        enterRoom(1);
+        setStatsUI();
+
+        raf = requestAnimationFrame(loop);
+      }
+
+      startBtn.addEventListener("click", start);
+      resetBtn.addEventListener("click", doReset);
+
+      setStatsUI();
+    })();
+
+   // init
     giftCount.textContent = "0";
     tokenCount.textContent = "0";
     renderStack();
