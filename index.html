@@ -696,7 +696,7 @@
     <div class="planet planet-star"></div>
     <div class="planet planet-ring"></div>
 
-    <!-- Kirby (simple SVG) -->
+    <!-- King D (simple SVG) -->
     <svg id="kirby" viewBox="0 0 200 200" aria-hidden="true">
       <!-- body -->
       <defs>
@@ -738,7 +738,7 @@
   <div id="powerups" aria-hidden="true"></div>
   <div id="pixelClouds" aria-hidden="true"></div>
   <div id="hearts" aria-hidden="true"></div>
-
+ 
   <!-- Title + Mana -->
   <header class="relative z-[3] px-4 pt-6">
     <div class="max-w-7xl mx-auto">
@@ -846,7 +846,7 @@
             <div>
               <div class="text-2xl font-black text-slate-800/80">Begin the Event</div>
               <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                Defeat the boss to unlock the final question… and then try to click NO. (lol)
+               The Boss guards the sacrid answers! 
               </div>
             </div>
             <button id="beginEvent"
@@ -860,26 +860,26 @@
         <!-- Boss Fight -->
         <section class="glass rounded-3xl overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-            <div class="font-black text-slate-800/80">👾 Boss Fight (Love Edition)</div>
+            <div class="font-black text-slate-800/80"> Boss Fight (Love Edition)</div>
             <div class="text-xs font-black text-slate-700/70">Move: WASD/Arrows • Attack: Space / Tap</div>
           </div>
 
           <div class="px-6 py-5">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
               <div>
-                <div class="text-xs font-black text-slate-700/80 mb-1">YOU 💖</div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">YOU </div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="playerHPBar" class="h-full w-full bg-gradient-to-r from-rose-500 to-pink-500"></div>
                 </div>
               </div>
               <div>
-                <div class="text-xs font-black text-slate-700/80 mb-1">BOSS ☄️</div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">BOSS </div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="bossHPBar" class="h-full w-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"></div>
                 </div>
               </div>
               <div>
-                <div class="text-xs font-black text-slate-700/80 mb-1">LOVE METER 💘</div>
+                <div class="text-xs font-black text-slate-700/80 mb-1">LOVE METER </div>
                 <div class="h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
                   <div id="loveBar" class="h-full w-0 bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300"></div>
                 </div>
@@ -892,7 +892,7 @@
 
               <div id="bossOverlay" class="absolute inset-0 flex items-center justify-center text-center px-6 pointer-events-none">
                 <div class="text-slate-800/80">
-                  <div class="text-3xl font-extrabold">A wild boss appeared!</div>
+                  <div class="text-3xl font-extrabold">A wild boss (NOT COPYWRITE) appeared!</div>
                   <div class="text-sm font-semibold mt-2">Dodge cursed hearts. Shoot love beams.</div>
                 </div>
               </div>
@@ -905,7 +905,7 @@
             </div>
 
             <div id="bossMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
-              Beat the boss to unlock YES + NO.
+              Beat the boss to unlock 
             </div>
           </div>
         </section>
@@ -913,7 +913,7 @@
         <!-- PLATFORMER -->
         <section class="glass rounded-3xl overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
-            <div class="font-black text-slate-800/80">🏃‍♀️ Platformer (C-Side++++ Love Run)</div>
+            <div class="font-black text-slate-800/80"> Platformer (C-Side++++)</div>
             <div class="text-xs font-black text-slate-700/70">Treats: <span id="platCount">0</span>/36</div>
           </div>
           <div class="px-6 py-5">
@@ -926,7 +926,7 @@
 
               <div id="platOverlay">
                 <div class="text-slate-800/90">
-                  <div class="text-3xl font-extrabold">C-Side++++ “ALL OF THEM” 💘</div>
+                  <div class="text-3xl font-extrabold">Platformer</div>
                   <div class="text-sm font-semibold mt-2">Move: ←→/A D • Jump: ↑/W/Space • Dash: Shift/X + direction</div>
                   <div class="text-xs font-semibold mt-2 opacity-80">Dash refills only via 💎 (some require dashing). Death resets treats (per segment).</div>
                 </div>
@@ -935,7 +935,7 @@
               <button id="platStart"
                 class="rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
                 style="background: linear-gradient(135deg, #fb7185, #ec4899, #6366f1);">
-                Start C-Side++++ 💞
+                Start C-Side++++ 
               </button>
             </div>
           </div>
@@ -947,7 +947,7 @@
             <div>
               <div class="text-2xl font-black text-slate-800/80">Romance Arcade System</div>
               <div class="text-sm font-semibold text-slate-700/80 mt-1">
-                Tokens → mana → cast spells → buffs → unlock love lines 💌
+                Tokens → mana → cast spells → buffs → unlock love lines!
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -1154,61 +1154,528 @@
             </div>
           </div>
 
-          <!-- “Wild Valentine” battle -->
-          <div class="mt-5 rounded-3xl bg-white/60 border border-white/60 p-5">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <div class="text-xl font-black text-slate-800/80">Wild Valentine Encounter</div>
-                <div id="battleText" class="text-sm font-semibold text-slate-700/80 mt-1">
-                  A wild Valentine appeared!
-                </div>
-              </div>
-              <div class="text-xs font-black text-slate-700/70">
-                Enemy Affection: <span id="enemyAff">0%</span>
-              </div>
-            </div>
-
-            <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
-                <div class="text-xs font-black text-slate-700/70">Enemy HP</div>
-                <div class="mt-2 h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
-                  <div id="enemyHPBar" class="h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500" style="width:100%"></div>
-                </div>
-                <div class="mt-3 text-4xl text-center select-none">💘</div>
-              </div>
-
-              <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
-                <div class="text-xs font-black text-slate-700/70">You HP</div>
-                <div class="mt-2 h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
-                  <div id="youHPBar" class="h-full bg-gradient-to-r from-rose-500 to-pink-500" style="width:100%"></div>
-                </div>
-
-                <div class="mt-3 text-xs font-black text-slate-700/70 flex items-center justify-between">
-                  <span>Nerves</span><span id="youNerves">25%</span>
-                </div>
-                <div class="mt-2 h-2 rounded-full bg-white/80 border border-white/60 overflow-hidden">
-                  <div id="youNervesBar" class="h-full bg-gradient-to-r from-sky-500 to-indigo-400" style="width:25%"></div>
-                </div>
-
-                <div class="mt-3 text-4xl text-center select-none">🫶</div>
-              </div>
-            </div>
-
-            <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                      style="background: linear-gradient(135deg, #fb7185, #ec4899);" data-move="Compliment Beam">Compliment</button>
-              <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                      style="background: linear-gradient(135deg, #60a5fa, #22c55e);" data-move="Snack Shield">Snack</button>
-              <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                      style="background: linear-gradient(135deg, #f59e0b, #fb7185);" data-move="Laugh Attack">Laugh</button>
-              <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
-                      style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy</button>
-            </div>
-          </div>
-        </section>
-      </main>
+        <!-- “Wild Valentine” battle (REPLACE your whole block with this) -->
+<div class="mt-5 rounded-3xl bg-white/60 border border-white/60 p-5 battle-arena">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <div class="text-xl font-black text-slate-800/80">Wild Valentine Encounter</div>
+      <div id="battleText" class="text-sm font-semibold text-slate-700/80 mt-1">
+        A wild Valentine appeared!
+      </div>
+    </div>
+    <div class="text-xs font-black text-slate-700/70">
+      Enemy Affection: <span id="enemyAff">0%</span>
     </div>
   </div>
+
+  <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <!-- ENEMY -->
+    <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+      <div class="text-xs font-black text-slate-700/70">Enemy HP</div>
+      <div class="mt-2 h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+        <div id="enemyHPBar" class="h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500" style="width:100%"></div>
+      </div>
+
+      <!-- ✅ Enemy sprite GIF -->
+      <div class="mt-3 flex justify-center">
+        <img
+          id="enemySprite"
+          src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTM1NmR2dzBnM2hjN2hyMGc0OTg3Y3JqMGViaW5ocmEzNG4wOGFibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/I2uqvnLH9pfHVdbgWH/giphy.gif"
+          alt="Valentine sprite"
+          class="battle-sprite"
+          draggable="false"
+        />
+      </div>
+    </div>
+
+    <!-- YOU -->
+    <div class="rounded-2xl bg-white/70 border border-white/60 p-4">
+      <div class="text-xs font-black text-slate-700/70">You HP</div>
+      <div class="mt-2 h-3 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+        <div id="youHPBar" class="h-full bg-gradient-to-r from-rose-500 to-pink-500" style="width:100%"></div>
+      </div>
+
+      <div class="mt-3 text-xs font-black text-slate-700/70 flex items-center justify-between">
+        <span>Nerves</span><span id="youNerves">25%</span>
+      </div>
+      <div class="mt-2 h-2 rounded-full bg-white/80 border border-white/60 overflow-hidden">
+        <div id="youNervesBar" class="h-full bg-gradient-to-r from-sky-500 to-indigo-400" style="width:25%"></div>
+      </div>
+
+      <!-- ✅ User sprite GIF -->
+      <div class="mt-3 flex justify-center">
+        <img
+          id="youSprite"
+          src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExamkzNmF6dDhtd2c3d2RpMDRyaXo4enByNWFocHdyZzRkcDdsdXN2ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3xgR6JaucMaXe/giphy.gif"
+          alt="You sprite"
+          class="battle-sprite"
+          draggable="false"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Buttons + RUN -->
+  <div class="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
+    <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+            style="background: linear-gradient(135deg, #fb7185, #ec4899);" data-move="Compliment Beam">Compliment</button>
+    <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+            style="background: linear-gradient(135deg, #60a5fa, #22c55e);" data-move="Snack Shield">Snack</button>
+    <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+            style="background: linear-gradient(135deg, #f59e0b, #fb7185);" data-move="Laugh Attack">Laugh</button>
+    <button class="rounded-xl px-4 py-3 font-black text-white shadow active:scale-95 transition"
+            style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy</button>
+
+    <button id="btnRun"
+      class="rounded-xl px-4 py-3 font-black text-slate-800/80 bg-white/85 border border-white/60 shadow active:scale-95 transition">
+      RUN
+    </button>
+  </div>
+
+  <!-- FX layer -->
+  <div id="battleFx" class="battle-fx" aria-hidden="true"></div>
+
+  <!-- ✅ Quick Time Event: Dodge -->
+  <div id="qte" class="qte hidden" aria-hidden="true">
+    <div class="qte-inner">
+      <div class="qte-title">DODGE!</div>
+      <div class="qte-sub">Tap fast — you can’t let the 💘 hit you</div>
+
+      <button id="qteBtn" class="qte-btn" type="button">DODGE</button>
+
+      <div class="qte-bar" aria-hidden="true">
+        <div id="qteFill" class="qte-fill"></div>
+      </div>
+
+      <div class="qte-hint">Tip: tap or press <b>Space</b></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* === Battle visuals / better graphics === */
+  .battle-arena{ position: relative; overflow: hidden; transform: translateZ(0); }
+  .battle-arena::before{
+    content:"";
+    position:absolute;
+    inset:-40%;
+    background:
+      radial-gradient(800px 520px at 25% 30%, rgba(167,139,250,0.30), transparent 60%),
+      radial-gradient(900px 560px at 75% 40%, rgba(34,211,238,0.22), transparent 62%),
+      radial-gradient(850px 650px at 55% 85%, rgba(244,63,94,0.18), transparent 65%),
+      radial-gradient(600px 500px at 60% 55%, rgba(255,255,255,0.10), transparent 60%);
+    filter: blur(18px) saturate(1.2);
+    opacity: 0.85;
+    animation: arenaDrift 14s ease-in-out infinite;
+    z-index: 0;
+  }
+  .battle-arena::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.55) 0 1px, transparent 2px),
+      radial-gradient(circle, rgba(255,255,255,0.25) 0 1px, transparent 2px);
+    background-size: 120px 120px, 70px 70px;
+    background-position: 0 0, 20px 40px;
+    opacity: 0.25;
+    mix-blend-mode: screen;
+    z-index: 0;
+  }
+  @keyframes arenaDrift{
+    0%,100%{ transform: translate3d(0,0,0) scale(1); }
+    50%{ transform: translate3d(-14px, 10px, 0) scale(1.04); }
+  }
+  .battle-arena > *{ position: relative; z-index: 1; }
+
+  .battle-sprite{
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    image-rendering: auto;
+    filter: drop-shadow(0 14px 26px rgba(0,0,0,0.18));
+    animation: spriteFloat 2.2s ease-in-out infinite;
+    user-select: none;
+    pointer-events: none;
+  }
+  #enemySprite{ filter: drop-shadow(0 14px 26px rgba(0,0,0,0.18)) drop-shadow(0 0 40px rgba(167,139,250,0.25)); }
+  #youSprite{   filter: drop-shadow(0 14px 26px rgba(0,0,0,0.18)) drop-shadow(0 0 40px rgba(244,63,94,0.18)); }
+
+  @keyframes spriteFloat{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-6px); }
+  }
+
+  /* FX layer */
+  .battle-fx{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index: 20;
+    overflow:hidden;
+  }
+
+  /* Hit shake */
+  @keyframes hitShake{
+    0%{ transform: translateX(0); }
+    20%{ transform: translateX(-6px); }
+    40%{ transform: translateX(6px); }
+    60%{ transform: translateX(-4px); }
+    80%{ transform: translateX(4px); }
+    100%{ transform: translateX(0); }
+  }
+  .hit-shake{ animation: hitShake 320ms ease; }
+
+  /* Floating text */
+  .float-text{
+    position:absolute;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 0.4px;
+    opacity: 0;
+    transform: translateY(0);
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,0.18));
+    animation: floatUpText 900ms ease forwards;
+  }
+  @keyframes floatUpText{
+    0%{ opacity: 0; transform: translateY(6px) scale(0.96); }
+    15%{ opacity: 1; }
+    100%{ opacity: 0; transform: translateY(-34px) scale(1.04); }
+  }
+
+  /* Sparkles */
+  .spark{
+    position:absolute;
+    opacity: 0;
+    font-size: 18px;
+    animation: sparkPop 700ms ease forwards;
+    filter: drop-shadow(0 10px 16px rgba(0,0,0,0.14));
+  }
+  @keyframes sparkPop{
+    0%{ opacity: 0; transform: translate(0,0) scale(0.8); }
+    18%{ opacity: 1; }
+    100%{ opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.2); }
+  }
+
+  /* === QTE Overlay === */
+  .qte{
+    position:absolute;
+    inset:0;
+    z-index: 30;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(15,23,42,0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .qte.hidden{ display:none; }
+
+  .qte-inner{
+    width: min(520px, 92%);
+    border-radius: 22px;
+    padding: 16px 16px 14px;
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(255,255,255,0.65);
+    box-shadow: 0 22px 70px rgba(0,0,0,0.18);
+    text-align:center;
+  }
+  .qte-title{
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    font-size: 30px;
+    color: rgba(15,23,42,0.85);
+  }
+  .qte-sub{
+    margin-top: 4px;
+    font-weight: 800;
+    font-size: 13px;
+    color: rgba(15,23,42,0.65);
+  }
+  .qte-btn{
+    margin-top: 12px;
+    width: 100%;
+    border-radius: 16px;
+    padding: 14px 14px;
+    font-weight: 900;
+    color: white;
+    background: linear-gradient(135deg, #fb7185, #ec4899, #6366f1);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+    transform: translateZ(0);
+  }
+  .qte-btn:active{ transform: scale(0.98); }
+
+  .qte-bar{
+    margin-top: 12px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(15,23,42,0.12);
+    overflow:hidden;
+  }
+  .qte-fill{
+    height: 100%;
+    width: 100%;
+    transform-origin: left;
+    background: linear-gradient(90deg, rgba(34,211,238,0.95), rgba(167,139,250,0.95), rgba(244,63,94,0.95));
+  }
+  .qte-hint{
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(15,23,42,0.55);
+  }
+</style>
+
+<script>
+  // ====== Battle logic with QTE Dodge + RUN message ======
+  const enemyHPBar = document.getElementById("enemyHPBar");
+  const youHPBar = document.getElementById("youHPBar");
+  const enemyAff = document.getElementById("enemyAff");
+  const youNerves = document.getElementById("youNerves");
+  const youNervesBar = document.getElementById("youNervesBar");
+  const battleText = document.getElementById("battleText");
+
+  const battleCard = document.querySelector(".battle-arena");
+  const battleFx = document.getElementById("battleFx");
+  const enemySprite = document.getElementById("enemySprite");
+  const youSprite = document.getElementById("youSprite");
+
+  const btnRun = document.getElementById("btnRun");
+
+  const qte = document.getElementById("qte");
+  const qteBtn = document.getElementById("qteBtn");
+  const qteFill = document.getElementById("qteFill");
+
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+
+  const state = {
+    enemyHP: 100,
+    youHP: 100,
+    enemyAff: 0,
+    nerves: 25,
+    shield: 0,       // reduces next incoming dmg
+    stunned: false,  // enemy can skip turn
+    inTurn: false
+  };
+
+  const moves = {
+    "Compliment Beam": { dmg: 18, aff: 14, text: "Compliment Beam! “You look SO cute.” 💥💖" },
+    "Snack Shield":    { dmg: 6,  heal: 12, aff: 6,  shield: 1, text: "Snack Shield! You feel safer (+HP) 🍪🛡️" },
+    "Laugh Attack":    { dmg: 12, aff: 10, stun: 0.35, text: "Laugh Attack! He can’t stop smiling 😂" },
+    "Cozy Aura":       { dmg: 10, heal: 8,  aff: 8,  text: "Cozy Aura! Warm vibes (+HP) 🧸✨" }
+  };
+
+  function setBars(){
+    enemyHPBar.style.width = clamp(state.enemyHP,0,100) + "%";
+    youHPBar.style.width   = clamp(state.youHP,0,100) + "%";
+    enemyAff.textContent = clamp(state.enemyAff,0,100).toFixed(0) + "%";
+    youNerves.textContent = clamp(state.nerves,0,100).toFixed(0) + "%";
+    youNervesBar.style.width = clamp(state.nerves,0,100) + "%";
+  }
+  setBars();
+
+  function shake(el){
+    if (!el) return;
+    el.classList.remove("hit-shake");
+    void el.offsetWidth;
+    el.classList.add("hit-shake");
+  }
+
+  function centerOf(el){
+    const r = el.getBoundingClientRect();
+    const cr = battleCard.getBoundingClientRect();
+    return { x: (r.left + r.width/2) - cr.left, y: (r.top + r.height/2) - cr.top };
+  }
+
+  function sparkBurst(x, y, count=10){
+    const chars = ["✨","💫","⭐","🌟","💖"];
+    for (let i=0;i<count;i++){
+      const s = document.createElement("div");
+      s.className = "spark";
+      s.textContent = chars[Math.floor(Math.random()*chars.length)];
+      s.style.left = x + "px";
+      s.style.top = y + "px";
+      s.style.setProperty("--dx", (Math.random()*120-60) + "px");
+      s.style.setProperty("--dy", (Math.random()*120-60) + "px");
+      battleFx.appendChild(s);
+      setTimeout(()=>s.remove(), 750);
+    }
+  }
+
+  function floatText(x, y, text, color){
+    const t = document.createElement("div");
+    t.className = "float-text";
+    t.textContent = text;
+    t.style.left = x + "px";
+    t.style.top = y + "px";
+    t.style.color = color || "rgba(15,23,42,0.85)";
+    battleFx.appendChild(t);
+    setTimeout(()=>t.remove(), 950);
+  }
+
+  function runDodgeQTE(ms=650){
+    return new Promise((resolve)=>{
+      let done=false;
+      const start = performance.now();
+
+      qte.classList.remove("hidden");
+      qte.setAttribute("aria-hidden","false");
+
+      const finish = (ok)=>{
+        if(done) return;
+        done=true;
+        qte.classList.add("hidden");
+        qte.setAttribute("aria-hidden","true");
+        window.removeEventListener("keydown", onKey);
+        qteBtn.removeEventListener("click", onClick);
+        resolve(ok);
+      };
+
+      const onClick = ()=>finish(true);
+      const onKey = (e)=>{
+        if(e.key===" " || e.code==="Space"){
+          e.preventDefault();
+          finish(true);
+        }
+      };
+
+      qteBtn.addEventListener("click", onClick, { once:true });
+      window.addEventListener("keydown", onKey);
+
+      const tick = (now)=>{
+        if(done) return;
+        const t = (now-start)/ms;
+        const left = Math.max(0, 1 - t);
+        qteFill.style.transform = `scaleX(${left})`;
+        if(t>=1) finish(false);
+        else requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  async function enemyAttack(){
+    const base = 12 + Math.floor(Math.random()*4); // 12-15
+    battleText.textContent = "Valentine attacks! QUICK — DODGE!";
+
+    const dodged = await runDodgeQTE(650);
+    const pos = centerOf(youSprite);
+
+    let dmg = base;
+    if(state.shield > 0){
+      dmg = Math.max(1, Math.floor(dmg * 0.5));
+      state.shield = 0;
+    }
+
+    if(dodged){
+      const reduced = Math.max(1, Math.floor(dmg * 0.5));
+      state.youHP = clamp(state.youHP - reduced, 0, 100);
+      state.nerves = clamp(state.nerves - 6, 0, 100);
+      battleText.textContent = "Nice! You dodged — love still grazes you 💞";
+      floatText(pos.x, pos.y, `-${reduced}`, "rgba(34,197,94,0.95)");
+      sparkBurst(pos.x, pos.y, 10);
+      shake(youSprite);
+    }else{
+      state.youHP = clamp(state.youHP - dmg, 0, 100);
+      state.nerves = clamp(state.nerves + 10, 0, 100);
+      battleText.textContent = "Oof 💥 You got hit!";
+      floatText(pos.x, pos.y, `-${dmg}`, "rgba(244,63,94,0.95)");
+      sparkBurst(pos.x, pos.y, 12);
+      shake(youSprite);
+      shake(battleCard);
+    }
+
+    setBars();
+
+    if(state.youHP <= 0){
+      battleText.textContent = "You fainted… but LOVE revives you instantly. (Try again 😤💖)";
+      state.youHP = 100;
+      state.enemyHP = 100;
+      state.enemyAff = 0;
+      state.nerves = 25;
+      setBars();
+    }
+  }
+
+  function win(){
+    battleText.textContent = "Valentine surrendered… it’s basically YES. 💘💖";
+    const epos = centerOf(enemySprite);
+    sparkBurst(epos.x, epos.y, 14);
+    shake(enemySprite);
+    // reset after a moment
+    setTimeout(()=>{
+      state.enemyHP = 100;
+      state.youHP = 100;
+      state.enemyAff = 0;
+      state.nerves = 25;
+      setBars();
+      battleText.textContent = "A wild Valentine appeared! (Again… because it loves you.)";
+    }, 1600);
+  }
+
+  async function playerMove(name){
+    if(state.inTurn) return;
+    state.inTurn = true;
+
+    const m = moves[name];
+    const epos = centerOf(enemySprite);
+
+    state.enemyHP = clamp(state.enemyHP - m.dmg, 0, 100);
+    state.enemyAff = clamp(state.enemyAff + (m.aff || 0), 0, 100);
+
+    if(m.heal) state.youHP = clamp(state.youHP + m.heal, 0, 100);
+    if(m.shield) state.shield = 1;
+    if(m.stun && Math.random() < m.stun) state.stunned = true;
+
+    battleText.textContent = m.text;
+    floatText(epos.x, epos.y, `-${m.dmg}`, "rgba(99,102,241,0.95)");
+    sparkBurst(epos.x, epos.y, 10);
+    shake(enemySprite);
+
+    setBars();
+
+    if(state.enemyHP <= 0 || state.enemyAff >= 100){
+      win();
+      state.inTurn = false;
+      return;
+    }
+
+    // enemy turn (unless stunned)
+    setTimeout(async ()=>{
+      if(state.stunned){
+        state.stunned = false;
+        battleText.textContent = "Valentine is too flustered to move… 😳";
+        state.inTurn = false;
+        return;
+      }
+      await enemyAttack();
+      state.inTurn = false;
+    }, 700);
+  }
+
+  // move buttons
+  document.querySelectorAll("button[data-move]").forEach(btn=>{
+    btn.addEventListener("click", ()=> playerMove(btn.getAttribute("data-move")));
+  });
+
+  // RUN button
+  btnRun.addEventListener("click", ()=>{
+    battleText.textContent = "You can’t run from love.";
+    btnRun.animate(
+      [
+        { transform:"translateX(0px)" },
+        { transform:"translateX(-6px)" },
+        { transform:"translateX(6px)" },
+        { transform:"translateX(-4px)" },
+        { transform:"translateX(4px)" },
+        { transform:"translateX(0px)" }
+      ],
+      { duration: 360 }
+    );
+  });
+</script>
+
 
   <!-- Spellbook Modal -->
   <div id="dateModal" class="modal hidden" aria-hidden="true">
