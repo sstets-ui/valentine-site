@@ -1859,53 +1859,145 @@
       }
     });
 
-    /* =========================================================
-       Simple music toggle (low volume oscillator)
-    ========================================================= */
-    const musicBtn = $("musicBtn");
-    let audioCtx = null;
-    let musicOsc = null;
-    let musicOn = false;
+const musicBtn = $("musicBtn");
+let audioCtx = null;
+let musicOn = false;
+let stopFlag = false;
+let scheduled = [];
 
-    function startMusic(){
-      try{
-        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = 220;
-        gain.gain.value = 0.02;
-        osc.connect(gain).connect(audioCtx.destination);
-        osc.start();
-        musicOsc = { osc, gain };
+function midiToFreq(m){ return 440 * Math.pow(2, (m - 69) / 12); }
 
-        let step = 0;
-        const chord = [220, 277.18, 329.63, 392.00];
-        const timer = setInterval(() => {
-          if (!musicOn || !musicOsc){ clearInterval(timer); return; }
-          step = (step + 1) % chord.length;
-          musicOsc.osc.frequency.setTargetAtTime(chord[step], audioCtx.currentTime, 0.08);
-        }, 900);
-      } catch {}
+function pianoNote(ctx, midi, when, dur, vel=0.9){
+  const freq = midiToFreq(midi);
+
+  // Envelope
+  const out = ctx.createGain();
+  out.gain.setValueAtTime(0.0001, when);
+  out.gain.exponentialRampToValueAtTime(0.12 * vel, when + 0.01);
+  out.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+
+  // "Piano-ish" partials
+  const partials = [1, 2, 3, 4];
+  const amps     = [1.0, 0.30, 0.16, 0.07];
+
+  const oscs = partials.map((k, i) => {
+    const o = ctx.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(freq * k, when);
+
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(amps[i], when);
+
+    o.connect(g).connect(out);
+    o.start(when);
+    o.stop(when + dur + 0.05);
+    return o;
+  });
+
+  out.connect(ctx.destination);
+
+  // cleanup
+  scheduled.push(out, ...oscs);
+  const ms = Math.max(0, (when - ctx.currentTime + dur + 0.1) * 1000);
+  setTimeout(() => { try { out.disconnect(); } catch {} }, ms);
+}
+
+function playChord(ctx, midis, when, dur, vel=0.7){
+  midis.forEach(m => pianoNote(ctx, m, when, dur, vel));
+}
+
+function clearScheduled(){
+  try {
+    scheduled.forEach(n => { try { n.disconnect?.(); } catch {} });
+  } catch {}
+  scheduled = [];
+}
+
+function startMusic(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    stopFlag = false;
+
+    // Clair de Lune (public domain) — simplified excerpt in Db major-ish color
+    // Times are in seconds from start, to mimic rubato a bit.
+    const E = [];
+    let t = audioCtx.currentTime + 0.08;
+
+    const add = (dt, fn) => { t += dt; if(!stopFlag) fn(t); };
+
+    // Helper note sets (MIDI)
+    const Db2=37, Ab2=44, Db3=49, Ab3=56;
+    const Db4=61, Eb4=63, F4=65, Ab4=68, Bb4=70, Db5=73, Eb5=75, F5=77;
+
+    // Arpeggio bed (left hand / inner), then melody (right hand)
+    // (This is intentionally simplified but "Clair de Lune-like".)
+
+    // Opening wash (broken Db/Ab sonority)
+    for (let i=0;i<6;i++){
+      add(0.00, (tt)=>playChord(audioCtx,[Db2,Ab2],tt,1.6,0.45));
+      add(0.20, (tt)=>playChord(audioCtx,[Db3,Ab3],tt,1.4,0.35));
+      add(0.35, (tt)=>playChord(audioCtx,[Db4,Ab4],tt,1.2,0.25));
+      add(0.55, ()=>{});
     }
 
-    function stopMusic(){
-      try{
-        if (!musicOsc || !audioCtx) return;
-        musicOsc.gain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.05);
-        setTimeout(() => {
-          try { musicOsc.osc.stop(); } catch {}
-          musicOsc = null;
-        }, 120);
-      } catch {}
-    }
+    // Melody entrance (very simplified contour)
+    const melody = [
+      [Ab4, 1.0], [Bb4, 0.7], [Db5, 1.0], [Eb5, 0.8], [F5, 1.0],
+      [Eb5, 0.7], [Db5, 0.9], [Bb4, 0.7], [Ab4, 1.0],
+      [F4,  0.8], [Ab4, 0.9], [Bb4, 0.7], [Db5, 1.1],
+      [Bb4, 0.7], [Ab4, 1.0], [F4,  1.0],
+    ];
 
-    musicBtn.addEventListener("click", () => {
-      musicOn = !musicOn;
-      musicBtn.textContent = `🎵 Music: ${musicOn ? "On" : "Off"}`;
-      if (musicOn) startMusic();
-      else stopMusic();
+    // Under-melody chords (soft)
+    const pads = [
+      [Db3,Ab3,Db4, 1.8],
+      [Db3,Ab3,Eb4, 1.8],
+      [Db3,Ab3,F4,  1.8],
+      [Db3,Ab3,Eb4, 1.8],
+    ];
+
+    // Schedule melody with gentle rubato
+    let rub = 0.55;
+    melody.forEach(([m, v], idx) => {
+      add(0.55 + (idx%3===0?0.10:0), (tt)=>pianoNote(audioCtx,m,tt,1.3,v*0.9));
+      // occasional pad
+      if (idx % 4 === 0){
+        const p = pads[(idx/4) % pads.length | 0];
+        add(0.00, (tt)=>playChord(audioCtx,[p[0],p[1],p[2]],tt,p[3],0.25));
+      }
+      add(0.00, ()=>{});
+      rub = (rub === 0.55 ? 0.50 : 0.55);
     });
+
+    // Little resolving cadence feel
+    add(0.60, (tt)=>playChord(audioCtx,[Db3,Ab3,Db4,F4],tt,2.4,0.28));
+    add(0.50, (tt)=>pianoNote(audioCtx,Db5,tt,2.0,0.55));
+    add(0.00, ()=>{});
+
+    // Auto-loop: restart after ~35s (keeps it simple)
+    const loopLen = 36;
+    const loopTimer = setTimeout(() => {
+      if (!musicOn || stopFlag) return;
+      startMusic();
+    }, loopLen * 1000);
+
+    scheduled.push({ disconnect: ()=>clearTimeout(loopTimer) });
+
+  } catch {}
+}
+
+function stopMusic(){
+  stopFlag = true;
+  clearScheduled();
+}
+
+musicBtn.addEventListener("click", () => {
+  musicOn = !musicOn;
+  musicBtn.textContent = `🎵 Music: ${musicOn ? "On" : "Off"}`;
+  if (musicOn) startMusic();
+  else stopMusic();
+});
+
 
     /* =========================================================
        Valentine GIF (clean loader)
