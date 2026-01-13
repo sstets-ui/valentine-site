@@ -2344,53 +2344,73 @@ window.addEventListener("resize", () => {
       }
     });
 
-    /* =========================================================
-       3) Simple music toggle (low volume oscillator “vibe bed”)
-    ========================================================= */
-    const musicBtn = $("musicBtn");
-    let audioCtx = null;
-    let musicOsc = null;
-    let musicOn = false;
+ <!-- COPY/PASTE THIS WHOLE BLOCK (put it inside <body> near the end) -->
+<button id="musicBtn">🎵 Music: Off</button>
 
-    function startMusic(){
-      try{
-        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = 220;
-        gain.gain.value = 0.02;
-        osc.connect(gain).connect(audioCtx.destination);
-        osc.start();
-        musicOsc = { osc, gain };
+<!-- Hidden YouTube player (audio will still play) -->
+<div id="ytPlayer" style="width:0;height:0;overflow:hidden;"></div>
 
-        let step = 0;
-        const chord = [220, 277.18, 329.63, 392.00];
-        const timer = setInterval(() => {
-          if (!musicOn || !musicOsc){ clearInterval(timer); return; }
-          step = (step + 1) % chord.length;
-          musicOsc.osc.frequency.setTargetAtTime(chord[step], audioCtx.currentTime, 0.08);
-        }, 900);
-      } catch {}
-    }
+<!-- Load YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
 
-    function stopMusic(){
-      try{
-        if (!musicOsc || !audioCtx) return;
-        musicOsc.gain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.05);
-        setTimeout(() => {
-          try { musicOsc.osc.stop(); } catch {}
-          musicOsc = null;
-        }, 120);
-      } catch {}
-    }
+<script>
+  // If you already have a $ helper, you can remove this.
+  const $ = (id) => document.getElementById(id);
 
-    musicBtn.addEventListener("click", () => {
-      musicOn = !musicOn;
-      musicBtn.textContent = `🎵 Music: ${musicOn ? "On" : "Off"}`;
-      if (musicOn) startMusic();
-      else stopMusic();
+  /* =========================================================
+     Music toggle (YouTube: Never Gonna Give You Up)
+  ========================================================= */
+  const musicBtn = $("musicBtn");
+  let musicOn = false;
+  let ytPlayer = null;
+  let ytReady = false;
+
+  // https://www.youtube.com/watch?v=dQw4w9WgXcQ
+  const YT_VIDEO_ID = "dQw4w9WgXcQ";
+
+  // YouTube API calls this when ready
+  window.onYouTubeIframeAPIReady = function () {
+    ytPlayer = new YT.Player("ytPlayer", {
+      videoId: YT_VIDEO_ID,
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        rel: 0,
+        playsinline: 1
+      },
+      events: {
+        onReady: () => {
+          ytReady = true;
+          try { ytPlayer.setVolume(15); } catch (e) {}
+        }
+      }
     });
+  };
+
+  function startMusic() {
+    if (!ytReady || !ytPlayer) return;
+    ytPlayer.playVideo();
+  }
+
+  function stopMusic() {
+    if (!ytReady || !ytPlayer) return;
+    ytPlayer.pauseVideo();
+    // Uncomment next line to restart from the beginning next time:
+    // ytPlayer.seekTo(0, true);
+  }
+
+  musicBtn.addEventListener("click", () => {
+    musicOn = !musicOn;
+    musicBtn.textContent = `🎵 Music: ${musicOn ? "On" : "Off"}`;
+    if (musicOn) startMusic();
+    else stopMusic();
+  });
+</script>
+>
+
 
     /* =========================================================
        4) Valentine GIF (clean loader)
