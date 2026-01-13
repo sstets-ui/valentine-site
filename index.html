@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Valentine’s Day 2026 Site </title>
+  <title>Valentine’s Day 2026 — Sarah Stets</title>
 
   <!-- Tailwind + Confetti -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -105,69 +105,269 @@
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
       background-size:180px 180px;
     }
-
     .pixel-grid{
       position:absolute;
       inset:0;
-      opacity:.22;
-      background-image:url("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWFiOGYya3oyeWpxbGJ2bWFqZDhqY2IyMTRmOXNmZjB4cWc3eDBoOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/O7fdFrKXQ2WCxYKLeT/giphy.gif");
-      background-size:cover;
-      background-position:center;
+      opacity:.14;
       mix-blend-mode:overlay;
       filter:saturate(.95) contrast(1.05);
+      background-image:
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 42px 42px;
     }
 
     /* =========================================================
-       1) Floating layers (hearts/powerups/clouds)
+       0.5) Floating emoji layers (hearts / powerups / pixel clouds)
     ========================================================= */
     #hearts, #powerups, #pixelClouds{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:2;
-      overflow:hidden;
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
     }
-    #powerups{ z-index:1; }
+    #hearts{ z-index: 7; }
+    #powerups{ z-index: 6; }
+    #pixelClouds{ z-index: 5; }
 
     .heart, .powerup{
       position:absolute;
-      bottom:-40px;
-      user-select:none;
+      bottom:-12vh;
       will-change: transform, opacity;
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
-      opacity:0;
+      animation-name: floatUp;
+      animation-timing-function: linear;
+      animation-iteration-count: 1;
+      transform: translate3d(calc(var(--drift, 0px)), 0, 0);
+      filter:
+        drop-shadow(0 10px 22px rgba(0,0,0,.18))
+        drop-shadow(0 0 22px rgba(255, 140, 210, .18));
     }
-    .heart{ animation: floatUp linear forwards; }
-    .powerup{ animation: puFloat linear forwards; }
+    .powerup{
+      filter:
+        drop-shadow(0 10px 22px rgba(0,0,0,.14))
+        drop-shadow(0 0 18px rgba(120, 200, 255, .16));
+    }
     @keyframes floatUp{
-      0%   { transform: translateY(0) translateX(0) scale(1); opacity:0; }
-      10%  { opacity:.85; }
-      100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.15); opacity:0; }
-    }
-    @keyframes puFloat{
-      0%   { transform: translateY(0) translateX(0) scale(.9) rotate(0deg); opacity:0; }
-      12%  { opacity:.9; }
-      100% { transform: translateY(-120vh) translateX(var(--drift)) scale(1.2) rotate(var(--rot)); opacity:0; }
+      from{ transform: translate3d(calc(var(--drift, 0px)), 0, 0) rotate(0deg); opacity: 0; }
+      10%{ opacity: 1; }
+      to{ transform: translate3d(calc(var(--drift, 0px)), -120vh, 0) rotate(var(--rot, 0deg)); opacity: 0; }
     }
 
     .pixel-cloud{
       position:absolute;
-      left:-260px;
-      top: var(--top);
-      width:240px;
-      height:120px;
-      opacity:0.30;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.08));
-      image-rendering: pixelated;
+      left:-30vw;
+      top: var(--top, 20vh);
+      width: 180px;
+      height: 90px;
+      opacity: .60;
+      transform: scale(var(--s, 1));
       background-repeat:no-repeat;
-      background-size:100% 100%;
-      animation: cloudDrift linear forwards;
+      background-size: contain;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.12));
+      animation: cloudDrift linear 1 forwards;
+    }
+    @keyframes cloudDrift{
+      from{ transform: translate3d(-30vw, 0, 0) scale(var(--s, 1)); opacity: 0; }
+      8%{ opacity: .65; }
+      to{ transform: translate3d(160vw, 0, 0) scale(var(--s, 1)); opacity: 0; }
+    }
+
+    /* =========================================================
+       1) SPACE SCENE (Galaxy clouds + stars + planets + Kirby)
+       Fixes:
+       - actually renders (HTML added)
+       - correct z-index layering
+       - nebula clouds visible (screen blend) and animated
+       - Kirby placed behind floating hearts but above nebula
+    ========================================================= */
+    #spaceScene{
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 800px at 30% 35%, rgba(120, 80, 255, .18), transparent 60%),
+        radial-gradient(900px 700px at 70% 70%, rgba(255, 90, 190, .14), transparent 58%),
+        radial-gradient(1100px 900px at 60% 20%, rgba(40, 210, 255, .10), transparent 55%),
+        radial-gradient(1400px 1000px at 40% 90%, rgba(30, 20, 60, 1), rgba(5, 5, 18, 1) 60%);
+      filter: saturate(1.10) contrast(1.06);
       transform: translateZ(0);
     }
-    body.boss-mode .pixel-cloud{ opacity:0.18; }
-    @keyframes cloudDrift{
-      from { transform: translateX(0) scale(var(--s)); }
-      to { transform: translateX(calc(100vw + 520px)) scale(var(--s)); }
+
+    #spaceScene .stars{
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.85) 50%, transparent 52%),
+        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,.75) 50%, transparent 52%),
+        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,.8) 50%, transparent 52%),
+        radial-gradient(1px 1px at 85% 75%, rgba(255,255,255,.7) 50%, transparent 52%),
+        radial-gradient(1px 1px at 55% 80%, rgba(255,255,255,.65) 50%, transparent 52%),
+        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,.8) 50%, transparent 52%),
+        radial-gradient(1px 1px at 92% 22%, rgba(255,255,255,.75) 50%, transparent 52%);
+      background-size: 240px 240px;
+      opacity:.60;
+      filter: blur(.2px) drop-shadow(0 0 8px rgba(120,200,255,.10));
+      animation: starDrift 80s linear infinite;
+    }
+    @keyframes starDrift{
+      from{ transform: translate3d(0,0,0) scale(1.05); }
+      to{ transform: translate3d(-6%, 4%, 0) scale(1.05); }
+    }
+
+    .moon{
+      position:absolute;
+      width: 46vmin;
+      height: 46vmin;
+      left: 6vmin;
+      top: 8vmin;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,.98), rgba(230,230,255,.92) 45%, rgba(180,180,220,.65) 70%, rgba(120,120,170,.25) 100%),
+        radial-gradient(circle at 60% 62%, rgba(120,120,160,.25), transparent 55%);
+      filter:
+        drop-shadow(0 22px 40px rgba(0,0,0,.28))
+        drop-shadow(0 0 60px rgba(160, 120, 255, .25));
+      opacity:.95;
+      z-index: 2;
+      transform: translate3d(0,0,0);
+      animation: floatParallax 10s ease-in-out infinite;
+    }
+
+    .planet{
+      position:absolute;
+      border-radius: 50%;
+      transform: translate3d(0,0,0);
+      filter: drop-shadow(0 20px 36px rgba(0,0,0,.28)) drop-shadow(0 0 40px rgba(120,180,255,.14));
+      opacity:.95;
+      z-index: 2;
+      animation: floatParallax 12s ease-in-out infinite;
+    }
+    .planet-star{
+      width: 22vmin;
+      height: 22vmin;
+      left: 48vmin;
+      top: 30vmin;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(140,100,255,.95), rgba(80,40,160,.85) 55%, rgba(30, 20, 60,.95) 100%),
+        radial-gradient(circle at 55% 65%, rgba(255,255,255,.20), transparent 55%),
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.22), transparent 55%);
+      box-shadow: inset -18px -24px 40px rgba(0,0,0,.35);
+      animation-duration: 14s;
+    }
+    .planet-star::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius: 50%;
+      background:
+        radial-gradient(10px 10px at 25% 35%, rgba(255,255,255,.95) 45%, transparent 55%),
+        radial-gradient(12px 12px at 55% 55%, rgba(255,255,255,.92) 45%, transparent 55%),
+        radial-gradient(9px 9px at 72% 38%, rgba(255,255,255,.88) 45%, transparent 55%),
+        radial-gradient(11px 11px at 40% 75%, rgba(255,255,255,.90) 45%, transparent 55%);
+      opacity:.8;
+      mix-blend-mode: screen;
+      filter: blur(.2px);
+    }
+    .planet-star::before{
+      content:"";
+      position:absolute;
+      inset:-10px;
+      border-radius:50%;
+      background: radial-gradient(circle, rgba(255,255,255,.22), transparent 60%);
+      filter: blur(1.2px);
+      opacity:.8;
+    }
+
+    .planet-ring{
+      width: 16vmin;
+      height: 16vmin;
+      right: 10vmin;
+      top: 12vmin;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(120,220,255,.95), rgba(60,120,200,.82) 55%, rgba(25, 35, 70,.95) 100%);
+      box-shadow: inset -12px -18px 30px rgba(0,0,0,.35);
+      animation-duration: 12s;
+    }
+    .planet-ring::after{
+      content:"";
+      position:absolute;
+      left: -25%;
+      top: 40%;
+      width: 150%;
+      height: 45%;
+      border-radius: 50%;
+      background:
+        radial-gradient(closest-side, rgba(255,255,255,.24), rgba(255,255,255,.10) 55%, transparent 72%),
+        radial-gradient(closest-side, rgba(120,180,255,.22), transparent 70%);
+      transform: rotate(-18deg);
+      filter: blur(.3px);
+      opacity:.9;
+    }
+
+    @keyframes floatParallax{
+      0%,100%{ transform: translate3d(0,0,0); }
+      50%{ transform: translate3d(0,-8px,0); }
+    }
+
+    /* Nebula clouds container */
+    #nebula{
+      position:absolute;
+      inset:-10%;
+      z-index: 1;
+      pointer-events:none;
+      opacity: 0.95;
+    }
+    .nebula-cloud{
+      position:absolute;
+      width: clamp(360px, 55vmin, 900px);
+      height: clamp(240px, 40vmin, 650px);
+      border-radius: 45%;
+      opacity: .62;
+      transform: translate3d(0,0,0) scale(var(--s,1));
+      will-change: transform, opacity;
+      mix-blend-mode: screen;
+      filter: blur(18px) saturate(1.25) contrast(1.15);
+      background:
+        radial-gradient(closest-side at 30% 35%, rgba(150,110,255,.55), transparent 65%),
+        radial-gradient(closest-side at 55% 55%, rgba(255,120,200,.35), transparent 68%),
+        radial-gradient(closest-side at 70% 35%, rgba(80,220,255,.25), transparent 70%),
+        radial-gradient(closest-side at 40% 75%, rgba(50, 40, 120,.35), transparent 72%);
+      animation: nebulaDrift var(--dur, 18s) ease-in-out infinite alternate;
+    }
+    .nebula-cloud::after{
+      content:"";
+      position:absolute;
+      inset:-18px;
+      border-radius: inherit;
+      background: radial-gradient(closest-side, rgba(0,0,0,.18), transparent 70%);
+      opacity:.55;
+      mix-blend-mode: multiply;
+      filter: blur(22px);
+    }
+    @keyframes nebulaDrift{
+      from { transform: translate3d(-8%, 0, 0) scale(var(--s,1)); }
+      to   { transform: translate3d(8%, -4%, 0) scale(var(--s,1)); }
+    }
+
+    /* Kirby floating (behind hearts/powerups/clouds, above nebula/space) */
+    #kirby{
+      position:absolute;
+      width: clamp(76px, 12vmin, 160px);
+      left: 46%;
+      top: 62%;
+      transform: translate3d(-50%,-50%,0);
+      z-index: 4;
+      opacity: .97;
+      filter:
+        drop-shadow(0 18px 30px rgba(0,0,0,.25))
+        drop-shadow(0 0 34px rgba(255,150,210,.18));
+      animation: kirbyFloat 9s ease-in-out infinite;
+    }
+    @keyframes kirbyFloat{
+      0%,100%{ transform: translate3d(-50%,-50%,0) rotate(-2deg); }
+      50%{ transform: translate3d(-48%,-56%,0) rotate(2deg); }
     }
 
     /* =========================================================
@@ -250,7 +450,6 @@
     .svg-heart:hover{ transform: scale(1.06); filter: drop-shadow(0 12px 18px rgba(0,0,0,.18)); }
     .svg-heart:active{ transform: scale(.96); }
 
-    /* Runaway arena */
     #heartButtons{
       position: relative;
       height: 118px;
@@ -275,11 +474,9 @@
     }
     .svg-heart.no.runaway.is-running{ transition: transform 60ms linear; }
 
-    /* Mascot bounce */
     .mascot-bounce{ animation: mascotBounce 1.8s ease-in-out infinite; }
     @keyframes mascotBounce { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-6px);} }
 
-    /* Boss overlay gif */
     #blackholeGif{
       position:absolute;
       left:50%;
@@ -322,16 +519,44 @@
       box-shadow: 0 40px 90px rgba(2,6,23,0.25);
     }
 
-    /* Tiny helpers */
     .hidden{ display:none !important; }
 
     /* Platformer crisp pixels + stable layout */
-    #pfCanvas { image-rendering: pixelated; touch-action: none; }
+    #platCanvas { image-rendering: pixelated; touch-action: none; }
+
+    /* Platformer overlay */
+    .plat-wrap{
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+    }
+    #platOverlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 18px;
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(255,255,255,0.62);
+      backdrop-filter: blur(10px);
+      transition: opacity 220ms ease;
+      pointer-events: none;
+    }
+    #platStart{
+      position:absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: auto;
+      transition: opacity 220ms ease;
+    }
   </style>
 </head>
 
 <body class="min-h-screen">
-  <!-- Background -->
+  <!-- Background blobs + texture -->
   <div id="bg" aria-hidden="true">
     <div class="blob a"></div>
     <div class="blob b"></div>
@@ -340,7 +565,60 @@
     <div class="pixel-grid"></div>
   </div>
 
-  <!-- Floating layers -->
+  <!-- SPACE SCENE (Galaxy Clouds / Planets / Kirby) -->
+  <div id="spaceScene" aria-hidden="true">
+    <div class="stars"></div>
+
+    <div id="nebula">
+      <div class="nebula-cloud" style="left:-6%; top:4%; --s:1.05; --dur:20s;"></div>
+      <div class="nebula-cloud" style="left:38%; top:8%; --s:0.90; --dur:24s; opacity:.58;"></div>
+      <div class="nebula-cloud" style="left:10%; top:52%; --s:1.12; --dur:22s; opacity:.60;"></div>
+      <div class="nebula-cloud" style="left:58%; top:54%; --s:0.98; --dur:26s; opacity:.56;"></div>
+    </div>
+
+    <div class="moon"></div>
+    <div class="planet planet-star"></div>
+    <div class="planet planet-ring"></div>
+
+    <!-- Kirby (simple SVG) -->
+    <svg id="kirby" viewBox="0 0 200 200" aria-hidden="true">
+      <!-- body -->
+      <defs>
+        <radialGradient id="kBody" cx="35%" cy="30%" r="70%">
+          <stop offset="0" stop-color="#ffd1dc"/>
+          <stop offset="0.55" stop-color="#ff94b8"/>
+          <stop offset="1" stop-color="#ff5fa0"/>
+        </radialGradient>
+        <radialGradient id="kCheek" cx="50%" cy="50%" r="60%">
+          <stop offset="0" stop-color="#ff6aa8" stop-opacity="0.9"/>
+          <stop offset="1" stop-color="#ff6aa8" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <ellipse cx="100" cy="105" rx="72" ry="62" fill="url(#kBody)"/>
+      <!-- arms -->
+      <ellipse cx="45" cy="112" rx="26" ry="22" fill="#ff82b1" opacity="0.95"/>
+      <ellipse cx="155" cy="112" rx="26" ry="22" fill="#ff82b1" opacity="0.95"/>
+      <!-- feet -->
+      <ellipse cx="70" cy="160" rx="34" ry="24" fill="#ff2d6d" opacity="0.95"/>
+      <ellipse cx="130" cy="160" rx="34" ry="24" fill="#ff2d6d" opacity="0.95"/>
+      <!-- eyes -->
+      <ellipse cx="82" cy="92" rx="10" ry="20" fill="#111827"/>
+      <ellipse cx="118" cy="92" rx="10" ry="20" fill="#111827"/>
+      <ellipse cx="79" cy="86" rx="3" ry="6" fill="#fff"/>
+      <ellipse cx="115" cy="86" rx="3" ry="6" fill="#fff"/>
+      <!-- mouth -->
+      <path d="M100 110 C92 110 92 124 100 124 C108 124 108 110 100 110 Z" fill="#7c2d12" opacity="0.85"/>
+      <!-- cheeks -->
+      <ellipse cx="62" cy="112" rx="20" ry="14" fill="url(#kCheek)"/>
+      <ellipse cx="138" cy="112" rx="20" ry="14" fill="url(#kCheek)"/>
+      <!-- tiny star sparkle -->
+      <path d="M165 50 l6 12 13 2 -10 9 2 13 -11-6 -11 6 2-13 -10-9 13-2z"
+            fill="#fff" opacity="0.35"/>
+    </svg>
+  </div>
+
+  <!-- Floating emoji layers -->
   <div id="powerups" aria-hidden="true"></div>
   <div id="pixelClouds" aria-hidden="true"></div>
   <div id="hearts" aria-hidden="true"></div>
@@ -512,6 +790,37 @@
 
             <div id="bossMsg" class="mt-3 text-sm font-semibold text-slate-700/80">
               Beat the boss to unlock YES + NO.
+            </div>
+          </div>
+        </section>
+
+        <!-- PLATFORMER -->
+        <section class="glass rounded-3xl overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
+            <div class="font-black text-slate-800/80">🏃‍♀️ Platformer (C-Side++++ Love Run)</div>
+            <div class="text-xs font-black text-slate-700/70">Treats: <span id="platCount">0</span>/36</div>
+          </div>
+          <div class="px-6 py-5">
+            <div class="text-sm font-semibold text-slate-700/80 mb-3" id="platMsg">
+              Collect ALL the sweets 💘
+            </div>
+
+            <div class="plat-wrap border border-white/60 bg-white/55">
+              <canvas id="platCanvas" class="w-full block h-[420px]"></canvas>
+
+              <div id="platOverlay">
+                <div class="text-slate-800/90">
+                  <div class="text-3xl font-extrabold">C-Side++++ “ALL OF THEM” 💘</div>
+                  <div class="text-sm font-semibold mt-2">Move: ←→/A D • Jump: ↑/W/Space • Dash: Shift/X + direction</div>
+                  <div class="text-xs font-semibold mt-2 opacity-80">Dash refills only via 💎 (some require dashing). Death resets treats (per segment).</div>
+                </div>
+              </div>
+
+              <button id="platStart"
+                class="rounded-full px-6 py-3 font-extrabold text-white shadow-lg active:scale-95 transition"
+                style="background: linear-gradient(135deg, #fb7185, #ec4899, #6366f1);">
+                Start C-Side++++ 💞
+              </button>
             </div>
           </div>
         </section>
@@ -729,7 +1038,7 @@
             </div>
           </div>
 
-          <!-- “Wild Valentine” battle (simple) -->
+          <!-- “Wild Valentine” battle -->
           <div class="mt-5 rounded-3xl bg-white/60 border border-white/60 p-5">
             <div class="flex items-center justify-between gap-3">
               <div>
@@ -780,8 +1089,11 @@
                       style="background: linear-gradient(135deg, #6366f1, #ec4899);" data-move="Cozy Aura">Cozy</button>
             </div>
           </div>
+        </section>
+      </main>
+    </div>
+  </div>
 
-      
   <!-- Spellbook Modal -->
   <div id="dateModal" class="modal hidden" aria-hidden="true">
     <div class="backdrop" data-close="1"></div>
@@ -821,12 +1133,39 @@
     </div>
   </div>
 
-  
+  <!-- =========================================================
+       MAIN GAME SCRIPT
+  ========================================================== -->
+  <script>
+  (() => {
+    "use strict";
 
     /* =========================================================
-       1) Floating hearts / powerups / pixel clouds
+       Helpers
     ========================================================= */
-          
+    const $ = (id) => document.getElementById(id);
+    const clamp = (n,a,b) => Math.max(a, Math.min(b,n));
+
+    function safeConfetti(opts){
+      try { confetti(opts); } catch {}
+    }
+
+    function setImageTryFor(imgEl, urls) {
+      let i = 0;
+      const tryNext = () => {
+        if (i >= urls.length) return;
+        const url = urls[i++];
+        const probe = new Image();
+        probe.onload = () => { imgEl.src = url; };
+        probe.onerror = tryNext;
+        probe.src = url;
+      };
+      tryNext();
+    }
+
+    /* =========================================================
+       Floating hearts / powerups / pixel clouds
+    ========================================================= */
     const heartsLayer = $("hearts");
     const powerupsLayer = $("powerups");
     const pixelCloudsLayer = $("pixelClouds");
@@ -844,8 +1183,9 @@
       el.style.opacity = (0.30 + Math.random() * 0.50).toFixed(2);
       el.style.animationDuration = dur + "s";
       el.style.setProperty("--drift", drift);
+      el.style.setProperty("--rot", (Math.random()*140 - 70) + "deg");
       heartsLayer.appendChild(el);
-      setTimeout(() => el.remove(), dur * 1000 + 150);
+      setTimeout(() => el.remove(), dur * 1000 + 200);
     }
 
     function spawnPowerup(){
@@ -860,6 +1200,7 @@
       const rot = (Math.random() * 160 - 80) + "deg";
       el.style.left = left + "vw";
       el.style.fontSize = size + "px";
+      el.style.opacity = (0.25 + Math.random() * 0.45).toFixed(2);
       el.style.animationDuration = dur + "s";
       el.style.setProperty("--drift", drift);
       el.style.setProperty("--rot", rot);
@@ -896,7 +1237,7 @@
       el.style.animationDuration = dur;
       el.style.backgroundImage = `url("data:image/svg+xml,${pixelCloudSvg}")`;
       pixelCloudsLayer.appendChild(el);
-      setTimeout(() => el.remove(), parseFloat(dur) * 1000 + 300);
+      setTimeout(() => el.remove(), parseFloat(dur) * 1000 + 400);
     }
 
     for (let i = 0; i < 12; i++) spawnHeart();
@@ -907,7 +1248,7 @@
     setInterval(spawnPixelCloud, 1700);
 
     /* =========================================================
-       2) Mana bar (scroll progress) + shiny mode
+       Mana bar (scroll progress) + shiny mode
     ========================================================= */
     const manaBarInner = $("manaBarInner");
     const manaPctEl = $("manaPct");
@@ -936,7 +1277,7 @@
     });
 
     /* =========================================================
-       3) Simple music toggle (low volume oscillator “vibe bed”)
+       Simple music toggle (low volume oscillator)
     ========================================================= */
     const musicBtn = $("musicBtn");
     let audioCtx = null;
@@ -984,7 +1325,7 @@
     });
 
     /* =========================================================
-       4) Valentine GIF (clean loader)
+       Valentine GIF (clean loader)
     ========================================================= */
     const valImage = $("valImage");
     const GIFS = {
@@ -995,7 +1336,7 @@
     setImageTryFor(valImage, GIFS.start);
 
     /* =========================================================
-       5) YES/NO locking + runaway NO (AFTER boss victory)
+       YES/NO locking + runaway NO (AFTER boss victory)
     ========================================================= */
     const yesBtn = $("yesBtn");
     const noBtn  = $("noBtn");
@@ -1061,9 +1402,9 @@
     });
 
     function enableRunawayNo(){
-      noBtn.classList.add("runaway");
-      noBtn.classList.add("no");
+      if (noBtn.classList.contains("runaway")) return;
 
+      noBtn.classList.add("runaway");
       const arenaRect0 = arena.getBoundingClientRect();
       const noRect0 = noBtn.getBoundingClientRect();
       let nx = (noRect0.left - arenaRect0.left);
@@ -1130,7 +1471,7 @@
     }
 
     /* =========================================================
-       6) Boss fight (cleaned + self-contained)
+       Boss fight (self-contained)
     ========================================================= */
     const beginEvent = $("beginEvent");
     const bossCanvas = $("bossCanvas");
@@ -1152,13 +1493,14 @@
       "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjliOThhaGVlNzMyNWFsa2RhZmdidGdxczU0eDF1bTBxMjZpNXRnMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUA7b2takylWgFwJYQ/giphy.gif"
     ]);
 
+    // Global keys for boss fight
     const keys = new Set();
     window.addEventListener("keydown", (e) => {
-      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"," "].includes(e.key)){
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"," ", "Shift", "x"].includes(e.key)){
         keys.add(e.key);
         if (e.key === " ") e.preventDefault();
       }
-    });
+    }, { passive:false });
     window.addEventListener("keyup", (e) => keys.delete(e.key));
 
     function fitCanvasToCSS(canvas, ctx){
@@ -1220,10 +1562,8 @@
       ctx.restore();
     }
 
-    // Polyfill-ish helper: roundRect fallback for older browsers
     function rr(ctx, x, y, w, h, r){
-      if (ctx.roundRect) { ctx.roundRect(x,y,w,h,r); return; }
-      // fallback path
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x,y,w,h,r); return; }
       r = Math.min(r, w/2, h/2);
       ctx.beginPath();
       ctx.moveTo(x+r, y);
@@ -1553,7 +1893,6 @@
         } else if (b.kind === "dash"){
           bossCtx.globalAlpha = 0.95;
           bossCtx.fillStyle = "#fb7185";
-          bossCtx.beginPath();
           rr(bossCtx, b.x-14, b.y-5, 28, 10, 6);
           bossCtx.fill();
           bossCtx.globalAlpha = 1;
@@ -1567,7 +1906,6 @@
       for (const p of bossGame.beams){
         bossCtx.globalAlpha = 0.88;
         bossCtx.fillStyle = "#22c55e";
-        bossCtx.beginPath();
         rr(bossCtx, p.x-3, p.y-12, 6, 24, 6);
         bossCtx.fill();
         bossCtx.globalAlpha = 1;
@@ -1613,7 +1951,7 @@
     resetBossFight();
 
     /* =========================================================
-       7) Romance arcade system (spellbook + tokens + battle)
+       Romance arcade system (spellbook + tokens + battle)
     ========================================================= */
     const tcgCard = $("tcgCard");
     const altArtBtn = $("altArtBtn");
@@ -1748,6 +2086,24 @@
       }
     }
 
+    function setBars(){
+      enemyHPBar.style.width = `${clamp(STATE.enemyHP,0,100)}%`;
+      youHPBar.style.width = `${clamp(STATE.youHP,0,100)}%`;
+      enemyAff.textContent = `${Math.round(clamp(STATE.enemyAffection,0,100))}%`;
+      youNerves.textContent = `${Math.round(clamp(STATE.nerves,0,100))}%`;
+      youNervesBar.style.width = `${clamp(STATE.nerves,0,100)}%`;
+
+      if (STATE.enemyHP <= 0){
+        battleStatus.textContent = "Victory 💝";
+      } else if (STATE.youHP <= 0){
+        battleStatus.textContent = "Bonked 💥";
+      } else if (STATE.enemyAffection >= 80){
+        battleStatus.textContent = "Heart Melt 💞";
+      } else {
+        battleStatus.textContent = "Neutral";
+      }
+    }
+
     function setCardTiltFromEvent(e){
       const r = tcgCard.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width;
@@ -1779,6 +2135,7 @@
       unlockLoveLine();
       addAchievement("Alt art revealed");
       updateHUD();
+      setBars();
     });
 
     const SPELLS = [
@@ -1887,6 +2244,7 @@
           renderStack();
           updateSynergy();
           updateHUD();
+          setBars();
         });
         spellList.appendChild(btn);
       });
@@ -1985,7 +2343,7 @@
       STATE.mana.heart += (sp.cost.heart||0);
       STATE.mana.popcorn += (sp.cost.popcorn||0);
       STATE.mana.sparkle += (sp.cost.sparkle||0);
-      renderStack(); updateSynergy(); updateHUD();
+      renderStack(); updateSynergy(); updateHUD(); setBars();
     });
 
     stackClear.addEventListener("click", () => {
@@ -1996,17 +2354,19 @@
         STATE.mana.popcorn += (sp.cost.popcorn||0);
         STATE.mana.sparkle += (sp.cost.sparkle||0);
       }
-      renderStack(); updateSynergy(); updateHUD();
+      renderStack(); updateSynergy(); updateHUD(); setBars();
     });
 
     resolveStackBtn.addEventListener("click", resolveStack);
 
+    // ---- Tokens ----
     const TOKEN_TABLE = [
       { emoji:"🌹", type:"rose",    mana:{ heart:1 },   w:30 },
       { emoji:"🍫", type:"choc",    mana:{ choc:1 },    w:26 },
       { emoji:"🍿", type:"popcorn", mana:{ popcorn:1 }, w:18 },
       { emoji:"✨", type:"sparkle", mana:{ sparkle:1 }, w:22 },
       { emoji:"🕯️", type:"candle", mana:{ sparkle:1 }, w:12 },
+      { emoji:"❤️", type:"heart",  mana:{ heart:1 },   w:16 },
     ];
 
     const RARITIES = [
@@ -2059,10 +2419,12 @@
       const counts = {};
       for (const t of STATE.tokens) counts[t.type] = (counts[t.type]||0) + 1;
 
-      const lines = Object.keys(counts).map(k => {
-        const emoji = (TOKEN_TABLE.find(x=>x.type===k)?.emoji) || "💖";
-        return `${emoji} ${k}: <b>${counts[k]}</b>`;
-      });
+      const pretty = (k) => {
+        const m = TOKEN_TABLE.find(x=>x.type===k);
+        return m ? m.emoji : "💖";
+      };
+
+      const lines = Object.keys(counts).map(k => `${pretty(k)} ${k}: <b>${counts[k]}</b>`);
 
       const g = STATE.gifts;
       const giftsLine = [
@@ -2082,17 +2444,22 @@
       return Object.values(STATE.gifts).reduce((a,b)=>a+b,0);
     }
 
+    function hasCounts(req){
+      const counts = {};
+      for (const t of STATE.tokens) counts[t.type] = (counts[t.type]||0)+1;
+      return Object.entries(req).every(([k,v]) => (counts[k]||0) >= v);
+    }
+
     function consumeTokens(req){
+      if (!hasCounts(req)) return false;
       const needed = { ...req };
       const remaining = [];
       for (const t of STATE.tokens){
         if (needed[t.type] > 0) needed[t.type] -= 1;
         else remaining.push(t);
       }
-      const ok = Object.values(needed).every(v => v <= 0);
-      if (!ok) return false;
-
       STATE.tokens = remaining;
+
       tokenGrid.innerHTML = "";
       STATE.tokens.forEach(pushTokenToGrid);
       tokenCount.textContent = String(STATE.tokens.length);
@@ -2128,129 +2495,137 @@
       STATE.nerves -= 0.6;
 
       if (STATE.tokens.length >= 10) addAchievement("Token hoarder");
-      if (rarity.name === "Mythic"){ addAchievement("Mythic pull"); unlockLoveLine(); }
-
-      logLoot(`${tok.rarity.name} ${tok.emoji} (+${fmtMana(tok.mana)})`);
+      if (rarity.name === "Mythic") addAchievement("Mythic pull!");
+      logLoot(`${tok.rarity.name} ${tok.emoji} (+mana)`);
       updateHUD();
       setBars();
-
-      safeConfetti({ particleCount: 40, spread: 65, origin: { y: 0.75 } });
+      safeConfetti({ particleCount: rarity.name==="Mythic" ? 140 : 50, spread: 80, origin: { y: 0.75 } });
     });
 
     craftBtn.addEventListener("click", () => {
       const recipes = [
-        { name:"Bouquet", key:"bouquet", req:{ rose:2, sparkle:1 } },
-        { name:"Chocolate Box", key:"chocoBox", req:{ choc:2, heart:1 } },
-        { name:"Candle Kit", key:"candleKit", req:{ candle:1, sparkle:1, heart:1 } },
-        { name:"Date Ticket", key:"dateTicket", req:{ popcorn:2, heart:1 } },
+        { name:"Bouquet", key:"bouquet", req:{ rose:2, sparkle:1 }, emoji:"💐" },
+        { name:"Chocolate Box", key:"chocoBox", req:{ choc:2, heart:1 }, emoji:"🍫" },
+        { name:"Candle Kit", key:"candleKit", req:{ candle:1, sparkle:1, heart:1 }, emoji:"🕯️" },
+        { name:"Date Ticket", key:"dateTicket", req:{ popcorn:2, heart:1 }, emoji:"🎟️" },
       ];
 
-      for (const r of recipes){
-        if (consumeTokens(r.req)){
-          STATE.gifts[r.key] += 1;
-          giftCount.textContent = String(totalGifts());
-          STATE.affection += 6;
-          STATE.nerves -= 5;
-          addAchievement(`Crafted ${r.name}`);
-          unlockLoveLine();
-          updateHUD();
-          setBars();
-
-          logLoot(`Crafted: ${r.name} 💝`);
-          battleText.textContent = `You crafted ${r.name} 💝`;
-          safeConfetti({ particleCount: 120, spread: 90, origin: { y: 0.7 } });
-          return;
-        }
+      // pick first craftable recipe (or tell them none)
+      const craftable = recipes.find(r => hasCounts(r.req));
+      if (!craftable){
+        logLoot("Not enough tokens to craft 💔");
+        battleText.textContent = "Need more tokens to craft a gift.";
+        return;
       }
-      battleText.textContent = "Not enough ingredients 💔 (Create more tokens!)";
+
+      consumeTokens(craftable.req);
+      STATE.gifts[craftable.key] += 1;
+      giftCount.textContent = String(totalGifts());
+      addAchievement(`Crafted ${craftable.name}`);
+      logLoot(`Crafted ${craftable.emoji} ${craftable.name}!`);
+      STATE.affection += 6;
+      STATE.nerves -= 2;
+
+      // Gift buffs
+      if (craftable.key === "bouquet") unlockLoveLine();
+      if (craftable.key === "dateTicket") STATE.enemyAffection += 6;
+
+      updateHUD();
+      setBars();
+      safeConfetti({ particleCount: 90, spread: 90, origin: { y: 0.75 } });
     });
 
-    function setBars(){
-      enemyHPBar.style.width = `${clamp(STATE.enemyHP,0,100)}%`;
-      youHPBar.style.width = `${clamp(STATE.youHP,0,100)}%`;
-      enemyAff.textContent = `${Math.round(clamp(STATE.enemyAffection,0,100))}%`;
-      youNerves.textContent = `${Math.round(clamp(STATE.nerves,0,100))}%`;
-      youNervesBar.style.width = `${clamp(STATE.nerves,0,100)}%`;
-      battleStatus.textContent = STATE.enemyAffection >= 70 ? "Blushing" : "Neutral";
+    // ---- Battle moves ----
+    function enemyTurn(){
+      if (STATE.enemyHP <= 0 || STATE.youHP <= 0) return;
+
+      // enemy behavior: reacts to your buffs
+      const base = 6 + Math.random()*6;
+      const nerveHit = (STATE.status.confident > 0 ? base*0.45 : base*0.75);
+
+      STATE.nerves += nerveHit;
+      STATE.youHP -= (STATE.status.cozy > 0 ? base*0.55 : base*0.75);
+
+      // enemy affection rises as you get affectionate
+      STATE.enemyAffection += 2.2 + (STATE.status.starry > 0 ? 1.5 : 0.6);
+
+      battleText.textContent = "Enemy: suspiciously charmed… but still dramatic 💫";
+      setBars();
+      updateHUD();
     }
 
-    function enemyTurn(){
-      let nervUp = 6;
-      let txt = "Valentine tilts their head… judging your vibe. 😳";
-
-      if (STATE.status.cozy > 0){ nervUp -= 2; txt = "Valentine smiles softly… cozy aura is working. 🕯️"; }
-      if (STATE.status.confident > 0){ nervUp -= 2; txt = "Valentine looks impressed. Your confidence is *dangerous*. ✨"; }
-
-      STATE.nerves += nervUp;
-      STATE.youHP -= Math.max(0, nervUp - 2);
-
-      for (const k of Object.keys(STATE.status)) STATE.status[k] = Math.max(0, STATE.status[k] - 1);
-
-      if (STATE.nerves >= 95) txt = "You panic a little 💔 (Cast spells, craft gifts, or use Cozy!)";
-      battleText.textContent = txt;
-
-      if (STATE.youHP <= 0){
-        STATE.youHP = 100;
-        STATE.enemyHP = 100;
-        STATE.enemyAffection = 0;
-        battleText.textContent = "You fainted… but LOVE revives you instantly. Try again 😤💖";
+    function applyMove(name){
+      if (STATE.turnLock) return;
+      if (STATE.enemyHP <= 0 || STATE.youHP <= 0){
+        battleText.textContent = "Battle is over. Refresh for a full reset 💞";
+        return;
       }
 
-      updateHUD();
-      setBars();
-    }
-
-    function applyMove(move){
-      if (STATE.turnLock) return;
       STATE.turnLock = true;
 
-      let affGain = 0, nervDown = 0, heal = 0;
-
-      if (move === "Compliment Beam"){
-        affGain = 14; nervDown = 4;
-        if (STATE.status.confident > 0) affGain += 6;
-        if (STATE.status.starry > 0) affGain += 4;
-        battleText.textContent = "You fire a Compliment Beam 💞 It lands perfectly.";
-      }
-      if (move === "Snack Shield"){
-        affGain = 6; nervDown = 10; heal = 8;
-        if (STATE.gifts.chocoBox > 0){ affGain += 4; heal += 4; }
-        battleText.textContent = "Snack Shield 🍫 Comfort increases dramatically.";
-      }
-      if (move === "Laugh Attack"){
-        affGain = 10; nervDown = 8;
-        if (STATE.status.cozy > 0) affGain += 3;
-        battleText.textContent = "Laugh Attack 😂 The tension melts.";
-      }
-      if (move === "Cozy Aura"){
-        affGain = 7; nervDown = 12;
-        STATE.status.cozy += 3;
-        if (STATE.gifts.candleKit > 0){ STATE.status.cozy += 2; affGain += 3; }
-        battleText.textContent = "Cozy Aura 🕯️ Everything feels warm and safe.";
-      }
-
-      STATE.enemyAffection += affGain;
-      STATE.nerves -= nervDown;
-      STATE.youHP += heal;
-      STATE.affection += (affGain * 0.25);
-
-      if (STATE.enemyAffection >= 50) addAchievement("Halfway to love");
-      if (STATE.nerves <= 15) addAchievement("Ice-cold rizz");
-      if (STATE.status.cozy >= 4) addAchievement("Cozy build");
-
-      if (STATE.enemyAffection >= 100){
-        STATE.enemyAffection = 100;
-        battleText.textContent = "Valentine is completely smitten 💘";
-        safeConfetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
+      if (name === "Compliment Beam"){
+        const dmg = 10 + (STATE.status.confident*2);
+        STATE.enemyHP -= dmg;
+        STATE.enemyAffection += 10;
+        STATE.affection += 4;
+        battleText.textContent = `Compliment Beam! Enemy HP -${Math.round(dmg)} 💘`;
+      } else if (name === "Snack Shield"){
+        const heal = 9 + (STATE.gifts.chocoBox > 0 ? 4 : 0);
+        STATE.youHP = clamp(STATE.youHP + heal, 0, 100);
+        STATE.nerves -= 8;
+        STATE.affection += 2;
+        battleText.textContent = `Snack Shield! You healed +${Math.round(heal)} 🍫`;
+      } else if (name === "Laugh Attack"){
+        const spike = 6 + Math.random()*6;
+        STATE.enemyAffection += 14;
+        STATE.enemyHP -= spike;
+        STATE.nerves -= 6;
+        STATE.affection += 3;
+        battleText.textContent = `Laugh Attack! Enemy melts a little 😆💞`;
+      } else if (name === "Cozy Aura"){
+        STATE.status.cozy += 2;
+        STATE.status.confident += 1;
+        STATE.nerves -= 4;
+        STATE.affection += 3;
+        battleText.textContent = "Cozy Aura! You feel safer 🛋️✨";
       }
 
-      updateHUD();
+      // decay buffs gently
+      STATE.status.cozy = Math.max(0, STATE.status.cozy - 0.2);
+      STATE.status.confident = Math.max(0, STATE.status.confident - 0.15);
+      STATE.status.starry = Math.max(0, STATE.status.starry - 0.1);
+
       setBars();
+      updateHUD();
 
+      // check victory
+      if (STATE.enemyHP <= 0){
+        battleText.textContent = "Victory! The wild Valentine surrendered 💝";
+        addAchievement("Battle win");
+        unlockLoveLine();
+        safeConfetti({ particleCount: 180, spread: 95, origin: { y: 0.7 } });
+        STATE.turnLock = false;
+        return;
+      }
+
+      // enemy response
       setTimeout(() => {
         enemyTurn();
+
+        if (STATE.youHP <= 0){
+          battleText.textContent = "You got bonked 💥 Try crafting gifts / reducing nerves!";
+          addAchievement("Battle loss");
+        } else if (STATE.enemyAffection >= 100){
+          battleText.textContent = "Heart Melt! Enemy affection maxed 💞";
+          addAchievement("Heart Melt");
+          unlockLoveLine();
+          safeConfetti({ particleCount: 140, spread: 90, origin: { y: 0.7 } });
+        }
+
+        setBars();
+        updateHUD();
         STATE.turnLock = false;
-      }, 550);
+      }, 540);
     }
 
     MOVE_BTNS.forEach(btn => {
@@ -2258,1401 +2633,1282 @@
     });
 
     // init
-    giftCount.textContent = "0";
-    tokenCount.textContent = "0";
-    renderStack();
     renderInventory();
-    updateSynergy();
     updateHUD();
     setBars();
 
+  })();
+  </script>
+
+  <!-- =========================================================
+       PLATFORMER SCRIPT (separate, fixed)
+       Fixes:
+       - was inserted into HTML without <script> tag (now valid)
+       - uses correct element IDs (platCanvas, platStart, platOverlay, platMsg, platCount)
+       - defines missing helpers: clamp2, roundRectPath, drawHeartShape
+       - uses separate key set so it won’t fight boss keys
+  ========================================================== -->
+  <script>
+  (() => {
+    "use strict";
+
+    const platCanvas = document.getElementById("platCanvas");
+    const platCtx = platCanvas.getContext("2d");
+    const platStartBtn = document.getElementById("platStart");
+    const platOverlay = document.getElementById("platOverlay");
+    const platMsg = document.getElementById("platMsg");
+    const platCountEl = document.getElementById("platCount");
+
+    function fitCanvasToCSS(canvas, ctx){
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width  = Math.floor(rect.width  * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    fitCanvasToCSS(platCanvas, platCtx);
+
+    // platformer-only keys
+    const platKeys = new Set();
     window.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-      dateModal.classList.add("hidden");
-      cinematicOverlay.classList.add("hidden");
-    });
-
-   // ========== Platformer (Valentine: Celeste C-Side++++ "ALL OF THEM" Dinner Date Edition) ==========
-const platCanvas = document.getElementById("platCanvas");
-const platCtx = platCanvas.getContext("2d");
-const platStartBtn = document.getElementById("platStart");
-const platOverlay = document.getElementById("platOverlay");
-const platMsg = document.getElementById("platMsg");
-const platCountEl = document.getElementById("platCount");
-
-let platRaf = null;
-let platLast = 0;
-
-fitCanvasToCSS(platCanvas, platCtx);
-
-const VDAY = {
-  pink: "#ff4d8d",
-  hotPink: "#ff2d6d",
-  blush: "#ffd1dc",
-  cream: "#fff5f7",
-  lavender: "#d8ccff",
-  mint: "#bff7e6",
-  cocoa: "#6b3f2a",
-  ink: "rgba(15,23,42,0.20)"
-};
-
-const SWEETS = ["🍫", "🌹", "💖", "🍓", "🧁", "🍬", "🍪"];
-
-// --- “Rooms” (camera snap) ---
-const ROOM_W = 520;          // world units per room
-const ROOM_COUNT = 12;       // longer
-const LEVEL_W = ROOM_W * ROOM_COUNT;
-
-const platGame = {
-  running: false,
-
-  // Win condition: collect everything (but deaths reset treats PER SEGMENT: B-side remix)
-  heartsTarget: 36,
-  heartsGot: 0,
-
-  // core world
-  camX: 0,
-  levelW: LEVEL_W,
-
-  // movement: tight + punishing
-  gravity: 0.72,
-  maxFall: 16.2,
-  accel: 0.70,
-  maxRun: 4.95,
-  friction: 0.76,
-
-  jumpVel: -9.45,
-  wallJumpX: 6.15,
-  wallJumpY: -9.10,
-  wallSlideMax: 2.65,
-
-  // VERY tight buffers
-  coyoteMax: 0.035,
-  jumpBufferMax: 0.045,
-
-  // dash (only refilled by crystals)
-  dashSpeed: 10.2,
-  dashDuration: 0.115,
-  dashCooldown: 0.070,
-
-  // feather (free flight)
-  featherMaxT: 4.25,
-  featherAccel: 0.55,
-  featherMaxV: 5.8,
-  featherDamp: 0.90,
-
-  // B-side remix: deaths reset treats (PER SEGMENT)
-  bSideTreatReset: true,
-
-  player: {
-    x: 60, y: 160, w: 18, h: 22,
-    vx: 0, vy: 0,
-    onGround: false,
-    onWall: 0,        // -1 left, +1 right
-    facing: 1,
-
-    coyote: 0,
-    jumpBuffer: 0,
-
-    dashAvail: 1,
-    dashT: 0,
-    dashCd: 0,
-
-    featherT: 0
-  },
-
-  // “segments” divide the level into checkpoint chunks so treat-reset isn’t impossible
-  segment: 0,
-  segCommitted: [],           // permanent collected per finished segment
-  segCurrentCount: 0,
-
-  spawn: { x: 60, y: 160 },
-  deaths: 0,
-
-  platforms: [],
-  movers: [],                 // moving platforms
-  crumble: [],                // crumble state
-
-  hazards: [],                // spike strips
-  hazardMovers: [],           // moving kill blocks
-  windZones: [],              // wind areas
-  noWallZones: [],            // zones where wall jump / slide is disabled
-
-  hearts: [],                 // treats (seg-tagged)
-  dashCrystals: [],           // crystals (normal + dashOnly)
-  feathers: [],               // feather pickups
-  checkpoints: [],
-
-  goal: { x: LEVEL_W - 95, y: 128, w: 28, h: 28 },
-
-  // dinner-date background state
-  bg: { lights: [], sparkles: [], skyline: [] },
-
-  prev: { jump: false, dash: false }
-};
-
-function rectsOverlap(a, b){
-  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-}
-function rand(min, max){ return min + Math.random()*(max-min); }
-function sign(n){ return n < 0 ? -1 : (n > 0 ? 1 : 0); }
-function clamp01(t){ return Math.max(0, Math.min(1, t)); }
-
-function initDinnerBackground(){
-  const w = platCanvas.getBoundingClientRect().width;
-  const h = platCanvas.getBoundingClientRect().height;
-
-  platGame.bg.lights = Array.from({ length: 22 }, (_, i) => ({
-    t: i / 21,
-    phase: rand(0, Math.PI*2),
-    a: rand(0.45, 0.98)
-  }));
-
-  platGame.bg.sparkles = Array.from({ length: 30 }, () => ({
-    x: rand(0, w),
-    y: rand(0, h*0.65),
-    r: rand(2, 8),
-    a: rand(0.05, 0.17),
-    phase: rand(0, Math.PI*2)
-  }));
-
-  platGame.bg.skyline = Array.from({ length: 36 }, (_, i) => ({
-    x: i * 70,
-    w: rand(35, 72),
-    h: rand(30, 130),
-    windows: Math.floor(rand(2, 6))
-  }));
-}
-
-function drawDinnerBackground(ctx, w, h, cam, t){
-  // dusk gradient
-  const sky = ctx.createLinearGradient(0,0,0,h);
-  sky.addColorStop(0, "rgba(22, 6, 34, 1)");
-  sky.addColorStop(0.55, "rgba(88, 18, 70, 1)");
-  sky.addColorStop(1, "rgba(255, 77, 141, 0.30)");
-  ctx.fillStyle = sky;
-  ctx.fillRect(0,0,w,h);
-
-  // bokeh sparkles
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  for (const s of platGame.bg.sparkles){
-    const pulse = 0.5 + 0.5*Math.sin(t*1.6 + s.phase);
-    ctx.globalAlpha = s.a * (0.6 + 0.6*pulse);
-    ctx.beginPath();
-    ctx.ellipse(s.x, s.y, s.r*(0.9+pulse*0.4), s.r*(0.9+pulse*0.4), 0, 0, Math.PI*2);
-    ctx.fillStyle = "rgba(255, 245, 247, 1)";
-    ctx.fill();
-  }
-  ctx.restore();
-  ctx.globalAlpha = 1;
-
-  // window frame
-  const wx = w*0.12, wy = h*0.08, ww = w*0.76, wh = h*0.58;
-
-  ctx.save();
-  ctx.globalAlpha = 0.95;
-  ctx.fillStyle = "rgba(10, 8, 18, 0.55)";
-  roundRectPath(ctx, wx-10, wy-10, ww+20, wh+20, 22);
-  ctx.fill();
-
-  ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
-  roundRectPath(ctx, wx, wy, ww, wh, 18);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(255, 245, 247, 0.18)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(wx + ww*0.5, wy); ctx.lineTo(wx + ww*0.5, wy+wh);
-  ctx.moveTo(wx, wy+wh*0.55); ctx.lineTo(wx+ww, wy+wh*0.55);
-  ctx.stroke();
-  ctx.restore();
-
-  // skyline parallax inside window
-  const px = -cam * 0.12;
-  const baseY = wy + wh*0.92;
-
-  ctx.save();
-  ctx.beginPath();
-  roundRectPath(ctx, wx, wy, ww, wh, 18);
-  ctx.clip();
-
-  ctx.globalAlpha = 0.35;
-  const glow = ctx.createLinearGradient(0, wy+wh*0.3, 0, baseY);
-  glow.addColorStop(0, "rgba(255, 77, 141, 0.10)");
-  glow.addColorStop(1, "rgba(255, 245, 247, 0.04)");
-  ctx.fillStyle = glow;
-  ctx.fillRect(wx, wy, ww, wh);
-
-  ctx.globalAlpha = 0.9;
-  for (const b of platGame.bg.skyline){
-    const bx = wx + ((b.x + px) % (ww + 160)) - 80;
-    const by = baseY - b.h;
-    ctx.fillStyle = "rgba(12, 10, 22, 0.95)";
-    ctx.fillRect(bx, by, b.w, b.h);
-
-    ctx.globalAlpha = 0.12 + 0.10*Math.sin(t*0.8 + (b.x*0.03));
-    ctx.fillStyle = "rgba(255, 245, 247, 1)";
-    for (let r=0;r<b.windows;r++){
-      const wy2 = by + 8 + r*(b.h/(b.windows+1));
-      ctx.fillRect(bx + 8, wy2, 6, 4);
-      if (b.w > 45) ctx.fillRect(bx + 20, wy2, 6, 4);
-      if (b.w > 60) ctx.fillRect(bx + 32, wy2, 6, 4);
-    }
-    ctx.globalAlpha = 0.9;
-  }
-
-  ctx.restore();
-  ctx.globalAlpha = 1;
-
-  // string lights across top
-  ctx.save();
-  ctx.globalAlpha = 0.9;
-  ctx.strokeStyle = "rgba(255, 245, 247, 0.25)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(w*0.08, h*0.07);
-  ctx.quadraticCurveTo(w*0.5, h*0.02, w*0.92, h*0.07);
-  ctx.stroke();
-
-  for (const bulb of platGame.bg.lights){
-    const x = w*0.08 + bulb.t*(w*0.84);
-    const y = h*0.07 + Math.sin(bulb.t*Math.PI)*(-8);
-    const tw = 0.45 + 0.55*Math.sin(t*3.2 + bulb.phase);
-    ctx.globalAlpha = bulb.a * (0.35 + 0.65*tw);
-
-    ctx.beginPath();
-    ctx.ellipse(x, y+10, 4.5, 6, 0, 0, Math.PI*2);
-    ctx.fillStyle = "rgba(255, 245, 247, 1)";
-    ctx.fill();
-
-    ctx.globalAlpha *= 0.45;
-    ctx.beginPath();
-    ctx.ellipse(x, y+10, 10, 14, 0, 0, Math.PI*2);
-    ctx.fillStyle = "rgba(255, 77, 141, 1)";
-    ctx.fill();
-  }
-  ctx.restore();
-  ctx.globalAlpha = 1;
-
-  // table (foreground)
-  ctx.save();
-  ctx.globalAlpha = 0.95;
-  const ty = h*0.70;
-  ctx.fillStyle = "rgba(15, 10, 24, 0.75)";
-  ctx.fillRect(0, ty, w, h-ty);
-
-  const cloth = ctx.createLinearGradient(0, ty, 0, h);
-  cloth.addColorStop(0, "rgba(255, 209, 220, 0.25)");
-  cloth.addColorStop(1, "rgba(255, 245, 247, 0.10)");
-  ctx.fillStyle = cloth;
-  ctx.fillRect(0, ty+10, w, h-ty-10);
-
-  // plates
-  ctx.globalAlpha = 0.35;
-  ctx.strokeStyle = "rgba(255, 245, 247, 0.65)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.ellipse(w*0.40, ty+55, 32, 14, 0, 0, Math.PI*2);
-  ctx.ellipse(w*0.60, ty+55, 32, 14, 0, 0, Math.PI*2);
-  ctx.stroke();
-
-  // candles flicker
-  const flick = 0.5 + 0.5*Math.sin(t*8.5);
-  function candle(cx, cy){
-    ctx.globalAlpha = 0.6;
-    ctx.fillStyle = "rgba(255,245,247,0.85)";
-    roundRectPath(ctx, cx-6, cy-18, 12, 22, 6);
-    ctx.fill();
-
-    ctx.globalAlpha = 0.8;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy-25, 5, 8 + flick*2, 0, 0, Math.PI*2);
-    ctx.fillStyle = "rgba(255, 190, 90, 1)";
-    ctx.fill();
-
-    ctx.globalAlpha = 0.18 + flick*0.10;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy-25, 18, 26, 0, 0, Math.PI*2);
-    ctx.fillStyle = "rgba(255, 77, 141, 1)";
-    ctx.fill();
-  }
-  candle(w*0.50, ty+42);
-  candle(w*0.48, ty+52);
-
-  ctx.globalAlpha = 0.9;
-  ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-  ctx.fillText("🌹", w*0.52, ty+78);
-  ctx.restore();
-}
-
-function drawSprinklePlatform(ctx, x, y, w, h, alpha=1){
-  ctx.save();
-  ctx.globalAlpha = alpha;
-
-  ctx.globalAlpha *= 0.18;
-  ctx.fillStyle = "#000";
-  roundRectPath(ctx, x+2, y+4, w, h, 14);
-  ctx.fill();
-
-  ctx.globalAlpha = alpha;
-
-  const g = ctx.createLinearGradient(x, y, x, y+h);
-  g.addColorStop(0, VDAY.cream);
-  g.addColorStop(1, VDAY.blush);
-
-  ctx.fillStyle = g;
-  ctx.strokeStyle = VDAY.ink;
-  ctx.lineWidth = 2;
-  roundRectPath(ctx, x, y, w, h, 14);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.globalAlpha = alpha*0.7;
-  ctx.fillStyle = "#ffffff";
-  roundRectPath(ctx, x+8, y+6, Math.max(0, w-16), Math.max(0, h-12), 12);
-  ctx.fill();
-  ctx.globalAlpha = alpha;
-
-  for (let i = 0; i < Math.floor(w / 22); i++){
-    const sx = x + 14 + i*22 + (Math.random()*4);
-    const sy = y + 8 + (Math.random()*(h-16));
-    ctx.save();
-    ctx.translate(sx, sy);
-    ctx.rotate((Math.random()*0.8)-0.4);
-    ctx.globalAlpha = alpha*0.9;
-    ctx.fillStyle = Math.random() < 0.5 ? VDAY.lavender : VDAY.mint;
-    ctx.fillRect(-5, -1.5, 10, 3);
-    ctx.restore();
-  }
-
-  ctx.font = "12px system-ui, Apple Color Emoji, Segoe UI Emoji";
-  ctx.globalAlpha = alpha*0.35;
-  const count = Math.max(1, Math.floor(w / 90));
-  for (let i=0;i<count;i++){
-    ctx.fillText("💗", x + 18 + i*(w/(count)), y + h - 6);
-  }
-
-  ctx.restore();
-}
-
-function drawCupidHeart(ctx, cx, cy, size){
-  ctx.save();
-  ctx.translate(cx, cy);
-
-  ctx.fillStyle = VDAY.hotPink;
-  drawHeartShape(ctx, 0, 2, size);
-  ctx.fill();
-
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = "#fff";
-  drawHeartShape(ctx, -3, -2, size*0.55);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // wings
-  ctx.strokeStyle = "rgba(255,255,255,0.9)";
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  ctx.moveTo(-size*0.9, -1);
-  ctx.quadraticCurveTo(-size*1.25, -size*0.45, -size*0.75, -size*0.85);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(-size*0.75, 2);
-  ctx.quadraticCurveTo(-size*1.1, -size*0.2, -size*0.65, -size*0.6);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(size*0.9, -1);
-  ctx.quadraticCurveTo(size*1.25, -size*0.45, size*0.75, -size*0.85);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(size*0.75, 2);
-  ctx.quadraticCurveTo(size*1.1, -size*0.2, size*0.65, -size*0.6);
-  ctx.stroke();
-
-  // cupid arrow
-  ctx.strokeStyle = "rgba(255,255,255,0.85)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(-size*0.1, size*0.95);
-  ctx.lineTo(size*0.9, size*0.15);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(size*0.85, size*0.15);
-  ctx.lineTo(size*0.65, size*0.1);
-  ctx.lineTo(size*0.75, size*0.3);
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-function drawSpikes(ctx, s){
-  ctx.save();
-  ctx.globalAlpha = 0.95;
-  ctx.fillStyle = "rgba(255, 45, 109, 0.90)";
-  ctx.strokeStyle = "rgba(15,23,42,0.18)";
-  ctx.lineWidth = 1;
-
-  const count = Math.max(1, Math.floor((s.w || s.h) / 10));
-  ctx.beginPath();
-
-  if (s.dir === "up"){
-    const y = s.y + s.h;
-    for (let i=0;i<count;i++){
-      const x0 = s.x + (i*(s.w/count));
-      const x1 = s.x + ((i+1)*(s.w/count));
-      const xm = (x0+x1)/2;
-      ctx.moveTo(x0, y); ctx.lineTo(xm, s.y); ctx.lineTo(x1, y);
-    }
-  } else if (s.dir === "down"){
-    const y = s.y;
-    for (let i=0;i<count;i++){
-      const x0 = s.x + (i*(s.w/count));
-      const x1 = s.x + ((i+1)*(s.w/count));
-      const xm = (x0+x1)/2;
-      ctx.moveTo(x0, y); ctx.lineTo(xm, s.y + s.h); ctx.lineTo(x1, y);
-    }
-  } else if (s.dir === "left"){
-    const x = s.x + s.w;
-    for (let i=0;i<count;i++){
-      const y0 = s.y + (i*(s.h/count));
-      const y1 = s.y + ((i+1)*(s.h/count));
-      const ym = (y0+y1)/2;
-      ctx.moveTo(x, y0); ctx.lineTo(s.x, ym); ctx.lineTo(x, y1);
-    }
-  } else { // right
-    const x = s.x;
-    for (let i=0;i<count;i++){
-      const y0 = s.y + (i*(s.h/count));
-      const y1 = s.y + ((i+1)*(s.h/count));
-      const ym = (y0+y1)/2;
-      ctx.moveTo(x, y0); ctx.lineTo(s.x + s.w, ym); ctx.lineTo(x, y1);
-    }
-  }
-
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  ctx.restore();
-}
-
-// ---------- Level building helpers ----------
-function addPlatform(x,y,w,h, opt={}){
-  platGame.platforms.push({ x,y,w,h, ...opt });
-}
-function addSpikes(x,y,w,h,dir){ platGame.hazards.push({ x,y,w,h,dir }); }
-function addHazardMover(x,y,w,h, axis, range, speed){
-  platGame.hazardMovers.push({ x,y,w,h, axis, range, speed, t:0 });
-}
-function addWindZone(x,y,w,h, ax, ay){
-  platGame.windZones.push({ x,y,w,h, ax, ay });
-}
-function addNoWallZone(x,y,w,h){
-  platGame.noWallZones.push({ x,y,w,h });
-}
-function addCrystal(x,y, dashOnly=false){
-  platGame.dashCrystals.push({ x,y, used:false, dashOnly });
-}
-function addFeather(x,y){
-  platGame.feathers.push({ x,y, used:false });
-}
-function addCheckpoint(x,y, segNext){
-  platGame.checkpoints.push({ x,y,w:26,h:40, hit:false, segNext });
-}
-function addTreat(x,y, seg){
-  platGame.hearts.push({ x,y, taken:false, seg, emoji: SWEETS[Math.floor(Math.random()*SWEETS.length)] });
-}
-
-// ---------- Reset / Build the “ALL OF THEM” level ----------
-function resetPlatformer(){
-  platGame.running = false;
-  platGame.deaths = 0;
-
-  // segments: 0..3 (each has a checkpoint to commit progress)
-  platGame.segment = 0;
-  platGame.segCommitted = [0,0,0,0];
-  platGame.segCurrentCount = 0;
-
-  platGame.heartsGot = 0;
-  platCountEl.textContent = "0";
-
-  platMsg.innerHTML = `
-    <b>C-Side++++ Love Run 💘 (ALL OF THEM)</b><br>
-    Camera snaps by room • Wind zones • Dash-only crystals • Feather flight • Treat reset on death (per segment).<br>
-    <span class="opacity-80">Move: ←→/A D • Jump: ↑/W/Space • Dash: Shift/X + direction • Dash refills only via 💎 (some require dashing).</span>
-  `;
-
-  platOverlay.style.opacity = "1";
-  platStartBtn.style.opacity = "1";
-  platStartBtn.style.pointerEvents = "auto";
-  platStartBtn.textContent = "Start C-Side++++ 💞";
-
-  // player
-  const p = platGame.player;
-  p.x = 60; p.y = 160;
-  p.vx = 0; p.vy = 0;
-  p.onGround = false;
-  p.onWall = 0;
-  p.facing = 1;
-  p.coyote = 0;
-  p.jumpBuffer = 0;
-  p.dashAvail = 1;
-  p.dashT = 0;
-  p.dashCd = 0;
-  p.featherT = 0;
-
-  platGame.spawn = { x: 60, y: 160 };
-  platGame.camX = 0;
-
-  // clear level arrays
-  platGame.platforms = [];
-  platGame.movers = [];
-  platGame.crumble = [];
-  platGame.hazards = [];
-  platGame.hazardMovers = [];
-  platGame.windZones = [];
-  platGame.noWallZones = [];
-  platGame.hearts = [];
-  platGame.dashCrystals = [];
-  platGame.feathers = [];
-  platGame.checkpoints = [];
-
-  // --- Build rooms (0..11) ---
-  // Each room has its own cruelty theme. Y baseline ~340 ground.
-  const GROUND_Y = 350;
-
-  // global ground
-  addPlatform(0, GROUND_Y, platGame.levelW, 95, { id:"ground" });
-
-  // Helper offsets
-  const R = (i) => i * ROOM_W;
-
-  // ROOM 0: warmup into crumble + pit
-  addPlatform(R(0)+0,   310, 240, 22);
-  addPlatform(R(0)+270, 270, 60, 16);
-  addPlatform(R(0)+350, 235, 58, 16, { crumble:true });
-  addPlatform(R(0)+435, 260, 56, 16);
-  addSpikes  (R(0)+240, 332, 30, 18, "up");
-  addSpikes  (R(0)+330, 332, 20, 18, "up");
-  addTreat   (R(0)+120, 265, 0);
-  addTreat   (R(0)+295, 235, 0);
-  addCrystal (R(0)+460, 210, false); // normal crystal
-
-  // ROOM 1: wall tech + NO-WALL zone strip (forces dash usage)
-  addPlatform(R(1)+120, 305, 90, 18);
-  addPlatform(R(1)+255, 200, 22, 150); // wall
-  addPlatform(R(1)+345, 140, 22, 210); // wall
-  addNoWallZone(R(1)+220, 90, 260, 190); // no wall jump/slide in mid-air section
-  addSpikes(R(1)+277, 230, 14, 105, "right");
-  addSpikes(R(1)+331, 190, 14, 140, "left");
-  addTreat(R(1)+150, 260, 0);
-  addTreat(R(1)+360, 110, 0);
-  addCrystal(R(1)+410, 120, true); // dash-only crystal (must be dashing to collect)
-
-  // ROOM 2: moving platforms + spike sea + wind nudge
-  addPlatform(R(2)+60,  300, 85, 16);
-  addPlatform(R(2)+190, 235, 70, 14, { moving:true, axis:"x", range: 120, speed: 1.95 });
-  addPlatform(R(2)+350, 190, 70, 14, { moving:true, axis:"y", range: 75,  speed: 1.65 });
-  addPlatform(R(2)+455, 235, 70, 14, { moving:true, axis:"x", range: 115, speed: 2.15 });
-  addSpikes(R(2)+0,  332, 520, 18, "up"); // whole floor deadly here
-  addWindZone(R(2)+0, 80, 520, 250, +0.020, -0.006); // gentle up-right push
-  addTreat(R(2)+85,  255, 0);
-  addTreat(R(2)+420, 150, 0);
-  addCrystal(R(2)+250, 170, false);
-
-  // ROOM 3: feather flight corridor (precision through hazards) + checkpoint (commit seg0 -> seg1)
-  addPlatform(R(3)+40,  300, 70, 16);
-  addPlatform(R(3)+430, 300, 70, 16);
-  addSpikes(R(3)+120, 190, 12, 160, "right");
-  addSpikes(R(3)+390, 190, 12, 160, "left");
-  addSpikes(R(3)+130, 332, 260, 18, "up");
-  addWindZone(R(3)+140, 90, 240, 200, 0.0, -0.020); // strong updraft for feather control
-  addFeather(R(3)+260, 170);
-  addTreat(R(3)+240, 130, 0);
-  addCheckpoint(R(3)+470, 255, 1); // when hit, segment advances to 1
-
-  // ROOM 4: segment 1 start – conveyors + crumble staircase
-  addPlatform(R(4)+20,  308, 120, 18, { conveyor:+1.05 });
-  addPlatform(R(4)+170, 275, 120, 18, { conveyor:-1.05 });
-  addPlatform(R(4)+320, 245, 110, 18, { conveyor:+1.15 });
-  addSpikes(R(4)+0, 332, 520, 18, "up");
-  addPlatform(R(4)+60,  205, 52, 16, { crumble:true });
-  addPlatform(R(4)+135, 180, 52, 16, { crumble:true });
-  addPlatform(R(4)+210, 155, 52, 16, { crumble:true });
-  addPlatform(R(4)+285, 130, 52, 16, { crumble:true });
-  addPlatform(R(4)+360, 155, 52, 16, { crumble:true });
-  addTreat(R(4)+85,  255, 1);
-  addTreat(R(4)+205, 235, 1);
-  addTreat(R(4)+300, 210, 1);
-  addCrystal(R(4)+400, 120, true); // dash-only crystal at top
-
-  // ROOM 5: moving hazard blocks + micro ledges + wind that lies
-  addPlatform(R(5)+60,  260, 54, 16);
-  addPlatform(R(5)+140, 220, 54, 16, { crumble:true });
-  addPlatform(R(5)+220, 180, 54, 16);
-  addPlatform(R(5)+300, 220, 54, 16, { crumble:true });
-  addPlatform(R(5)+380, 260, 54, 16);
-
-  addSpikes(R(5)+0, 332, 520, 18, "up");
-  addHazardMover(R(5)+165, 290, 34, 34, "y", 110, 2.15);
-  addHazardMover(R(5)+265, 295, 34, 34, "y", 95,  2.35);
-  addHazardMover(R(5)+365, 292, 34, 34, "y", 120, 2.55);
-
-  addWindZone(R(5)+0, 95, 520, 180, -0.018, 0.0); // push LEFT midair
-  addTreat(R(5)+90,  210, 1);
-  addTreat(R(5)+250, 150, 1);
-  addTreat(R(5)+410, 210, 1);
-  addCrystal(R(5)+455, 160, false);
-
-  // ROOM 6: wall gauntlet + no-wall zones forcing dash timing + checkpoint (commit seg1 -> seg2)
-  addPlatform(R(6)+40,  308, 120, 18);
-  addPlatform(R(6)+220, 150, 22, 200);
-  addPlatform(R(6)+320, 110, 22, 240);
-  addPlatform(R(6)+420, 150, 22, 200);
-
-  addSpikes(R(6)+242, 180, 14, 150, "right");
-  addSpikes(R(6)+306, 140, 14, 190, "left");
-  addSpikes(R(6)+442, 180, 14, 150, "right");
-
-  addNoWallZone(R(6)+180, 90, 300, 160); // disables wall jump/slide in this band
-  addSpikes(R(6)+180, 332, 340, 18, "up");
-
-  addTreat(R(6)+70,  265, 1);
-  addTreat(R(6)+340, 85,  1); // last treat in seg1
-  addCheckpoint(R(6)+480, 255, 2);
-
-  // ROOM 7: segment 2 start – feather + wind maze + dash-only crystal gate
-  addPlatform(R(7)+40,  300, 70, 16);
-  addPlatform(R(7)+420, 300, 70, 16);
-
-  addSpikes(R(7)+110, 190, 12, 160, "right");
-  addSpikes(R(7)+398, 190, 12, 160, "left");
-  addSpikes(R(7)+122, 332, 276, 18, "up");
-
-  // Wind changes direction mid corridor
-  addWindZone(R(7)+140, 90, 240, 80,  +0.020, -0.010);
-  addWindZone(R(7)+140, 170,240, 80,  -0.020, -0.010);
-
-  addFeather(R(7)+260, 165);
-  addCrystal(R(7)+260, 110, true); // dash-only crystal (forces you to dash while flying)
-  addTreat(R(7)+240, 125, 2);
-  addTreat(R(7)+280, 125, 2);
-
-  // ROOM 8: ultra tight moving platforms over spikes (classic “please no”)
-  addSpikes(R(8)+0, 332, 520, 18, "up");
-  addPlatform(R(8)+60,  270, 70, 14, { moving:true, axis:"x", range: 160, speed: 2.55 });
-  addPlatform(R(8)+220, 210, 70, 14, { moving:true, axis:"y", range: 95,  speed: 2.25 });
-  addPlatform(R(8)+380, 160, 70, 14, { moving:true, axis:"x", range: 160, speed: 2.75 });
-  addWindZone(R(8)+0, 90, 520, 240, +0.010, 0.0); // slight right push
-  addTreat(R(8)+95,  220, 2);
-  addTreat(R(8)+405, 115, 2);
-  addCrystal(R(8)+260, 160, false);
-
-  // ROOM 9: crumble runway + moving heartbreak blocks + no-wall zone
-  addSpikes(R(9)+0, 332, 520, 18, "up");
-  for (let i=0;i<6;i++){
-    addPlatform(R(9)+60 + i*70, 255 - i*18, 52, 16, { crumble:true });
-    addTreat(R(9)+70 + i*70, 220 - i*18, 2);
-  }
-  addHazardMover(R(9)+280, 285, 34, 34, "y", 140, 2.75);
-  addHazardMover(R(9)+360, 285, 34, 34, "y", 120, 2.95);
-  addNoWallZone(R(9)+140, 85, 320, 170);
-  addCrystal(R(9)+470, 150, true);
-
-  // ROOM 10: final segment checkpoint (commit seg2 -> seg3) + “dash or perish” pillar
-  addPlatform(R(10)+20, 308, 110, 18);
-  addPlatform(R(10)+170, 190, 22, 160);
-  addPlatform(R(10)+270, 140, 22, 210);
-  addSpikes(R(10)+192, 215, 14, 120, "right");
-  addSpikes(R(10)+256, 160, 14, 175, "left");
-  addWindZone(R(10)+0, 100, 520, 230, -0.012, 0.0);
-  addTreat(R(10)+60, 265, 2);
-  addCheckpoint(R(10)+480, 255, 3);
-
-  // ROOM 11: FINAL – brutal micro hops + last feather + last crystal, then goal
-  addSpikes(R(11)+0, 332, 520, 18, "up");
-  addPlatform(R(11)+60,  260, 54, 16);
-  addPlatform(R(11)+145, 220, 54, 16, { crumble:true });
-  addPlatform(R(11)+230, 180, 54, 16);
-  addPlatform(R(11)+315, 220, 54, 16, { crumble:true });
-  addPlatform(R(11)+400, 260, 54, 16);
-
-  addSpikes(R(11)+130, 140, 14, 190, "right");
-  addSpikes(R(11)+376, 140, 14, 190, "left");
-
-  addFeather(R(11)+260, 145);
-  addCrystal(R(11)+260, 105, true); // dash-only in final
-  addTreat(R(11)+95,  210, 3);
-  addTreat(R(11)+250, 135, 3);
-  addTreat(R(11)+410, 210, 3);
-
-  // goal area platform
-  addPlatform(platGame.goal.x - 30, platGame.goal.y + 40, 120, 16);
-
-  // Build movers state
-  platGame.movers = platGame.platforms
-    .filter(p => p.moving)
-    .map(p => ({ ref: p, t: 0, lastX: p.x, lastY: p.y, dx: 0, dy: 0 }));
-
-  // Build crumble state
-  platGame.crumble = platGame.platforms
-    .filter(p => p.crumble)
-    .map(p => ({ ref: p, state: "solid", t: 0, respawnT: 0 }));
-
-  initDinnerBackground();
-}
-
-// ---------- Death / Segment rules ----------
-function recomputeHeartsGot(){
-  const committed = platGame.segCommitted.reduce((a,b)=>a+b,0);
-  platGame.heartsGot = committed + platGame.segCurrentCount;
-  platCountEl.textContent = String(platGame.heartsGot);
-}
-
-function resetCurrentSegmentTreats(){
-  // reset only hearts in current segment (B-side remix rule)
-  for (const h of platGame.hearts){
-    if (h.seg === platGame.segment) h.taken = false;
-  }
-  platGame.segCurrentCount = 0;
-  recomputeHeartsGot();
-}
-
-function diePlatformer(){
-  const p = platGame.player;
-  platGame.deaths += 1;
-
-  // reset dash crystals + feathers on death (Celeste-ish)
-  for (const c of platGame.dashCrystals) c.used = false;
-  for (const f of platGame.feathers) f.used = false;
-
-  // reset crumble platforms on death
-  for (const c of platGame.crumble){
-    c.state = "solid";
-    c.t = 0;
-    c.respawnT = 0;
-  }
-
-  // B-side remix: reset treats
-  if (platGame.bSideTreatReset) resetCurrentSegmentTreats();
-
-  // respawn
-  p.x = platGame.spawn.x;
-  p.y = platGame.spawn.y;
-  p.vx = 0; p.vy = 0;
-  p.onGround = false;
-  p.onWall = 0;
-  p.coyote = 0;
-  p.jumpBuffer = 0;
-  p.dashAvail = 1;
-  p.dashT = 0;
-  p.dashCd = 0;
-  p.featherT = 0;
-
-  platMsg.innerHTML = `💔 Respawn! Deaths: <b>${platGame.deaths}</b> • Segment: <b>${platGame.segment+1}</b>/${platGame.segCommitted.length}`;
-  try { confetti({ particleCount: 20, spread: 70, origin: { y: 0.55 } }); } catch {}
-}
-
-// ---------- Moving / Crumble / Hazards ----------
-function updateMovingPlatforms(dt){
-  for (const m of platGame.movers){
-    const p = m.ref;
-    m.lastX = p.x; m.lastY = p.y;
-
-    m.t += dt * p.speed;
-    if (p.axis === "x"){
-      p.x = (p.baseX ?? (p.baseX = p.x)) + Math.sin(m.t * Math.PI * 2) * p.range;
-    } else {
-      p.y = (p.baseY ?? (p.baseY = p.y)) + Math.sin(m.t * Math.PI * 2) * p.range;
-    }
-
-    m.dx = p.x - m.lastX;
-    m.dy = p.y - m.lastY;
-  }
-}
-
-function updateHazardMovers(dt){
-  for (const hz of platGame.hazardMovers){
-    hz.t += dt * hz.speed;
-    const s = Math.sin(hz.t * Math.PI * 2);
-    if (hz.axis === "y"){
-      hz.y = (hz.baseY ?? (hz.baseY = hz.y)) + s * hz.range;
-    } else {
-      hz.x = (hz.baseX ?? (hz.baseX = hz.x)) + s * hz.range;
-    }
-  }
-}
-
-function updateCrumble(dt){
-  for (const c of platGame.crumble){
-    if (c.state === "solid") continue;
-
-    if (c.state === "falling"){
-      c.t -= dt;
-      if (c.t <= 0){
-        c.state = "gone";
-        c.respawnT = 1.15; // fast respawn -> still evil
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"," ", "Shift", "x"].includes(e.key)){
+        platKeys.add(e.key);
+        if (e.key === " ") e.preventDefault();
       }
-    } else if (c.state === "gone"){
-      c.respawnT -= dt;
-      if (c.respawnT <= 0){
-        c.state = "solid";
-        c.t = 0;
+    }, { passive:false });
+    window.addEventListener("keyup", (e) => platKeys.delete(e.key));
+
+    // helpers
+    function clamp2(n,a,b){ return Math.max(a, Math.min(b,n)); }
+    function rectsOverlap(a, b){
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+    function rand(min, max){ return min + Math.random()*(max-min); }
+
+    function roundRectPath(ctx, x,y,w,h,r){
+      r = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.arcTo(x+w, y,   x+w, y+h, r);
+      ctx.arcTo(x+w, y+h, x,   y+h, r);
+      ctx.arcTo(x,   y+h, x,   y,   r);
+      ctx.arcTo(x,   y,   x+w, y,   r);
+      ctx.closePath();
+    }
+
+    function drawHeartShape(ctx, x, y, s){
+      ctx.beginPath();
+      ctx.moveTo(x, y + s*0.25);
+      ctx.bezierCurveTo(x - s, y - s*0.35, x - s*0.6, y - s, x, y - s*0.45);
+      ctx.bezierCurveTo(x + s*0.6, y - s, x + s, y - s*0.35, x, y + s*0.25);
+      ctx.closePath();
+    }
+
+    const VDAY = {
+      pink: "#ff4d8d",
+      hotPink: "#ff2d6d",
+      blush: "#ffd1dc",
+      cream: "#fff5f7",
+      lavender: "#d8ccff",
+      mint: "#bff7e6",
+      cocoa: "#6b3f2a",
+      ink: "rgba(15,23,42,0.20)"
+    };
+
+    const SWEETS = ["🍫", "🌹", "💖", "🍓", "🧁", "🍬", "🍪"];
+
+    // “Rooms” (camera snap)
+    const ROOM_W = 520;
+    const ROOM_COUNT = 12;
+    const LEVEL_W = ROOM_W * ROOM_COUNT;
+
+    const platGame = {
+      running: false,
+      heartsTarget: 36,
+      heartsGot: 0,
+
+      camX: 0,
+      levelW: LEVEL_W,
+
+      gravity: 0.72,
+      maxFall: 16.2,
+      accel: 0.70,
+      maxRun: 4.95,
+      friction: 0.76,
+
+      jumpVel: -9.45,
+      wallJumpX: 6.15,
+      wallJumpY: -9.10,
+      wallSlideMax: 2.65,
+
+      coyoteMax: 0.035,
+      jumpBufferMax: 0.045,
+
+      dashSpeed: 10.2,
+      dashDuration: 0.115,
+      dashCooldown: 0.070,
+
+      featherMaxT: 4.25,
+      featherAccel: 0.55,
+      featherMaxV: 5.8,
+      featherDamp: 0.90,
+
+      bSideTreatReset: true,
+
+      player: {
+        x: 60, y: 160, w: 18, h: 22,
+        vx: 0, vy: 0,
+        onGround: false,
+        onWall: 0,
+        facing: 1,
+        coyote: 0,
+        jumpBuffer: 0,
+        dashAvail: 1,
+        dashT: 0,
+        dashCd: 0,
+        featherT: 0
+      },
+
+      segment: 0,
+      segCommitted: [],
+      segCurrentCount: 0,
+
+      spawn: { x: 60, y: 160 },
+      deaths: 0,
+
+      platforms: [],
+      movers: [],
+      crumble: [],
+
+      hazards: [],
+      hazardMovers: [],
+      windZones: [],
+      noWallZones: [],
+
+      hearts: [],
+      dashCrystals: [],
+      feathers: [],
+      checkpoints: [],
+
+      goal: { x: LEVEL_W - 95, y: 128, w: 28, h: 28 },
+
+      bg: { lights: [], sparkles: [], skyline: [] },
+
+      prev: { jump: false, dash: false }
+    };
+
+    function initDinnerBackground(){
+      const w = platCanvas.getBoundingClientRect().width;
+      const h = platCanvas.getBoundingClientRect().height;
+
+      platGame.bg.lights = Array.from({ length: 22 }, (_, i) => ({
+        t: i / 21,
+        phase: rand(0, Math.PI*2),
+        a: rand(0.45, 0.98)
+      }));
+
+      platGame.bg.sparkles = Array.from({ length: 30 }, () => ({
+        x: rand(0, w),
+        y: rand(0, h*0.65),
+        r: rand(2, 8),
+        a: rand(0.05, 0.17),
+        phase: rand(0, Math.PI*2)
+      }));
+
+      platGame.bg.skyline = Array.from({ length: 36 }, (_, i) => ({
+        x: i * 70,
+        w: rand(35, 72),
+        h: rand(30, 130),
+        windows: Math.floor(rand(2, 6))
+      }));
+    }
+
+    function drawDinnerBackground(ctx, w, h, cam, t){
+      const sky = ctx.createLinearGradient(0,0,0,h);
+      sky.addColorStop(0, "rgba(22, 6, 34, 1)");
+      sky.addColorStop(0.55, "rgba(88, 18, 70, 1)");
+      sky.addColorStop(1, "rgba(255, 77, 141, 0.30)");
+      ctx.fillStyle = sky;
+      ctx.fillRect(0,0,w,h);
+
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      for (const s of platGame.bg.sparkles){
+        const pulse = 0.5 + 0.5*Math.sin(t*1.6 + s.phase);
+        ctx.globalAlpha = s.a * (0.6 + 0.6*pulse);
+        ctx.beginPath();
+        ctx.ellipse(s.x, s.y, s.r*(0.9+pulse*0.4), s.r*(0.9+pulse*0.4), 0, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(255, 245, 247, 1)";
+        ctx.fill();
       }
+      ctx.restore();
+      ctx.globalAlpha = 1;
+
+      const wx = w*0.12, wy = h*0.08, ww = w*0.76, wh = h*0.58;
+
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.fillStyle = "rgba(10, 8, 18, 0.55)";
+      roundRectPath(ctx, wx-10, wy-10, ww+20, wh+20, 22);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
+      roundRectPath(ctx, wx, wy, ww, wh, 18);
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255, 245, 247, 0.18)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(wx + ww*0.5, wy); ctx.lineTo(wx + ww*0.5, wy+wh);
+      ctx.moveTo(wx, wy+wh*0.55); ctx.lineTo(wx+ww, wy+wh*0.55);
+      ctx.stroke();
+      ctx.restore();
+
+      const px = -cam * 0.12;
+      const baseY = wy + wh*0.92;
+
+      ctx.save();
+      roundRectPath(ctx, wx, wy, ww, wh, 18);
+      ctx.clip();
+
+      ctx.globalAlpha = 0.35;
+      const glow = ctx.createLinearGradient(0, wy+wh*0.3, 0, baseY);
+      glow.addColorStop(0, "rgba(255, 77, 141, 0.10)");
+      glow.addColorStop(1, "rgba(255, 245, 247, 0.04)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(wx, wy, ww, wh);
+
+      ctx.globalAlpha = 0.9;
+      for (const b of platGame.bg.skyline){
+        const bx = wx + ((b.x + px) % (ww + 160)) - 80;
+        const by = baseY - b.h;
+        ctx.fillStyle = "rgba(12, 10, 22, 0.95)";
+        ctx.fillRect(bx, by, b.w, b.h);
+
+        ctx.globalAlpha = 0.12 + 0.10*Math.sin(t*0.8 + (b.x*0.03));
+        ctx.fillStyle = "rgba(255, 245, 247, 1)";
+        for (let r=0;r<b.windows;r++){
+          const wy2 = by + 8 + r*(b.h/(b.windows+1));
+          ctx.fillRect(bx + 8, wy2, 6, 4);
+          if (b.w > 45) ctx.fillRect(bx + 20, wy2, 6, 4);
+          if (b.w > 60) ctx.fillRect(bx + 32, wy2, 6, 4);
+        }
+        ctx.globalAlpha = 0.9;
+      }
+
+      ctx.restore();
+      ctx.globalAlpha = 1;
+
+      ctx.save();
+      ctx.globalAlpha = 0.9;
+      ctx.strokeStyle = "rgba(255, 245, 247, 0.25)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(w*0.08, h*0.07);
+      ctx.quadraticCurveTo(w*0.5, h*0.02, w*0.92, h*0.07);
+      ctx.stroke();
+
+      for (const bulb of platGame.bg.lights){
+        const x = w*0.08 + bulb.t*(w*0.84);
+        const y = h*0.07 + Math.sin(bulb.t*Math.PI)*(-8);
+        const tw = 0.45 + 0.55*Math.sin(t*3.2 + bulb.phase);
+        ctx.globalAlpha = bulb.a * (0.35 + 0.65*tw);
+
+        ctx.beginPath();
+        ctx.ellipse(x, y+10, 4.5, 6, 0, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(255, 245, 247, 1)";
+        ctx.fill();
+
+        ctx.globalAlpha *= 0.45;
+        ctx.beginPath();
+        ctx.ellipse(x, y+10, 10, 14, 0, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(255, 77, 141, 1)";
+        ctx.fill();
+      }
+      ctx.restore();
+      ctx.globalAlpha = 1;
+
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      const ty = h*0.70;
+      ctx.fillStyle = "rgba(15, 10, 24, 0.75)";
+      ctx.fillRect(0, ty, w, h-ty);
+
+      const cloth = ctx.createLinearGradient(0, ty, 0, h);
+      cloth.addColorStop(0, "rgba(255, 209, 220, 0.25)");
+      cloth.addColorStop(1, "rgba(255, 245, 247, 0.10)");
+      ctx.fillStyle = cloth;
+      ctx.fillRect(0, ty+10, w, h-ty-10);
+
+      ctx.globalAlpha = 0.35;
+      ctx.strokeStyle = "rgba(255, 245, 247, 0.65)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(w*0.40, ty+55, 32, 14, 0, 0, Math.PI*2);
+      ctx.ellipse(w*0.60, ty+55, 32, 14, 0, 0, Math.PI*2);
+      ctx.stroke();
+
+      const flick = 0.5 + 0.5*Math.sin(t*8.5);
+      function candle(cx, cy){
+        ctx.globalAlpha = 0.6;
+        ctx.fillStyle = "rgba(255,245,247,0.85)";
+        roundRectPath(ctx, cx-6, cy-18, 12, 22, 6);
+        ctx.fill();
+
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy-25, 5, 8 + flick*2, 0, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(255, 190, 90, 1)";
+        ctx.fill();
+
+        ctx.globalAlpha = 0.18 + flick*0.10;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy-25, 18, 26, 0, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(255, 77, 141, 1)";
+        ctx.fill();
+      }
+      candle(w*0.50, ty+42);
+      candle(w*0.48, ty+52);
+
+      ctx.globalAlpha = 0.9;
+      ctx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+      ctx.fillText("🌹", w*0.52, ty+78);
+      ctx.restore();
     }
-  }
-}
 
-function isPlatformSolid(plat){
-  if (!plat.crumble) return true;
-  const c = platGame.crumble.find(x => x.ref === plat);
-  return c ? (c.state !== "gone") : true;
-}
+    function drawSprinklePlatform(ctx, x, y, w, h, alpha=1){
+      ctx.save();
+      ctx.globalAlpha = alpha;
 
-function inZone(list, p){
-  const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-  for (const z of list){
-    if (rectsOverlap(pb, z)) return true;
-  }
-  return false;
-}
+      ctx.globalAlpha *= 0.18;
+      ctx.fillStyle = "#000";
+      roundRectPath(ctx, x+2, y+4, w, h, 14);
+      ctx.fill();
 
-// ---------- Physics / Collisions ----------
-function moveAndCollide(dt){
-  const p = platGame.player;
-  p.onWall = 0;
+      ctx.globalAlpha = alpha;
 
-  // Horizontal
-  p.x += p.vx;
+      const g = ctx.createLinearGradient(x, y, x, y+h);
+      g.addColorStop(0, VDAY.cream);
+      g.addColorStop(1, VDAY.blush);
 
-  for (const plat of platGame.platforms){
-    if (!isPlatformSolid(plat)) continue;
-    const a = { x: p.x, y: p.y, w: p.w, h: p.h };
-    const b = { x: plat.x, y: plat.y, w: plat.w, h: plat.h };
-    if (!rectsOverlap(a,b)) continue;
+      ctx.fillStyle = g;
+      ctx.strokeStyle = VDAY.ink;
+      ctx.lineWidth = 2;
+      roundRectPath(ctx, x, y, w, h, 14);
+      ctx.fill();
+      ctx.stroke();
 
-    if (p.vx > 0){
-      p.x = plat.x - p.w;
-      p.vx = 0;
-      p.onWall = +1;
-    } else if (p.vx < 0){
-      p.x = plat.x + plat.w;
-      p.vx = 0;
-      p.onWall = -1;
+      ctx.globalAlpha = alpha*0.7;
+      ctx.fillStyle = "#ffffff";
+      roundRectPath(ctx, x+8, y+6, Math.max(0, w-16), Math.max(0, h-12), 12);
+      ctx.fill();
+      ctx.globalAlpha = alpha;
+
+      for (let i = 0; i < Math.floor(w / 22); i++){
+        const sx = x + 14 + i*22 + (Math.random()*4);
+        const sy = y + 8 + (Math.random()*(h-16));
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate((Math.random()*0.8)-0.4);
+        ctx.globalAlpha = alpha*0.9;
+        ctx.fillStyle = Math.random() < 0.5 ? VDAY.lavender : VDAY.mint;
+        ctx.fillRect(-5, -1.5, 10, 3);
+        ctx.restore();
+      }
+
+      ctx.font = "12px system-ui, Apple Color Emoji, Segoe UI Emoji";
+      ctx.globalAlpha = alpha*0.35;
+      const count = Math.max(1, Math.floor(w / 90));
+      for (let i=0;i<count;i++){
+        ctx.fillText("💗", x + 18 + i*(w/(count)), y + h - 6);
+      }
+
+      ctx.restore();
     }
-  }
 
-  // Vertical
-  p.y += p.vy;
-  p.onGround = false;
-  let landedOn = null;
+    function drawCupidHeart(ctx, cx, cy, size){
+      ctx.save();
+      ctx.translate(cx, cy);
 
-  for (const plat of platGame.platforms){
-    if (!isPlatformSolid(plat)) continue;
-    const a = { x: p.x, y: p.y, w: p.w, h: p.h };
-    const b = { x: plat.x, y: plat.y, w: plat.w, h: plat.h };
-    if (!rectsOverlap(a,b)) continue;
+      ctx.fillStyle = VDAY.hotPink;
+      drawHeartShape(ctx, 0, 2, size);
+      ctx.fill();
 
-    if (p.vy > 0){
-      p.y = plat.y - p.h;
-      p.vy = 0;
-      p.onGround = true;
-      landedOn = plat;
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = "#fff";
+      drawHeartShape(ctx, -3, -2, size*0.55);
+      ctx.fill();
+      ctx.globalAlpha = 1;
 
-      // carry moving platforms
-      if (plat.moving){
-        const mover = platGame.movers.find(m => m.ref === plat);
-        if (mover){
-          p.x += mover.dx;
-          p.y += mover.dy;
+      ctx.strokeStyle = "rgba(255,255,255,0.9)";
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+
+      ctx.beginPath();
+      ctx.moveTo(-size*0.9, -1);
+      ctx.quadraticCurveTo(-size*1.25, -size*0.45, -size*0.75, -size*0.85);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-size*0.75, 2);
+      ctx.quadraticCurveTo(-size*1.1, -size*0.2, -size*0.65, -size*0.6);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(size*0.9, -1);
+      ctx.quadraticCurveTo(size*1.25, -size*0.45, size*0.75, -size*0.85);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(size*0.75, 2);
+      ctx.quadraticCurveTo(size*1.1, -size*0.2, size*0.65, -size*0.6);
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-size*0.1, size*0.95);
+      ctx.lineTo(size*0.9, size*0.15);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(size*0.85, size*0.15);
+      ctx.lineTo(size*0.65, size*0.1);
+      ctx.lineTo(size*0.75, size*0.3);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawSpikes(ctx, s){
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.fillStyle = "rgba(255, 45, 109, 0.90)";
+      ctx.strokeStyle = "rgba(15,23,42,0.18)";
+      ctx.lineWidth = 1;
+
+      const count = Math.max(1, Math.floor((s.w || s.h) / 10));
+      ctx.beginPath();
+
+      if (s.dir === "up"){
+        const y = s.y + s.h;
+        for (let i=0;i<count;i++){
+          const x0 = s.x + (i*(s.w/count));
+          const x1 = s.x + ((i+1)*(s.w/count));
+          const xm = (x0+x1)/2;
+          ctx.moveTo(x0, y); ctx.lineTo(xm, s.y); ctx.lineTo(x1, y);
+        }
+      } else if (s.dir === "down"){
+        const y = s.y;
+        for (let i=0;i<count;i++){
+          const x0 = s.x + (i*(s.w/count));
+          const x1 = s.x + ((i+1)*(s.w/count));
+          const xm = (x0+x1)/2;
+          ctx.moveTo(x0, y); ctx.lineTo(xm, s.y + s.h); ctx.lineTo(x1, y);
+        }
+      } else if (s.dir === "left"){
+        const x = s.x + s.w;
+        for (let i=0;i<count;i++){
+          const y0 = s.y + (i*(s.h/count));
+          const y1 = s.y + ((i+1)*(s.h/count));
+          const ym = (y0+y1)/2;
+          ctx.moveTo(x, y0); ctx.lineTo(s.x, ym); ctx.lineTo(x, y1);
+        }
+      } else {
+        const x = s.x;
+        for (let i=0;i<count;i++){
+          const y0 = s.y + (i*(s.h/count));
+          const y1 = s.y + ((i+1)*(s.h/count));
+          const ym = (y0+y1)/2;
+          ctx.moveTo(x, y0); ctx.lineTo(s.x + s.w, ym); ctx.lineTo(x, y1);
         }
       }
-    } else if (p.vy < 0){
-      p.y = plat.y + plat.h;
-      p.vy = 0;
-    }
-  }
 
-  // conveyors
-  if (landedOn && landedOn.conveyor){
-    p.x += landedOn.conveyor;
-  }
-
-  // crumble trigger
-  if (landedOn && landedOn.crumble){
-    const c = platGame.crumble.find(x => x.ref === landedOn);
-    if (c && c.state === "solid"){
-      c.state = "falling";
-      c.t = 0.20; // VERY fast crumble
-    }
-  }
-}
-
-// ---------- Main Update ----------
-function updatePlatformer(dt){
-  const w = platCanvas.getBoundingClientRect().width;
-
-  const left  = keys.has("ArrowLeft")  || keys.has("a");
-  const right = keys.has("ArrowRight") || keys.has("d");
-  const up    = keys.has("ArrowUp")    || keys.has("w");
-  const down  = keys.has("ArrowDown")  || keys.has("s");
-  const jumpHeld = up || keys.has(" ") || keys.has("Spacebar");
-  const dashHeld = keys.has("Shift") || keys.has("x");
-
-  const pressedJump = jumpHeld && !platGame.prev.jump;
-  const pressedDash = dashHeld && !platGame.prev.dash;
-  platGame.prev.jump = jumpHeld;
-  platGame.prev.dash = dashHeld;
-
-  const p = platGame.player;
-
-  if (left) p.facing = -1;
-  if (right) p.facing = +1;
-
-  // movers / hazards / crumble
-  updateMovingPlatforms(dt);
-  updateHazardMovers(dt);
-  updateCrumble(dt);
-
-  // buffers
-  p.jumpBuffer = Math.max(0, p.jumpBuffer - dt);
-  p.coyote = Math.max(0, p.coyote - dt);
-  if (pressedJump) p.jumpBuffer = platGame.jumpBufferMax;
-
-  // dash timers
-  p.dashCd = Math.max(0, p.dashCd - dt);
-  p.dashT  = Math.max(0, p.dashT  - dt);
-
-  // feather timer
-  p.featherT = Math.max(0, p.featherT - dt);
-  const feathering = p.featherT > 0;
-
-  // coyote
-  if (p.onGround) p.coyote = platGame.coyoteMax;
-
-  // apply wind zones (ALWAYS, even during feather/dash)
-  for (const wz of platGame.windZones){
-    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    if (rectsOverlap(pb, wz)){
-      // tuned to feel like constant force (dt-compensated)
-      p.vx += wz.ax * (dt * 60);
-      p.vy += wz.ay * (dt * 60);
-    }
-  }
-
-  // FEATHER MODE: free flight control
-  if (feathering){
-    // damp
-    p.vx *= platGame.featherDamp;
-    p.vy *= platGame.featherDamp;
-
-    // accelerate with arrows
-    const fx = (right ? 1 : 0) - (left ? 1 : 0);
-    const fy = (down  ? 1 : 0) - (up   ? 1 : 0);
-
-    p.vx += fx * platGame.featherAccel;
-    p.vy += fy * platGame.featherAccel;
-
-    p.vx = clamp2(p.vx, -platGame.featherMaxV, platGame.featherMaxV);
-    p.vy = clamp2(p.vy, -platGame.featherMaxV, platGame.featherMaxV);
-  } else {
-    // normal horizontal accel unless dashing
-    if (p.dashT <= 0){
-      if (left)  p.vx -= platGame.accel;
-      if (right) p.vx += platGame.accel;
-      if (!left && !right) p.vx *= platGame.friction;
-      p.vx = clamp2(p.vx, -platGame.maxRun, platGame.maxRun);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     }
 
-    // gravity unless dashing
-    if (p.dashT <= 0){
-      p.vy += platGame.gravity;
-      p.vy = clamp2(p.vy, -22, platGame.maxFall);
+    // Level building helpers
+    function addPlatform(x,y,w,h, opt={}){ platGame.platforms.push({ x,y,w,h, ...opt }); }
+    function addSpikes(x,y,w,h,dir){ platGame.hazards.push({ x,y,w,h,dir }); }
+    function addHazardMover(x,y,w,h, axis, range, speed){
+      platGame.hazardMovers.push({ x,y,w,h, axis, range, speed, t:0 });
     }
-  }
+    function addWindZone(x,y,w,h, ax, ay){ platGame.windZones.push({ x,y,w,h, ax, ay }); }
+    function addNoWallZone(x,y,w,h){ platGame.noWallZones.push({ x,y,w,h }); }
+    function addCrystal(x,y, dashOnly=false){ platGame.dashCrystals.push({ x,y, used:false, dashOnly }); }
+    function addFeather(x,y){ platGame.feathers.push({ x,y, used:false }); }
+    function addCheckpoint(x,y, segNext){ platGame.checkpoints.push({ x,y,w:26,h:40, hit:false, segNext }); }
+    function addTreat(x,y, seg){
+      platGame.hearts.push({ x,y, taken:false, seg, emoji: SWEETS[Math.floor(Math.random()*SWEETS.length)] });
+    }
 
-  // movement + collisions
-  moveAndCollide(dt);
+    function resetPlatformer(){
+      platGame.running = false;
+      platGame.deaths = 0;
 
-  // no-wall zone disables wall slide/jump
-  const noWallHere = inZone(platGame.noWallZones, p);
+      platGame.segment = 0;
+      platGame.segCommitted = [0,0,0,0];
+      platGame.segCurrentCount = 0;
 
-  // wall slide
-  if (!feathering && !noWallHere && !p.onGround && p.onWall !== 0 && p.dashT <= 0 && p.vy > 0){
-    p.vy = Math.min(p.vy, platGame.wallSlideMax);
-  }
+      platGame.heartsGot = 0;
+      platCountEl.textContent = "0";
 
-  // JUMP resolve
-  if (p.jumpBuffer > 0){
-    if (p.onGround || p.coyote > 0){
-      p.vy = platGame.jumpVel;
+      platOverlay.style.opacity = "1";
+      platStartBtn.style.opacity = "1";
+      platStartBtn.style.pointerEvents = "auto";
+      platStartBtn.textContent = "Start C-Side++++ 💞";
+
+      const p = platGame.player;
+      p.x = 60; p.y = 160;
+      p.vx = 0; p.vy = 0;
       p.onGround = false;
+      p.onWall = 0;
+      p.facing = 1;
       p.coyote = 0;
       p.jumpBuffer = 0;
-    } else if (!feathering && !noWallHere && p.onWall !== 0){
-      // wall jump away
-      p.vy = platGame.wallJumpY;
-      p.vx = -p.onWall * platGame.wallJumpX;
-      p.jumpBuffer = 0;
-    }
-  }
+      p.dashAvail = 1;
+      p.dashT = 0;
+      p.dashCd = 0;
+      p.featherT = 0;
 
-  // DASH resolve (8-way)
-  if (pressedDash && p.dashAvail > 0 && p.dashCd <= 0 && p.dashT <= 0){
-    let dx = (right ? 1 : 0) - (left ? 1 : 0);
-    let dy = (down  ? 1 : 0) - (up   ? 1 : 0);
+      platGame.spawn = { x: 60, y: 160 };
+      platGame.camX = 0;
 
-    if (dx === 0 && dy === 0){
-      dx = p.facing || 1;
-      dy = 0;
-    }
+      platGame.platforms = [];
+      platGame.movers = [];
+      platGame.crumble = [];
+      platGame.hazards = [];
+      platGame.hazardMovers = [];
+      platGame.windZones = [];
+      platGame.noWallZones = [];
+      platGame.hearts = [];
+      platGame.dashCrystals = [];
+      platGame.feathers = [];
+      platGame.checkpoints = [];
 
-    const len = Math.hypot(dx, dy) || 1;
-    dx /= len; dy /= len;
+      const GROUND_Y = 350;
+      addPlatform(0, GROUND_Y, platGame.levelW, 95, { id:"ground" });
+      const R = (i) => i * ROOM_W;
 
-    p.vx = dx * platGame.dashSpeed;
-    p.vy = dy * platGame.dashSpeed;
-    p.dashAvail -= 1;
-    p.dashT = platGame.dashDuration;
-    p.dashCd = platGame.dashCooldown;
-    p.onGround = false;
+      // ROOM 0
+      addPlatform(R(0)+0,   310, 240, 22);
+      addPlatform(R(0)+270, 270, 60, 16);
+      addPlatform(R(0)+350, 235, 58, 16, { crumble:true });
+      addPlatform(R(0)+435, 260, 56, 16);
+      addSpikes  (R(0)+240, 332, 30, 18, "up");
+      addSpikes  (R(0)+330, 332, 20, 18, "up");
+      addTreat   (R(0)+120, 265, 0);
+      addTreat   (R(0)+295, 235, 0);
+      addCrystal (R(0)+460, 210, false);
 
-    try { confetti({ particleCount: 14, spread: 45, origin: { y: 0.6 } }); } catch {}
-  }
+      // ROOM 1
+      addPlatform(R(1)+120, 305, 90, 18);
+      addPlatform(R(1)+255, 200, 22, 150);
+      addPlatform(R(1)+345, 140, 22, 210);
+      addNoWallZone(R(1)+220, 90, 260, 190);
+      addSpikes(R(1)+277, 230, 14, 105, "right");
+      addSpikes(R(1)+331, 190, 14, 140, "left");
+      addTreat(R(1)+150, 260, 0);
+      addTreat(R(1)+360, 110, 0);
+      addCrystal(R(1)+410, 120, true);
 
-  // bounds
-  p.x = clamp2(p.x, 0, platGame.levelW - p.w);
-  if (p.y > 560) diePlatformer();
+      // ROOM 2
+      addPlatform(R(2)+60,  300, 85, 16);
+      addPlatform(R(2)+190, 235, 70, 14, { moving:true, axis:"x", range: 120, speed: 1.95 });
+      addPlatform(R(2)+350, 190, 70, 14, { moving:true, axis:"y", range: 75,  speed: 1.65 });
+      addPlatform(R(2)+455, 235, 70, 14, { moving:true, axis:"x", range: 115, speed: 2.15 });
+      addSpikes(R(2)+0,  332, 520, 18, "up");
+      addWindZone(R(2)+0, 80, 520, 250, +0.020, -0.006);
+      addTreat(R(2)+85,  255, 0);
+      addTreat(R(2)+420, 150, 0);
+      addCrystal(R(2)+250, 170, false);
 
-  // Treat pickups
-  for (const h of platGame.hearts){
-    if (h.taken) continue;
-    const hb = { x: h.x - 9, y: h.y - 12, w: 20, h: 20 };
-    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    if (rectsOverlap(pb, hb)){
-      h.taken = true;
-      if (h.seg === platGame.segment){
-        platGame.segCurrentCount += 1;
+      // ROOM 3 checkpoint
+      addPlatform(R(3)+40,  300, 70, 16);
+      addPlatform(R(3)+430, 300, 70, 16);
+      addSpikes(R(3)+120, 190, 12, 160, "right");
+      addSpikes(R(3)+390, 190, 12, 160, "left");
+      addSpikes(R(3)+130, 332, 260, 18, "up");
+      addWindZone(R(3)+140, 90, 240, 200, 0.0, -0.020);
+      addFeather(R(3)+260, 170);
+      addTreat(R(3)+240, 130, 0);
+      addCheckpoint(R(3)+470, 255, 1);
+
+      // ROOM 4
+      addPlatform(R(4)+20,  308, 120, 18, { conveyor:+1.05 });
+      addPlatform(R(4)+170, 275, 120, 18, { conveyor:-1.05 });
+      addPlatform(R(4)+320, 245, 110, 18, { conveyor:+1.15 });
+      addSpikes(R(4)+0, 332, 520, 18, "up");
+      addPlatform(R(4)+60,  205, 52, 16, { crumble:true });
+      addPlatform(R(4)+135, 180, 52, 16, { crumble:true });
+      addPlatform(R(4)+210, 155, 52, 16, { crumble:true });
+      addPlatform(R(4)+285, 130, 52, 16, { crumble:true });
+      addPlatform(R(4)+360, 155, 52, 16, { crumble:true });
+      addTreat(R(4)+85,  255, 1);
+      addTreat(R(4)+205, 235, 1);
+      addTreat(R(4)+300, 210, 1);
+      addCrystal(R(4)+400, 120, true);
+
+      // ROOM 5
+      addPlatform(R(5)+60,  260, 54, 16);
+      addPlatform(R(5)+140, 220, 54, 16, { crumble:true });
+      addPlatform(R(5)+220, 180, 54, 16);
+      addPlatform(R(5)+300, 220, 54, 16, { crumble:true });
+      addPlatform(R(5)+380, 260, 54, 16);
+      addSpikes(R(5)+0, 332, 520, 18, "up");
+      addHazardMover(R(5)+165, 290, 34, 34, "y", 110, 2.15);
+      addHazardMover(R(5)+265, 295, 34, 34, "y", 95,  2.35);
+      addHazardMover(R(5)+365, 292, 34, 34, "y", 120, 2.55);
+      addWindZone(R(5)+0, 95, 520, 180, -0.018, 0.0);
+      addTreat(R(5)+90,  210, 1);
+      addTreat(R(5)+250, 150, 1);
+      addTreat(R(5)+410, 210, 1);
+      addCrystal(R(5)+455, 160, false);
+
+      // ROOM 6 checkpoint
+      addPlatform(R(6)+40,  308, 120, 18);
+      addPlatform(R(6)+220, 150, 22, 200);
+      addPlatform(R(6)+320, 110, 22, 240);
+      addPlatform(R(6)+420, 150, 22, 200);
+      addSpikes(R(6)+242, 180, 14, 150, "right");
+      addSpikes(R(6)+306, 140, 14, 190, "left");
+      addSpikes(R(6)+442, 180, 14, 150, "right");
+      addNoWallZone(R(6)+180, 90, 300, 160);
+      addSpikes(R(6)+180, 332, 340, 18, "up");
+      addTreat(R(6)+70,  265, 1);
+      addTreat(R(6)+340, 85,  1);
+      addCheckpoint(R(6)+480, 255, 2);
+
+      // ROOM 7
+      addPlatform(R(7)+40,  300, 70, 16);
+      addPlatform(R(7)+420, 300, 70, 16);
+      addSpikes(R(7)+110, 190, 12, 160, "right");
+      addSpikes(R(7)+398, 190, 12, 160, "left");
+      addSpikes(R(7)+122, 332, 276, 18, "up");
+      addWindZone(R(7)+140, 90, 240, 80,  +0.020, -0.010);
+      addWindZone(R(7)+140, 170,240, 80,  -0.020, -0.010);
+      addFeather(R(7)+260, 165);
+      addCrystal(R(7)+260, 110, true);
+      addTreat(R(7)+240, 125, 2);
+      addTreat(R(7)+280, 125, 2);
+
+      // ROOM 8
+      addSpikes(R(8)+0, 332, 520, 18, "up");
+      addPlatform(R(8)+60,  270, 70, 14, { moving:true, axis:"x", range: 160, speed: 2.55 });
+      addPlatform(R(8)+220, 210, 70, 14, { moving:true, axis:"y", range: 95,  speed: 2.25 });
+      addPlatform(R(8)+380, 160, 70, 14, { moving:true, axis:"x", range: 160, speed: 2.75 });
+      addWindZone(R(8)+0, 90, 520, 240, +0.010, 0.0);
+      addTreat(R(8)+95,  220, 2);
+      addTreat(R(8)+405, 115, 2);
+      addCrystal(R(8)+260, 160, false);
+
+      // ROOM 9
+      addSpikes(R(9)+0, 332, 520, 18, "up");
+      for (let i=0;i<6;i++){
+        addPlatform(R(9)+60 + i*70, 255 - i*18, 52, 16, { crumble:true });
+        addTreat(R(9)+70 + i*70, 220 - i*18, 2);
       }
-      recomputeHeartsGot();
-      try { confetti({ particleCount: 45, spread: 80, origin: { y: 0.7 } }); } catch {}
-      platMsg.innerHTML = `Sweet! 💞 ${platGame.heartsGot}/${platGame.heartsTarget} • Deaths: <b>${platGame.deaths}</b> • Segment: <b>${platGame.segment+1}</b>`;
+      addHazardMover(R(9)+280, 285, 34, 34, "y", 140, 2.75);
+      addHazardMover(R(9)+360, 285, 34, 34, "y", 120, 2.95);
+      addNoWallZone(R(9)+140, 85, 320, 170);
+      addCrystal(R(9)+470, 150, true);
+
+      // ROOM 10 checkpoint
+      addPlatform(R(10)+20, 308, 110, 18);
+      addPlatform(R(10)+170, 190, 22, 160);
+      addPlatform(R(10)+270, 140, 22, 210);
+      addSpikes(R(10)+192, 215, 14, 120, "right");
+      addSpikes(R(10)+256, 160, 14, 175, "left");
+      addWindZone(R(10)+0, 100, 520, 230, -0.012, 0.0);
+      addTreat(R(10)+60, 265, 2);
+      addCheckpoint(R(10)+480, 255, 3);
+
+      // ROOM 11 FINAL
+      addSpikes(R(11)+0, 332, 520, 18, "up");
+      addPlatform(R(11)+60,  260, 54, 16);
+      addPlatform(R(11)+145, 220, 54, 16, { crumble:true });
+      addPlatform(R(11)+230, 180, 54, 16);
+      addPlatform(R(11)+315, 220, 54, 16, { crumble:true });
+      addPlatform(R(11)+400, 260, 54, 16);
+      addSpikes(R(11)+130, 140, 14, 190, "right");
+      addSpikes(R(11)+376, 140, 14, 190, "left");
+      addFeather(R(11)+260, 145);
+      addCrystal(R(11)+260, 105, true);
+      addTreat(R(11)+95,  210, 3);
+      addTreat(R(11)+250, 135, 3);
+      addTreat(R(11)+410, 210, 3);
+
+      addPlatform(platGame.goal.x - 30, platGame.goal.y + 40, 120, 16);
+
+      // movers state
+      platGame.movers = platGame.platforms
+        .filter(p => p.moving)
+        .map(p => ({ ref: p, t: 0, lastX: p.x, lastY: p.y, dx: 0, dy: 0 }));
+
+      // crumble state
+      platGame.crumble = platGame.platforms
+        .filter(p => p.crumble)
+        .map(p => ({ ref: p, state: "solid", t: 0, respawnT: 0 }));
+
+      initDinnerBackground();
+      platMsg.innerHTML = `ALL OF THEM mode 💘 Camera-snap rooms, wind, dash-only crystals, feathers, and treat-reset deaths. Good luck, lover.`;
     }
-  }
 
-  // Crystals (dash refill). Some are DASH-ONLY: only trigger if currently dashing.
-  for (const c of platGame.dashCrystals){
-    if (c.used) continue;
-    const cb = { x: c.x - 10, y: c.y - 10, w: 20, h: 20 };
-    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    if (!rectsOverlap(pb, cb)) continue;
-
-    if (c.dashOnly && p.dashT <= 0){
-      // not dashing: no refill (cruel)
-      continue;
+    function recomputeHeartsGot(){
+      const committed = platGame.segCommitted.reduce((a,b)=>a+b,0);
+      platGame.heartsGot = committed + platGame.segCurrentCount;
+      platCountEl.textContent = String(platGame.heartsGot);
     }
 
-    c.used = true;
-    p.dashAvail = 1;
-    try { confetti({ particleCount: 30, spread: 70, origin: { y: 0.6 } }); } catch {}
-    platMsg.innerHTML = `Dash refilled 💎 • Deaths: <b>${platGame.deaths}</b>`;
-  }
-
-  // Feather pickups
-  for (const f of platGame.feathers){
-    if (f.used) continue;
-    const fb = { x: f.x - 10, y: f.y - 10, w: 20, h: 20 };
-    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    if (rectsOverlap(pb, fb)){
-      f.used = true;
-      p.featherT = platGame.featherMaxT;
-      // feather sections are spicy: don’t give free dash
-      try { confetti({ particleCount: 24, spread: 70, origin: { y: 0.6 } }); } catch {}
-      platMsg.innerHTML = `Feather flight 🪶 for ${platGame.featherMaxT.toFixed(2)}s • Don’t touch 💔`;
-    }
-  }
-
-  // Checkpoints: commit current segment and advance to next
-  for (const cp of platGame.checkpoints){
-    const cpb = { x: cp.x, y: cp.y, w: cp.w, h: cp.h };
-    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    if (cp.hit) continue;
-
-    if (rectsOverlap(pb, cpb)){
-      cp.hit = true;
-
-      // Commit segment progress (locks it in)
-      platGame.segCommitted[platGame.segment] = platGame.segCurrentCount;
-
-      // Advance segment
-      platGame.segment = Math.min(cp.segNext, platGame.segCommitted.length - 1);
+    function resetCurrentSegmentTreats(){
+      for (const h of platGame.hearts){
+        if (h.seg === platGame.segment) h.taken = false;
+      }
       platGame.segCurrentCount = 0;
       recomputeHeartsGot();
-
-      platGame.spawn = { x: cp.x, y: cp.y - 30 };
-
-      try { confetti({ particleCount: 90, spread: 95, origin: { y: 0.6 } }); } catch {}
-      platMsg.innerHTML = `Checkpoint 💌 Segment advanced! • Deaths: <b>${platGame.deaths}</b>`;
     }
-  }
 
-  // Hazards (static spikes)
-  {
-    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    for (const hz of platGame.hazards){
-      if (rectsOverlap(pb, hz)){
-        diePlatformer();
-        break;
+    function diePlatformer(){
+      const p = platGame.player;
+      platGame.deaths += 1;
+
+      for (const c of platGame.dashCrystals) c.used = false;
+      for (const f of platGame.feathers) f.used = false;
+
+      for (const c of platGame.crumble){
+        c.state = "solid";
+        c.t = 0;
+        c.respawnT = 0;
+      }
+
+      if (platGame.bSideTreatReset) resetCurrentSegmentTreats();
+
+      p.x = platGame.spawn.x;
+      p.y = platGame.spawn.y;
+      p.vx = 0; p.vy = 0;
+      p.onGround = false;
+      p.onWall = 0;
+      p.coyote = 0;
+      p.jumpBuffer = 0;
+      p.dashAvail = 1;
+      p.dashT = 0;
+      p.dashCd = 0;
+      p.featherT = 0;
+
+      platMsg.innerHTML = `💔 Respawn! Deaths: <b>${platGame.deaths}</b> • Segment: <b>${platGame.segment+1}</b>/${platGame.segCommitted.length}`;
+      try { confetti({ particleCount: 20, spread: 70, origin: { y: 0.55 } }); } catch {}
+    }
+
+    function updateMovingPlatforms(dt){
+      for (const m of platGame.movers){
+        const p = m.ref;
+        m.lastX = p.x; m.lastY = p.y;
+
+        m.t += dt * p.speed;
+        if (p.axis === "x"){
+          p.x = (p.baseX ?? (p.baseX = p.x)) + Math.sin(m.t * Math.PI * 2) * p.range;
+        } else {
+          p.y = (p.baseY ?? (p.baseY = p.y)) + Math.sin(m.t * Math.PI * 2) * p.range;
+        }
+
+        m.dx = p.x - m.lastX;
+        m.dy = p.y - m.lastY;
       }
     }
-  }
 
-  // Hazards (moving heartbreak blocks)
-  {
-    const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-    for (const hz of platGame.hazardMovers){
-      const hb = { x: hz.x, y: hz.y, w: hz.w, h: hz.h };
-      if (rectsOverlap(pb, hb)){
-        diePlatformer();
-        break;
+    function updateHazardMovers(dt){
+      for (const hz of platGame.hazardMovers){
+        hz.t += dt * hz.speed;
+        const s = Math.sin(hz.t * Math.PI * 2);
+        if (hz.axis === "y"){
+          hz.y = (hz.baseY ?? (hz.baseY = hz.y)) + s * hz.range;
+        } else {
+          hz.x = (hz.baseX ?? (hz.baseX = hz.x)) + s * hz.range;
+        }
       }
     }
-  }
 
-  // Camera snap to room
-  // snap by player center x; keep clamped to world
-  const roomIndex = Math.max(0, Math.min(ROOM_COUNT-1, Math.floor((p.x + p.w/2) / ROOM_W)));
-  const targetCam = roomIndex * ROOM_W;
-  platGame.camX = clamp2(targetCam, 0, platGame.levelW - w);
+    function updateCrumble(dt){
+      for (const c of platGame.crumble){
+        if (c.state === "solid") continue;
+        if (c.state === "falling"){
+          c.t -= dt;
+          if (c.t <= 0){
+            c.state = "gone";
+            c.respawnT = 1.15;
+          }
+        } else if (c.state === "gone"){
+          c.respawnT -= dt;
+          if (c.respawnT <= 0){
+            c.state = "solid";
+            c.t = 0;
+          }
+        }
+      }
+    }
 
-  // Win condition
-  const goal = platGame.goal;
-  const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
-  const gb = { x: goal.x, y: goal.y, w: goal.w, h: goal.h };
-  if (rectsOverlap(pb, gb) && platGame.heartsGot >= platGame.heartsTarget){
-    winPlatformer();
-  }
-}
-
-// ---------- Draw ----------
-function drawPlatformer(){
-  const w = platCanvas.getBoundingClientRect().width;
-  const h = platCanvas.getBoundingClientRect().height;
-  platCtx.clearRect(0,0,w,h);
-
-  const t = performance.now()/1000;
-  if (!platGame.bg.lights || platGame.bg.lights.length === 0) initDinnerBackground();
-
-  // romantic dinner date background (screen space)
-  drawDinnerBackground(platCtx, w, h, platGame.camX, t);
-
-  // world
-  const cam = platGame.camX;
-  platCtx.save();
-  platCtx.translate(-cam, 0);
-
-  // Platforms
-  for (const plat of platGame.platforms){
-    if (plat.crumble){
+    function isPlatformSolid(plat){
+      if (!plat.crumble) return true;
       const c = platGame.crumble.find(x => x.ref === plat);
-      const alpha =
-        !c ? 1 :
-        c.state === "solid" ? 1 :
-        c.state === "falling" ? (0.55 + 0.45*(c.t/0.20)) :
-        0;
-      if (alpha > 0.02) drawSprinklePlatform(platCtx, plat.x, plat.y, plat.w, plat.h, alpha);
-    } else {
-      drawSprinklePlatform(platCtx, plat.x, plat.y, plat.w, plat.h, 1);
+      return c ? (c.state !== "gone") : true;
     }
 
-    if (plat.conveyor){
+    function inZone(list, p){
+      const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+      for (const z of list){
+        if (rectsOverlap(pb, z)) return true;
+      }
+      return false;
+    }
+
+    function moveAndCollide(dt){
+      const p = platGame.player;
+      p.onWall = 0;
+
+      p.x += p.vx;
+      for (const plat of platGame.platforms){
+        if (!isPlatformSolid(plat)) continue;
+        const a = { x: p.x, y: p.y, w: p.w, h: p.h };
+        const b = { x: plat.x, y: plat.y, w: plat.w, h: plat.h };
+        if (!rectsOverlap(a,b)) continue;
+
+        if (p.vx > 0){
+          p.x = plat.x - p.w; p.vx = 0; p.onWall = +1;
+        } else if (p.vx < 0){
+          p.x = plat.x + plat.w; p.vx = 0; p.onWall = -1;
+        }
+      }
+
+      p.y += p.vy;
+      p.onGround = false;
+      let landedOn = null;
+
+      for (const plat of platGame.platforms){
+        if (!isPlatformSolid(plat)) continue;
+        const a = { x: p.x, y: p.y, w: p.w, h: p.h };
+        const b = { x: plat.x, y: plat.y, w: plat.w, h: plat.h };
+        if (!rectsOverlap(a,b)) continue;
+
+        if (p.vy > 0){
+          p.y = plat.y - p.h;
+          p.vy = 0;
+          p.onGround = true;
+          landedOn = plat;
+
+          if (plat.moving){
+            const mover = platGame.movers.find(m => m.ref === plat);
+            if (mover){ p.x += mover.dx; p.y += mover.dy; }
+          }
+        } else if (p.vy < 0){
+          p.y = plat.y + plat.h;
+          p.vy = 0;
+        }
+      }
+
+      if (landedOn && landedOn.conveyor){ p.x += landedOn.conveyor; }
+
+      if (landedOn && landedOn.crumble){
+        const c = platGame.crumble.find(x => x.ref === landedOn);
+        if (c && c.state === "solid"){
+          c.state = "falling";
+          c.t = 0.20;
+        }
+      }
+    }
+
+    function updatePlatformer(dt){
+      const w = platCanvas.getBoundingClientRect().width;
+
+      const left  = platKeys.has("ArrowLeft")  || platKeys.has("a");
+      const right = platKeys.has("ArrowRight") || platKeys.has("d");
+      const up    = platKeys.has("ArrowUp")    || platKeys.has("w");
+      const down  = platKeys.has("ArrowDown")  || platKeys.has("s");
+      const jumpHeld = up || platKeys.has(" ") || platKeys.has("Spacebar");
+      const dashHeld = platKeys.has("Shift") || platKeys.has("x");
+
+      const pressedJump = jumpHeld && !platGame.prev.jump;
+      const pressedDash = dashHeld && !platGame.prev.dash;
+      platGame.prev.jump = jumpHeld;
+      platGame.prev.dash = dashHeld;
+
+      const p = platGame.player;
+
+      if (left) p.facing = -1;
+      if (right) p.facing = +1;
+
+      updateMovingPlatforms(dt);
+      updateHazardMovers(dt);
+      updateCrumble(dt);
+
+      p.jumpBuffer = Math.max(0, p.jumpBuffer - dt);
+      p.coyote = Math.max(0, p.coyote - dt);
+      if (pressedJump) p.jumpBuffer = platGame.jumpBufferMax;
+
+      p.dashCd = Math.max(0, p.dashCd - dt);
+      p.dashT  = Math.max(0, p.dashT  - dt);
+
+      p.featherT = Math.max(0, p.featherT - dt);
+      const feathering = p.featherT > 0;
+
+      if (p.onGround) p.coyote = platGame.coyoteMax;
+
+      for (const wz of platGame.windZones){
+        const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+        if (rectsOverlap(pb, wz)){
+          p.vx += wz.ax * (dt * 60);
+          p.vy += wz.ay * (dt * 60);
+        }
+      }
+
+      if (feathering){
+        p.vx *= platGame.featherDamp;
+        p.vy *= platGame.featherDamp;
+
+        const fx = (right ? 1 : 0) - (left ? 1 : 0);
+        const fy = (down  ? 1 : 0) - (up   ? 1 : 0);
+
+        p.vx += fx * platGame.featherAccel;
+        p.vy += fy * platGame.featherAccel;
+
+        p.vx = clamp2(p.vx, -platGame.featherMaxV, platGame.featherMaxV);
+        p.vy = clamp2(p.vy, -platGame.featherMaxV, platGame.featherMaxV);
+      } else {
+        if (p.dashT <= 0){
+          if (left)  p.vx -= platGame.accel;
+          if (right) p.vx += platGame.accel;
+          if (!left && !right) p.vx *= platGame.friction;
+          p.vx = clamp2(p.vx, -platGame.maxRun, platGame.maxRun);
+        }
+
+        if (p.dashT <= 0){
+          p.vy += platGame.gravity;
+          p.vy = clamp2(p.vy, -22, platGame.maxFall);
+        }
+      }
+
+      moveAndCollide(dt);
+
+      const noWallHere = inZone(platGame.noWallZones, p);
+
+      if (!feathering && !noWallHere && !p.onGround && p.onWall !== 0 && p.dashT <= 0 && p.vy > 0){
+        p.vy = Math.min(p.vy, platGame.wallSlideMax);
+      }
+
+      if (p.jumpBuffer > 0){
+        if (p.onGround || p.coyote > 0){
+          p.vy = platGame.jumpVel;
+          p.onGround = false;
+          p.coyote = 0;
+          p.jumpBuffer = 0;
+        } else if (!feathering && !noWallHere && p.onWall !== 0){
+          p.vy = platGame.wallJumpY;
+          p.vx = -p.onWall * platGame.wallJumpX;
+          p.jumpBuffer = 0;
+        }
+      }
+
+      if (pressedDash && p.dashAvail > 0 && p.dashCd <= 0 && p.dashT <= 0){
+        let dx = (right ? 1 : 0) - (left ? 1 : 0);
+        let dy = (down  ? 1 : 0) - (up   ? 1 : 0);
+
+        if (dx === 0 && dy === 0){
+          dx = p.facing || 1;
+          dy = 0;
+        }
+
+        const len = Math.hypot(dx, dy) || 1;
+        dx /= len; dy /= len;
+
+        p.vx = dx * platGame.dashSpeed;
+        p.vy = dy * platGame.dashSpeed;
+        p.dashAvail -= 1;
+        p.dashT = platGame.dashDuration;
+        p.dashCd = platGame.dashCooldown;
+        p.onGround = false;
+
+        try { confetti({ particleCount: 14, spread: 45, origin: { y: 0.6 } }); } catch {}
+      }
+
+      p.x = clamp2(p.x, 0, platGame.levelW - p.w);
+      if (p.y > 560) diePlatformer();
+
+      for (const h of platGame.hearts){
+        if (h.taken) continue;
+        const hb = { x: h.x - 9, y: h.y - 12, w: 20, h: 20 };
+        const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+        if (rectsOverlap(pb, hb)){
+          h.taken = true;
+          if (h.seg === platGame.segment){ platGame.segCurrentCount += 1; }
+          recomputeHeartsGot();
+          try { confetti({ particleCount: 45, spread: 80, origin: { y: 0.7 } }); } catch {}
+          platMsg.innerHTML = `Sweet! 💞 ${platGame.heartsGot}/${platGame.heartsTarget} • Deaths: <b>${platGame.deaths}</b> • Segment: <b>${platGame.segment+1}</b>`;
+        }
+      }
+
+      for (const c of platGame.dashCrystals){
+        if (c.used) continue;
+        const cb = { x: c.x - 10, y: c.y - 10, w: 20, h: 20 };
+        const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+        if (!rectsOverlap(pb, cb)) continue;
+        if (c.dashOnly && p.dashT <= 0) continue;
+
+        c.used = true;
+        p.dashAvail = 1;
+        try { confetti({ particleCount: 30, spread: 70, origin: { y: 0.6 } }); } catch {}
+        platMsg.innerHTML = `Dash refilled 💎 • Deaths: <b>${platGame.deaths}</b>`;
+      }
+
+      for (const f of platGame.feathers){
+        if (f.used) continue;
+        const fb = { x: f.x - 10, y: f.y - 10, w: 20, h: 20 };
+        const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+        if (rectsOverlap(pb, fb)){
+          f.used = true;
+          p.featherT = platGame.featherMaxT;
+          try { confetti({ particleCount: 24, spread: 70, origin: { y: 0.6 } }); } catch {}
+          platMsg.innerHTML = `Feather flight 🪶 for ${platGame.featherMaxT.toFixed(2)}s • Don’t touch 💔`;
+        }
+      }
+
+      for (const cp of platGame.checkpoints){
+        const cpb = { x: cp.x, y: cp.y, w: cp.w, h: cp.h };
+        const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+        if (cp.hit) continue;
+
+        if (rectsOverlap(pb, cpb)){
+          cp.hit = true;
+          platGame.segCommitted[platGame.segment] = platGame.segCurrentCount;
+          platGame.segment = Math.min(cp.segNext, platGame.segCommitted.length - 1);
+          platGame.segCurrentCount = 0;
+          recomputeHeartsGot();
+          platGame.spawn = { x: cp.x, y: cp.y - 30 };
+          try { confetti({ particleCount: 90, spread: 95, origin: { y: 0.6 } }); } catch {}
+          platMsg.innerHTML = `Checkpoint 💌 Segment advanced! • Deaths: <b>${platGame.deaths}</b>`;
+        }
+      }
+
+      {
+        const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+        for (const hz of platGame.hazards){
+          if (rectsOverlap(pb, hz)){ diePlatformer(); break; }
+        }
+      }
+      {
+        const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+        for (const hz of platGame.hazardMovers){
+          const hb = { x: hz.x, y: hz.y, w: hz.w, h: hz.h };
+          if (rectsOverlap(pb, hb)){ diePlatformer(); break; }
+        }
+      }
+
+      const roomIndex = Math.max(0, Math.min(ROOM_COUNT-1, Math.floor((p.x + p.w/2) / ROOM_W)));
+      const targetCam = roomIndex * ROOM_W;
+      platGame.camX = clamp2(targetCam, 0, platGame.levelW - w);
+
+      const goal = platGame.goal;
+      const pb = { x: p.x, y: p.y, w: p.w, h: p.h };
+      const gb = { x: goal.x, y: goal.y, w: goal.w, h: goal.h };
+      if (rectsOverlap(pb, gb) && platGame.heartsGot >= platGame.heartsTarget){
+        winPlatformer();
+      }
+    }
+
+    function drawPlatformer(){
+      const w = platCanvas.getBoundingClientRect().width;
+      const h = platCanvas.getBoundingClientRect().height;
+      platCtx.clearRect(0,0,w,h);
+
+      const t = performance.now()/1000;
+      if (!platGame.bg.lights || platGame.bg.lights.length === 0) initDinnerBackground();
+      drawDinnerBackground(platCtx, w, h, platGame.camX, t);
+
+      const cam = platGame.camX;
       platCtx.save();
-      platCtx.globalAlpha = 0.65;
-      platCtx.font = "14px system-ui, Apple Color Emoji, Segoe UI Emoji";
-      platCtx.fillText(plat.conveyor > 0 ? "➡️" : "⬅️", plat.x + plat.w/2 - 7, plat.y + plat.h - 4);
+      platCtx.translate(-cam, 0);
+
+      for (const plat of platGame.platforms){
+        if (plat.crumble){
+          const c = platGame.crumble.find(x => x.ref === plat);
+          const alpha =
+            !c ? 1 :
+            c.state === "solid" ? 1 :
+            c.state === "falling" ? (0.55 + 0.45*(c.t/0.20)) :
+            0;
+          if (alpha > 0.02) drawSprinklePlatform(platCtx, plat.x, plat.y, plat.w, plat.h, alpha);
+        } else {
+          drawSprinklePlatform(platCtx, plat.x, plat.y, plat.w, plat.h, 1);
+        }
+
+        if (plat.conveyor){
+          platCtx.save();
+          platCtx.globalAlpha = 0.65;
+          platCtx.font = "14px system-ui, Apple Color Emoji, Segoe UI Emoji";
+          platCtx.fillText(plat.conveyor > 0 ? "➡️" : "⬅️", plat.x + plat.w/2 - 7, plat.y + plat.h - 4);
+          platCtx.restore();
+        }
+      }
+
+      for (const wz of platGame.windZones){
+        platCtx.save();
+        platCtx.globalAlpha = 0.12;
+        platCtx.fillStyle = "rgba(255,245,247,1)";
+        roundRectPath(platCtx, wz.x, wz.y, wz.w, wz.h, 16);
+        platCtx.fill();
+        platCtx.restore();
+      }
+
+      for (const nz of platGame.noWallZones){
+        platCtx.save();
+        platCtx.globalAlpha = 0.10;
+        platCtx.fillStyle = "rgba(0,0,0,1)";
+        roundRectPath(platCtx, nz.x, nz.y, nz.w, nz.h, 16);
+        platCtx.fill();
+        platCtx.restore();
+      }
+
+      for (const hz of platGame.hazards) drawSpikes(platCtx, hz);
+
+      platCtx.save();
+      platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+      for (const hz of platGame.hazardMovers){
+        const bob = Math.sin((performance.now()/180) + hz.x*0.01) * 2;
+        platCtx.globalAlpha = 0.95;
+        platCtx.fillText("💔", hz.x + hz.w/2 - 10, hz.y + hz.h/2 + 8 + bob);
+      }
+      platCtx.restore();
+
+      platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+      for (const c of platGame.dashCrystals){
+        if (c.used) continue;
+        const bob = Math.sin((performance.now()/240) + c.x*0.02) * 2;
+        platCtx.globalAlpha = c.dashOnly ? 0.85 : 0.98;
+        platCtx.fillText(c.dashOnly ? "💠" : "💎", c.x - 10, c.y + 10 + bob);
+      }
+      platCtx.globalAlpha = 1;
+
+      platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+      for (const f of platGame.feathers){
+        if (f.used) continue;
+        const bob = Math.sin((performance.now()/220) + f.x*0.02) * 2;
+        platCtx.globalAlpha = 0.95;
+        platCtx.fillText("🪶", f.x - 10, f.y + 10 + bob);
+      }
+      platCtx.globalAlpha = 1;
+
+      for (const cp of platGame.checkpoints){
+        platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
+        platCtx.globalAlpha = cp.hit ? 1 : 0.65;
+        platCtx.fillText(cp.hit ? "💌" : "📍", cp.x - 8, cp.y + 22);
+      }
+      platCtx.globalAlpha = 1;
+
+      platCtx.font = "20px system-ui, Apple Color Emoji, Segoe UI Emoji";
+      for (const hrt of platGame.hearts){
+        if (hrt.taken) continue;
+        const bob = Math.sin((performance.now()/250) + hrt.x*0.02) * 2;
+        platCtx.fillText(hrt.emoji, hrt.x - 9, hrt.y + 6 + bob);
+      }
+
+      platCtx.font = "28px system-ui, Apple Color Emoji, Segoe UI Emoji";
+      platCtx.fillText("💝", platGame.goal.x - 6, platGame.goal.y + 26);
+
+      const p = platGame.player;
+      platCtx.save();
+      platCtx.translate(p.x + p.w/2, p.y + p.h/2);
+      const floaty = p.onGround ? 0 : Math.sin(performance.now()/120) * 1.5;
+      drawCupidHeart(platCtx, 0, 2 + floaty, 13.5);
+
+      if (p.dashT > 0){
+        platCtx.globalAlpha = 0.22;
+        platCtx.beginPath();
+        platCtx.ellipse(0, 4, 26, 14, 0, 0, Math.PI*2);
+        platCtx.fillStyle = "#fff";
+        platCtx.fill();
+        platCtx.globalAlpha = 1;
+      }
+
+      if (p.featherT > 0){
+        platCtx.globalAlpha = 0.20;
+        platCtx.beginPath();
+        platCtx.ellipse(0, 4, 30, 18, 0, 0, Math.PI*2);
+        platCtx.fillStyle = "rgba(255,245,247,1)";
+        platCtx.fill();
+        platCtx.globalAlpha = 1;
+      }
+
+      platCtx.restore();
       platCtx.restore();
     }
-  }
 
-  // Wind zone hint (subtle)
-  for (const wz of platGame.windZones){
-    platCtx.save();
-    platCtx.globalAlpha = 0.12;
-    platCtx.fillStyle = "rgba(255,245,247,1)";
-    roundRectPath(platCtx, wz.x, wz.y, wz.w, wz.h, 16);
-    platCtx.fill();
-    platCtx.restore();
-  }
+    let platRaf = null;
+    let platLast = 0;
 
-  // No-wall zones hint (subtle)
-  for (const nz of platGame.noWallZones){
-    platCtx.save();
-    platCtx.globalAlpha = 0.10;
-    platCtx.fillStyle = "rgba(0,0,0,1)";
-    roundRectPath(platCtx, nz.x, nz.y, nz.w, nz.h, 16);
-    platCtx.fill();
-    platCtx.restore();
-  }
+    function platformerLoop(ts){
+      if (!platGame.running) return;
+      if (!platLast) platLast = ts;
 
-  // Spikes
-  for (const hz of platGame.hazards) drawSpikes(platCtx, hz);
+      const dt = Math.min(0.033, (ts - platLast) / 1000);
+      platLast = ts;
 
-  // Moving heartbreak blocks
-  platCtx.save();
-  platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-  for (const hz of platGame.hazardMovers){
-    const bob = Math.sin((performance.now()/180) + hz.x*0.01) * 2;
-    platCtx.globalAlpha = 0.95;
-    platCtx.fillText("💔", hz.x + hz.w/2 - 10, hz.y + hz.h/2 + 8 + bob);
-  }
-  platCtx.restore();
+      const steps = Math.max(1, Math.floor(dt / 0.016));
+      const stepDt = dt / steps;
+      for (let i=0;i<steps;i++) updatePlatformer(stepDt);
 
-  // Crystals
-  platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-  for (const c of platGame.dashCrystals){
-    if (c.used) continue;
-    const bob = Math.sin((performance.now()/240) + c.x*0.02) * 2;
-    platCtx.globalAlpha = c.dashOnly ? 0.85 : 0.98;
-    platCtx.fillText(c.dashOnly ? "💠" : "💎", c.x - 10, c.y + 10 + bob);
-  }
-  platCtx.globalAlpha = 1;
+      drawPlatformer();
+      platRaf = requestAnimationFrame(platformerLoop);
+    }
 
-  // Feathers
-  platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-  for (const f of platGame.feathers){
-    if (f.used) continue;
-    const bob = Math.sin((performance.now()/220) + f.x*0.02) * 2;
-    platCtx.globalAlpha = 0.95;
-    platCtx.fillText("🪶", f.x - 10, f.y + 10 + bob);
-  }
-  platCtx.globalAlpha = 1;
+    function startPlatformer(){
+      resetPlatformer();
+      platGame.running = true;
+      platOverlay.style.opacity = "0";
+      platStartBtn.style.opacity = "0";
+      platStartBtn.style.pointerEvents = "none";
 
-  // Checkpoints
-  for (const cp of platGame.checkpoints){
-    platCtx.font = "22px system-ui, Apple Color Emoji, Segoe UI Emoji";
-    platCtx.globalAlpha = cp.hit ? 1 : 0.65;
-    platCtx.fillText(cp.hit ? "💌" : "📍", cp.x - 8, cp.y + 22);
-  }
-  platCtx.globalAlpha = 1;
+      platLast = 0;
+      platRaf = requestAnimationFrame(platformerLoop);
+    }
 
-  // Treats
-  platCtx.font = "20px system-ui, Apple Color Emoji, Segoe UI Emoji";
-  for (const hrt of platGame.hearts){
-    if (hrt.taken) continue;
-    const bob = Math.sin((performance.now()/250) + hrt.x*0.02) * 2;
-    platCtx.fillText(hrt.emoji, hrt.x - 9, hrt.y + 6 + bob);
-  }
+    function stopPlatformer(showOverlay = true){
+      platGame.running = false;
+      if (platRaf) cancelAnimationFrame(platRaf);
+      platRaf = null;
+      if (showOverlay){
+        platOverlay.style.opacity = "1";
+        platStartBtn.style.opacity = "1";
+        platStartBtn.style.pointerEvents = "auto";
+      }
+    }
 
-  // Goal
-  platCtx.font = "28px system-ui, Apple Color Emoji, Segoe UI Emoji";
-  platCtx.fillText("💝", platGame.goal.x - 6, platGame.goal.y + 26);
+    function winPlatformer(){
+      stopPlatformer(false);
+      platOverlay.style.opacity = "1";
+      platOverlay.innerHTML = `
+        <div class="text-slate-800/90">
+          <div class="text-4xl font-extrabold">DATE NIGHT DELIVERED 💝</div>
+          <div class="text-sm font-semibold mt-2">C-Side++++ “ALL OF THEM” cleared. True love. True pain. 💘</div>
+          <div class="text-xs font-semibold mt-2 opacity-80">Deaths: ${platGame.deaths}</div>
+        </div>
+      `;
+      platStartBtn.style.opacity = "1";
+      platStartBtn.style.pointerEvents = "auto";
+      platStartBtn.textContent = "Run It Back 💞";
+      platMsg.innerHTML = `Perfect delivery 💖`;
+      try { confetti({ particleCount: 320, spread: 110, origin: { y: 0.65 } }); } catch {}
+    }
 
-  // Player
-  const p = platGame.player;
-  platCtx.save();
-  platCtx.translate(p.x + p.w/2, p.y + p.h/2);
-  const floaty = p.onGround ? 0 : Math.sin(performance.now()/120) * 1.5;
-  drawCupidHeart(platCtx, 0, 2 + floaty, 13.5);
+    platStartBtn.addEventListener("click", startPlatformer);
+    resetPlatformer();
 
-  // dash aura
-  if (p.dashT > 0){
-    platCtx.globalAlpha = 0.22;
-    platCtx.beginPath();
-    platCtx.ellipse(0, 4, 26, 14, 0, 0, Math.PI*2);
-    platCtx.fillStyle = "#fff";
-    platCtx.fill();
-    platCtx.globalAlpha = 1;
-  }
-
-  // feather aura
-  if (p.featherT > 0){
-    platCtx.globalAlpha = 0.20;
-    platCtx.beginPath();
-    platCtx.ellipse(0, 4, 30, 18, 0, 0, Math.PI*2);
-    platCtx.fillStyle = "rgba(255,245,247,1)";
-    platCtx.fill();
-    platCtx.globalAlpha = 1;
-  }
-
-  platCtx.restore();
-
-  platCtx.restore();
-}
-
-// ---------- Loop ----------
-function platformerLoop(ts){
-  if (!platGame.running) return;
-  if (!platLast) platLast = ts;
-
-  const dt = Math.min(0.033, (ts - platLast) / 1000);
-  platLast = ts;
-
-  // fixed-ish stepping
-  const steps = Math.max(1, Math.floor(dt / 0.016));
-  const stepDt = dt / steps;
-  for (let i=0;i<steps;i++){
-    updatePlatformer(stepDt);
-  }
-
-  drawPlatformer();
-  platRaf = requestAnimationFrame(platformerLoop);
-}
-
-function startPlatformer(){
-  resetPlatformer();
-  platGame.running = true;
-  platOverlay.style.opacity = "0";
-  platStartBtn.style.opacity = "0";
-  platStartBtn.style.pointerEvents = "none";
-
-  platMsg.innerHTML = `ALL OF THEM mode 💘 Camera-snap rooms, wind, dash-only crystals, feathers, and treat-reset deaths. Good luck, lover.`;
-  platLast = 0;
-  platRaf = requestAnimationFrame(platformerLoop);
-}
-
-function stopPlatformer(showOverlay = true){
-  platGame.running = false;
-  if (platRaf) cancelAnimationFrame(platRaf);
-  platRaf = null;
-  if (showOverlay){
-    platOverlay.style.opacity = "1";
-    platStartBtn.style.opacity = "1";
-    platStartBtn.style.pointerEvents = "auto";
-  }
-}
-
-function winPlatformer(){
-  stopPlatformer(false);
-  platOverlay.style.opacity = "1";
-  platOverlay.innerHTML = `
-    <div class="text-slate-800/90">
-      <div class="text-4xl font-extrabold">DATE NIGHT DELIVERED 💝</div>
-      <div class="text-sm font-semibold mt-2">C-Side++++ “ALL OF THEM” cleared. True love. True pain. 💘</div>
-      <div class="text-xs font-semibold mt-2 opacity-80">Deaths: ${platGame.deaths}</div>
-    </div>
-  `;
-  platStartBtn.style.opacity = "1";
-  platStartBtn.style.pointerEvents = "auto";
-  platStartBtn.textContent = "Run It Back 💞";
-  platMsg.innerHTML = `Perfect delivery 💖`;
-
-  try { confetti({ particleCount: 320, spread: 110, origin: { y: 0.65 } }); } catch {}
-}
-
-platStartBtn.addEventListener("click", startPlatformer);
-resetPlatformer();
-
-window.addEventListener("resize", () => {
-  fitCanvasToCSS(platCanvas, platCtx);
-  initDinnerBackground();
-});
-
+    window.addEventListener("resize", () => {
+      fitCanvasToCSS(platCanvas, platCtx);
+      initDinnerBackground();
+    });
+  })();
   </script>
+
 </body>
 </html>
