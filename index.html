@@ -4583,6 +4583,459 @@ musicBtn.addEventListener("click", () => {
       initDinnerBackground();
     });
   })();
+
+    <!-- ✅ 1) Put this SECTION right under your Pokémon battle </section> -->
+<section class="glass rounded-3xl overflow-hidden">
+  <div class="flex items-center justify-between px-6 py-4 border-b border-white/50">
+    <div class="font-black text-slate-800/80">♟️ Valentine Chess (AI Opponent)</div>
+    <div class="text-xs font-black text-slate-700/70">Tap pieces • Tap destination • Hearts on captures 💘</div>
+  </div>
+
+  <div class="px-6 py-5">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 items-start">
+      <!-- Board -->
+      <div class="rounded-2xl border border-white/60 bg-white/55 overflow-hidden p-3">
+        <div id="chessStatus" class="text-sm font-extrabold text-slate-800/80 mb-2">Chess loading…</div>
+
+        <div id="chessBoard"
+             class="grid grid-cols-8 gap-1 select-none rounded-2xl p-2"
+             style="
+               background:
+                 radial-gradient(900px 320px at 20% 20%, rgba(251,113,133,0.18), transparent 60%),
+                 radial-gradient(900px 320px at 80% 40%, rgba(236,72,153,0.15), transparent 60%),
+                 linear-gradient(180deg, rgba(255,255,255,0.70), rgba(255,255,255,0.55));
+               border: 1px solid rgba(255,255,255,0.65);
+             ">
+        </div>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button id="chessNew"
+                  class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
+                  style="background: linear-gradient(135deg, #fb7185, #ec4899, #60a5fa);">
+            New Game
+          </button>
+          <button id="chessUndo"
+                  class="rounded-full px-4 py-2 font-extrabold text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition">
+            Undo
+          </button>
+          <button id="chessFlip"
+                  class="rounded-full px-4 py-2 font-extrabold text-slate-800/80 bg-white/80 border border-white/60 shadow active:scale-95 transition">
+            Flip
+          </button>
+          <button id="chessAIMoveNow"
+                  class="rounded-full px-4 py-2 font-extrabold text-white shadow active:scale-95 transition"
+                  style="background: linear-gradient(135deg, #22c55e, #60a5fa);">
+            AI Move ▶
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="rounded-2xl border border-white/60 bg-white/55 p-4">
+        <div class="text-sm font-black text-slate-800/80">AI Settings 💘</div>
+
+        <div class="mt-3 space-y-3">
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-black text-slate-700/70">AI plays</label>
+            <select id="chessAISide" class="rounded-xl px-3 py-2 font-bold bg-white/80 border border-white/70">
+              <option value="b" selected>Black ♚</option>
+              <option value="w">White ♔</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
+
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-black text-slate-700/70">Difficulty</label>
+            <select id="chessAIDepth" class="rounded-xl px-3 py-2 font-bold bg-white/80 border border-white/70">
+              <option value="1">Easy</option>
+              <option value="2" selected>Medium</option>
+              <option value="3">Hard</option>
+            </select>
+          </div>
+
+          <div class="rounded-2xl bg-white/70 border border-white/60 p-3 text-xs font-bold text-slate-700/80 leading-relaxed">
+            <div>💡 How to play:</div>
+            <div>• Tap a piece → tap a destination.</div>
+            <div>• Promotion auto-queens.</div>
+            <div>• Hard is slower on phones.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ 2) Put this SCRIPT TAG in your <head> with your other CDNs -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/chess.js@1.0.0/chess.umd.min.js"></script> -->
+
+<!-- ✅ 3) Paste THIS JS at the BOTTOM of your existing <script> (right before </script>) -->
+<script>
+
+  /* ==============================
+   ♟️ VALENTINE CHESS + AI BOT
+   Dependency: chess.js UMD (Chess)
+   ============================== */
+
+(() => {
+  const statusEl = document.getElementById("chessStatus");
+  const boardEl  = document.getElementById("chessBoard");
+  const btnNew   = document.getElementById("chessNew");
+  const btnUndo  = document.getElementById("chessUndo");
+  const btnFlip  = document.getElementById("chessFlip");
+  const btnAIMoveNow = document.getElementById("chessAIMoveNow");
+  const aiSideEl = document.getElementById("chessAISide");
+  const aiDepthEl = document.getElementById("chessAIDepth");
+
+  if (!statusEl || !boardEl) return;
+
+  const PIECES = {
+    wp:"♙", wn:"♘", wb:"♗", wr:"♖", wq:"♕", wk:"♔",
+    bp:"♟", bn:"♞", bb:"♝", br:"♜", bq:"♛", bk:"♚"
+  };
+
+  let game = null;
+  let selected = null; // "e2"
+  let legalTargets = new Set();
+  let flipped = false; // false=white bottom
+  let aiThinking = false;
+
+  function sqColor(fileIdx, rankIdx){
+    const light = ((fileIdx + rankIdx) % 2 === 0);
+    return light ? "rgba(255,255,255,0.78)" : "rgba(251,113,133,0.18)";
+  }
+  function coordToSquare(fileIdx, rankIdx){
+    const file = String.fromCharCode("a".charCodeAt(0) + fileIdx);
+    const rank = String(8 - rankIdx);
+    return file + rank;
+  }
+  function squareToCoord(sq){
+    const fileIdx = sq.charCodeAt(0) - "a".charCodeAt(0);
+    const rank = Number(sq[1]);
+    const rankIdx = 8 - rank;
+    return { fileIdx, rankIdx };
+  }
+
+  function setStatus(){
+    if (!game) return;
+    const turn = game.turn() === "w" ? "White ♔" : "Black ♚";
+    if (game.isCheckmate()){
+      statusEl.textContent = `Checkmate! ${turn} is checkmated 💘`;
+    } else if (game.isDraw()){
+      statusEl.textContent = "Draw! (love is complicated) 💞";
+    } else if (game.isCheck()){
+      statusEl.textContent = `${turn} to move — CHECK! ⚡`;
+    } else {
+      statusEl.textContent = `${turn} to move`;
+    }
+  }
+
+  function clearSelection(){
+    selected = null;
+    legalTargets.clear();
+  }
+
+  function render(){
+    if (!game) return;
+    setStatus();
+    boardEl.innerHTML = "";
+
+    const b = game.board(); // [rank8..rank1][file a..h]
+    const rankOrder = flipped ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
+    const fileOrder = flipped ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
+
+    for (const r of rankOrder){
+      for (const f of fileOrder){
+        const sq = coordToSquare(f, r);
+        const piece = b[r][f];
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.sq = sq;
+        btn.className = "aspect-square rounded-xl flex items-center justify-center font-black shadow-sm transition active:scale-[0.98]";
+        btn.style.background = sqColor(f, r);
+
+        // piece glyph
+        if (piece){
+          const key = piece.color + piece.type; // e.g. "wp"
+          btn.textContent = PIECES[key] || "";
+          btn.style.fontSize = "clamp(18px, 3.4vw, 34px)";
+          btn.style.filter = "drop-shadow(0 10px 10px rgba(0,0,0,0.12))";
+        } else {
+          btn.textContent = "";
+        }
+
+        // highlight selected
+        if (selected === sq){
+          btn.style.outline = "3px solid rgba(236,72,153,0.75)";
+          btn.style.boxShadow = "0 0 0 6px rgba(236,72,153,0.20)";
+        }
+
+        // highlight legal targets
+        if (legalTargets.has(sq)){
+          btn.style.outline = "3px solid rgba(34,197,94,0.70)";
+          btn.style.boxShadow = "0 0 0 6px rgba(34,197,94,0.18)";
+        }
+
+        btn.addEventListener("click", () => onSquareClick(sq));
+        boardEl.appendChild(btn);
+      }
+    }
+  }
+
+  function isAITurn(){
+    const aiSide = aiSideEl.value; // "w" | "b" | "off"
+    if (aiSide === "off") return false;
+    return game && game.turn() === aiSide;
+  }
+
+  function maybeConfettiCapture(){
+    try {
+      if (window.confetti){
+        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      }
+    } catch {}
+  }
+
+  function onSquareClick(sq){
+    if (!game || aiThinking) return;
+
+    // If it's AI's turn, ignore clicks
+    if (isAITurn()) return;
+
+    const piece = game.get(sq);
+
+    // If selecting own piece
+    if (!selected){
+      if (piece && piece.color === game.turn()){
+        selected = sq;
+        const moves = game.moves({ square: sq, verbose: true });
+        legalTargets = new Set(moves.map(m => m.to));
+        render();
+      }
+      return;
+    }
+
+    // If tapping same square again
+    if (selected === sq){
+      clearSelection();
+      render();
+      return;
+    }
+
+    // Attempt move from selected -> sq
+    const move = tryMove(selected, sq);
+
+    if (!move){
+      // If they tapped another own piece, switch selection
+      if (piece && piece.color === game.turn()){
+        selected = sq;
+        const moves = game.moves({ square: sq, verbose: true });
+        legalTargets = new Set(moves.map(m => m.to));
+        render();
+      } else {
+        // invalid tap
+        selected && document.querySelector(`[data-sq="${selected}"]`)?.animate?.(
+          [{transform:"scale(1)"},{transform:"scale(1.04)"},{transform:"scale(1)"}],
+          {duration:220}
+        );
+      }
+      return;
+    }
+
+    // Successful move
+    if (move.captured) maybeConfettiCapture();
+    clearSelection();
+    render();
+    setTimeout(chessMaybeTriggerAI, 120);
+  }
+
+  function tryMove(from, to){
+    // auto-queen promotions
+    const promo = (() => {
+      const p = game.get(from);
+      if (!p || p.type !== "p") return undefined;
+      // if pawn goes to last rank:
+      const toRank = Number(to[1]);
+      if (p.color === "w" && toRank === 8) return "q";
+      if (p.color === "b" && toRank === 1) return "q";
+      return undefined;
+    })();
+
+    const mv = game.move({ from, to, promotion: promo });
+    return mv || null;
+  }
+
+  // --- AI (simple minimax) ---
+  const pieceValue = (p) => {
+    if (!p) return 0;
+    const v = { p:100, n:320, b:330, r:500, q:900, k:20000 }[p.type] || 0;
+    return p.color === "w" ? v : -v;
+  };
+
+  function evaluatePosition(){
+    // material only (fast)
+    const board = game.board();
+    let score = 0;
+    for (let r=0;r<8;r++){
+      for (let f=0;f<8;f++){
+        score += pieceValue(board[r][f]);
+      }
+    }
+    return score;
+  }
+
+  function minimax(depth, alpha, beta, maximizing){
+    if (depth === 0 || game.isGameOver()){
+      return evaluatePosition();
+    }
+
+    const moves = game.moves({ verbose: true });
+
+    // tiny move ordering: captures first
+    moves.sort((a,b) => (b.captured ? 1 : 0) - (a.captured ? 1 : 0));
+
+    if (maximizing){
+      let best = -Infinity;
+      for (const m of moves){
+        game.move(m);
+        const val = minimax(depth - 1, alpha, beta, false);
+        game.undo();
+        best = Math.max(best, val);
+        alpha = Math.max(alpha, val);
+        if (beta <= alpha) break;
+      }
+      return best;
+    } else {
+      let best = Infinity;
+      for (const m of moves){
+        game.move(m);
+        const val = minimax(depth - 1, alpha, beta, true);
+        game.undo();
+        best = Math.min(best, val);
+        beta = Math.min(beta, val);
+        if (beta <= alpha) break;
+      }
+      return best;
+    }
+  }
+
+  function chooseAIMove(depth){
+    const moves = game.moves({ verbose: true });
+    moves.sort((a,b) => (b.captured ? 1 : 0) - (a.captured ? 1 : 0));
+
+    const aiSide = aiSideEl.value; // "w" | "b" | "off"
+    const maximizing = (aiSide === "w"); // maximizing for white, minimizing for black because eval is +white
+
+    let bestMove = null;
+    let bestScore = maximizing ? -Infinity : Infinity;
+
+    for (const m of moves){
+      game.move(m);
+      const score = minimax(depth - 1, -Infinity, Infinity, !maximizing);
+      game.undo();
+
+      if (maximizing){
+        if (score > bestScore){ bestScore = score; bestMove = m; }
+      } else {
+        if (score < bestScore){ bestScore = score; bestMove = m; }
+      }
+    }
+    return bestMove;
+  }
+
+  function chessMaybeTriggerAI(){
+    if (!game || game.isGameOver()) { render(); return; }
+    if (!isAITurn()) return;
+
+    const depth = Number(aiDepthEl.value || "2");
+    aiThinking = true;
+
+    // show "thinking"
+    const old = statusEl.textContent;
+    statusEl.textContent = old + " — AI thinking… 💭";
+
+    // allow UI to repaint
+    setTimeout(() => {
+      try{
+        const move = chooseAIMove(depth);
+        if (move){
+          const made = game.move(move);
+          if (made?.captured) maybeConfettiCapture();
+        }
+      } finally {
+        aiThinking = false;
+        clearSelection();
+        render();
+      }
+    }, 40);
+  }
+
+  // Buttons
+  btnNew?.addEventListener("click", () => {
+    if (!game) return;
+    game.reset();
+    clearSelection();
+    render();
+    chessMaybeTriggerAI();
+  });
+
+  btnUndo?.addEventListener("click", () => {
+    if (!game) return;
+    // undo twice if vs AI so player gets back their move
+    const aiSide = aiSideEl.value;
+    game.undo();
+    if (aiSide !== "off") game.undo();
+    clearSelection();
+    render();
+  });
+
+  btnFlip?.addEventListener("click", () => {
+    flipped = !flipped;
+    render();
+  });
+
+  btnAIMoveNow?.addEventListener("click", () => {
+    if (!game || game.isGameOver()) return;
+    // force AI move even if not set to play that side
+    const depth = Number(aiDepthEl.value || "2");
+    aiThinking = true;
+    const old = statusEl.textContent;
+    statusEl.textContent = old + " — AI move… 💞";
+    setTimeout(() => {
+      try{
+        // temporarily pretend AI is current turn side
+        const current = game.turn();
+        const prev = aiSideEl.value;
+        aiSideEl.value = current;
+        const move = chooseAIMove(depth);
+        aiSideEl.value = prev;
+        if (move){
+          const made = game.move(move);
+          if (made?.captured) maybeConfettiCapture();
+        }
+      } finally {
+        aiThinking = false;
+        clearSelection();
+        render();
+      }
+    }, 40);
+  });
+
+  aiSideEl?.addEventListener("change", () => chessMaybeTriggerAI());
+  aiDepthEl?.addEventListener("change", () => { /* no-op */ });
+
+  // Init
+  if (!window.Chess){
+    statusEl.textContent = "Chess engine missing. Add chess.js in <head>.";
+    return;
+  }
+  game = new window.Chess();
+  render();
+  chessMaybeTriggerAI();
+  
+})();
+</script>
+
   </script>
 
 </body>
