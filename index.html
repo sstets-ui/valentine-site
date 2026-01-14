@@ -486,6 +486,71 @@
       50%{ transform: translate3d(-48%,-56%,0) rotate(2deg); }
     }
 
+    <div id="darkness-beam" aria-hidden="true"></div>
+    /* Darkness Beam pinned to bottom-right */
+#darkness-beam{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: clamp(90px, 14vmin, 190px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%,
+      #000 0 28%,
+      rgba(0,0,0,.98) 28% 40%,
+      rgba(120,90,255,.35) 44%,
+      rgba(255,90,190,.25) 56%,
+      rgba(0,0,0,0) 72%);
+  filter: drop-shadow(0 0 26px rgba(120,90,255,.35))
+          drop-shadow(0 0 44px rgba(255,90,190,.18));
+  animation: bhSpin 2.8s linear infinite, bhPulse 3.8s ease-in-out infinite;
+}
+
+#darkness-beam::before{
+  content:"";
+  position:absolute;
+  inset:-18%;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 0deg,
+      rgba(255,90,190,0) 0 18%,
+      rgba(255,90,190,.35) 22%,
+      rgba(120,90,255,.35) 32%,
+      rgba(0,0,0,0) 52%,
+      rgba(255,255,255,.18) 60%,
+      rgba(0,0,0,0) 80%,
+      rgba(120,90,255,.25) 90%,
+      rgba(0,0,0,0) 100%);
+  filter: blur(1.2px);
+  opacity: .9;
+  animation: bhSpin 1.6s linear infinite reverse;
+}
+
+#darkness-beam::after{
+  content:"";
+  position:absolute;
+  inset:-35%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle,
+      rgba(255,90,190,.14) 0 25%,
+      rgba(120,90,255,.10) 35%,
+      rgba(0,0,0,0) 70%);
+  filter: blur(6px);
+  opacity: .85;
+  animation: bhPulse 3.8s ease-in-out infinite;
+}
+
+@keyframes bhSpin{ to{ transform: rotate(360deg); } }
+@keyframes bhPulse{
+  0%,100%{ transform: scale(1); opacity: .85; }
+  50%{ transform: scale(1.06); opacity: 1; }
+}
+
+
     /* =========================================================
        2) Glass + Title + Mana
     ========================================================= */
